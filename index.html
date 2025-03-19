@@ -263,7 +263,7 @@
                 <p class="proverb-text" id="daily-proverb">Cargando proverbio del día...</p>
                 <p class="proverb-reference" id="proverb-reference"></p>
                 <div class="button-container">
-                    <a href="#" id="read-more-link" class="button">Leer más</a>
+                    <a href="lectura.html" id="read-more-link" class="button">Leer más</a>
                     <div class="secondary-buttons">
                         <a href="historias.html" class="button secondary">Historias Bíblicas</a>
                         <a href="diccionario.html" class="button secondary">Diccionario Bíblico</a>
@@ -317,7 +317,8 @@
         // Proverbio del día
         async function loadDailyProverb() {
             try {
-                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const response = await fetch(baseUrl + 'biblia-files/Reina-Valera-1960.xmm');
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(text, 'text/xml');
@@ -353,7 +354,7 @@
                 
                 // Actualizar el enlace "Leer más"
                 const readMoreLink = document.getElementById('read-more-link');
-                readMoreLink.href = `/lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${chapter}&verse=${verse}`;
+                readMoreLink.href = `${baseUrl}lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${chapter}&verse=${verse}`;
                 
                 // Guardar el proverbio actual en localStorage con la fecha
                 localStorage.setItem('lastProverbDate', today.toDateString());
@@ -374,7 +375,7 @@
                     document.getElementById('daily-proverb').textContent = proverbData.text;
                     document.getElementById('proverb-reference').textContent = proverbData.reference;
                     document.getElementById('read-more-link').href = 
-                        `/lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${proverbData.chapter}&verse=${proverbData.verse}`;
+                        `${baseUrl}lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${proverbData.chapter}&verse=${proverbData.verse}`;
                 } else {
                     document.getElementById('daily-proverb').textContent = 'Error al cargar el proverbio del día';
                     document.getElementById('proverb-reference').textContent = '';
@@ -389,7 +390,8 @@
         let xmlDoc = null;
         async function loadBibleForSearch() {
             try {
-                const response = await fetch('/biblia-files/TLA.xmm');
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const response = await fetch(baseUrl + 'biblia-files/TLA.xmm');
                 const text = await response.text();
                 const parser = new DOMParser();
                 xmlDoc = parser.parseFromString(text, 'text/xml');
@@ -441,7 +443,8 @@
                     ${match.text}
                 `;
                 div.onclick = () => {
-                    window.location.href = `/lectura.html?version=TLA&book=${encodeURIComponent(match.book)}&chapter=${match.chapter}`;
+                    const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                    window.location.href = `${baseUrl}lectura.html?version=TLA&book=${encodeURIComponent(match.book)}&chapter=${match.chapter}`;
                 };
                 results.appendChild(div);
             });

@@ -390,7 +390,8 @@
         // Cargar el archivo XML
         async function loadBible(version = 'TLA') {
             try {
-                const response = await fetch(`/biblia-files/${version}.xmm`);
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const response = await fetch(`${baseUrl}biblia-files/${version}.xmm`);
                 const xmlText = await response.text();
                 const parser = new DOMParser();
                 xmlDoc = parser.parseFromString(xmlText, 'text/xml');
