@@ -105,13 +105,18 @@
             color: var(--text-color);
             cursor: pointer;
             transition: all 0.3s;
-            width: 100%;
             outline: none;
         }
 
         .select-css:hover {
             border-color: var(--primary-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .select-css option {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 8px;
         }
 
         .chapter-content {
@@ -194,6 +199,11 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        #chapter-select {
+            min-width: 120px;
+            text-align: center;
         }
 
         .chapter-grid {
@@ -380,6 +390,7 @@
         document.getElementById('chapter-select').addEventListener('change', (e) => {
             currentChapter = parseInt(e.target.value);
             loadChapter();
+            updateControls();
             updateURL();
             
             window.scrollTo({
@@ -422,30 +433,13 @@
             if (!book) return;
 
             const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
-            const chapterGrid = document.getElementById('chapter-grid');
+            const chapterSelect = document.getElementById('chapter-select');
             
-            chapterGrid.innerHTML = Array.from(chapters).map((_, index) => `
-                <button class="chapter-button ${currentChapter === index + 1 ? 'active' : ''}" 
-                        onclick="selectChapter(${index + 1})">
-                    ${index + 1}
-                </button>
+            chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
+                <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                    Capítulo ${index + 1}
+                </option>
             `).join('');
-            
-            chapterGrid.classList.add('active');
-        }
-
-        // Función para seleccionar capítulo
-        function selectChapter(chapter) {
-            currentChapter = chapter;
-            loadChapter();
-            updateControls();
-            updateURL();
-            
-            document.getElementById('chapter-grid').classList.remove('active');
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
         }
 
         // Función para cargar capítulo
