@@ -55,6 +55,12 @@
             margin-bottom: 30px;
         }
 
+        .proverb-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .proverb-text {
             font-size: 1.5em;
             margin-bottom: 15px;
@@ -70,44 +76,24 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            align-items: center;
-        }
-
-        .secondary-buttons {
-            display: flex;
-            gap: 12px;
+            margin-top: 30px;
         }
 
         .button {
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            background: #45a049;
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: rgba(255, 255, 255, 0.2);
             color: white;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 120px;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.1em;
         }
 
         .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .button.secondary {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-width: 100px;
-        }
-
-        .button.secondary:hover {
             background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
         }
 
         .menu-links {
@@ -145,12 +131,6 @@
                 font-size: 1.2em;
             }
 
-            .secondary-buttons {
-                flex-direction: column;
-                width: 100%;
-                max-width: 300px;
-            }
-
             .button {
                 width: 100%;
                 text-align: center;
@@ -164,13 +144,13 @@
         <div class="hero-content">
             <h1>Biblia de Poder y Milagros</h1>
             <div class="proverb-card">
-                <p class="proverb-text" id="proverb-text">Cargando proverbio del día...</p>
-                <p class="proverb-reference" id="proverb-reference"></p>
-                <div class="button-container">
-                    <a href="lectura.html?book=Proverbios&chapter=1" id="read-more-link" class="button">Leer más</a>
-                    <div class="secondary-buttons">
-                        <a href="historias.html" class="button secondary">Historias Bíblicas</a>
-                        <a href="diccionario.html" class="button secondary">Diccionario Bíblico</a>
+                <div class="proverb-content">
+                    <p id="proverb-text">Cargando proverbio del día...</p>
+                    <p id="proverb-reference" class="reference"></p>
+                    <div class="button-container">
+                        <a href="lectura.html" id="read-more-link" class="button">Leer más</a>
+                        <a href="historias.html" class="button">Historias Bíblicas</a>
+                        <a href="diccionario.html" class="button">Diccionario Bíblico</a>
                     </div>
                 </div>
             </div>
