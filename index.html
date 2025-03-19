@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblia de Poder y Milagros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #1a1a1a;
+            --card-bg: rgba(30, 30, 30, 0.9);
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s;
+        }
+
+        .hero {
+            height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4em;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .proverb-card {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin: 20px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .proverb-text {
+            font-size: 1.5em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .proverb-reference {
+            font-style: italic;
+            color: #4CAF50;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-size: 1.1em;
+        }
+
+        .read-more {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .read-more:hover {
+            transform: translateY(-2px);
+            background-color: #45a049;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 3;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 4;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-content {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .search-result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .secondary-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .button {
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            background: #45a049;
+            color: white;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .button.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .button.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .secondary-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .nav-links {
+            display: none;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+    <button class="search-button" onclick="openSearch()">🔍 Buscar</button>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="title">Biblia de Poder y Milagros</h1>
+            <div class="proverb-card">
+                <p class="proverb-text" id="daily-proverb">Cargando proverbio del día...</p>
+                <p class="proverb-reference" id="proverb-reference"></p>
+                <div class="button-container">
+                    <a href="#" id="read-more-link" class="button">Leer más</a>
+                    <div class="secondary-buttons">
+                        <a href="historias.html" class="button secondary">Historias Bíblicas</a>
+                        <a href="diccionario.html" class="button secondary">Diccionario Bíblico</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-modal" id="search-modal">
+        <div class="search-content">
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar en la Biblia...">
+            <div class="search-results" id="search-results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Manejo del tema oscuro
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙 Modo oscuro' : '☀️ Modo claro';
+            
+            // Guardar preferencia
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Cargar preferencia de tema
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.querySelector('.theme-toggle').textContent = 
+                savedTheme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro';
+        }
+
+        // Búsqueda
+        function openSearch() {
+            document.getElementById('search-modal').style.display = 'flex';
+        }
+
+        // Cerrar búsqueda al hacer clic fuera
+        document.getElementById('search-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Proverbio del día
+        async function loadDailyProverb() {
+            try {
+                const response = await fetch('/biblia-files/Reina-Valera-1960.xmm');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+                // Obtener todos los proverbios
+                const proverbsBook = xmlDoc.querySelector('b[n="Proverbios"]');
+                if (!proverbsBook) {
+                    throw new Error('No se encontró el libro de Proverbios');
+                }
+
+                const chapters = proverbsBook.getElementsByTagName('c');
+                
+                // Usar la fecha actual para seleccionar un proverbio
+                const today = new Date();
+                const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+                const chapter = Math.floor((seed % 31) + 1); // 31 capítulos en Proverbios
+                const selectedChapter = chapters[chapter - 1];
+                
+                if (!selectedChapter) {
+                    throw new Error('No se encontró el capítulo');
+                }
+
+                const verses = selectedChapter.getElementsByTagName('v');
+                const verse = Math.floor((seed % verses.length) + 1);
+                const selectedVerse = verses[verse - 1];
+
+                if (!selectedVerse) {
+                    throw new Error('No se encontró el versículo');
+                }
+
+                document.getElementById('daily-proverb').textContent = selectedVerse.textContent;
+                document.getElementById('proverb-reference').textContent = `Proverbios ${chapter}:${verse}`;
+                
+                // Actualizar el enlace "Leer más"
+                const readMoreLink = document.getElementById('read-more-link');
+                readMoreLink.href = `/lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${chapter}&verse=${verse}`;
+                
+                // Guardar el proverbio actual en localStorage con la fecha
+                localStorage.setItem('lastProverbDate', today.toDateString());
+                localStorage.setItem('lastProverb', JSON.stringify({
+                    text: selectedVerse.textContent,
+                    reference: `Proverbios ${chapter}:${verse}`,
+                    chapter: chapter,
+                    verse: verse
+                }));
+            } catch (error) {
+                console.error('Error al cargar el proverbio:', error);
+                // Intentar usar el último proverbio guardado
+                const lastProverbDate = localStorage.getItem('lastProverbDate');
+                const lastProverb = localStorage.getItem('lastProverb');
+                
+                if (lastProverbDate && lastProverb) {
+                    const proverbData = JSON.parse(lastProverb);
+                    document.getElementById('daily-proverb').textContent = proverbData.text;
+                    document.getElementById('proverb-reference').textContent = proverbData.reference;
+                    document.getElementById('read-more-link').href = 
+                        `/lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${proverbData.chapter}&verse=${proverbData.verse}`;
+                } else {
+                    document.getElementById('daily-proverb').textContent = 'Error al cargar el proverbio del día';
+                    document.getElementById('proverb-reference').textContent = '';
+                }
+            }
+        }
+
+        // Cargar el proverbio al iniciar
+        loadDailyProverb();
+
+        // Búsqueda en la Biblia
+        let xmlDoc = null;
+        async function loadBibleForSearch() {
+            try {
+                const response = await fetch('/biblia-files/TLA.xmm');
+                const text = await response.text();
+                const parser = new DOMParser();
+                xmlDoc = parser.parseFromString(text, 'text/xml');
+            } catch (error) {
+                console.error('Error al cargar la Biblia:', error);
+            }
+        }
+
+        // Cargar la Biblia para búsqueda
+        loadBibleForSearch();
+
+        // Función de búsqueda
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const results = document.getElementById('search-results');
+            results.innerHTML = '';
+
+            if (searchTerm.length < 3 || !xmlDoc) return;
+
+            const books = xmlDoc.getElementsByTagName('b');
+            let matches = [];
+
+            Array.from(books).forEach(book => {
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+
+                Array.from(chapters).forEach((chapter, chapterIndex) => {
+                    const verses = chapter.getElementsByTagName('v');
+
+                    Array.from(verses).forEach((verse, verseIndex) => {
+                        if (verse.textContent.toLowerCase().includes(searchTerm)) {
+                            matches.push({
+                                book: bookName,
+                                chapter: chapterIndex + 1,
+                                verse: verseIndex + 1,
+                                text: verse.textContent
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Mostrar solo los primeros 10 resultados
+            matches.slice(0, 10).forEach(match => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `
+                    <strong>${match.book} ${match.chapter}:${match.verse}</strong><br>
+                    ${match.text}
+                `;
+                div.onclick = () => {
+                    window.location.href = `/lectura.html?version=TLA&book=${encodeURIComponent(match.book)}&chapter=${match.chapter}`;
+                };
+                results.appendChild(div);
+            });
+        });
+    </script>
+</body>
+</html>

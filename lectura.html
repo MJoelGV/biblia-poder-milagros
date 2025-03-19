@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectura - Biblia de Poder y Milagros</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --nav-bg: rgba(248, 248, 248, 0.95);
+            --verse-number-color: #4CAF50;
+            --nav-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #1a1a1a;
+            --nav-bg: rgba(42, 42, 42, 0.95);
+            --verse-number-color: #45a049;
+            --nav-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s;
+        }
+
+        .controls {
+            background: var(--nav-bg);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: var(--nav-shadow);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .controls.hidden {
+            transform: translateY(-100%);
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        select {
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+        }
+
+        .content {
+            margin: 60px auto 100px;
+            padding: 20px 40px;
+            transition: margin 0.3s ease;
+        }
+
+        .content.full-screen {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .verse {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            line-height: 1.8;
+            padding: 5px 0;
+            transition: background-color 0.3s;
+        }
+
+        .verse:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .verse-number {
+            color: var(--verse-number-color);
+            font-weight: bold;
+            min-width: 25px;
+            text-align: right;
+        }
+
+        .verse-text {
+            flex: 1;
+            font-size: 18px;
+        }
+
+        .navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--nav-shadow);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .navigation-bottom.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            width: 200px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            width: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-results {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: var(--bg-color);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 99;
+            padding: 20px;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .result-text {
+            margin-top: 5px;
+        }
+
+        .close-search {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .nav-links, .nav-link {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-wrap: wrap;
+                padding: 10px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            select {
+                min-width: 120px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .verse-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls" id="controls">
+        <a href="/" class="home-icon">🏠</a>
+        <div class="navigation">
+            <select id="version-selector">
+                <option value="TLA">Traducción en Lenguaje Actual</option>
+                <option value="Reina-Valera-1960">Reina-Valera 1960</option>
+                <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
+                <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
+                <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
+            </select>
+            <select id="book-selector">
+                <option value="">Selecciona un libro</option>
+            </select>
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="Buscar palabra exacta...">
+                <button class="search-button" onclick="searchText()">🔍 Buscar</button>
+            </div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+    </div>
+
+    <div class="search-results" id="search-results">
+        <button class="close-search" onclick="closeSearch()">×</button>
+        <div id="results-content"></div>
+    </div>
+
+    <div class="content" id="chapter-content"></div>
+
+    <div class="navigation-bottom hidden" id="navigation-bottom">
+        <button class="nav-button" id="prev-button" onclick="previousChapter()">← Anterior</button>
+        <select id="chapter-selector-bottom">
+            <option value="">Selecciona un capítulo</option>
+        </select>
+        <button class="nav-button" id="next-button" onclick="nextChapter()">Siguiente →</button>
+    </div>
+
+    <script>
+        let xmlDoc = null;
+        const content = document.getElementById('chapter-content');
+        const versionSelector = document.getElementById('version-selector');
+        const bookSelector = document.getElementById('book-selector');
+        const chapterSelectorBottom = document.getElementById('chapter-selector-bottom');
+        const controls = document.getElementById('controls');
+        const navigationBottom = document.getElementById('navigation-bottom');
+        let lastScrollY = window.scrollY;
+        let scrollTimer = null;
+
+        // Sincronizar los selectores de capítulo
+        chapterSelectorBottom.addEventListener('change', () => {
+            showChapter();
+        });
+
+        // Manejar la visibilidad de los menús
+        function handleScroll() {
+            clearTimeout(scrollTimer);
+            const currentScrollY = window.scrollY;
+            const scrollingDown = currentScrollY > lastScrollY;
+            
+            controls.classList.toggle('hidden', scrollingDown);
+            navigationBottom.classList.toggle('hidden', scrollingDown);
+            
+            lastScrollY = currentScrollY;
+
+            // Mostrar menús después de 2 segundos sin scroll
+            scrollTimer = setTimeout(() => {
+                controls.classList.remove('hidden');
+                navigationBottom.classList.remove('hidden');
+            }, 2000);
+        }
+
+        // Detectar movimiento del mouse cerca de los menús
+        function handleMouseMove(e) {
+            const topThreshold = 100;
+            const bottomThreshold = window.innerHeight - 100;
+            
+            if (e.clientY <= topThreshold || e.clientY >= bottomThreshold) {
+                controls.classList.remove('hidden');
+                navigationBottom.classList.remove('hidden');
+            }
+        }
+
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('mousemove', handleMouseMove);
+        
+        // Para dispositivos táctiles
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            const touchY = touch.clientY;
+            const topThreshold = 100;
+            const bottomThreshold = window.innerHeight - 100;
+            
+            if (touchY <= topThreshold || touchY >= bottomThreshold) {
+                controls.classList.remove('hidden');
+                navigationBottom.classList.remove('hidden');
+            }
+        });
+
+        // Cargar el archivo XML
+        async function loadBible(version = 'TLA') {
+            try {
+                const response = await fetch(`/biblia-files/${version}.xmm`);
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                setupBookSelector();
+                loadFromUrl();
+            } catch (error) {
+                console.error('Error loading XML:', error);
+                content.innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
+            }
+        }
+
+        // Configurar el selector de libros
+        function setupBookSelector() {
+            const books = xmlDoc.getElementsByTagName('b');
+            bookSelector.innerHTML = '<option value="">Selecciona un libro</option>';
+            
+            Array.from(books).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.getAttribute('n');
+                option.textContent = book.getAttribute('n');
+                bookSelector.appendChild(option);
+            });
+
+            bookSelector.addEventListener('change', loadChapters);
+        }
+
+        // Cargar capítulos cuando se selecciona un libro
+        function loadChapters() {
+            const book = bookSelector.value;
+            if (!book) return;
+
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            const chapterOptions = '<option value="">Selecciona un capítulo</option>' + 
+                Array.from(chapters).map((_, index) => 
+                    `<option value="${index + 1}">Capítulo ${index + 1}</option>`
+                ).join('');
+            
+            chapterSelectorBottom.innerHTML = chapterOptions;
+        }
+
+        // Mostrar versículos cuando se selecciona un capítulo
+        function showChapter() {
+            const book = bookSelector.value;
+            const chapter = chapterSelectorBottom.value;
+            if (!book || !chapter) return;
+
+            try {
+                const chapterElement = xmlDoc.querySelector(`b[n="${book}"] c[n="${chapter}"]`);
+                const verses = chapterElement.getElementsByTagName('v');
+                
+                content.innerHTML = Array.from(verses).map(verse => `
+                    <div class="verse">
+                        <span class="verse-number">${verse.getAttribute('n')}</span>
+                        <span class="verse-text">${verse.textContent}</span>
+                    </div>
+                `).join('');
+
+                // Actualizar la URL
+                const url = new URL(window.location);
+                url.searchParams.set('version', versionSelector.value);
+                url.searchParams.set('book', book);
+                url.searchParams.set('chapter', chapter);
+                window.history.pushState({}, '', url);
+
+                // Actualizar selector inferior
+                navigationBottom.classList.remove('hidden');
+
+                // Actualizar botones de navegación
+                updateNavigationButtons(book, parseInt(chapter));
+            } catch (error) {
+                console.error('Error al mostrar versículos:', error);
+                content.innerHTML = `<div class="error">Error al mostrar versículos: ${error.message}</div>`;
+            }
+        }
+
+        // Actualizar botones de navegación
+        function updateNavigationButtons(book, chapter) {
+            const totalChapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c').length;
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            
+            prevButton.style.visibility = chapter > 1 ? 'visible' : 'hidden';
+            nextButton.style.visibility = chapter < totalChapters ? 'visible' : 'hidden';
+        }
+
+        // Navegación entre capítulos
+        function previousChapter() {
+            const currentChapter = parseInt(chapterSelectorBottom.value);
+            if (currentChapter > 1) {
+                chapterSelectorBottom.value = currentChapter - 1;
+                showChapter();
+            }
+        }
+
+        function nextChapter() {
+            const book = bookSelector.value;
+            const currentChapter = parseInt(chapterSelectorBottom.value);
+            const totalChapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c').length;
+            
+            if (currentChapter < totalChapters) {
+                chapterSelectorBottom.value = currentChapter + 1;
+                showChapter();
+            }
+        }
+
+        // Cargar desde URL
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const versionParam = params.get('version');
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+
+            if (versionParam) {
+                versionSelector.value = versionParam;
+            }
+            
+            if (bookParam) {
+                bookSelector.value = bookParam;
+                loadChapters();
+                
+                if (chapterParam) {
+                    chapterSelectorBottom.value = chapterParam;
+                    showChapter();
+                }
+            }
+        }
+
+        // Cambiar tema
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Event listeners
+        versionSelector.addEventListener('change', () => loadBible(versionSelector.value));
+        chapterSelectorBottom.addEventListener('change', showChapter);
+
+        // Teclas de navegación
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                previousChapter();
+            } else if (e.key === 'ArrowRight') {
+                nextChapter();
+            }
+        });
+
+        // Función de búsqueda
+        function searchText() {
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!searchTerm) return;
+
+            const resultsDiv = document.getElementById('search-results');
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
+            resultsDiv.classList.add('active');
+
+            const results = [];
+            const books = xmlDoc.getElementsByTagName('b');
+            // Crear una expresión regular que busque la palabra exacta
+            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
+
+            for (const book of books) {
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+
+                for (const chapter of chapters) {
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+
+                    for (const verse of verses) {
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+
+                        if (searchRegex.test(verseText)) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: verse.textContent
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (results.length > 0) {
+                resultsContent.innerHTML = results.map(result => `
+                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
+                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
+                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
+            }
+        }
+
+        // Resaltar término de búsqueda
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
+            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
+        }
+
+        // Ir a un versículo específico
+        function goToVerse(book, chapter, verse) {
+            bookSelector.value = book;
+            loadChapters();
+            chapterSelectorBottom.value = chapter;
+            showChapter();
+            
+            setTimeout(() => {
+                const verseElement = document.querySelector(`.verse:nth-child(${verse})`);
+                if (verseElement) {
+                    verseElement.scrollIntoView({ behavior: 'smooth' });
+                    verseElement.style.animation = 'highlight 2s';
+                }
+                closeSearch();
+            }, 100);
+        }
+
+        // Cerrar resultados de búsqueda
+        function closeSearch() {
+            document.getElementById('search-results').classList.remove('active');
+        }
+
+        // Event listener para búsqueda con Enter
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchText();
+            }
+        });
+
+        // Iniciar la aplicación
+        loadBible(versionSelector.value);
+    </script>
+</body>
+</html>

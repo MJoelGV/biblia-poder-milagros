@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<diccionario>
+    <termino>
+        <palabra>Aarón</palabra>
+        <definicion>Hermano mayor de Moisés y primer sumo sacerdote del pueblo de Israel.</definicion>
+        <referencias>
+            <ref>Éxodo 4:14</ref>
+            <ref>Éxodo 28:1</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Abba</palabra>
+        <definicion>Palabra aramea que significa "padre". Es un término íntimo y cariñoso, similar a "papá".</definicion>
+        <referencias>
+            <ref>Marcos 14:36</ref>
+            <ref>Romanos 8:15</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Abel</palabra>
+        <definicion>Segundo hijo de Adán y Eva, pastor de ovejas, asesinado por su hermano Caín.</definicion>
+        <referencias>
+            <ref>Génesis 4:2</ref>
+            <ref>Hebreos 11:4</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Bendición</palabra>
+        <definicion>Favor o don especial concedido por Dios. También puede referirse al acto de invocar el favor divino sobre alguien.</definicion>
+        <referencias>
+            <ref>Génesis 12:2</ref>
+            <ref>Números 6:24</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Canaán</palabra>
+        <definicion>La tierra prometida por Dios a Abraham y sus descendientes, también conocida como Israel.</definicion>
+        <referencias>
+            <ref>Génesis 12:5</ref>
+            <ref>Josué 1:2</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>David</palabra>
+        <definicion>Rey de Israel, compositor de muchos salmos y antepasado de Jesús. Conocido por su fe y valentía.</definicion>
+        <referencias>
+            <ref>1 Samuel 16:13</ref>
+            <ref>Mateo 1:1</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Edén</palabra>
+        <definicion>El jardín creado por Dios donde vivieron Adán y Eva antes de la caída.</definicion>
+        <referencias>
+            <ref>Génesis 2:8</ref>
+            <ref>Génesis 3:23</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Faraón</palabra>
+        <definicion>Título dado a los reyes del antiguo Egipto. En el Éxodo, se refiere al gobernante que se opuso a Moisés.</definicion>
+        <referencias>
+            <ref>Éxodo 5:2</ref>
+            <ref>Éxodo 14:28</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Gólgota</palabra>
+        <definicion>Lugar donde Jesús fue crucificado, significa "lugar de la calavera".</definicion>
+        <referencias>
+            <ref>Mateo 27:33</ref>
+            <ref>Juan 19:17</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Herodes</palabra>
+        <definicion>Nombre de varios reyes que gobernaron en Judea. Herodes el Grande ordenó matar a los niños de Belén.</definicion>
+        <referencias>
+            <ref>Mateo 2:1</ref>
+            <ref>Lucas 1:5</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Israel</palabra>
+        <definicion>Nombre dado por Dios a Jacob. También se refiere al pueblo escogido de Dios y a la tierra prometida.</definicion>
+        <referencias>
+            <ref>Génesis 32:28</ref>
+            <ref>Éxodo 4:22</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Jerusalén</palabra>
+        <definicion>Ciudad santa, capital del antiguo reino de Israel y lugar donde estaba el templo.</definicion>
+        <referencias>
+            <ref>2 Samuel 5:5</ref>
+            <ref>Apocalipsis 21:2</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Levitas</palabra>
+        <definicion>Miembros de la tribu de Leví, dedicados al servicio del templo y al sacerdocio.</definicion>
+        <referencias>
+            <ref>Números 3:12</ref>
+            <ref>Deuteronomio 10:8</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Maná</palabra>
+        <definicion>Alimento milagroso que Dios proveyó a los israelitas durante su travesía por el desierto.</definicion>
+        <referencias>
+            <ref>Éxodo 16:31</ref>
+            <ref>Juan 6:31</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Nazaret</palabra>
+        <definicion>Ciudad donde Jesús creció, de ahí el título "Jesús de Nazaret".</definicion>
+        <referencias>
+            <ref>Mateo 2:23</ref>
+            <ref>Lucas 4:16</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Pascua</palabra>
+        <definicion>Fiesta que conmemora la liberación de Israel de Egipto. En el NT, relacionada con la muerte de Cristo.</definicion>
+        <referencias>
+            <ref>Éxodo 12:11</ref>
+            <ref>1 Corintios 5:7</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Querubín</palabra>
+        <definicion>Ser celestial, ángel de alto rango que sirve y adora a Dios.</definicion>
+        <referencias>
+            <ref>Génesis 3:24</ref>
+            <ref>Ezequiel 10:1</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Rabí</palabra>
+        <definicion>Título de respeto que significa "maestro", frecuentemente usado para dirigirse a Jesús.</definicion>
+        <referencias>
+            <ref>Juan 1:38</ref>
+            <ref>Mateo 23:8</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Sión</palabra>
+        <definicion>Nombre de una de las colinas de Jerusalén. También usado como símbolo del pueblo de Dios.</definicion>
+        <referencias>
+            <ref>2 Samuel 5:7</ref>
+            <ref>Hebreos 12:22</ref>
+        </referencias>
+    </termino>
+    <termino>
+        <palabra>Tabernáculo</palabra>
+        <definicion>Santuario portátil usado por los israelitas para adorar a Dios durante su peregrinación.</definicion>
+        <referencias>
+            <ref>Éxodo 25:9</ref>
+            <ref>Hebreos 9:2</ref>
+        </referencias>
+    </termino>
+</diccionario>

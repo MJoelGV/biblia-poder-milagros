@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bible>
+    <b n="Génesis">
+        <c n="1">
+            <v n="1">En el principio creó Dios los cielos y la tierra.</v>
+            <v n="2">Y la tierra estaba desordenada y vacía, y las tinieblas estaban sobre la faz del abismo, y el Espíritu de Dios se movía sobre la faz de las aguas.</v>
+            <v n="3">Y dijo Dios: Sea la luz; y fue la luz.</v>
+        </c>
+        <c n="2">
+            <v n="1">Fueron, pues, acabados los cielos y la tierra, y todo el ejército de ellos.</v>
+            <v n="2">Y acabó Dios en el día séptimo la obra que hizo.</v>
+        </c>
+    </b>
+    <b n="Salmos">
+        <c n="1">
+            <v n="1">Bienaventurado el varón que no anduvo en consejo de malos.</v>
+            <v n="2">Sino que en la ley de Jehová está su delicia.</v>
+        </c>
+    </b>
+</bible>
