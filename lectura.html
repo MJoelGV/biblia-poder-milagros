@@ -28,263 +28,108 @@
             padding: 0;
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            color: var(--text-color);
             background-color: var(--bg-color);
+            color: var(--text-color);
             transition: background-color 0.3s;
         }
 
+        .chapter-content {
+            max-width: 800px;
+            margin: 80px auto 40px;
+            padding: 20px;
+        }
+
+        .verse {
+            margin-bottom: 1.5em;
+            padding: 0.5em;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .verse:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .verse-number {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 0.5em;
+            font-size: 0.9em;
+        }
+
+        .verse-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
         .controls {
-            background: var(--nav-bg);
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 100;
-            box-shadow: var(--nav-shadow);
-            transform: translateY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .controls.hidden {
-            transform: translateY(-100%);
-        }
-
-        .home-icon {
-            text-decoration: none;
-            font-size: 24px;
-            color: var(--primary-color);
+            background: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
         }
 
         .navigation {
             display: flex;
             gap: 10px;
             align-items: center;
-            flex-grow: 1;
         }
 
-        select {
-            padding: 8px 15px;
-            border: 2px solid var(--primary-color);
-            border-radius: 20px;
-            background: var(--bg-color);
-            color: var(--text-color);
+        .select-css {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            outline: none;
+            min-width: 150px;
         }
 
-        select:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .theme-toggle {
-            background: var(--primary-color);
-            color: white;
-            border: none;
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
             padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.3s;
-        }
-
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-        }
-
-        .content {
-            margin: 60px auto 100px;
-            padding: 20px 40px;
-            transition: margin 0.3s ease;
-        }
-
-        .content.full-screen {
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-
-        .verse {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            line-height: 1.8;
-            padding: 5px 0;
+            border-radius: 8px;
             transition: background-color 0.3s;
         }
 
-        .verse:hover {
-            background-color: rgba(76, 175, 80, 0.05);
-        }
-
-        .verse-number {
-            color: var(--verse-number-color);
-            font-weight: bold;
-            min-width: 25px;
-            text-align: right;
-        }
-
-        .verse-text {
-            flex: 1;
-            font-size: 18px;
-        }
-
-        .navigation-bottom {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--nav-bg);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--nav-shadow);
-            transform: translateY(0);
-            transition: transform 0.3s ease;
-            z-index: 100;
-        }
-
-        .navigation-bottom.hidden {
-            transform: translateY(100%);
-        }
-
-        .nav-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.3s;
-        }
-
-        .nav-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .search-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 8px 15px;
-            border: 2px solid var(--primary-color);
-            border-radius: 20px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-            width: 200px;
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            width: 300px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .search-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.3s;
-        }
-
-        .search-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .search-results {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            background: var(--bg-color);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 99;
-            padding: 20px;
-            display: none;
-        }
-
-        .search-results.active {
-            display: block;
-        }
-
-        .result-item {
-            padding: 10px;
-            border-bottom: 1px solid rgba(76, 175, 80, 0.2);
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .result-item:hover {
-            background-color: rgba(76, 175, 80, 0.05);
-        }
-
-        .result-book {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .result-text {
-            margin-top: 5px;
-        }
-
-        .close-search {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .nav-links, .nav-link {
-            display: none;
+        .home-icon:hover {
+            background-color: rgba(76, 175, 80, 0.1);
         }
 
         @media (max-width: 768px) {
+            .chapter-content {
+                margin-top: 120px;
+                padding: 15px;
+            }
+
+            .verse {
+                margin-bottom: 1.2em;
+            }
+
+            .verse-text {
+                font-size: 1em;
+                line-height: 1.6;
+            }
+
             .controls {
-                flex-wrap: wrap;
+                flex-direction: column;
                 padding: 10px;
             }
 
             .navigation {
-                flex-wrap: wrap;
+                width: 100%;
                 justify-content: center;
+                margin-top: 10px;
             }
 
-            select {
+            .select-css {
                 min-width: 120px;
-            }
-
-            .content {
-                padding: 15px;
-            }
-
-            .verse-text {
-                font-size: 16px;
             }
         }
     </style>
@@ -293,14 +138,14 @@
     <div class="controls" id="controls">
         <a href="index.html" class="home-icon">🏠</a>
         <div class="navigation">
-            <select id="version-selector">
+            <select id="version-selector" class="select-css">
                 <option value="TLA">Traducción en Lenguaje Actual</option>
-                <option value="Reina-Valera-1960">Reina-Valera 1960</option>
+                <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
-            <select id="book-selector">
+            <select id="book-selector" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
             <div class="search-container">
@@ -316,11 +161,11 @@
         <div id="results-content"></div>
     </div>
 
-    <div class="content" id="chapter-content"></div>
+    <div class="chapter-content" id="chapter-content"></div>
 
     <div class="navigation-bottom hidden" id="navigation-bottom">
         <button class="nav-button" id="prev-button" onclick="previousChapter()">← Anterior</button>
-        <select id="chapter-selector-bottom">
+        <select id="chapter-selector-bottom" class="select-css">
             <option value="">Selecciona un capítulo</option>
         </select>
         <button class="nav-button" id="next-button" onclick="nextChapter()">Siguiente →</button>
@@ -388,7 +233,7 @@
         });
 
         // Cargar el archivo XML
-        async function loadBible(version = 'TLA') {
+        async function loadBible(version = 'Reina-Valera-1960') {
             try {
                 const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
                 const response = await fetch(`${baseUrl}biblia-files/${version}.xmm`);
