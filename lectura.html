@@ -382,12 +382,11 @@
     </div>
 
     <script>
+        let xmlDoc = null;
         let currentBook = '';
         let currentChapter = 1;
-        let currentVerse = 1;
-        let xmlDoc = null;
-        let lastScrollY = window.scrollY;
-        let ticking = false;
+        let currentVerse = 0;
+        let currentVersion = 'Reina-Valera-1960';
 
         // Controlar la visibilidad de los menús al hacer scroll
         function handleScroll() {
@@ -442,7 +441,7 @@
         document.getElementById('book-select').addEventListener('change', (e) => {
             currentBook = e.target.value;
             currentChapter = 1;
-            currentVerse = 1;
+            currentVerse = 0;
             loadChapters();
             loadChapter();
             updateControls();
@@ -572,18 +571,41 @@
             window.history.pushState({}, '', url);
         }
 
-        // Cargar archivo XML
-        async function loadBible(version = 'Reina-Valera-1960') {
+        // Función para cargar la Biblia
+        async function loadBible(version) {
             try {
-                const response = await fetch(`biblia-files/${version}.xmm`);
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const response = await fetch(`${baseUrl}biblia-files/${version}.xmm`);
                 const xmlText = await response.text();
-                const parser = new DOMParser();
-                xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                setupBookSelector();
+                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                currentVersion = version;
+                
+                if (currentBook) {
+                    loadChapter();
+                }
             } catch (error) {
-                console.error('Error loading XML:', error);
+                console.error('Error loading Bible:', error);
+                document.getElementById('verses').innerHTML = '<div class="error">Error al cargar la Biblia</div>';
             }
         }
+
+        // Event listener para el selector de versiones
+        document.getElementById('version-selector').addEventListener('change', async (e) => {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Cargando versión...';
+            document.getElementById('verses').innerHTML = '';
+            document.getElementById('verses').appendChild(loadingDiv);
+            
+            await loadBible(e.target.value);
+            setupBookSelector();
+            if (currentBook) {
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
+            }
+        });
 
         // Configurar selector de libros
         function setupBookSelector() {
@@ -719,7 +741,7 @@
 
         // Iniciar la aplicación
         async function init() {
-            await loadBible('Reina-Valera-1960');
+            await loadBible(currentVersion);
             setupBookSelector();
             loadFromUrl();
         }
