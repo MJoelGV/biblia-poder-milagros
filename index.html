@@ -110,6 +110,32 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
+        .menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 40px;
+            align-items: center;
+        }
+
+        .menu-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .menu-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 3em;
@@ -147,6 +173,11 @@
                         <a href="diccionario.html" class="button secondary">Diccionario Bíblico</a>
                     </div>
                 </div>
+            </div>
+            <div class="menu-links">
+                <a href="lectura.html" class="menu-link">Leer más</a>
+                <a href="historias.html" class="menu-link">Historias Bíblicas</a>
+                <a href="diccionario.html" class="menu-link">Diccionario Bíblico</a>
             </div>
         </div>
     </div>
