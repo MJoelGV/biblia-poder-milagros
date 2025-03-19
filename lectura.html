@@ -130,14 +130,8 @@
             font-size: 1.5em;
             font-weight: bold;
             color: var(--primary-color);
-            margin: 20px 0;
+            margin: 20px 0 40px 0;
             padding: 10px;
-            position: sticky;
-            top: 120px;
-            background: var(--bg-color);
-            z-index: 10;
-            border-bottom: 2px solid var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .verse {
@@ -394,7 +388,6 @@
     <div class="chapter-grid" id="chapter-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
-        <div class="chapter-title" id="chapter-title"></div>
         <div id="verses"></div>
     </div>
 
@@ -537,18 +530,20 @@
         // Función para cargar capítulo
         async function loadChapter() {
             const versesContainer = document.getElementById('verses');
-            const chapterTitle = document.getElementById('chapter-title');
             versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
-            chapterTitle.textContent = '';
 
             try {
                 const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
                 if (!chapter) throw new Error('No se encontró el capítulo');
 
-                chapterTitle.textContent = `${currentBook} - Capítulo ${currentChapter}`;
+                let html = `
+                    <div class="chapter-title">
+                        ${currentBook} - Capítulo ${currentChapter}
+                    </div>
+                `;
                 
                 const verses = chapter.getElementsByTagName('v');
-                versesContainer.innerHTML = Array.from(verses).map(verse => {
+                html += Array.from(verses).map(verse => {
                     const verseNum = verse.getAttribute('n');
                     const isHighlighted = parseInt(verseNum) === currentVerse;
                     return `
@@ -560,6 +555,8 @@
                         </div>
                     `;
                 }).join('');
+
+                versesContainer.innerHTML = html;
 
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
