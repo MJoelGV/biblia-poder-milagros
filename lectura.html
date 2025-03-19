@@ -9,18 +9,12 @@
             --primary-color: #4CAF50;
             --text-color: #333;
             --bg-color: #fff;
-            --nav-bg: rgba(248, 248, 248, 0.95);
-            --verse-number-color: #4CAF50;
-            --nav-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         [data-theme="dark"] {
             --primary-color: #45a049;
             --text-color: #fff;
-            --bg-color: #1a1a1a;
-            --nav-bg: rgba(42, 42, 42, 0.95);
-            --verse-number-color: #45a049;
-            --nav-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --bg-color: #121212;
         }
 
         body {
@@ -33,9 +27,96 @@
             transition: background-color 0.3s;
         }
 
+        .controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-color);
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .controls.hidden {
+            transform: translateY(-100%);
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-icon:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .select-css {
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            outline: none;
+        }
+
+        .select-css:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .chapter-content {
             max-width: 800px;
-            margin: 80px auto 40px;
+            margin: 140px auto 80px;
             padding: 20px;
         }
 
@@ -51,7 +132,7 @@
         }
 
         .verse-number {
-            color: #4CAF50;
+            color: var(--primary-color);
             font-weight: bold;
             margin-right: 0.5em;
             font-size: 0.9em;
@@ -62,49 +143,44 @@
             line-height: 1.8;
         }
 
-        .controls {
+        .navigation-bottom {
             position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
-            background: white;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--bg-color);
+            padding: 12px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
+            transition: transform 0.3s ease;
         }
 
-        .navigation {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .navigation-bottom.hidden {
+            transform: translateY(100%);
         }
 
-        .select-css {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            min-width: 150px;
-        }
-
-        .home-icon {
-            text-decoration: none;
-            font-size: 24px;
+        .nav-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
             padding: 8px 16px;
-            border-radius: 8px;
-            transition: background-color 0.3s;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .home-icon:hover {
-            background-color: rgba(76, 175, 80, 0.1);
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         @media (max-width: 768px) {
             .chapter-content {
-                margin-top: 120px;
+                margin-top: 160px;
                 padding: 15px;
             }
 
@@ -117,374 +193,217 @@
                 line-height: 1.6;
             }
 
-            .controls {
-                flex-direction: column;
-                padding: 10px;
-            }
-
-            .navigation {
-                width: 100%;
-                justify-content: center;
-                margin-top: 10px;
-            }
-
-            .select-css {
-                min-width: 120px;
+            .nav-button {
+                padding: 6px 12px;
+                font-size: 13px;
             }
         }
     </style>
 </head>
 <body>
     <div class="controls" id="controls">
-        <a href="index.html" class="home-icon">🏠</a>
+        <div class="top-row">
+            <a href="index.html" class="home-icon">🏠</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+        </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
-                <option value="TLA">Traducción en Lenguaje Actual</option>
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
+                <option value="TLA">Traducción en Lenguaje Actual</option>
                 <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
-            <select id="book-selector" class="select-css">
+            <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
-            <div class="search-container">
-                <input type="text" class="search-input" id="search-input" placeholder="Buscar palabra exacta...">
-                <button class="search-button" onclick="searchText()">🔍 Buscar</button>
-            </div>
+            <select id="chapter-select" class="select-css">
+                <option value="">Selecciona un capítulo</option>
+            </select>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
     </div>
 
-    <div class="search-results" id="search-results">
-        <button class="close-search" onclick="closeSearch()">×</button>
-        <div id="results-content"></div>
+    <div class="chapter-content" id="chapter-content">
+        Cargando...
     </div>
 
-    <div class="chapter-content" id="chapter-content"></div>
-
-    <div class="navigation-bottom hidden" id="navigation-bottom">
-        <button class="nav-button" id="prev-button" onclick="previousChapter()">← Anterior</button>
-        <select id="chapter-selector-bottom" class="select-css">
-            <option value="">Selecciona un capítulo</option>
-        </select>
-        <button class="nav-button" id="next-button" onclick="nextChapter()">Siguiente →</button>
+    <div class="navigation-bottom" id="navigation-bottom">
+        <button class="nav-button" id="prev-button">← Anterior</button>
+        <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
     <script>
+        let currentBook = '';
+        let currentChapter = 1;
+        let currentVerse = 1;
         let xmlDoc = null;
-        const content = document.getElementById('chapter-content');
-        const versionSelector = document.getElementById('version-selector');
-        const bookSelector = document.getElementById('book-selector');
-        const chapterSelectorBottom = document.getElementById('chapter-selector-bottom');
-        const controls = document.getElementById('controls');
-        const navigationBottom = document.getElementById('navigation-bottom');
         let lastScrollY = window.scrollY;
-        let scrollTimer = null;
+        let ticking = false;
 
-        // Sincronizar los selectores de capítulo
-        chapterSelectorBottom.addEventListener('change', () => {
-            showChapter();
-        });
-
-        // Manejar la visibilidad de los menús
+        // Controlar la visibilidad de los menús al hacer scroll
         function handleScroll() {
-            clearTimeout(scrollTimer);
-            const currentScrollY = window.scrollY;
-            const scrollingDown = currentScrollY > lastScrollY;
-            
-            controls.classList.toggle('hidden', scrollingDown);
-            navigationBottom.classList.toggle('hidden', scrollingDown);
-            
-            lastScrollY = currentScrollY;
-
-            // Mostrar menús después de 2 segundos sin scroll
-            scrollTimer = setTimeout(() => {
-                controls.classList.remove('hidden');
-                navigationBottom.classList.remove('hidden');
-            }, 2000);
-        }
-
-        // Detectar movimiento del mouse cerca de los menús
-        function handleMouseMove(e) {
-            const topThreshold = 100;
-            const bottomThreshold = window.innerHeight - 100;
-            
-            if (e.clientY <= topThreshold || e.clientY >= bottomThreshold) {
-                controls.classList.remove('hidden');
-                navigationBottom.classList.remove('hidden');
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    const controls = document.getElementById('controls');
+                    const navigationBottom = document.getElementById('navigation-bottom');
+                    
+                    // Si se scrollea hacia abajo, ocultar los menús
+                    if (currentScrollY > lastScrollY) {
+                        controls.classList.add('hidden');
+                        navigationBottom.classList.add('hidden');
+                    } else {
+                        // Si se scrollea hacia arriba, mostrar los menús
+                        controls.classList.remove('hidden');
+                        navigationBottom.classList.remove('hidden');
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                
+                ticking = true;
             }
         }
 
+        // Escuchar el evento scroll
         window.addEventListener('scroll', handleScroll);
-        window.addEventListener('mousemove', handleMouseMove);
-        
-        // Para dispositivos táctiles
-        document.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const touchY = touch.clientY;
-            const topThreshold = 100;
-            const bottomThreshold = window.innerHeight - 100;
+
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.getElementById('theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
             
-            if (touchY <= topThreshold || touchY >= bottomThreshold) {
-                controls.classList.remove('hidden');
-                navigationBottom.classList.remove('hidden');
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙' : '☀️';
+            
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Cargar preferencia de tema
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-toggle').textContent = 
+                savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Event listeners para los selectores
+        document.getElementById('book-select').addEventListener('change', (e) => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            currentVerse = 1;
+            loadChapter();
+            updateControls();
+            updateURL();
+            
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        document.getElementById('chapter-select').addEventListener('change', (e) => {
+            currentChapter = parseInt(e.target.value);
+            loadChapter();
+            updateURL();
+            
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Event listeners para los botones de navegación
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentChapter > 1) {
+                currentChapter--;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             }
         });
 
-        // Cargar el archivo XML
+        document.getElementById('next-button').addEventListener('click', () => {
+            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            if (currentChapter < chapters.length) {
+                currentChapter++;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        });
+
+        // Función para cargar capítulo
+        function loadChapter() {
+            const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+            const verses = chapterElement.getElementsByTagName('v');
+            
+            const chapterContent = document.getElementById('chapter-content');
+            chapterContent.innerHTML = Array.from(verses).map(verse => `
+                <div class="verse">
+                    <span class="verse-number">${verse.getAttribute('n')}</span>
+                    <span class="verse-text">${verse.textContent}</span>
+                </div>
+            `).join('');
+        }
+
+        // Función para actualizar controles
+        function updateControls() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= chapters.length;
+        }
+
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
+
+        // Cargar archivo XML
         async function loadBible(version = 'Reina-Valera-1960') {
             try {
-                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-                const response = await fetch(`${baseUrl}biblia-files/${version}.xmm`);
+                const response = await fetch(`biblia-files/${version}.xmm`);
                 const xmlText = await response.text();
                 const parser = new DOMParser();
                 xmlDoc = parser.parseFromString(xmlText, 'text/xml');
                 setupBookSelector();
-                loadFromUrl();
             } catch (error) {
                 console.error('Error loading XML:', error);
-                content.innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
             }
         }
 
-        // Configurar el selector de libros
+        // Configurar selector de libros
         function setupBookSelector() {
             const books = xmlDoc.getElementsByTagName('b');
-            bookSelector.innerHTML = '<option value="">Selecciona un libro</option>';
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
             
             Array.from(books).forEach(book => {
                 const option = document.createElement('option');
                 option.value = book.getAttribute('n');
                 option.textContent = book.getAttribute('n');
-                bookSelector.appendChild(option);
-            });
-
-            bookSelector.addEventListener('change', () => {
-                chapterSelectorBottom.value = '1';
-                loadChapters();
-                showChapter();
+                bookSelect.appendChild(option);
             });
         }
-
-        // Cargar capítulos cuando se selecciona un libro
-        function loadChapters() {
-            const book = bookSelector.value;
-            if (!book) return;
-
-            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
-            const chapterOptions = '<option value="">Selecciona un capítulo</option>' + 
-                Array.from(chapters).map((_, index) => 
-                    `<option value="${index + 1}">Capítulo ${index + 1}</option>`
-                ).join('');
-            
-            chapterSelectorBottom.innerHTML = chapterOptions;
-        }
-
-        // Mostrar versículos cuando se selecciona un capítulo
-        function showChapter() {
-            const book = bookSelector.value;
-            const chapter = chapterSelectorBottom.value;
-            if (!book || !chapter) return;
-
-            try {
-                const chapterElement = xmlDoc.querySelector(`b[n="${book}"] c[n="${chapter}"]`);
-                const verses = chapterElement.getElementsByTagName('v');
-                
-                content.innerHTML = Array.from(verses).map(verse => `
-                    <div class="verse">
-                        <span class="verse-number">${verse.getAttribute('n')}</span>
-                        <span class="verse-text">${verse.textContent}</span>
-                    </div>
-                `).join('');
-
-                // Actualizar la URL
-                const url = new URL(window.location);
-                url.searchParams.set('version', versionSelector.value);
-                url.searchParams.set('book', book);
-                url.searchParams.set('chapter', chapter);
-                window.history.pushState({}, '', url);
-
-                // Actualizar selector inferior
-                navigationBottom.classList.remove('hidden');
-
-                // Actualizar botones de navegación
-                updateNavigationButtons(book, parseInt(chapter));
-            } catch (error) {
-                console.error('Error al mostrar versículos:', error);
-                content.innerHTML = `<div class="error">Error al mostrar versículos: ${error.message}</div>`;
-            }
-        }
-
-        // Actualizar botones de navegación
-        function updateNavigationButtons(book, chapter) {
-            const totalChapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c').length;
-            const prevButton = document.getElementById('prev-button');
-            const nextButton = document.getElementById('next-button');
-            
-            prevButton.style.visibility = chapter > 1 ? 'visible' : 'hidden';
-            nextButton.style.visibility = chapter < totalChapters ? 'visible' : 'hidden';
-        }
-
-        // Navegación entre capítulos
-        function previousChapter() {
-            const currentChapter = parseInt(chapterSelectorBottom.value);
-            if (currentChapter > 1) {
-                chapterSelectorBottom.value = currentChapter - 1;
-                showChapter();
-            }
-        }
-
-        function nextChapter() {
-            const book = bookSelector.value;
-            const currentChapter = parseInt(chapterSelectorBottom.value);
-            const totalChapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c').length;
-            
-            if (currentChapter < totalChapters) {
-                chapterSelectorBottom.value = currentChapter + 1;
-                showChapter();
-            }
-        }
-
-        // Cargar desde URL
-        function loadFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const versionParam = params.get('version');
-            const bookParam = params.get('book');
-            const chapterParam = params.get('chapter');
-
-            if (versionParam) {
-                versionSelector.value = versionParam;
-            }
-            
-            if (bookParam) {
-                bookSelector.value = bookParam;
-                loadChapters();
-                
-                if (chapterParam) {
-                    chapterSelectorBottom.value = chapterParam;
-                    showChapter();
-                } else {
-                    chapterSelectorBottom.value = '1';
-                    showChapter();
-                }
-            }
-        }
-
-        // Cambiar tema
-        function toggleTheme() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        }
-
-        // Cargar tema guardado
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.body.setAttribute('data-theme', savedTheme);
-        }
-
-        // Event listeners
-        versionSelector.addEventListener('change', () => loadBible(versionSelector.value));
-        chapterSelectorBottom.addEventListener('change', showChapter);
-
-        // Teclas de navegación
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                previousChapter();
-            } else if (e.key === 'ArrowRight') {
-                nextChapter();
-            }
-        });
-
-        // Función de búsqueda
-        function searchText() {
-            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
-            if (!searchTerm) return;
-
-            const resultsDiv = document.getElementById('search-results');
-            const resultsContent = document.getElementById('results-content');
-            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
-            resultsDiv.classList.add('active');
-
-            const results = [];
-            const books = xmlDoc.getElementsByTagName('b');
-            // Crear una expresión regular que busque la palabra exacta
-            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
-
-            for (const book of books) {
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-
-                for (const chapter of chapters) {
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-
-                    for (const verse of verses) {
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-
-                        if (searchRegex.test(verseText)) {
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: verse.textContent
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (results.length > 0) {
-                resultsContent.innerHTML = results.map(result => `
-                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
-                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
-                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
-                    </div>
-                `).join('');
-            } else {
-                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
-            }
-        }
-
-        // Resaltar término de búsqueda
-        function highlightSearchTerm(text, searchTerm) {
-            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
-            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
-        }
-
-        // Ir a un versículo específico
-        function goToVerse(book, chapter, verse) {
-            bookSelector.value = book;
-            loadChapters();
-            chapterSelectorBottom.value = chapter;
-            showChapter();
-            
-            setTimeout(() => {
-                const verseElement = document.querySelector(`.verse:nth-child(${verse})`);
-                if (verseElement) {
-                    verseElement.scrollIntoView({ behavior: 'smooth' });
-                    verseElement.style.animation = 'highlight 2s';
-                }
-                closeSearch();
-            }, 100);
-        }
-
-        // Cerrar resultados de búsqueda
-        function closeSearch() {
-            document.getElementById('search-results').classList.remove('active');
-        }
-
-        // Event listener para búsqueda con Enter
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchText();
-            }
-        });
 
         // Iniciar la aplicación
-        loadBible(versionSelector.value);
+        loadBible('Reina-Valera-1960');
     </script>
 </body>
 </html>
