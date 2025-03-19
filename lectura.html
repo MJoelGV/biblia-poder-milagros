@@ -244,6 +244,82 @@
             color: white;
         }
 
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
         @media (max-width: 768px) {
             .chapter-content {
                 margin-top: 160px;
@@ -278,10 +354,6 @@
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
         </div>
         <div class="navigation">
-            <div class="search-container">
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
-                <button onclick="searchText()" class="search-button">🔍</button>
-            </div>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -292,6 +364,10 @@
             <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
+                <button onclick="searchText()" class="search-button">🔍</button>
+            </div>
         </div>
     </div>
 
@@ -570,19 +646,17 @@
 
         // Ir a un versículo específico
         function goToVerse(book, chapter, verse) {
+            currentBook = book;
+            currentChapter = parseInt(chapter);
+            currentVerse = parseInt(verse);
+
             document.getElementById('book-select').value = book;
             loadChapters();
-            document.getElementById('chapter-select').value = chapter;
             loadChapter();
+            updateControls();
+            updateURL();
             
-            setTimeout(() => {
-                const verseElement = document.querySelector(`.verse:nth-child(${verse})`);
-                if (verseElement) {
-                    verseElement.scrollIntoView({ behavior: 'smooth' });
-                    verseElement.style.animation = 'highlight 2s';
-                }
-                closeSearch();
-            }, 100);
+            closeSearch();
         }
 
         // Cerrar resultados de búsqueda
