@@ -33,11 +33,8 @@
             left: 0;
             right: 0;
             background: var(--bg-color);
-            padding: 12px;
+            padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
             z-index: 1000;
             transition: transform 0.3s ease;
         }
@@ -389,33 +386,72 @@
         let currentVersion = 'Reina-Valera-1960';
 
         // Controlar la visibilidad de los menús al hacer scroll
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        let lastTouchY = 0;
+        let touchStartY = 0;
+        let menuVisible = true;
+
+        // Función para manejar el scroll
         function handleScroll() {
             if (!ticking) {
                 window.requestAnimationFrame(() => {
                     const currentScrollY = window.scrollY;
-                    const controls = document.getElementById('controls');
-                    const navigationBottom = document.getElementById('navigation-bottom');
+                    const scrollingDown = currentScrollY > lastScrollY;
                     
-                    // Si se scrollea hacia abajo, ocultar los menús
-                    if (currentScrollY > lastScrollY) {
-                        controls.classList.add('hidden');
-                        navigationBottom.classList.add('hidden');
-                    } else {
-                        // Si se scrollea hacia arriba, mostrar los menús
-                        controls.classList.remove('hidden');
-                        navigationBottom.classList.remove('hidden');
+                    // Solo cambiamos la visibilidad si el scroll es significativo
+                    if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                        menuVisible = !scrollingDown;
+                        document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                        document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
                     }
                     
                     lastScrollY = currentScrollY;
                     ticking = false;
                 });
-                
                 ticking = true;
             }
         }
 
-        // Escuchar el evento scroll
-        window.addEventListener('scroll', handleScroll);
+        // Función para manejar el toque
+        function handleTouch(e) {
+            const currentY = e.touches[0].clientY;
+            
+            if (e.type === 'touchstart') {
+                touchStartY = currentY;
+                lastTouchY = currentY;
+                return;
+            }
+            
+            const deltaY = currentY - lastTouchY;
+            
+            // Solo cambiamos la visibilidad si el movimiento es significativo
+            if (Math.abs(deltaY) > 30) {
+                menuVisible = deltaY > 0;
+                document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+            }
+            
+            lastTouchY = currentY;
+        }
+
+        // Event listeners para scroll y touch
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        document.addEventListener('touchstart', handleTouch, { passive: true });
+        document.addEventListener('touchmove', handleTouch, { passive: true });
+
+        // Mostrar menús al tocar cerca de ellos
+        document.addEventListener('touchstart', (e) => {
+            const touchY = e.touches[0].clientY;
+            const windowHeight = window.innerHeight;
+            
+            // Si el toque está cerca del borde superior o inferior
+            if (touchY < 50 || touchY > windowHeight - 50) {
+                menuVisible = true;
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('navigation-bottom').classList.remove('hidden');
+            }
+        }, { passive: true });
 
         // Función para cambiar el tema
         function toggleTheme() {
