@@ -613,8 +613,33 @@
             }
         });
 
+        // Función para cargar desde URL
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+            const verseParam = params.get('verse');
+
+            if (bookParam) {
+                currentBook = bookParam;
+                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+                currentVerse = verseParam ? parseInt(verseParam) : 0;
+
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
+            }
+        }
+
         // Iniciar la aplicación
-        loadBible('Reina-Valera-1960');
+        async function init() {
+            await loadBible('Reina-Valera-1960');
+            setupBookSelector();
+            loadFromUrl();
+        }
+
+        init();
     </script>
 </body>
 </html>
