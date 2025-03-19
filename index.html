@@ -141,7 +141,7 @@
                 <p class="proverb-text" id="proverb-text">Cargando proverbio del día...</p>
                 <p class="proverb-reference" id="proverb-reference"></p>
                 <div class="button-container">
-                    <a href="lectura.html" id="read-more-link" class="button">Leer más</a>
+                    <a href="lectura.html?book=Proverbios&chapter=1" id="read-more-link" class="button">Leer más</a>
                     <div class="secondary-buttons">
                         <a href="historias.html" class="button secondary">Historias Bíblicas</a>
                         <a href="diccionario.html" class="button secondary">Diccionario Bíblico</a>
@@ -209,7 +209,7 @@
             document.getElementById('proverb-reference').textContent = proverbData.reference;
             const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
             document.getElementById('read-more-link').href = 
-                `${baseUrl}lectura.html?version=Reina-Valera-1960&book=Proverbios&chapter=${proverbData.chapter}&verse=${proverbData.verse}`;
+                `${baseUrl}lectura.html?book=Proverbios&chapter=${proverbData.chapter}`;
         }
 
         // Cargar el proverbio cuando la página esté lista

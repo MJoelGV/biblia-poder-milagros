@@ -178,6 +178,94 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
+        .search-container {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .close-search {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
             .chapter-content {
                 margin-top: 160px;
@@ -203,10 +291,14 @@
 <body>
     <div class="controls" id="controls">
         <div class="top-row">
-            <a href="index.html" class="home-icon">🏠</a>
+            <a href="../index.html" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
         </div>
         <div class="navigation">
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
+                <button onclick="searchText()" class="search-button">🔍</button>
+            </div>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -217,10 +309,12 @@
             <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
-            <select id="chapter-select" class="select-css">
-                <option value="">Selecciona un capítulo</option>
-            </select>
         </div>
+    </div>
+
+    <div class="search-results" id="search-results">
+        <button class="close-search" onclick="closeSearch()">×</button>
+        <div id="results-content"></div>
     </div>
 
     <div class="chapter-content" id="chapter-content">
@@ -229,6 +323,9 @@
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
+        <select id="chapter-select" class="select-css">
+            <option value="">Capítulo</option>
+        </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -401,6 +498,91 @@
                 bookSelect.appendChild(option);
             });
         }
+
+        // Función de búsqueda
+        function searchText() {
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!searchTerm) return;
+
+            const resultsDiv = document.getElementById('search-results');
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
+            resultsDiv.classList.add('active');
+
+            const results = [];
+            const books = xmlDoc.getElementsByTagName('b');
+            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
+
+            for (const book of books) {
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+
+                for (const chapter of chapters) {
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+
+                    for (const verse of verses) {
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+
+                        if (searchRegex.test(verseText)) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: verseText
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (results.length > 0) {
+                resultsContent.innerHTML = results.map(result => `
+                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
+                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
+                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
+            }
+        }
+
+        // Resaltar término de búsqueda
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
+            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
+        }
+
+        // Ir a un versículo específico
+        function goToVerse(book, chapter, verse) {
+            document.getElementById('book-select').value = book;
+            loadChapters();
+            document.getElementById('chapter-select').value = chapter;
+            loadChapter();
+            
+            setTimeout(() => {
+                const verseElement = document.querySelector(`.verse:nth-child(${verse})`);
+                if (verseElement) {
+                    verseElement.scrollIntoView({ behavior: 'smooth' });
+                    verseElement.style.animation = 'highlight 2s';
+                }
+                closeSearch();
+            }, 100);
+        }
+
+        // Cerrar resultados de búsqueda
+        function closeSearch() {
+            document.getElementById('search-results').classList.remove('active');
+        }
+
+        // Event listener para búsqueda con Enter
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchText();
+            }
+        });
 
         // Iniciar la aplicación
         loadBible('Reina-Valera-1960');
