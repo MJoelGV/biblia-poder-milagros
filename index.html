@@ -317,7 +317,7 @@
         // Proverbio del día
         async function loadDailyProverb() {
             try {
-                const response = await fetch('/biblia-files/Reina-Valera-1960.xmm');
+                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(text, 'text/xml');
