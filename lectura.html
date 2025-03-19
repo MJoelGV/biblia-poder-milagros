@@ -415,7 +415,11 @@
                 bookSelector.appendChild(option);
             });
 
-            bookSelector.addEventListener('change', loadChapters);
+            bookSelector.addEventListener('change', () => {
+                chapterSelectorBottom.value = '1';
+                loadChapters();
+                showChapter();
+            });
         }
 
         // Cargar capítulos cuando se selecciona un libro
@@ -514,6 +518,9 @@
                 
                 if (chapterParam) {
                     chapterSelectorBottom.value = chapterParam;
+                    showChapter();
+                } else {
+                    chapterSelectorBottom.value = '1';
                     showChapter();
                 }
             }
