@@ -115,13 +115,13 @@
         }
 
         .chapter-content {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 140px auto 80px;
-            padding: 20px;
+            padding: 20px 40px;
         }
 
         .verse {
-            margin-bottom: 1.5em;
+            margin-bottom: 1.2em;
             padding: 0.5em;
             border-radius: 8px;
             transition: background-color 0.3s;
@@ -129,6 +129,15 @@
 
         .verse:hover {
             background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .verse.highlight {
+            animation: highlight 2s;
+        }
+
+        @keyframes highlight {
+            0% { background-color: rgba(76, 175, 80, 0.3); }
+            100% { background-color: transparent; }
         }
 
         .verse-number {
@@ -154,6 +163,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             z-index: 1000;
             transition: transform 0.3s ease;
         }
@@ -171,6 +181,7 @@
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
+            min-width: 100px;
         }
 
         .nav-button:hover {
@@ -178,102 +189,59 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .search-container {
-            display: flex;
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chapter-grid {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 90%;
+            width: 300px;
+        }
+
+        .chapter-grid.active {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            width: 100%;
         }
 
-        .search-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            font-size: 14px;
-            background-color: var(--bg-color);
+        .chapter-button {
+            background: var(--bg-color);
             color: var(--text-color);
-            outline: none;
-        }
-
-        .search-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            border: 1px solid var(--primary-color);
+            padding: 8px;
+            border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .search-results {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            background: var(--bg-color);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1100;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .search-results.active {
-            display: block;
-        }
-
-        .close-search {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-color);
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .result-item {
-            padding: 12px;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .result-item:hover {
-            background-color: rgba(76, 175, 80, 0.1);
-        }
-
-        .result-book {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 4px;
-        }
-
-        .result-text {
-            font-size: 0.9em;
-            line-height: 1.5;
+        .chapter-button:hover,
+        .chapter-button.active {
+            background: var(--primary-color);
+            color: white;
         }
 
         @media (max-width: 768px) {
             .chapter-content {
                 margin-top: 160px;
-                padding: 15px;
+                padding: 15px 20px;
             }
 
             .verse {
-                margin-bottom: 1.2em;
+                margin-bottom: 1em;
             }
 
             .verse-text {
@@ -284,6 +252,11 @@
             .nav-button {
                 padding: 6px 12px;
                 font-size: 13px;
+                min-width: 80px;
+            }
+
+            .chapter-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
     </style>
@@ -316,6 +289,8 @@
         <button class="close-search" onclick="closeSearch()">×</button>
         <div id="results-content"></div>
     </div>
+
+    <div class="chapter-grid" id="chapter-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
         Cargando...
@@ -391,6 +366,7 @@
             currentBook = e.target.value;
             currentChapter = 1;
             currentVerse = 1;
+            loadChapters();
             loadChapter();
             updateControls();
             updateURL();
@@ -440,18 +416,61 @@
             }
         });
 
+        // Función para cargar capítulos
+        function loadChapters() {
+            const book = document.getElementById('book-select').value;
+            if (!book) return;
+
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            const chapterGrid = document.getElementById('chapter-grid');
+            
+            chapterGrid.innerHTML = Array.from(chapters).map((_, index) => `
+                <button class="chapter-button ${currentChapter === index + 1 ? 'active' : ''}" 
+                        onclick="selectChapter(${index + 1})">
+                    ${index + 1}
+                </button>
+            `).join('');
+            
+            chapterGrid.classList.add('active');
+        }
+
+        // Función para seleccionar capítulo
+        function selectChapter(chapter) {
+            currentChapter = chapter;
+            loadChapter();
+            updateControls();
+            updateURL();
+            
+            document.getElementById('chapter-grid').classList.remove('active');
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
         // Función para cargar capítulo
         function loadChapter() {
             const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+            if (!chapterElement) return;
+
             const verses = chapterElement.getElementsByTagName('v');
-            
             const chapterContent = document.getElementById('chapter-content');
+            
             chapterContent.innerHTML = Array.from(verses).map(verse => `
-                <div class="verse">
+                <div class="verse" id="verse-${verse.getAttribute('n')}">
                     <span class="verse-number">${verse.getAttribute('n')}</span>
                     <span class="verse-text">${verse.textContent}</span>
                 </div>
             `).join('');
+
+            // Si hay un versículo específico para resaltar
+            if (currentVerse > 0) {
+                const verseElement = document.getElementById(`verse-${currentVerse}`);
+                if (verseElement) {
+                    verseElement.classList.add('highlight');
+                    verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         }
 
         // Función para actualizar controles
@@ -581,6 +600,22 @@
         document.getElementById('search-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 searchText();
+            }
+        });
+
+        // Mostrar/ocultar grid de capítulos
+        document.getElementById('chapter-select').addEventListener('click', () => {
+            const chapterGrid = document.getElementById('chapter-grid');
+            chapterGrid.classList.toggle('active');
+        });
+
+        // Ocultar grid al hacer click fuera
+        document.addEventListener('click', (e) => {
+            const chapterGrid = document.getElementById('chapter-grid');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
+                chapterGrid.classList.remove('active');
             }
         });
 

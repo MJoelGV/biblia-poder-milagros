@@ -152,68 +152,46 @@
     </div>
 
     <script>
+        // Cargar proverbio del día
         async function loadDailyProverb() {
             try {
                 const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-                const response = await fetch(baseUrl + 'biblia-files/Reina-Valera-1960.xmm');
-                const text = await response.text();
+                const response = await fetch(`${baseUrl}biblia-files/Reina-Valera-1960.xmm`);
+                const xmlText = await response.text();
                 const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, 'text/xml');
-                
-                // Obtener la fecha actual
-                const today = new Date();
-                
-                // Verificar si ya mostramos un proverbio hoy
-                const lastProverbDate = localStorage.getItem('lastProverbDate');
-                const savedProverb = localStorage.getItem('currentProverb');
-                
-                if (lastProverbDate === today.toDateString() && savedProverb) {
-                    const proverbData = JSON.parse(savedProverb);
-                    displayProverb(proverbData);
-                    return;
-                }
-                
-                // Obtener todos los versículos de Proverbios
-                const proverbios = xmlDoc.querySelectorAll('b[n="Proverbios"] c v');
-                
-                // Seleccionar un versículo aleatorio
-                const randomIndex = Math.floor(Math.random() * proverbios.length);
-                const verse = proverbios[randomIndex];
-                
-                // Obtener capítulo y versículo
-                const chapter = verse.parentElement.getAttribute('n');
-                const verseNum = verse.getAttribute('n');
-                
-                const proverbData = {
-                    text: verse.textContent,
-                    reference: `Proverbios ${chapter}:${verseNum}`,
-                    chapter: chapter,
-                    verse: verseNum
-                };
-                
-                // Guardar el proverbio actual
-                localStorage.setItem('currentProverb', JSON.stringify(proverbData));
-                localStorage.setItem('lastProverbDate', today.toDateString());
-                
-                displayProverb(proverbData);
-                
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+                // Obtener el libro de Proverbios
+                const proverbios = xmlDoc.querySelector('b[n="Proverbios"]');
+                if (!proverbios) throw new Error('No se encontró el libro de Proverbios');
+
+                // Obtener un capítulo aleatorio
+                const chapters = proverbios.getElementsByTagName('c');
+                const randomChapter = Math.floor(Math.random() * chapters.length) + 1;
+                const chapter = proverbios.querySelector(`c[n="${randomChapter}"]`);
+                if (!chapter) throw new Error('No se encontró el capítulo');
+
+                // Obtener un versículo aleatorio
+                const verses = chapter.getElementsByTagName('v');
+                const randomVerse = Math.floor(Math.random() * verses.length) + 1;
+                const verse = chapter.querySelector(`v[n="${randomVerse}"]`);
+                if (!verse) throw new Error('No se encontró el versículo');
+
+                // Mostrar el versículo
+                document.getElementById('proverb-text').textContent = verse.textContent;
+                document.getElementById('proverb-reference').textContent = `Proverbios ${randomChapter}:${randomVerse}`;
+
+                // Actualizar el enlace "Leer más"
+                document.getElementById('read-more-link').href = 
+                    `${baseUrl}lectura.html?book=Proverbios&chapter=${randomChapter}&verse=${randomVerse}`;
             } catch (error) {
-                console.error('Error loading proverb:', error);
+                console.error('Error al cargar el proverbio:', error);
                 document.getElementById('proverb-text').textContent = 'Error al cargar el proverbio del día';
-                document.getElementById('proverb-reference').textContent = '';
             }
         }
 
-        function displayProverb(proverbData) {
-            document.getElementById('proverb-text').textContent = proverbData.text;
-            document.getElementById('proverb-reference').textContent = proverbData.reference;
-            const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-            document.getElementById('read-more-link').href = 
-                `${baseUrl}lectura.html?book=Proverbios&chapter=${proverbData.chapter}`;
-        }
-
         // Cargar el proverbio cuando la página esté lista
-        document.addEventListener('DOMContentLoaded', loadDailyProverb);
+        loadDailyProverb();
     </script>
 </body>
 </html>
