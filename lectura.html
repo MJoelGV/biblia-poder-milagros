@@ -120,9 +120,9 @@
         }
 
         .chapter-content {
-            max-width: 1000px;
-            margin: 140px auto 80px;
-            padding: 20px 40px;
+            max-width: 1200px;
+            margin: 120px auto 80px;
+            padding: 0 20px;
         }
 
         .chapter-title {
@@ -130,14 +130,15 @@
             font-size: 1.5em;
             font-weight: bold;
             color: var(--primary-color);
-            margin: 20px 0 40px 0;
+            margin: 20px 0 30px 0;
             padding: 10px;
         }
 
         .verse {
-            margin-bottom: 1.2em;
-            padding: 0.5em;
-            border-radius: 8px;
+            margin-bottom: 0.8em;
+            padding: 0.4em;
+            line-height: 1.5;
+            border-radius: 4px;
             transition: background-color 0.3s;
         }
 
@@ -145,13 +146,8 @@
             background-color: rgba(76, 175, 80, 0.1);
         }
 
-        .verse.highlight {
-            animation: highlight 2s;
-        }
-
-        @keyframes highlight {
-            0% { background-color: rgba(76, 175, 80, 0.3); }
-            100% { background-color: transparent; }
+        .verse.highlighted {
+            background-color: rgba(76, 175, 80, 0.15);
         }
 
         .verse-number {
@@ -331,27 +327,13 @@
 
         @media (max-width: 768px) {
             .chapter-content {
-                margin-top: 160px;
-                padding: 15px 20px;
+                padding: 0 15px;
+                margin-top: 140px;
             }
 
             .verse {
-                margin-bottom: 1em;
-            }
-
-            .verse-text {
-                font-size: 1em;
-                line-height: 1.6;
-            }
-
-            .nav-button {
-                padding: 6px 12px;
-                font-size: 13px;
-                min-width: 80px;
-            }
-
-            .chapter-grid {
-                grid-template-columns: repeat(4, 1fr);
+                margin-bottom: 0.6em;
+                padding: 0.3em;
             }
         }
     </style>
