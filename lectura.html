@@ -134,9 +134,10 @@
         .verse {
             margin-bottom: 0.8em;
             padding: 0.4em;
-            line-height: 1.5;
+            line-height: 1.6;
             border-radius: 4px;
             transition: background-color 0.3s;
+            font-size: 1.1em;
         }
 
         .verse:hover {
@@ -156,7 +157,7 @@
 
         .verse-text {
             font-size: 1.1em;
-            line-height: 1.8;
+            line-height: 1.6;
         }
 
         .navigation-bottom {
@@ -516,8 +517,8 @@
         });
 
         document.getElementById('next-button').addEventListener('click', () => {
-            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
-            if (currentChapter < chapters.length) {
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            if (currentChapter < totalChapters) {
                 currentChapter++;
                 loadChapter();
                 updateControls();
@@ -593,10 +594,21 @@
         function updateControls() {
             const prevButton = document.getElementById('prev-button');
             const nextButton = document.getElementById('next-button');
-            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!currentBook) {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
+
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
             
             prevButton.disabled = currentChapter <= 1;
-            nextButton.disabled = currentChapter >= chapters.length;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar el selector de capítulos
+            chapterSelect.value = currentChapter;
         }
 
         // Función para actualizar URL
