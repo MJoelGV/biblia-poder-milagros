@@ -348,8 +348,8 @@
             </select>
             <div class="search-container" style="gap: 4px; flex-wrap: wrap;">
                 <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
-                <button onclick="searchText()" class="search-button">🔍</button>
-                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); showBookTitles();" style="min-width:40px;">📑</button>
+                <button onclick="window.searchText()" class="search-button">🔍</button>
+                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); window.showBookTitles();" style="min-width:40px;">📑</button>
             </div>
             <div id="book-titles-modal" class="chapter-grid">
                 <button class="close-search" onclick="closeBookTitles()">×</button>
@@ -675,7 +675,7 @@
         }
 
         // Función de búsqueda
-        function searchText() {
+        window.searchText = function searchText() {
             const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
             if (!searchTerm) return;
 
@@ -831,7 +831,7 @@
         }
 
         // Mostrar los títulos del libro actual
-        async function showBookTitles() {
+        window.showBookTitles = async function showBookTitles() {
             const modal = document.getElementById('book-titles-modal');
             const contentDiv = document.getElementById('book-titles-content');
             if (!bookTitlesData || bookTitlesData.length === 0) {
@@ -864,12 +864,12 @@
             }
         });
 
-        function closeBookTitles() {
+        window.closeBookTitles = function closeBookTitles() {
             document.getElementById('book-titles-modal').classList.remove('active');
         }
 
         // Navegar al título/versículo
-        function goToBookTitle(capitulo, versiculo) {
+        window.goToBookTitle = function goToBookTitle(capitulo, versiculo) {
             currentChapter = parseInt(capitulo);
             currentVerse = parseInt(versiculo);
             document.getElementById('chapter-select').value = capitulo;
