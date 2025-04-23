@@ -346,23 +346,11 @@
             <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
-            <div class="search-container" style="gap: 4px; flex-wrap: wrap;">
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
-                <button onclick="searchText()" class="search-button">🔍</button>
-                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); showBookTitles();" style="min-width:40px;">📑</button>
-            </div>
-            <div id="book-titles-modal" class="chapter-grid">
-                <button class="close-search" onclick="closeBookTitles()">×</button>
-                <h3>Índice de títulos</h3>
-                <div id="book-titles-content"></div>
-            </div>
+
         </div>
     </div>
 
-    <div class="search-results" id="search-results">
-        <button class="close-search" onclick="closeSearch()">×</button>
-        <div id="results-content"></div>
-    </div>
+
 
     <div class="chapter-grid" id="chapter-grid"></div>
 
@@ -674,104 +662,6 @@
             });
         }
 
-        // Función de búsqueda
-        function searchText() {
-            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
-            if (!searchTerm) return;
-
-            const resultsDiv = document.getElementById('search-results');
-            const resultsContent = document.getElementById('results-content');
-            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
-            resultsDiv.classList.add('active');
-
-            const results = [];
-            const books = xmlDoc.getElementsByTagName('b');
-            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
-
-            for (const book of books) {
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-
-                for (const chapter of chapters) {
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-
-                    for (const verse of verses) {
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-
-                        if (searchRegex.test(verseText)) {
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: verseText
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (results.length > 0) {
-                resultsContent.innerHTML = results.map(result => `
-                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
-                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
-                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
-                    </div>
-                `).join('');
-            } else {
-                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
-            }
-        }
-
-        // Resaltar término de búsqueda
-        function highlightSearchTerm(text, searchTerm) {
-            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
-            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
-        }
-
-        // Ir a un versículo específico
-        function goToVerse(book, chapter, verse) {
-            currentBook = book;
-            currentChapter = parseInt(chapter);
-            currentVerse = parseInt(verse);
-
-            document.getElementById('book-select').value = book;
-            loadChapter();
-            updateControls();
-            updateURL();
-            
-            closeSearch();
-        }
-
-        // Cerrar resultados de búsqueda
-        function closeSearch() {
-            document.getElementById('search-results').classList.remove('active');
-        }
-
-        // Event listener para búsqueda con Enter
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchText();
-            }
-        });
-
-        // Mostrar/ocultar grid de capítulos
-        document.getElementById('chapter-select').addEventListener('click', () => {
-            const chapterGrid = document.getElementById('chapter-grid');
-            chapterGrid.classList.toggle('active');
-        });
-
-        // Ocultar grid al hacer click fuera
-        document.addEventListener('click', (e) => {
-            const chapterGrid = document.getElementById('chapter-grid');
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
-                chapterGrid.classList.remove('active');
-            }
-        });
-
         // Función para cargar desde URL
         function loadFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -799,88 +689,6 @@
         }
 
         init();
-
-        // --- ÍNDICE DE TÍTULOS POR LIBRO ---
-        let bookTitlesData = [];
-
-        async function loadBookTitles() {
-            try {
-                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-                const url = `${baseUrl}biblia-files/temas-versiculos.xml`;
-                const resp = await fetch(url);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const xml = await resp.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(xml, 'text/xml');
-                bookTitlesData = [];
-                const subtemas = doc.getElementsByTagName('subtema');
-                for (const subtema of subtemas) {
-                    const nombre = subtema.getAttribute('nombre');
-                    const ref = subtema.getElementsByTagName('referencia')[0];
-                    if (ref) {
-                        const libro = ref.getAttribute('libro');
-                        const cap = ref.getAttribute('capitulo');
-                        const ver = ref.getAttribute('versiculo').split('-')[0];
-                        bookTitlesData.push({ libro, nombre, capitulo: cap, versiculo: ver });
-                    }
-                }
-            } catch (e) {
-                console.error('Error cargando títulos por libro:', e);
-                document.getElementById('book-titles-content').innerHTML = `<div style="color:red;text-align:center;">Error al cargar títulos.</div>`;
-            }
-        }
-
-        // Mostrar los títulos del libro actual
-        async function showBookTitles() {
-            if (!currentBook) return;
-            const modal = document.getElementById('book-titles-modal');
-            const contentDiv = document.getElementById('book-titles-content');
-            if (!bookTitlesData || bookTitlesData.length === 0) {
-                await loadBookTitles();
-            }
-            const titulos = bookTitlesData.filter(item => item.libro === currentBook);
-            if (!titulos || titulos.length === 0) {
-                contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos para este libro.</div>';
-            } else {
-                contentDiv.innerHTML = titulos.map(item => `
-                  <button class="chapter-btn" onclick="goToBookTitle('${item.capitulo}', '${item.versiculo}')">
-                    ${item.nombre}
-                  </button>
-                `).join('');
-                const btns = contentDiv.querySelectorAll('.chapter-btn');
-                btns.forEach((btn, idx) => {
-                    btn.classList.toggle('active', titulos[idx].capitulo == currentChapter);
-                });
-            }
-            modal.classList.add('active');
-        }
-
-        // Cerrar menú de títulos al hacer click fuera
-        window.addEventListener('click', function(e) {
-            const modal = document.getElementById('book-titles-modal');
-            const btn = document.getElementById('book-titles-btn');
-            if (modal.classList.contains('active') && !modal.contains(e.target) && e.target!==btn) {
-                closeBookTitles();
-            }
-        });
-
-        function closeBookTitles() {
-            console.log('closeBookTitles invocado');
-            document.getElementById('book-titles-modal').classList.remove('active');
-        }
-
-        // Navegar al título/versículo
-        function goToBookTitle(capitulo, versiculo) {
-            console.log('goToBookTitle invocado', capitulo, versiculo);
-            currentChapter = parseInt(capitulo);
-            currentVerse = parseInt(versiculo);
-            document.getElementById('chapter-select').value = capitulo;
-            loadChapter();
-            updateControls();
-            updateURL();
-            closeBookTitles();
-            window.scrollTo({top:0, behavior:'smooth'});
-        }
 
         window.addEventListener('DOMContentLoaded', async () => {
             const version = document.getElementById('version-selector').value || 'Reina-Valera-1960';
