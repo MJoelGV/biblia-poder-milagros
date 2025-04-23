@@ -409,10 +409,18 @@
             }
             // Detiene cualquier lectura anterior
             window.speechSynthesis.cancel();
-            // Espera a que las voces estén listas
+            // Verifica si el navegador soporta la síntesis de voz
+            if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+                alert('Tu navegador no soporta la función de lectura en voz alta. Prueba con Chrome, Safari o actualiza tu navegador.');
+                return;
+            }
             function speakWhenVoicesReady() {
+                const voces = window.speechSynthesis.getVoices();
+                if (!voces || voces.length === 0) {
+                    alert('No se encontraron voces en tu dispositivo.\n\nEn Android: Ve a Ajustes > Accesibilidad > Texto a voz y descarga una voz en español.\nEn iPhone/iPad: Ajustes > Accesibilidad > Contenido hablado > Voces > Español.');
+                    return;
+                }
                 const utterance = new SpeechSynthesisUtterance(textoCompleto);
-                let voces = window.speechSynthesis.getVoices();
                 utterance.lang = 'es-ES';
                 let vozEncontrada = false;
                 for (let voz of voces) {
@@ -429,6 +437,9 @@
             }
             if (window.speechSynthesis.getVoices().length === 0) {
                 window.speechSynthesis.onvoiceschanged = speakWhenVoicesReady;
+                // Forzar carga de voces en algunos navegadores móviles
+                window.speechSynthesis.getVoices();
+                setTimeout(speakWhenVoicesReady, 500);
             } else {
                 speakWhenVoicesReady();
             }
