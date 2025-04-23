@@ -197,7 +197,10 @@
                 return null;
             }
 
-            return versiculoElement.textContent;
+            // Obtener el texto del versículo
+            const texto = versiculoElement.textContent;
+            console.log(`Cargando versículo ${libro} ${capitulo}:${versiculo} - ${texto}`);
+            return texto;
         }
 
         // Mostrar versículos
@@ -211,14 +214,14 @@
                 const versiculo = verso.getAttribute('versiculo');
                 const texto = getVerseText(libro, capitulo, versiculo);
 
+                // Si no se encuentra el texto en la biblia, usar el texto del XML original
+                const displayText = texto || verso.getAttribute('texto');
+
                 const verseCard = document.createElement('div');
                 verseCard.className = 'verse-card';
                 
                 const isMemorized = memorizedVerses.includes(index);
                 verseCard.className += isMemorized ? ' memorized-verse' : '';
-
-                // Si no se encuentra el texto, mostrar el texto del XML original
-                const displayText = texto || verso.getAttribute('texto');
 
                 verseCard.innerHTML = `
                     <div class="verse-reference">
