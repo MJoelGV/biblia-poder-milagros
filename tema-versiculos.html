@@ -42,6 +42,28 @@
             transition: transform 0.3s ease;
         }
 
+        .verse-card.memorized-verse {
+            background: #fff;
+            position: relative;
+        }
+
+        .verse-card.memorized-verse::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,0,0.2) 0%, rgba(255,255,0,0.1) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .verse-card.memorized-verse .verse-text {
+            position: relative;
+            z-index: 2;
+        }
+
         .verse-card:hover {
             transform: translateY(-5px);
         }
