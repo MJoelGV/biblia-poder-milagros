@@ -128,11 +128,11 @@
         // Cargar la biblia
         async function loadBiblia() {
             try {
-                const response = await fetch('biblia-files/biblia.xml');
+                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
                 const xmlText = await response.text();
                 const parser = new DOMParser();
                 biblia = parser.parseFromString(xmlText, 'text/xml');
-                console.log('Biblia cargada exitosamente');
+                console.log('Biblia Reina Valera 1960 cargada exitosamente');
             } catch (error) {
                 console.error('Error loading biblia:', error);
                 throw error;
