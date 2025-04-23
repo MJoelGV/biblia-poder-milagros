@@ -225,7 +225,7 @@
 
         // Alternar visibilidad de subtemas
         function toggleTheme(temaName) {
-            const themeCard = document.querySelector(`.theme-card h2:contains('${temaName}')`).closest('.theme-card');
+            const themeCard = document.querySelector(`.theme-card .theme-title:contains('${temaName}')`).closest('.theme-card');
             const subthemesContainer = themeCard.querySelector('.subthemes-container');
             const arrow = themeCard.querySelector('.theme-arrow');
             
@@ -243,6 +243,10 @@
             currentTheme = tema;
             currentSubtheme = subtema;
             loadSubthemeVerses(tema, subtema);
+
+            // Mostrar los versículos
+            const versesContainer = document.getElementById('verses-container');
+            versesContainer.style.display = 'block';
         }
 
         // Cargar versículos de un subtema
