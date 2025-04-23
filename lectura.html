@@ -529,9 +529,14 @@
         function loadChapters() {
             const book = document.getElementById('book-select').value;
             if (!book) return;
-
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            const chapterSelect = document.getElementById('chapter-select');
+            chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
+                <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                    Capítulo ${index + 1}
+                </option>
+            `).join('');
         }
-    }, { passive: true });
 
     // Función para cambiar el tema
     function toggleTheme() {
