@@ -530,71 +530,317 @@
             const book = document.getElementById('book-select').value;
             if (!book) return;
 
-            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
-                <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
-                    Capítulo ${index + 1}
-                </option>
-            `).join('');
         }
+    }, { passive: true });
 
-        // Función para cargar capítulo
-        async function loadChapter() {
-            const versesContainer = document.getElementById('verses');
-            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+    // Función para cambiar el tema
+    function toggleTheme() {
+        const body = document.body;
+        const button = document.getElementById('theme-toggle');
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        button.textContent = isDark ? '🌙' : '☀️';
+        
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
 
-            try {
-                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-                if (!chapter) throw new Error('No se encontró el capítulo');
+    // Cargar preferencia de tema
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-toggle').textContent = 
+            savedTheme === 'dark' ? '☀️' : '🌙';
+    }
 
-                let html = `
-                    <div class="chapter-title">
-                        ${currentBook} - Capítulo ${currentChapter}
+    // Event listeners para los selectores
+    document.getElementById('book-select').addEventListener('change', (e) => {
+        currentBook = e.target.value;
+        currentChapter = 1;
+        currentVerse = 0;
+        loadChapters();
+        loadChapter();
+        updateControls();
+        updateURL();
+        
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    document.getElementById('chapter-select').addEventListener('change', (e) => {
+        currentChapter = parseInt(e.target.value);
+        loadChapter();
+        updateControls();
+        updateURL();
+        
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // Event listeners para los botones de navegación
+    document.getElementById('prev-button').addEventListener('click', () => {
+        if (currentChapter > 1) {
+            currentChapter--;
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    });
+
+    document.getElementById('next-button').addEventListener('click', () => {
+        const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+        if (currentChapter < totalChapters) {
+            currentChapter++;
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    });
+
+    // Función para cargar capítulos
+    function loadChapters() {
+        const book = document.getElementById('book-select').value;
+        if (!book) return;
+
+        const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+        const chapterSelect = document.getElementById('chapter-select');
+        
+        chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
+            <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                Capítulo ${index + 1}
+            </option>
+        `).join('');
+    }
+
+    // Función para cargar capítulo
+    async function loadChapter() {
+        const versesContainer = document.getElementById('verses');
+        versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+
+        try {
+            const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+            if (!chapter) throw new Error('No se encontró el capítulo');
+
+            let html = `
+                <div class="chapter-title">
+                    ${currentBook} - Capítulo ${currentChapter}
+                </div>
+            `;
+            
+            const verses = chapter.getElementsByTagName('v');
+            html += Array.from(verses).map(verse => {
+                const verseNum = verse.getAttribute('n');
+                const isHighlighted = parseInt(verseNum) === currentVerse;
+                return `
+                    <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
+                         data-verse="${verseNum}"
+                         onclick="highlightVerse(this)">
+                        <span class="verse-number">${verseNum}</span>
+                        ${verse.textContent}
                     </div>
                 `;
-                
+            }).join('');
+
+            versesContainer.innerHTML = html;
+
+            if (currentVerse > 0) {
+                const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                if (verseElement) {
+                    setTimeout(() => {
+                        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading chapter:', error);
+            versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
+        }
+    }
+
+    // Función para actualizar controles
+    function updateControls() {
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const chapterSelect = document.getElementById('chapter-select');
+        
+        if (!currentBook) {
+            prevButton.disabled = true;
+            nextButton.disabled = true;
+            return;
+        }
+
+        const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+        
+        prevButton.disabled = currentChapter <= 1;
+        nextButton.disabled = currentChapter >= totalChapters;
+        
+        // Actualizar el selector de capítulos
+        chapterSelect.value = currentChapter;
+    }
+
+    // Función para actualizar URL
+    function updateURL() {
+        const url = new URL(window.location);
+        url.searchParams.set('book', currentBook);
+        url.searchParams.set('chapter', currentChapter);
+        window.history.pushState({}, '', url);
+    }
+
+    // Función para cargar la Biblia
+    async function loadBible(version) {
+        try {
+            const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+            const url = `${baseUrl}biblia-files/${version}.xmm`;
+            console.log('[BIBLIA] Intentando cargar:', url);
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
+            }
+            const xmlText = await response.text();
+            xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+            currentVersion = version;
+            
+            if (currentBook) {
+                loadChapter();
+            }
+        } catch (error) {
+            console.error('[BIBLIA] Error loading Bible:', error);
+            document.getElementById('verses').innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
+        }
+    }
+
+    // Event listener para el selector de versiones
+    document.getElementById('version-selector').addEventListener('change', async (e) => {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.textContent = 'Cargando versión...';
+        document.getElementById('verses').innerHTML = '';
+        document.getElementById('verses').appendChild(loadingDiv);
+        
+        await loadBible(e.target.value);
+        setupBookSelector();
+        if (currentBook) {
+            document.getElementById('book-select').value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
+        }
+    });
+
+    // Configurar selector de libros
+    function setupBookSelector() {
+        const books = xmlDoc.getElementsByTagName('b');
+        const bookSelect = document.getElementById('book-select');
+        bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+        
+        Array.from(books).forEach(book => {
+            const option = document.createElement('option');
+            option.value = book.getAttribute('n');
+            option.textContent = book.getAttribute('n');
+            bookSelect.appendChild(option);
+        });
+    }
+
+    // Función para cargar desde URL
+    function loadFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const bookParam = params.get('book');
+        const chapterParam = params.get('chapter');
+        const verseParam = params.get('verse');
+
+        if (bookParam) {
+            currentBook = bookParam;
+            currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+            currentVerse = verseParam ? parseInt(verseParam) : 0;
+
+            document.getElementById('book-select').value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
+        }
+    }
+
+    // Iniciar la aplicación
+    async function init() {
+        await loadBible(currentVersion);
+        setupBookSelector();
+        loadFromUrl();
+    }
+
+    init();
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const version = document.getElementById('version-selector').value || 'Reina-Valera-1960';
+        await loadBible(version);
+        setupBookSelector();
+        loadChapters();
+        loadChapter();
+        updateControls();
+    });
+
+    // Función para quitar acentos y hacer minúsculas
+    function normalize(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function searchText() {
+        const searchTermRaw = document.getElementById('search-input').value.trim();
+        if (!searchTermRaw) return;
+        if (!xmlDoc) return;
+        const searchTerm = normalize(searchTermRaw);
+        const resultsDiv = document.getElementById('search-results');
+        const resultsContent = document.getElementById('results-content');
+        resultsContent.innerHTML = '<div style="text-align:center;">Buscando...</div>';
+        resultsDiv.style.display = 'block';
+
+        const results = [];
+        const books = xmlDoc.getElementsByTagName('b');
+        // Palabra exacta, pero sin acentos ni mayúsculas
+        const searchRegex = new RegExp(`(^|[^\wáéíóúüñ])${searchTerm}([^\wáéíóúüñ]|$)`, 'i');
+
+        for (const book of books) {
+            const bookName = book.getAttribute('n');
+            const chapters = book.getElementsByTagName('c');
+            for (const chapter of chapters) {
+                const chapterNum = chapter.getAttribute('n');
                 const verses = chapter.getElementsByTagName('v');
-                html += Array.from(verses).map(verse => {
+                for (const verse of verses) {
                     const verseNum = verse.getAttribute('n');
-                    const isHighlighted = parseInt(verseNum) === currentVerse;
-                    return `
-                        <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
-                             data-verse="${verseNum}"
-                             onclick="highlightVerse(this)">
-                            <span class="verse-number">${verseNum}</span>
-                            ${verse.textContent}
-                        </div>
-                    `;
-                }).join('');
-
-                versesContainer.innerHTML = html;
-
-                if (currentVerse > 0) {
-                    const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
-                    if (verseElement) {
-                        setTimeout(() => {
-                            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 100);
+                    const verseText = verse.textContent;
+                    if (searchRegex.test(normalize(verseText))) {
+                        results.push({
+                            book: bookName,
+                            chapter: chapterNum,
+                            verse: verseNum,
+                            text: verseText,
+                            searchTerm: searchTermRaw
+                        });
                     }
                 }
-            } catch (error) {
-                console.error('Error loading chapter:', error);
-                versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
             }
         }
 
-        // Función para actualizar controles
-        function updateControls() {
-            const prevButton = document.getElementById('prev-button');
-            const nextButton = document.getElementById('next-button');
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            if (!currentBook) {
-                prevButton.disabled = true;
-                nextButton.disabled = true;
-                return;
+        if (results.length > 0) {
+            resultsContent.innerHTML = results.map(result => `
+                <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})" style="margin-bottom:14px; cursor:pointer; padding:10px; border-radius:8px; background:rgba(76,175,80,0.08); transition:background 0.2s;">
+                    <div class="result-book" style="font-weight:bold; color:var(--primary-color);">${result.book} ${result.chapter}:${result.verse}</div>
+                    <div class="result-text" style="font-size:1em;">${highlightSearchTerm(result.text, result.searchTerm)}</div>
+                </div>
+            `).join('');
+        } else {
+            resultsContent.innerHTML = '<div style="text-align:center;">No se encontraron resultados</div>';
             }
 
             const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
