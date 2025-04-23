@@ -398,10 +398,10 @@
         // === LECTOR DE CAPÍTULO EN VOZ ALTA ===
         function leerCapitulo() {
             // Junta todos los versículos del capítulo actual
-            const versos = document.querySelectorAll('#verses .verse-text');
+            const versos = document.querySelectorAll('#verses .verse');
             let textoCompleto = '';
             versos.forEach((el, i) => {
-                textoCompleto += `Versículo ${i+1}: ${el.textContent}. `;
+                textoCompleto += el.textContent + ' ';
             });
             if (!textoCompleto.trim()) {
                 alert('No hay versículos para leer en este capítulo.');
