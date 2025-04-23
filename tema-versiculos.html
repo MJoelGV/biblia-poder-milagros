@@ -112,9 +112,7 @@
     <script>
         let currentTheme = null;
         let currentSubtheme = null;
-        let memorizedVerses = [];
-        let temas = [];
-        let biblia = null;
+        let memorizedVerses = {};
 
         // Obtener parámetros de la URL
         function getURLParameters() {
@@ -146,6 +144,9 @@
                 const { tema, subtema } = getURLParameters();
                 if (!tema || !subtema) return;
 
+                currentTheme = tema;
+                currentSubtheme = subtema;
+
                 // Cargar temas
                 const response = await fetch('biblia-files/temas-versiculos.xml');
                 const xmlText = await response.text();
@@ -167,6 +168,9 @@
 
                 const versos = Array.from(subtemaElement.getElementsByTagName('referencia'));
                 displayVerses(versos);
+
+                // Cargar versículos memorizados
+                loadMemorizedVerses();
             } catch (error) {
                 console.error('Error loading versículos:', error);
             }
@@ -220,7 +224,7 @@
                 const verseCard = document.createElement('div');
                 verseCard.className = 'verse-card';
                 
-                const isMemorized = memorizedVerses.includes(index);
+                const isMemorized = (memorizedVerses[`${currentTheme}-${currentSubtheme}`] || []).includes(index);
                 verseCard.className += isMemorized ? ' memorized-verse' : '';
 
                 verseCard.innerHTML = `
@@ -238,9 +242,37 @@
             });
         }
 
+        // Cargar versículos memorizados
+        function loadMemorizedVerses() {
+            const saved = localStorage.getItem('memorizedVerses');
+            if (saved) {
+                memorizedVerses = JSON.parse(saved);
+            } else {
+                memorizedVerses = {};
+            }
+
+            // Actualizar la visualización de los versículos memorizados
+            if (currentTheme && currentSubtheme) {
+                const key = `${currentTheme}-${currentSubtheme}`;
+                const currentMemorized = memorizedVerses[key] || [];
+                const verseCards = document.querySelectorAll('.verse-card');
+                verseCards.forEach((card, index) => {
+                    const isMemorized = currentMemorized.includes(index);
+                    card.className = `verse-card ${isMemorized ? 'memorized-verse' : ''}`;
+                    const button = card.querySelector('.memorize-button');
+                    button.className = `memorize-button ${isMemorized ? 'hide-button' : 'show-button'}`;
+                    button.textContent = isMemorized ? 'Ocultar' : 'Marcar como memorizado';
+                });
+            }
+        }
+
         // Marcar como memorizado
         function markAsMemorized(index) {
-            memorizedVerses.push(index);
+            const key = `${currentTheme}-${currentSubtheme}`;
+            if (!memorizedVerses[key]) {
+                memorizedVerses[key] = [];
+            }
+            memorizedVerses[key].push(index);
             localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
             updateVerseDisplay(index);
         }
@@ -248,7 +280,7 @@
         // Actualizar la visualización de un versículo
         function updateVerseDisplay(index) {
             const verseCard = document.querySelector(`.verse-card:nth-child(${index + 1})`);
-            const isMemorized = memorizedVerses.includes(index);
+            const isMemorized = (memorizedVerses[`${currentTheme}-${currentSubtheme}`] || []).includes(index);
             verseCard.className = `verse-card ${isMemorized ? 'memorized-verse' : ''}`;
             const button = verseCard.querySelector('.memorize-button');
             button.className = `memorize-button ${isMemorized ? 'hide-button' : 'show-button'}`;
