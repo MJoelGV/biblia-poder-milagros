@@ -381,20 +381,15 @@
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
-    <div class="audio-player" id="audioPlayer" style="display: none;">
-        <div class="audio-info">
-            <span id="currentChapter">Capítulo</span>
-            <span id="currentTime">0:00</span>
-        </div>
-        <div class="audio-controls">
-            <button id="prevChapter" title="Anterior capítulo">⏮</button>
-            <button id="playPause" title="Pausar/Reproducir">⏸</button>
-            <button id="nextChapter" title="Siguiente capítulo">⏭</button>
-        </div>
-        <div class="audio-progress">
-            <div class="progress-filled" id="progressFilled"></div>
-        </div>
+    <div id="simple-audio-controls" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#4caf50;color:white;padding:18px 0;text-align:center;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.2);font-size:18px;">
+        <span id="audio-status" style="margin-right:16px;">Listo para leer</span>
+        <button id="btn-read" style="background:white;color:#388e3c;border:none;padding:8px 18px;border-radius:5px;font-size:16px;cursor:pointer;margin-right:8px;">Escuchar</button>
+        <button id="btn-pause" style="background:white;color:#388e3c;border:none;padding:8px 18px;border-radius:5px;font-size:16px;cursor:pointer;margin-right:8px;display:none;">Pausar</button>
+        <button id="btn-resume" style="background:white;color:#388e3c;border:none;padding:8px 18px;border-radius:5px;font-size:16px;cursor:pointer;margin-right:8px;display:none;">Reanudar</button>
+        <button id="btn-stop" style="background:white;color:#388e3c;border:none;padding:8px 18px;border-radius:5px;font-size:16px;cursor:pointer;">Detener</button>
     </div>
+    <button id="test-voice-btn" style="position:fixed;bottom:100px;right:10px;z-index:2000;background:#4CAF50;color:white;padding:10px 18px;border:none;border-radius:6px;">Probar voz</button>
+
 
     <script>
         let xmlDoc = null;
@@ -923,16 +918,102 @@
         audioElement.addEventListener('ended', loadNextChapter);
 
         document.addEventListener('DOMContentLoaded', function() {
-            const btnEscuchar = document.getElementById('listen-chapter-btn');
-            if (btnEscuchar) btnEscuchar.onclick = startAudioPlayer;
-            const btnDetener = document.getElementById('stop-audio-btn');
-            if (btnDetener) btnDetener.onclick = stopAudioPlayer;
-            document.getElementById('playPause').addEventListener('click', togglePlayPause);
-            document.getElementById('prevChapter').addEventListener('click', loadPreviousChapter);
-            document.getElementById('nextChapter').addEventListener('click', loadNextChapter);
+            // Diagnóstico de SpeechSynthesis
+            if ('speechSynthesis' in window) {
+                console.log('SpeechSynthesis soportado ✅');
+                const voces = window.speechSynthesis.getVoices();
+                console.log('Voces disponibles:', voces);
+            } else {
+                console.warn('SpeechSynthesis NO soportado ❌');
+            }
+            // Botón de prueba
+            document.getElementById('test-voice-btn').onclick = function() {
+                if (!('speechSynthesis' in window)) {
+                    alert('Tu navegador no soporta la lectura en voz alta.');
+                    return;
+                }
+                window.speechSynthesis.cancel();
+                const testUtter = new SpeechSynthesisUtterance('Hola, esto es una prueba de voz.');
+                testUtter.lang = 'es-ES';
+                testUtter.onstart = () => console.log('¡Prueba de voz iniciada!');
+                testUtter.onend = () => console.log('¡Prueba de voz finalizada!');
+                testUtter.onerror = (e) => alert('Error en la prueba de voz: ' + e.error);
+                window.speechSynthesis.speak(testUtter);
+            };
+            // Mostrar controles simples
+            document.getElementById('simple-audio-controls').style.display = 'block';
+            // Botones simples
+            document.getElementById('btn-read').onclick = function() {
+                startSimpleSpeech();
+            };
+            document.getElementById('btn-pause').onclick = function() {
+                window.speechSynthesis.pause();
+                document.getElementById('audio-status').textContent = 'Pausado';
+                document.getElementById('btn-pause').style.display = 'none';
+                document.getElementById('btn-resume').style.display = 'inline-block';
+            };
+            document.getElementById('btn-resume').onclick = function() {
+                window.speechSynthesis.resume();
+                document.getElementById('audio-status').textContent = 'Leyendo capítulo...';
+                document.getElementById('btn-pause').style.display = 'inline-block';
+                document.getElementById('btn-resume').style.display = 'none';
+            };
+            document.getElementById('btn-stop').onclick = function() {
+                window.speechSynthesis.cancel();
+                document.getElementById('audio-status').textContent = 'Lectura detenida';
+                document.getElementById('btn-pause').style.display = 'none';
+                document.getElementById('btn-resume').style.display = 'none';
+            };
         });
 
+        // Nueva función para controles simples
+        let utterance = null;
+        function startSimpleSpeech() {
+            if (!('speechSynthesis' in window)) {
+                alert('Tu navegador no soporta la lectura en voz alta. Prueba con Chrome, Edge, Firefox o Safari actualizados.');
+                return;
+            }
+            const versos = document.querySelectorAll('#verses .verse');
+            let textoCompleto = '';
+            versos.forEach((el) => {
+                textoCompleto += el.textContent + ' ';
+            });
+            if (!textoCompleto.trim()) {
+                alert('No hay versículos para leer en este capítulo.');
+                document.getElementById('audio-status').textContent = 'No hay texto para leer';
+                return;
+            }
+            window.speechSynthesis.cancel();
+            utterance = new SpeechSynthesisUtterance(textoCompleto);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1;
+            utterance.onstart = function() {
+                document.getElementById('audio-status').textContent = 'Leyendo capítulo...';
+                document.getElementById('btn-pause').style.display = 'inline-block';
+                document.getElementById('btn-resume').style.display = 'none';
+            };
+            utterance.onend = function() {
+                document.getElementById('audio-status').textContent = 'Lectura finalizada';
+                document.getElementById('btn-pause').style.display = 'none';
+                document.getElementById('btn-resume').style.display = 'none';
+            };
+            utterance.onerror = function(event) {
+                document.getElementById('audio-status').textContent = 'Error en la lectura';
+                document.getElementById('btn-pause').style.display = 'none';
+                document.getElementById('btn-resume').style.display = 'none';
+                alert('Hubo un error al intentar leer el capítulo: ' + event.error);
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- Nueva función usando SpeechSynthesis API ---
+        let utterance = null;
         function loadChapterAudio() {
+            if (!('speechSynthesis' in window)) {
+                alert('Tu navegador no soporta la lectura en voz alta. Prueba con Chrome, Edge, Firefox o Safari actualizados.');
+                stopAudioPlayer();
+                return;
+            }
             const versos = document.querySelectorAll('#verses .verse');
             let textoCompleto = '';
             versos.forEach((el) => {
@@ -943,24 +1024,55 @@
                 stopAudioPlayer();
                 return;
             }
-            if (textoCompleto.length > 500) {
-                textoCompleto = textoCompleto.slice(0, 500);
+            // DEBUG: Mostrar el texto a leer
+            console.log('Texto a leer:', textoCompleto);
+            // Detener cualquier síntesis previa
+            window.speechSynthesis.cancel();
+            utterance = new SpeechSynthesisUtterance(textoCompleto);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1;
+            utterance.onstart = function() {
+                document.getElementById('currentChapter').textContent = `Capítulo ${currentChapter}`;
+                document.getElementById('playPause').textContent = '⏸';
+                isPlaying = true;
+                document.getElementById('audioPlayer').style.display = 'flex';
+            };
+            utterance.onend = function() {
+                isPlaying = false;
+                document.getElementById('playPause').textContent = '▶️';
+                loadNextChapter();
+            };
+            utterance.onerror = function(event) {
+                isPlaying = false;
+                document.getElementById('playPause').textContent = '▶️';
+                alert('Hubo un error al intentar leer el capítulo: ' + event.error);
+            };
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                alert('No se pudo iniciar la lectura: ' + e.message);
             }
-            const vozMeUrl = `https://vozme.com/text2voice.php?lang=es&text=${encodeURIComponent(textoCompleto)}&type=mp3`;
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: `Capítulo ${currentChapter}`,
-                    artist: 'Biblia de Poder y Milagros',
-                });
-            }
-            audioElement.src = vozMeUrl;
-            audioElement.load();
-            audioElement.play();
-            document.getElementById('currentChapter').textContent = `Capítulo ${currentChapter}`;
-            document.getElementById('playPause').textContent = '⏸';
-            isPlaying = true;
-            document.getElementById('audioPlayer').style.display = 'flex';
         }
+
+        // Sobreescribir controles para SpeechSynthesis
+        function togglePlayPause() {
+            if (isPlaying) {
+                window.speechSynthesis.pause();
+                document.getElementById('playPause').textContent = '▶️';
+                isPlaying = false;
+            } else {
+                window.speechSynthesis.resume();
+                document.getElementById('playPause').textContent = '⏸';
+                isPlaying = true;
+            }
+        }
+        function stopAudioPlayer() {
+            window.speechSynthesis.cancel();
+            isPlaying = false;
+            document.getElementById('playPause').textContent = '▶️';
+            document.getElementById('audioPlayer').style.display = 'none';
+        }
+
 
         function startAudioPlayer() {
             loadChapterAudio();
