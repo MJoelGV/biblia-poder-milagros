@@ -403,20 +403,35 @@
             versos.forEach((el, i) => {
                 textoCompleto += `Versículo ${i+1}: ${el.textContent}. `;
             });
+            if (!textoCompleto.trim()) {
+                alert('No hay versículos para leer en este capítulo.');
+                return;
+            }
             // Detiene cualquier lectura anterior
             window.speechSynthesis.cancel();
-            // Crea el objeto de síntesis
-            const utterance = new SpeechSynthesisUtterance(textoCompleto);
-            // Opcional: elige voz en español si está disponible
-            const voces = window.speechSynthesis.getVoices();
-            utterance.lang = 'es-ES';
-            for (let voz of voces) {
-                if (voz.lang.startsWith('es')) {
-                    utterance.voice = voz;
-                    break;
+            // Espera a que las voces estén listas
+            function speakWhenVoicesReady() {
+                const utterance = new SpeechSynthesisUtterance(textoCompleto);
+                let voces = window.speechSynthesis.getVoices();
+                utterance.lang = 'es-ES';
+                let vozEncontrada = false;
+                for (let voz of voces) {
+                    if (voz.lang.startsWith('es')) {
+                        utterance.voice = voz;
+                        vozEncontrada = true;
+                        break;
+                    }
                 }
+                if (!vozEncontrada && voces.length > 0) {
+                    utterance.voice = voces[0]; // Usa la primera voz disponible
+                }
+                window.speechSynthesis.speak(utterance);
             }
-            window.speechSynthesis.speak(utterance);
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = speakWhenVoicesReady;
+            } else {
+                speakWhenVoicesReady();
+            }
         }
         document.addEventListener('DOMContentLoaded', function() {
             const btnEscuchar = document.getElementById('listen-chapter-btn');
