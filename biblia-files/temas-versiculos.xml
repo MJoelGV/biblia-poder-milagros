@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<temas>
+    <tema nombre="amor">
+        <subtema nombre="Amor de Dios">
+            <referencia>
+                <libro>Juan</libro>
+                <capitulo>3</capitulo>
+                <versiculo>16</versiculo>
+                <texto>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</texto>
+            </referencia>
+            <referencia>
+                <libro>1 Juan</libro>
+                <capitulo>4</capitulo>
+                <versiculo>8</versiculo>
+                <texto>El que no ama, no ha conocido a Dios; porque Dios es amor.</texto>
+            </referencia>
+        </subtema>
+        <subtema nombre="Amor al prójimo">
+            <referencia>
+                <libro>Mateo</libro>
+                <capitulo>22</capitulo>
+                <versiculo>39</versiculo>
+                <texto>Amarás a tu prójimo como a ti mismo.</texto>
+            </referencia>
+            <referencia>
+                <libro>Marcos</libro>
+                <capítulo>12</capítulo>
+                <versículo>31</versículo>
+                <texto>Amarás a tu prójimo como a ti mismo.</texto>
+            </referencia>
+        </subtema>
+    </tema>
+
+    <tema nombre="depresion">
+        <subtema nombre="Consuelo y esperanza">
+            <referencia>
+                <libro>Salmos</libro>
+                <capitulo>34</capitulo>
+                <versiculo>18</versiculo>
+                <texto>Jehová está cerca de los quebrantados de corazón; y salva a los contritos de espíritu.</texto>
+            </referencia>
+            <referencia>
+                <libro>Salmos</libro>
+                <capitulo>46</capitulo>
+                <versiculo>1</versiculo>
+                <texto>Dios es nuestro refugio y fortaleza, ayuda muy presente en la tribulación.</texto>
+            </referencia>
+        </subtema>
+        <subtema nombre="Fuerza y valor">
+            <referencia>
+                <libro>Salmos</libro>
+                <capitulo>27</capitulo>
+                <versiculo>1</versiculo>
+                <texto>Jehová es mi luz y mi salvación; ¿a quién temeré? Jehová es la fortaleza de mi vida; ¿de quién me espantaré?</texto>
+            </referencia>
+            <referencia>
+                <libro>Isaías</libro>
+                <capitulo>41</capitulo>
+                <versiculo>10</versiculo>
+                <texto>No temas, porque yo estoy contigo; no te confundas, porque yo soy tu Dios; te fortaleceré, y te ayudaré, y te sustentaré con la diestra de mi justicia.</texto>
+            </referencia>
+        </subtema>
+    </tema>
+
+    <tema nombre="miedo">
+        <subtema nombre="Confianza en Dios">
+            <referencia>
+                <libro>Salmos</libro>
+                <capitulo>23</capitulo>
+                <versiculo>4</versiculo>
+                <texto>Aunque ande en valle de sombra de muerte, no temeré mal alguno; porque tú estarás conmigo; tu vara y tu cayado me confortan.</texto>
+            </referencia>
+            <referencia>
+                <libro>Isaías</libro>
+                <capitulo>41</capitulo>
+                <versiculo>13</versiculo>
+                <texto>Porque yo Jehová tu Dios, te sostengo la diestra; el que te dice: No te confundas, yo soy tu Dios.</texto>
+            </referencia>
+        </subtema>
+        <subtema nombre="Paz y tranquilidad">
+            <referencia>
+                <libro>Isaías</libro>
+                <capitulo>26</capitulo>
+                <versiculo>3</versiculo>
+                <texto>Tú guardarás en perfecta paz a aquel cuyo propósito es firme; porque en ti confía.</texto>
+            </referencia>
+            <referencia>
+                <libro>Filipenses</libro>
+                <capitulo>4</capitulo>
+                <versiculo>6</versiculo>
+                <texto>No andéis afanosos de nada; antes sean conocidas vuestras peticiones delante de Dios en toda oración y ruego con acción de gracias.</texto>
+            </referencia>
+        </subtema>
+    </tema>
+</temas>

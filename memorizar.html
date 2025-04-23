@@ -109,6 +109,40 @@
             transform: translateY(-2px);
         }
 
+        .theme-card {
+            background: var(--bg-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-header {
+            margin-bottom: 20px;
+        }
+
+        .theme-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .subthemes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .subtheme-item {
+            background: var(--bg-color);
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .subtheme-item:hover {
+            background-color: #f3f3f3;
+        }
+
         @media (max-width: 768px) {
             .memorize-container {
                 padding: 10px;
@@ -136,6 +170,8 @@
     </div>
 
     <div class="memorize-container">
+        <div id="themes-container"></div>
+        <div id="verses-container"></div>
         <div class="memorize-controls">
             <button class="memorize-button show-button" onclick="showVerse()">Mostrar Versículo</button>
             <button class="memorize-button hide-button" onclick="hideVerse()">Ocultar Versículo</button>
@@ -144,45 +180,119 @@
         <div class="progress-bar">
             <div id="progress" class="progress"></div>
         </div>
-
-        <div id="verses-container"></div>
     </div>
 
     <script>
+        let currentTheme = null;
+        let currentSubtheme = null;
         let currentVerseIndex = 0;
         let memorizedVerses = [];
-        let verses = [];
+        let temas = [];
 
-        // Cargar versículos memorizados del localStorage
-        function loadMemorizedVerses() {
-            const savedVerses = localStorage.getItem('memorizedVerses');
-            if (savedVerses) {
-                memorizedVerses = JSON.parse(savedVerses);
-                loadVerses();
+        // Cargar temas y versículos
+        async function loadTemas() {
+            try {
+                const response = await fetch('biblia-files/temas-versiculos.xml');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                temas = xml.getElementsByTagName('tema');
+                displayTemas();
+            } catch (error) {
+                console.error('Error loading temas:', error);
             }
         }
 
-        // Cargar versículos de la Biblia
-        async function loadVerses() {
-            try {
-                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+        // Mostrar lista de temas
+        function displayTemas() {
+            const container = document.getElementById('themes-container');
+            container.innerHTML = '';
 
-                // Seleccionar versículos populares para memorizar
-                verses = [
-                    { book: 'Salmos', chapter: 23, verse: 1, text: 'Jehová es mi pastor; nada me faltará.' },
-                    { book: 'Juan', chapter: 3, verse: 16, text: 'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.' },
-                    { book: 'Filipenses', chapter: 4, verse: 13, text: 'Todo puedo en Cristo que me fortalece.' },
-                    { book: 'Santiago', chapter: 1, verse: 17, text: 'Toda buena dádiva y todo don perfecto es de arriba, que viene del Padre de las luces, en el cual no hay mudanza ni sombra de variación.' },
-                    { book: 'Proverbios', chapter: 3, verse: 5, text: 'Confía en Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.' }
-                ];
+            Array.from(temas).forEach(tema => {
+                const temaName = tema.getAttribute('nombre');
+                const themeCard = document.createElement('div');
+                themeCard.className = 'theme-card';
+                
+                themeCard.innerHTML = `
+                    <div class="theme-header">
+                        <h2 class="theme-title">${temaName}</h2>
+                    </div>
+                    <div class="subthemes-list">
+                        ${Array.from(tema.getElementsByTagName('subtema'))
+                            .map(subtema => `
+                                <div class="subtheme-item" onclick="selectSubtheme('${temaName}', '${subtema.getAttribute('nombre')}')">
+                                    <h3>${subtema.getAttribute('nombre')}</h3>
+                                </div>
+                            `)
+                            .join('')}
+                    </div>
+                `;
 
-                displayVerses();
-            } catch (error) {
-                console.error('Error loading verses:', error);
-            }
+                container.appendChild(themeCard);
+            });
+        }
+
+        // Seleccionar subtema
+        function selectSubtheme(tema, subtema) {
+            currentTheme = tema;
+            currentSubtheme = subtema;
+            loadSubthemeVerses(tema, subtema);
+        }
+
+        // Cargar versículos de un subtema
+        function loadSubthemeVerses(tema, subtema) {
+            const temaElement = Array.from(temas).find(t => t.getAttribute('nombre') === tema);
+            if (!temaElement) return;
+
+            const subtemaElement = Array.from(temaElement.getElementsByTagName('subtema'))
+                .find(s => s.getAttribute('nombre') === subtema);
+            if (!subtemaElement) return;
+
+            const versos = Array.from(subtemaElement.getElementsByTagName('referencia'));
+            displayVerses(versos);
+        }
+
+        // Mostrar versículos
+        function displayVerses(versos) {
+            const container = document.getElementById('verses-container');
+            container.innerHTML = '';
+
+            versos.forEach((verso, index) => {
+                const verseCard = document.createElement('div');
+                verseCard.className = 'verse-card';
+                
+                const isMemorized = memorizedVerses.includes(index);
+                verseCard.className += isMemorized ? ' memorized-verse' : '';
+
+                verseCard.innerHTML = `
+                    <div class="verse-reference">
+                        ${verso.getElementsByTagName('libro')[0].textContent} 
+                        ${verso.getElementsByTagName('capitulo')[0].textContent}:
+                        ${verso.getElementsByTagName('versiculo')[0].textContent}
+                    </div>
+                    <div class="verse-text">${verso.getElementsByTagName('texto')[0].textContent}</div>
+                    <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
+                            onclick="markAsMemorized(${index})">
+                        ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
+                    </button>
+                `;
+
+                container.appendChild(verseCard);
+            });
+        }
+
+        // Marcar como memorizado
+        function markAsMemorized(index) {
+            memorizedVerses.push(index);
+            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
+            updateProgress();
+            updateVerseDisplay(index);
+        }
+
+        // Actualizar progreso
+        function updateProgress() {
+            const progress = (memorizedVerses.length / temas.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
         }
 
         // Mostrar/ocultar versículos
@@ -202,48 +312,8 @@
             verseElements.forEach(verse => verse.classList.add('hidden-verse'));
         }
 
-        // Marcar como memorizado
-        function markAsMemorized(index) {
-            memorizedVerses.push(index);
-            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
-            updateProgress();
-            updateVerseDisplay(index);
-        }
-
-        // Actualizar progreso
-        function updateProgress() {
-            const progress = (memorizedVerses.length / verses.length) * 100;
-            document.getElementById('progress').style.width = progress + '%';
-        }
-
-        // Mostrar versículos
-        function displayVerses() {
-            const container = document.getElementById('verses-container');
-            container.innerHTML = '';
-
-            verses.forEach((verse, index) => {
-                const verseCard = document.createElement('div');
-                verseCard.className = 'verse-card';
-                
-                const isMemorized = memorizedVerses.includes(index);
-                verseCard.className += isMemorized ? ' memorized-verse' : '';
-
-                verseCard.innerHTML = `
-                    <div class="verse-text">${verse.text}</div>
-                    <div class="reference">${verse.book} ${verse.chapter}:${verse.verse}</div>
-                    <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
-                            onclick="markAsMemorized(${index})">
-                        ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
-                    </button>
-                `;
-
-                container.appendChild(verseCard);
-            });
-        }
-
         // Inicializar
-        loadMemorizedVerses();
-        loadVerses();
+        loadTemas();
     </script>
 </body>
 </html>
