@@ -348,8 +348,8 @@
             </select>
             <div class="search-container" style="gap: 4px; flex-wrap: wrap;">
                 <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
-                <button onclick="window.searchText()" class="search-button">🔍</button>
-                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); window.showBookTitles();" style="min-width:40px;">📑</button>
+                <button onclick="searchText()" class="search-button">🔍</button>
+                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); showBookTitles();" style="min-width:40px;">📑</button>
             </div>
             <div id="book-titles-modal" class="chapter-grid">
                 <button class="close-search" onclick="closeBookTitles()">×</button>
@@ -831,23 +831,31 @@
         }
 
         // Mostrar los títulos del libro actual
-        window.showBookTitles = async function showBookTitles() {
-    console.log('showBookTitles invocado. currentBook:', currentBook);
-    try {
-            const modal = document.getElementById('book-titles-modal');
-            const contentDiv = document.getElementById('book-titles-content');
-            if (!bookTitlesData || bookTitlesData.length === 0) {
-        console.log('Cargando bookTitlesData...');
-                await loadBookTitles();
-            }
-            const titulos = bookTitlesData.filter(item => item.libro === currentBook);
-            console.log('Títulos encontrados para el libro:', currentBook, titulos);
-            if (!titulos || titulos.length === 0) {
-        contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos para este libro.</div>';
-        return;
+        async function showBookTitles() {
+    if (!currentBook) return;
+    const modal = document.getElementById('book-titles-modal');
+    const contentDiv = document.getElementById('book-titles-content');
+    if (!bookTitlesData || bookTitlesData.length === 0) {
+        await loadBookTitles();
     }
-                contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos.</div>';
-            } else {
+    const titulos = bookTitlesData.filter(item => item.libro === currentBook);
+    if (!titulos || titulos.length === 0) {
+        contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos para este libro.</div>';
+    } else {
+        contentDiv.innerHTML = titulos.map(item => `
+          <button class="chapter-btn" onclick="goToBookTitle('${item.capitulo}', '${item.versiculo}')">
+            ${item.nombre}
+          </button>
+        `).join('');
+        // Marcar botón activo según capítulo actual
+        const btns = contentDiv.querySelectorAll('.chapter-btn');
+        btns.forEach((btn, idx) => {
+            btn.classList.toggle('active', titulos[idx].capitulo == currentChapter);
+        });
+    }
+    modal.classList.add('active');
+}
+
                 contentDiv.innerHTML = titulos.map(item => `
                   <button class="chapter-btn" onclick="window.goToBookTitle('${item.capitulo}', '${item.versiculo}')">
                     ${item.nombre}
@@ -875,13 +883,13 @@
             }
         });
 
-        window.closeBookTitles = function closeBookTitles() {
+        function closeBookTitles() {
     console.log('closeBookTitles invocado');
             document.getElementById('book-titles-modal').classList.remove('active');
         }
 
         // Navegar al título/versículo
-        window.goToBookTitle = function goToBookTitle(capitulo, versiculo) {
+        function goToBookTitle(capitulo, versiculo) {
     console.log('goToBookTitle invocado', capitulo, versiculo);
             currentChapter = parseInt(capitulo);
             currentVerse = parseInt(versiculo);
@@ -892,7 +900,15 @@
             closeBookTitles();
             window.scrollTo({top:0, behavior:'smooth'});
         }
-    </script>
+    window.addEventListener('DOMContentLoaded', async () => {
+    const version = document.getElementById('version-selector').value || 'Reina-Valera-1960';
+    await loadBible(version);
+    setupBookSelector();
+    loadChapters();
+    loadChapter();
+    updateControls();
+});
+</script>
 </body>
 <!-- rebuild github pages -->
 </html>
