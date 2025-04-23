@@ -1,95 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <temas>
-    <tema nombre="amor">
+    <tema nombre="Amor">
         <subtema nombre="Amor de Dios">
-            <referencia>
-                <libro>Juan</libro>
-                <capitulo>3</capitulo>
-                <versiculo>16</versiculo>
-                <texto>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</texto>
-            </referencia>
-            <referencia>
-                <libro>1 Juan</libro>
-                <capitulo>4</capitulo>
-                <versiculo>8</versiculo>
-                <texto>El que no ama, no ha conocido a Dios; porque Dios es amor.</texto>
-            </referencia>
+            <referencia libro="Romanos" capitulo="8" versiculo="38-39" texto="Porque estoy persuadido de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir, ni lo alto, ni lo profundo, ni ninguna otra criatura nos podrá separar del amor de Dios, que es en Cristo Jesús Señor nuestro." />
+            <referencia libro="Juan" capitulo="3" versiculo="16" texto="Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna." />
         </subtema>
         <subtema nombre="Amor al prójimo">
-            <referencia>
-                <libro>Mateo</libro>
-                <capitulo>22</capitulo>
-                <versiculo>39</versiculo>
-                <texto>Amarás a tu prójimo como a ti mismo.</texto>
-            </referencia>
-            <referencia>
-                <libro>Marcos</libro>
-                <capítulo>12</capítulo>
-                <versículo>31</versículo>
-                <texto>Amarás a tu prójimo como a ti mismo.</texto>
-            </referencia>
+            <referencia libro="Mateo" capitulo="22" versiculo="39" texto="Amarás a tu prójimo como a ti mismo." />
+            <referencia libro="1 Juan" capitulo="4" versiculo="20-21" texto="Si alguno dice: Amo a Dios, y aborrece a su hermano, es mentiroso; porque el que no ama a su hermano a quien ve, no puede amar a Dios a quien no ve. Y este mandamiento tenemos de él: que el que ama a Dios, ame también a su hermano." />
         </subtema>
     </tema>
-
-    <tema nombre="depresion">
+    <tema nombre="Depresión">
         <subtema nombre="Consuelo y esperanza">
-            <referencia>
-                <libro>Salmos</libro>
-                <capitulo>34</capitulo>
-                <versiculo>18</versiculo>
-                <texto>Jehová está cerca de los quebrantados de corazón; y salva a los contritos de espíritu.</texto>
-            </referencia>
-            <referencia>
-                <libro>Salmos</libro>
-                <capitulo>46</capitulo>
-                <versiculo>1</versiculo>
-                <texto>Dios es nuestro refugio y fortaleza, ayuda muy presente en la tribulación.</texto>
-            </referencia>
+            <referencia libro="Salmo" capitulo="34" versiculo="18" texto="El Señor está cerca de los de corazón quebrantado, y salva a los contritos de espíritu." />
+            <referencia libro="Salmo" capitulo="46" versiculo="1" texto="Dios es nuestro amparo y fortaleza, nuestro pronto auxilio en las tribulaciones." />
         </subtema>
-        <subtema nombre="Fuerza y valor">
-            <referencia>
-                <libro>Salmos</libro>
-                <capitulo>27</capitulo>
-                <versiculo>1</versiculo>
-                <texto>Jehová es mi luz y mi salvación; ¿a quién temeré? Jehová es la fortaleza de mi vida; ¿de quién me espantaré?</texto>
-            </referencia>
-            <referencia>
-                <libro>Isaías</libro>
-                <capitulo>41</capitulo>
-                <versiculo>10</versiculo>
-                <texto>No temas, porque yo estoy contigo; no te confundas, porque yo soy tu Dios; te fortaleceré, y te ayudaré, y te sustentaré con la diestra de mi justicia.</texto>
-            </referencia>
+        <subtema nombre="Fuerza y coraje">
+            <referencia libro="Josué" capitulo="1" versiculo="9" texto="No te apartará de ti mi palabra." />
+            <referencia libro="Isaías" capitulo="41" versiculo="10" texto="No temas, porque yo estoy contigo; no te azares, porque yo soy tu Dios; te esforzaré, y te ayudaré, y te sustentaré con la diestra de mi justicia." />
         </subtema>
     </tema>
-
-    <tema nombre="miedo">
+    <tema nombre="Miedo">
         <subtema nombre="Confianza en Dios">
-            <referencia>
-                <libro>Salmos</libro>
-                <capitulo>23</capitulo>
-                <versiculo>4</versiculo>
-                <texto>Aunque ande en valle de sombra de muerte, no temeré mal alguno; porque tú estarás conmigo; tu vara y tu cayado me confortan.</texto>
-            </referencia>
-            <referencia>
-                <libro>Isaías</libro>
-                <capitulo>41</capitulo>
-                <versiculo>13</versiculo>
-                <texto>Porque yo Jehová tu Dios, te sostengo la diestra; el que te dice: No te confundas, yo soy tu Dios.</texto>
-            </referencia>
+            <referencia libro="Salmo" capitulo="91" versiculo="1-2" texto="El que habita en el escondrijimiento del Altísimo, a la sombra del Omnipotente descansará. Diré al Señor: Refugio mío y fortaleza mía, Dios mío, en quien confío." />
+            <referencia libro="Isaías" capitulo="26" versiculo="3" texto="Tú guardarás en perfecta paz a aquel cuyo propósito es firme, porque en ti confía." />
         </subtema>
-        <subtema nombre="Paz y tranquilidad">
-            <referencia>
-                <libro>Isaías</libro>
-                <capitulo>26</capitulo>
-                <versiculo>3</versiculo>
-                <texto>Tú guardarás en perfecta paz a aquel cuyo propósito es firme; porque en ti confía.</texto>
-            </referencia>
-            <referencia>
-                <libro>Filipenses</libro>
-                <capitulo>4</capitulo>
-                <versiculo>6</versiculo>
-                <texto>No andéis afanosos de nada; antes sean conocidas vuestras peticiones delante de Dios en toda oración y ruego con acción de gracias.</texto>
-            </referencia>
+        <subtema nombre="Valor y coraje">
+            <referencia libro="Deuteronomio" capitulo="31" versiculo="6" texto="Sé fuerte y valiente, no temas ni te espantes de ellos, porque el Señor tu Dios es el que va contigo; no te dejará, ni te desamparará." />
+            <referencia libro="Hebreos" capitulo="13" versiculo="6" texto="Así que, confiad en Dios, y no temáis; yo soy con vosotros; no os avergonzaréis." />
+        </subtema>
+    </tema>
+    <tema nombre="Perdón">
+        <subtema nombre="Perdón de Dios">
+            <referencia libro="Salmo" capitulo="103" versiculo="12" texto="Así está lejos de nosotros nuestra transgresión, como el oriente está lejos del occidente." />
+            <referencia libro="1 Juan" capitulo="1" versiculo="9" texto="Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad." />
+        </subtema>
+        <subtema nombre="Perdonar a otros">
+            <referencia libro="Mateo" capitulo="6" versiculo="14-15" texto="Porque si perdonáis a los hombres sus ofensas, os perdonará también a vosotros vuestro Padre celestial; mas si no perdonáis a los hombres sus ofensas, tampoco vuestro Padre os perdonará a vosotros vuestras ofensas." />
+            <referencia libro="Colosenses" capitulo="3" versiculo="13" texto="Soportándoos los unos a los otros, y perdonándoos mutuamente si alguno tuviere queja contra otro. Como el Señor os perdonó, así también vosotros." />
+        </subtema>
+    </tema>
+    <tema nombre="Fe">
+        <subtema nombre="Fuerza de la fe">
+            <referencia libro="Hebreos" capitulo="11" versiculo="1" texto="La fe es la certeza de lo que se espera, la convicción de lo que no se ve." />
+            <referencia libro="Romanos" capitulo="10" versiculo="17" texto="Así que la fe viene por el oír, y el oír, por la palabra de Dios." />
+        </subtema>
+        <subtema nombre="Ejemplos de fe">
+            <referencia libro="Hebreos" capitulo="11" versiculo="6" texto="Sin fe es imposible agradar a Dios; porque es menester que el que se acerca a Dios crea que le hay, y que es galardón de los que le buscan." />
+            <referencia libro="Marcos" capitulo="9" versiculo="23" texto="Y Jesús le dijo: Si puedes creer, todo es posible al que cree." />
         </subtema>
     </tema>
 </temas>

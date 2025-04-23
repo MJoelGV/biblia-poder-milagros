@@ -114,6 +114,7 @@
         let currentSubtheme = null;
         let memorizedVerses = [];
         let temas = [];
+        let biblia = null;
 
         // Obtener parámetros de la URL
         function getURLParameters() {
@@ -124,17 +125,30 @@
             };
         }
 
+        // Cargar la biblia
+        async function loadBiblia() {
+            try {
+                const response = await fetch('biblia-files/test-biblia.xmm');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                biblia = parser.parseFromString(xmlText, 'text/xml');
+            } catch (error) {
+                console.error('Error loading biblia:', error);
+            }
+        }
+
         // Cargar temas y mostrar los versículos correspondientes
         async function loadVersiculos() {
             try {
                 const { tema, subtema } = getURLParameters();
                 if (!tema || !subtema) return;
 
+                // Cargar temas
                 const response = await fetch('biblia-files/temas-versiculos.xml');
                 const xmlText = await response.text();
                 const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, 'text/xml');
-                temas = xml.getElementsByTagName('tema');
+                const temasXml = parser.parseFromString(xmlText, 'text/xml');
+                temas = temasXml.getElementsByTagName('tema');
 
                 // Actualizar títulos
                 document.getElementById('theme-title').textContent = tema;
@@ -155,12 +169,36 @@
             }
         }
 
+        // Obtener texto del versículo de la biblia
+        function getVerseText(libro, capitulo, versiculo) {
+            if (!biblia) return null;
+
+            // Buscar el libro
+            const libroElement = biblia.querySelector(`b[t="${libro}"]`);
+            if (!libroElement) return null;
+
+            // Buscar el capítulo
+            const capituloElement = libroElement.querySelector(`c[n="${capitulo}"]`);
+            if (!capituloElement) return null;
+
+            // Buscar el versículo
+            const versiculoElement = capituloElement.querySelector(`v[n="${versiculo}"]`);
+            if (!versiculoElement) return null;
+
+            return versiculoElement.textContent;
+        }
+
         // Mostrar versículos
         function displayVerses(versos) {
             const container = document.getElementById('verses-container');
             container.innerHTML = '';
 
             versos.forEach((verso, index) => {
+                const libro = verso.getAttribute('libro');
+                const capitulo = verso.getAttribute('capitulo');
+                const versiculo = verso.getAttribute('versiculo');
+                const texto = getVerseText(libro, capitulo, versiculo);
+
                 const verseCard = document.createElement('div');
                 verseCard.className = 'verse-card';
                 
@@ -169,11 +207,9 @@
 
                 verseCard.innerHTML = `
                     <div class="verse-reference">
-                        ${verso.getElementsByTagName('libro')[0].textContent} 
-                        ${verso.getElementsByTagName('capitulo')[0].textContent}:
-                        ${verso.getElementsByTagName('versiculo')[0].textContent}
+                        ${libro} ${capitulo}:${versiculo}
                     </div>
-                    <div class="verse-text">${verso.getElementsByTagName('texto')[0].textContent}</div>
+                    <div class="verse-text">${texto}</div>
                     <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
                             onclick="markAsMemorized(${index})">
                         ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
@@ -202,7 +238,9 @@
         }
 
         // Inicializar
-        loadVersiculos();
+        loadBiblia().then(() => {
+            loadVersiculos();
+        });
     </script>
 </body>
 </html>
