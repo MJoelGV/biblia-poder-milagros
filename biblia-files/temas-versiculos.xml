@@ -2,7 +2,7 @@
 <temas>
     <tema nombre="Amor">
         <subtema nombre="Amor de Dios">
-            <referencia libro="Romanos" capitulo="8" versiculo="38-39" texto="Porque estoy persuadido de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir, ni lo alto, ni lo profundo, ni ninguna otra criatura nos podrá separar del amor de Dios, que es en Cristo Jesús Señor nuestro." />
+            <referencia libro="Romanos" capitulo="8" versiculo="38-39" texto="Por lo cual estoy seguro de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir, ni lo alto, ni lo profundo, ni ninguna otra cosa creada nos podrá separar del amor de Dios, que es en Cristo Jesús Señor nuestro." />
             <referencia libro="Juan" capitulo="3" versiculo="16" texto="Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna." />
         </subtema>
         <subtema nombre="Amor al prójimo">
@@ -12,18 +12,18 @@
     </tema>
     <tema nombre="Depresión">
         <subtema nombre="Consuelo y esperanza">
-            <referencia libro="Salmo" capitulo="34" versiculo="18" texto="El Señor está cerca de los de corazón quebrantado, y salva a los contritos de espíritu." />
-            <referencia libro="Salmo" capitulo="46" versiculo="1" texto="Dios es nuestro amparo y fortaleza, nuestro pronto auxilio en las tribulaciones." />
+            <referencia libro="Salmo" capitulo="34" versiculo="18" texto="El Señor está cerca de los quebrantados de corazón, y salva a los contritos de espíritu." />
+            <referencia libro="Salmo" capitulo="46" versiculo="1" texto="Dios es nuestro refugio y fortaleza, nuestro pronto auxilio en la tribulación." />
         </subtema>
         <subtema nombre="Fuerza y coraje">
             <referencia libro="Josué" capitulo="1" versiculo="9" texto="No te apartará de ti mi palabra." />
-            <referencia libro="Isaías" capitulo="41" versiculo="10" texto="No temas, porque yo estoy contigo; no te azares, porque yo soy tu Dios; te esforzaré, y te ayudaré, y te sustentaré con la diestra de mi justicia." />
+            <referencia libro="Isaías" capitulo="41" versiculo="10" texto="No temas, porque yo estoy contigo; no te confundas, porque yo soy tu Dios; te fortaleceré, y te ayudaré, y te sustentaré con la diestra de mi justicia." />
         </subtema>
     </tema>
     <tema nombre="Miedo">
         <subtema nombre="Confianza en Dios">
             <referencia libro="Salmo" capitulo="91" versiculo="1-2" texto="El que habita en el escondrijimiento del Altísimo, a la sombra del Omnipotente descansará. Diré al Señor: Refugio mío y fortaleza mía, Dios mío, en quien confío." />
-            <referencia libro="Isaías" capitulo="26" versiculo="3" texto="Tú guardarás en perfecta paz a aquel cuyo propósito es firme, porque en ti confía." />
+            <referencia libro="Isaías" capitulo="26" versiculo="3" texto="Tú guardarás en perfecta paz a aquel cuyo propósito es firme; porque en ti confía." />
         </subtema>
         <subtema nombre="Valor y coraje">
             <referencia libro="Deuteronomio" capitulo="31" versiculo="6" texto="Sé fuerte y valiente, no temas ni te espantes de ellos, porque el Señor tu Dios es el que va contigo; no te dejará, ni te desamparará." />
@@ -32,7 +32,7 @@
     </tema>
     <tema nombre="Perdón">
         <subtema nombre="Perdón de Dios">
-            <referencia libro="Salmo" capitulo="103" versiculo="12" texto="Así está lejos de nosotros nuestra transgresión, como el oriente está lejos del occidente." />
+            <referencia libro="Salmo" capitulo="103" versiculo="12" texto="Como está lejos el oriente del occidente, así aleja de nosotros nuestras transgresiones." />
             <referencia libro="1 Juan" capitulo="1" versiculo="9" texto="Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad." />
         </subtema>
         <subtema nombre="Perdonar a otros">
@@ -42,7 +42,7 @@
     </tema>
     <tema nombre="Fe">
         <subtema nombre="Fuerza de la fe">
-            <referencia libro="Hebreos" capitulo="11" versiculo="1" texto="La fe es la certeza de lo que se espera, la convicción de lo que no se ve." />
+            <referencia libro="Hebreos" capitulo="11" versiculo="1" texto="La fe es el fundamento de las cosas que se esperan, y la evidencia de las cosas que no se ven." />
             <referencia libro="Romanos" capitulo="10" versiculo="17" texto="Así que la fe viene por el oír, y el oír, por la palabra de Dios." />
         </subtema>
         <subtema nombre="Ejemplos de fe">
