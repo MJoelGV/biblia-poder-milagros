@@ -360,8 +360,8 @@
     <button onclick="searchText()" class="search-button">🔍</button>
     <button id="book-titles-btn" class="search-button" title="Índice de títulos" style="min-width:40px;">📑</button>
 </div>
-<div id="book-titles-modal" class="chapter-grid" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.32); backdrop-filter: blur(2px); align-items:center; justify-content:center;">
-  <div style="background: var(--bg-color, #fff); width:90vw; max-width:400px; margin:0 auto; border-radius: 16px; box-shadow: 0 6px 32px #0002; padding: 18px 10px 14px 10px; position:relative; display:flex; flex-direction:column; max-height:85vh;">
+<div id="book-titles-modal" class="chapter-grid" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.32); backdrop-filter: blur(2px); display:flex; align-items:center; justify-content:center;">
+  <div style="background: var(--bg-color, #fff); width:90vw; max-width:400px; margin:0; border-radius: 16px; box-shadow: 0 6px 32px #0002; padding: 18px 10px 14px 10px; position:relative; display:flex; flex-direction:column; max-height:85vh;">
     <button class="close-search" onclick="closeBookTitles()" style="position:absolute; top:8px; right:12px; font-size:1.6em; background:none; border:none; cursor:pointer;">×</button>
     <h3 style="margin:0 0 16px 0; text-align:center; font-size:1.18em; color:var(--primary-color,#3a5)">Índice de títulos</h3>
     <div id="book-titles-content" style="flex:1 1 auto; overflow-y:auto; width:100%;"></div>
