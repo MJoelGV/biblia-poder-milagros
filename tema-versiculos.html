@@ -128,18 +128,21 @@
         // Cargar la biblia
         async function loadBiblia() {
             try {
-                const response = await fetch('biblia-files/test-biblia.xmm');
+                const response = await fetch('biblia-files/biblia.xml');
                 const xmlText = await response.text();
                 const parser = new DOMParser();
                 biblia = parser.parseFromString(xmlText, 'text/xml');
+                console.log('Biblia cargada exitosamente');
             } catch (error) {
                 console.error('Error loading biblia:', error);
+                throw error;
             }
         }
 
         // Cargar temas y mostrar los versículos correspondientes
         async function loadVersiculos() {
             try {
+                await loadBiblia();
                 const { tema, subtema } = getURLParameters();
                 if (!tema || !subtema) return;
 
@@ -174,16 +177,25 @@
             if (!biblia) return null;
 
             // Buscar el libro
-            const libroElement = biblia.querySelector(`b[t="${libro}"]`);
-            if (!libroElement) return null;
+            const libroElement = biblia.querySelector(`b[n="${libro}"]`);
+            if (!libroElement) {
+                console.error(`Libro no encontrado: ${libro}`);
+                return null;
+            }
 
             // Buscar el capítulo
             const capituloElement = libroElement.querySelector(`c[n="${capitulo}"]`);
-            if (!capituloElement) return null;
+            if (!capituloElement) {
+                console.error(`Capítulo no encontrado: ${capitulo}`);
+                return null;
+            }
 
             // Buscar el versículo
             const versiculoElement = capituloElement.querySelector(`v[n="${versiculo}"]`);
-            if (!versiculoElement) return null;
+            if (!versiculoElement) {
+                console.error(`Versículo no encontrado: ${versiculo}`);
+                return null;
+            }
 
             return versiculoElement.textContent;
         }
@@ -205,11 +217,14 @@
                 const isMemorized = memorizedVerses.includes(index);
                 verseCard.className += isMemorized ? ' memorized-verse' : '';
 
+                // Si no se encuentra el texto, mostrar el texto del XML original
+                const displayText = texto || verso.getAttribute('texto');
+
                 verseCard.innerHTML = `
                     <div class="verse-reference">
                         ${libro} ${capitulo}:${versiculo}
                     </div>
-                    <div class="verse-text">${texto}</div>
+                    <div class="verse-text">${displayText}</div>
                     <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
                             onclick="markAsMemorized(${index})">
                         ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
@@ -238,9 +253,7 @@
         }
 
         // Inicializar
-        loadBiblia().then(() => {
-            loadVersiculos();
-        });
+        loadVersiculos();
     </script>
 </body>
 </html>
