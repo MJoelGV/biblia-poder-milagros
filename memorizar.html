@@ -89,6 +89,26 @@
             text-decoration: line-through;
         }
 
+        .navigation-top {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .navigation-top .nav-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .navigation-top .nav-button:hover {
+            background-color: #3e8e41;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             .memorize-container {
                 padding: 10px;
@@ -107,6 +127,9 @@
 <body>
     <div class="hero">
         <div class="hero-content">
+            <div class="navigation-top">
+                <a href="index.html" class="nav-button">Inicio</a>
+            </div>
             <h1>Memorizar Versículos</h1>
             <p>Seleccione los versículos que desea memorizar y practique con ellos.</p>
         </div>
