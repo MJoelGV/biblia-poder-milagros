@@ -290,65 +290,36 @@
         .chapter-grid {
             display: none;
             position: fixed;
-            left: 50%;
             bottom: 70px;
+            left: 50%;
             transform: translateX(-50%);
             background: var(--bg-color);
             padding: 16px;
             border-radius: 12px;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
             z-index: 999;
-            max-width: 90vw;
-            width: 340px;
-            max-height: 60vh;
-            overflow-y: auto;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-
-        .chapter-grid.active {
-            display: grid;
-        }
-
-        @media (max-width: 480px) {
-            .chapter-grid {
-                grid-template-columns: repeat(1, 1fr);
+            max-width: 90%;
             }
-        }
 
-        @media (min-width: 480px) and (max-width: 700px) {
-            .chapter-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .select-css option {
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                padding: 8px;
             }
-        }
 
-        @media (min-width: 700px) {
-            .chapter-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .chapter-btn {
-            padding: 8px;
-            border: 1px solid var(--primary-color);
-            border-radius: 4px;
-            font-size: 14px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .chapter-btn:hover,
-        .chapter-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        @media (max-width: 768px) {
             .chapter-content {
-                padding: 0 15px;
-                margin-top: 140px;
+                max-width: 1200px;
+                margin: 120px auto 80px;
+                padding: 0 20px;
+            }
+
+            .chapter-title {
+                text-align: center;
+                font-size: 1.5em;
+                font-weight: bold;
+                color: var(--primary-color);
+                margin: 20px 0 30px 0;
+                padding: 10px;
             }
 
             .verse {
@@ -378,7 +349,7 @@
             <div class="search-container" style="gap: 4px; flex-wrap: wrap;">
                 <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
                 <button onclick="searchText()" class="search-button">🔍</button>
-                <button id="book-titles-btn" class="search-button" title="Índice de títulos" style="min-width:40px;">📑</button>
+                <button id="book-titles-btn" class="search-button" title="Índice de títulos" onclick="event.stopPropagation(); showBookTitles();" style="min-width:40px;">📑</button>
             </div>
             <div id="book-titles-modal" class="chapter-grid">
                 <button class="close-search" onclick="closeBookTitles()">×</button>
@@ -766,7 +737,6 @@
             currentVerse = parseInt(verse);
 
             document.getElementById('book-select').value = book;
-            loadChapters();
             loadChapter();
             updateControls();
             updateURL();
@@ -836,46 +806,51 @@
         async function loadBookTitles() {
             try {
                 const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-                const url = `${baseUrl}biblia-files/titulos-antiguo-testamento.xml`;
+                const url = `${baseUrl}biblia-files/temas-versiculos.xml`;
                 const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const xml = await resp.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(xml, 'text/xml');
                 bookTitlesData = [];
-                const libros = doc.getElementsByTagName('libro');
-                for (const libro of libros) {
-                    const nombreLibro = libro.getAttribute('nombre');
-                    const titulos = libro.getElementsByTagName('titulo');
-                    for (const titulo of titulos) {
-                        bookTitlesData.push({
-                            libro: nombreLibro,
-                            nombre: titulo.getAttribute('nombre'),
-                            capitulo: titulo.getAttribute('capitulo'),
-                            desde: titulo.getAttribute('desde'),
-                            hasta: titulo.getAttribute('hasta')
-                        });
+                const subtemas = doc.getElementsByTagName('subtema');
+                for (const subtema of subtemas) {
+                    const nombre = subtema.getAttribute('nombre');
+                    const ref = subtema.getElementsByTagName('referencia')[0];
+                    if (ref) {
+                        const libro = ref.getAttribute('libro');
+                        const cap = ref.getAttribute('capitulo');
+                        const ver = ref.getAttribute('versiculo').split('-')[0];
+                        bookTitlesData.push({ libro, nombre, capitulo: cap, versiculo: ver });
                     }
                 }
             } catch (e) {
                 console.error('Error cargando títulos por libro:', e);
+                document.getElementById('book-titles-content').innerHTML = `<div style="color:red;text-align:center;">Error al cargar títulos.</div>`;
             }
         }
 
         // Mostrar los títulos del libro actual
-        function showBookTitles() {
-            if (!currentBook) return;
+        async function showBookTitles() {
             const modal = document.getElementById('book-titles-modal');
             const contentDiv = document.getElementById('book-titles-content');
-            const titulos = bookTitlesData.filter(item => item.libro === currentBook);
-            if (titulos.length === 0) {
+            if (!bookTitlesData || bookTitlesData.length === 0) {
+                await loadBookTitles();
+            }
+            const titulos = bookTitlesData;
+            if (!titulos || titulos.length === 0) {
                 contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos.</div>';
             } else {
                 contentDiv.innerHTML = titulos.map(item => `
-                  <button class="chapter-btn" onclick="goToBookTitle('${item.capitulo}', '${item.desde}')">
-                    <b>${item.nombre}</b><br>
-                    <span style="font-size:0.98em;color:#888;">(Cap. ${item.capitulo}, v. ${item.desde}–${item.hasta})</span>
+                  <button class="chapter-btn" onclick="goToBookTitle('${item.capitulo}', '${item.versiculo}')">
+                    ${item.nombre}
                   </button>
                 `).join('');
+                // Marcar botón activo según capítulo actual
+                const btns = contentDiv.querySelectorAll('.chapter-btn');
+                btns.forEach((btn, idx) => {
+                    btn.classList.toggle('active', titulos[idx].capitulo == currentChapter);
+                });
             }
             modal.classList.add('active');
         }
@@ -893,8 +868,6 @@
             document.getElementById('book-titles-modal').classList.remove('active');
         }
 
-        document.getElementById('book-titles-btn').addEventListener('click', showBookTitles);
-
         // Navegar al título/versículo
         function goToBookTitle(capitulo, versiculo) {
             currentChapter = parseInt(capitulo);
@@ -906,13 +879,6 @@
             closeBookTitles();
             window.scrollTo({top:0, behavior:'smooth'});
         }
-
-        // Event listener para el botón de índice de títulos
-        const bookTitlesBtn = document.getElementById('book-titles-btn');
-        bookTitlesBtn.addEventListener('click', showBookTitles);
-
-        // Cargar los títulos al iniciar
-        loadBookTitles();
     </script>
 </body>
 </html>
