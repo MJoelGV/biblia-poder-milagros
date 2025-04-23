@@ -676,6 +676,7 @@
 
         // Función de búsqueda
         window.searchText = function searchText() {
+    console.log('searchText invocado');
             const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
             if (!searchTerm) return;
 
@@ -745,7 +746,7 @@
         }
 
         // Cerrar resultados de búsqueda
-        function closeSearch() {
+        window.closeSearch = function closeSearch() {
             document.getElementById('search-results').classList.remove('active');
         }
 
@@ -832,17 +833,24 @@
 
         // Mostrar los títulos del libro actual
         window.showBookTitles = async function showBookTitles() {
+    console.log('showBookTitles invocado. currentBook:', currentBook);
+    try {
             const modal = document.getElementById('book-titles-modal');
             const contentDiv = document.getElementById('book-titles-content');
             if (!bookTitlesData || bookTitlesData.length === 0) {
+        console.log('Cargando bookTitlesData...');
                 await loadBookTitles();
             }
-            const titulos = bookTitlesData;
+            const titulos = bookTitlesData.filter(item => item.libro === currentBook);
+            console.log('Títulos encontrados para el libro:', currentBook, titulos);
             if (!titulos || titulos.length === 0) {
+        contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos para este libro.</div>';
+        return;
+    }
                 contentDiv.innerHTML = '<div style="grid-column:1/-1;text-align:center">No hay títulos.</div>';
             } else {
                 contentDiv.innerHTML = titulos.map(item => `
-                  <button class="chapter-btn" onclick="goToBookTitle('${item.capitulo}', '${item.versiculo}')">
+                  <button class="chapter-btn" onclick="window.goToBookTitle('${item.capitulo}', '${item.versiculo}')">
                     ${item.nombre}
                   </button>
                 `).join('');
@@ -853,6 +861,10 @@
                 });
             }
             modal.classList.add('active');
+    } catch (err) {
+        console.error('Error en showBookTitles:', err);
+        contentDiv.innerHTML = '<div style="color:red;text-align:center;">Error al mostrar títulos.</div>';
+    }
         }
 
         // Cerrar menú de títulos al hacer click fuera
@@ -865,11 +877,13 @@
         });
 
         window.closeBookTitles = function closeBookTitles() {
+    console.log('closeBookTitles invocado');
             document.getElementById('book-titles-modal').classList.remove('active');
         }
 
         // Navegar al título/versículo
         window.goToBookTitle = function goToBookTitle(capitulo, versiculo) {
+    console.log('goToBookTitle invocado', capitulo, versiculo);
             currentChapter = parseInt(capitulo);
             currentVerse = parseInt(versiculo);
             document.getElementById('chapter-select').value = capitulo;
