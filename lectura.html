@@ -387,8 +387,13 @@
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
         <select id="chapter-select" class="select-css">
-            <option value="">Capítulo</option>
-        </select>
+    <option value="">Capítulo</option>
+</select>
+<button id="book-titles-btn" class="search-button" title="Índice de títulos" style="margin-left:6px;">📑</button>
+<div id="book-titles-list" class="search-results" style="display:none; top:70px;">
+    <button class="close-search" onclick="closeBookTitles()">×</button>
+    <div id="book-titles-content"></div>
+</div>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -941,6 +946,76 @@ function goToTitle(libro, capitulo, versiculo) {
 
 // Cargar los temas al iniciar
 loadTemas();
+
+// --- ÍNDICE DE TÍTULOS POR LIBRO ---
+let bookTitlesData = [];
+
+async function loadBookTitles() {
+    try {
+        const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+        const url = `${baseUrl}biblia-files/titulos-antiguo-testamento.xml`;
+        const resp = await fetch(url);
+        const xml = await resp.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xml, 'text/xml');
+        bookTitlesData = [];
+        const libros = doc.getElementsByTagName('libro');
+        for (const libro of libros) {
+            const nombreLibro = libro.getAttribute('nombre');
+            const titulos = libro.getElementsByTagName('titulo');
+            for (const titulo of titulos) {
+                bookTitlesData.push({
+                    libro: nombreLibro,
+                    nombre: titulo.getAttribute('nombre'),
+                    capitulo: titulo.getAttribute('capitulo'),
+                    desde: titulo.getAttribute('desde'),
+                    hasta: titulo.getAttribute('hasta')
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error cargando títulos por libro:', e);
+    }
+}
+
+// Mostrar los títulos del libro actual
+function showBookTitles() {
+    if (!currentBook) return;
+    const listDiv = document.getElementById('book-titles-list');
+    const contentDiv = document.getElementById('book-titles-content');
+    // Filtrar títulos SOLO del libro actual
+    const titulos = bookTitlesData.filter(item => item.libro === currentBook);
+    if (titulos.length === 0) {
+        contentDiv.innerHTML = '<div style="text-align:center">No hay títulos registrados para este libro.</div>';
+    } else {
+        contentDiv.innerHTML = titulos.map(item => `
+            <div class="result-item" style="cursor:pointer" onclick="goToBookTitle('${item.capitulo}', '${item.desde}')">
+                <b>${item.nombre}</b> <span style="color:#888;font-size:0.95em;">(Cap. ${item.capitulo}, v. ${item.desde}–${item.hasta})</span>
+            </div>
+        `).join('');
+    }
+    listDiv.style.display = 'block';
+}
+function closeBookTitles() {
+    document.getElementById('book-titles-list').style.display = 'none';
+}
+// Navegar al título/versículo
+function goToBookTitle(capitulo, versiculo) {
+    currentChapter = parseInt(capitulo);
+    currentVerse = parseInt(versiculo);
+    document.getElementById('chapter-select').value = capitulo;
+    loadChapter();
+    updateControls();
+    updateURL();
+    closeBookTitles();
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+// Event listener para el botón de índice de títulos
+const bookTitlesBtn = document.getElementById('book-titles-btn');
+bookTitlesBtn.addEventListener('click', showBookTitles);
+
+// Cargar los títulos al iniciar
+loadBookTitles();
 
 </script>
 </body>
