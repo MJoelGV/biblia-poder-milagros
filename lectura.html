@@ -368,6 +368,8 @@
     <div class="chapter-grid" id="chapter-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
+        <button id="listen-chapter-btn" style="margin-bottom: 10px;">🔊 Escuchar capítulo</button>
+        <button id="stop-audio-btn" style="margin-bottom: 20px;">⏹️ Detener audio</button>
         <div id="verses"></div>
     </div>
 
@@ -392,6 +394,36 @@
         let lastTouchY = 0;
         let touchStartY = 0;
         let menuVisible = true;
+
+        // === LECTOR DE CAPÍTULO EN VOZ ALTA ===
+        function leerCapitulo() {
+            // Junta todos los versículos del capítulo actual
+            const versos = document.querySelectorAll('#verses .verse-text');
+            let textoCompleto = '';
+            versos.forEach((el, i) => {
+                textoCompleto += `Versículo ${i+1}: ${el.textContent}. `;
+            });
+            // Detiene cualquier lectura anterior
+            window.speechSynthesis.cancel();
+            // Crea el objeto de síntesis
+            const utterance = new SpeechSynthesisUtterance(textoCompleto);
+            // Opcional: elige voz en español si está disponible
+            const voces = window.speechSynthesis.getVoices();
+            utterance.lang = 'es-ES';
+            for (let voz of voces) {
+                if (voz.lang.startsWith('es')) {
+                    utterance.voice = voz;
+                    break;
+                }
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnEscuchar = document.getElementById('listen-chapter-btn');
+            if (btnEscuchar) btnEscuchar.onclick = leerCapitulo;
+            const btnDetener = document.getElementById('stop-audio-btn');
+            if (btnDetener) btnDetener.onclick = () => window.speechSynthesis.cancel();
+        });
 
         // Función para manejar el scroll
         function handleScroll() {
