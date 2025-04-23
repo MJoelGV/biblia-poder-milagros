@@ -918,6 +918,9 @@
         audioElement.addEventListener('ended', loadNextChapter);
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar la Biblia
+            init();
+
             // Diagnóstico de SpeechSynthesis
             if ('speechSynthesis' in window) {
                 console.log('SpeechSynthesis soportado ✅');
