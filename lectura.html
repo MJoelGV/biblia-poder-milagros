@@ -205,29 +205,6 @@
         }
 
         #chapter-select {
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .chapter-grid {
-            display: none;
-            position: fixed;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-color);
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-            z-index: 999;
-            max-width: 90%;
-            width: 300px;
-        }
-
-        .chapter-grid.active {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
         }
 
         .chapter-button {
@@ -253,29 +230,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
             background: var(--bg-color);
+            padding: 16px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1100;
-            padding: 20px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 90vw;
+            width: 340px;
+            max-height: 60vh;
             overflow-y: auto;
-        }
-
-        .search-results.active {
-            display: block;
-        }
-
-        .result-item {
-            padding: 12px;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .result-item:hover {
+            grid-template-columns: repeat(1, 1fr);
             background-color: rgba(76, 175, 80, 0.1);
         }
 
@@ -360,12 +324,10 @@
     <button onclick="searchText()" class="search-button">🔍</button>
     <button id="book-titles-btn" class="search-button" title="Índice de títulos" style="min-width:40px;">📑</button>
 </div>
-<div id="book-titles-modal" class="chapter-grid" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.32); backdrop-filter: blur(2px); display:flex; align-items:center; justify-content:center;">
-  <div style="background: var(--bg-color, #fff); width:90vw; max-width:400px; margin:0; border-radius: 16px; box-shadow: 0 6px 32px #0002; padding: 18px 10px 14px 10px; position:relative; display:flex; flex-direction:column; max-height:85vh;">
-    <button class="close-search" onclick="closeBookTitles()" style="position:absolute; top:8px; right:12px; font-size:1.6em; background:none; border:none; cursor:pointer;">×</button>
-    <h3 style="margin:0 0 16px 0; text-align:center; font-size:1.18em; color:var(--primary-color,#3a5)">Índice de títulos</h3>
-    <div id="book-titles-content" style="flex:1 1 auto; overflow-y:auto; width:100%;"></div>
-  </div>
+<div id="book-titles-modal" class="titles-modal">
+  <button class="close-search" onclick="closeBookTitles()">×</button>
+  <h3>Índice de títulos</h3>
+  <div id="book-titles-list" class="titles-list"></div>
 </div>
 <div id="book-titles-list" class="search-results" style="display:none; top:70px;">
     <button class="close-search" onclick="closeBookTitles()">×</button>
@@ -854,22 +816,38 @@ async function loadBookTitles() {
 function showBookTitles() {
     if (!currentBook) return;
     const modal = document.getElementById('book-titles-modal');
-    const contentDiv = document.getElementById('book-titles-content');
+    const listDiv = document.getElementById('book-titles-list');
     // Filtrar títulos SOLO del libro actual
     const titulos = bookTitlesData.filter(item => item.libro === currentBook);
     if (titulos.length === 0) {
-        contentDiv.innerHTML = '<div style="text-align:center">No hay títulos registrados para este libro.</div>';
+        listDiv.innerHTML = '<div style="text-align:center">No hay títulos registrados para este libro.</div>';
     } else {
-        contentDiv.innerHTML = titulos.map(item => `
-          <button class="chapter-btn" style="width:100%;margin-bottom:8px;padding:10px 8px 8px 8px;font-size:1.05em;border-radius:8px;text-align:left;display:block;cursor:pointer;border:1px solid var(--primary-color,#3a5);background:var(--bg-color,#fff);color:var(--text-color,#222);transition:background .18s;"
-            onclick="goToBookTitle('${item.capitulo}', '${item.desde}')">
+        listDiv.innerHTML = titulos.map(item => `
+          <button onclick="goToBookTitle('${item.capitulo}', '${item.desde}')">
             <b>${item.nombre}</b><br>
             <span style="font-size:0.98em;color:#888;">(Cap. ${item.capitulo}, v. ${item.desde}–${item.hasta})</span>
           </button>
         `).join('');
     }
-    modal.style.display = 'flex';
+    modal.classList.add('active');
 }
+// Cerrar menú de títulos al hacer click fuera
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('book-titles-modal');
+    const btn = document.getElementById('book-titles-btn');
+    if (modal.classList.contains('active') && !modal.contains(e.target) && e.target!==btn) {
+        closeBookTitles();
+    }
+});
+function closeBookTitles() {
+    document.getElementById('book-titles-modal').classList.remove('active');
+}
+
+function closeBookTitles() {
+    document.getElementById('book-titles-modal').classList.remove('active');
+}
+
+document.getElementById('book-titles-btn').addEventListener('click', showBookTitles);
 
 function closeBookTitles() {
     document.getElementById('book-titles-modal').style.display = 'none';
