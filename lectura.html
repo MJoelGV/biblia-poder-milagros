@@ -340,8 +340,8 @@
     <div class="controls" id="controls">
         <div class="top-row">
     <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
-    <button id="listen-chapter-btn" class="audio-btn" title="Escuchar capítulo" style="margin-left: 10px; font-size: 22px; background: none; border: none; cursor: pointer; color: var(--primary-color);">🔊</button>
-    <button id="stop-audio-btn" style="margin-left: 10px; font-size: 20px; background: none; border: none; cursor: pointer; color: var(--primary-color);">⏹️</button>
+    
+    
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
 </div>
         <div class="navigation">
@@ -371,7 +371,7 @@
 
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
-        <audio id="audio-player" controls style="display:none; margin: 10px auto;"></audio>
+        
     </div> 
 
     <div class="navigation-bottom" id="navigation-bottom">
@@ -396,38 +396,7 @@
         let touchStartY = 0;
         let menuVisible = true;
 
-        // === LECTOR DE CAPÍTULO CON API VOZME ===
-function leerCapitulo() {
-    // Junta todos los versículos del capítulo actual
-    const versos = document.querySelectorAll('#verses .verse');
-    let textoCompleto = '';
-    versos.forEach((el, i) => {
-        textoCompleto += el.textContent + ' ';
-    });
-    if (!textoCompleto.trim()) {
-        alert('No hay versículos para leer en este capítulo.');
-        return;
-    }
-    // Limita el texto a 500 caracteres (límite de VozMe)
-    if (textoCompleto.length > 500) {
-        textoCompleto = textoCompleto.slice(0, 500);
-    }
-    // Construye la URL de VozMe
-    const vozMeUrl = `https://vozme.com/text2voice.php?lang=es&text=${encodeURIComponent(textoCompleto)}&type=mp3`;
-    // Inserta o actualiza el reproductor de audio
-    let audioPlayer = document.getElementById('audio-player');
-    audioPlayer.style.display = 'block';
-    audioPlayer.src = vozMeUrl;
-    audioPlayer.load();
-    audioPlayer.play();
-}
-document.addEventListener('DOMContentLoaded', function() {
-    const btnEscuchar = document.getElementById('listen-chapter-btn');
-    if (btnEscuchar) btnEscuchar.onclick = leerCapitulo;
-    const btnDetener = document.getElementById('stop-audio-btn');
-    if (btnDetener) btnDetener.onclick = () => {
-        let audioPlayer = document.getElementById('audio-player');
-        if (audioPlayer) {
+        // Función para manejar el scroll
             audioPlayer.pause();
             audioPlayer.currentTime = 0;
         }
