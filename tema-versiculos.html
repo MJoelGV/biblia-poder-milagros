@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versículos - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .verses-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .theme-header {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+        }
+
+        .subtheme-title {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0;
+        }
+
+        .verse-card {
+            background: var(--bg-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .verse-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .verse-reference {
+            font-style: italic;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .verse-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #3e8e41;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .verses-container {
+                padding: 10px;
+            }
+
+            .theme-header {
+                margin: 10px;
+            }
+
+            .verse-card {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <div class="navigation-top">
+                <a href="index.html" class="nav-button">Inicio</a>
+            </div>
+            <h1>Versículos Bíblicos</h1>
+        </div>
+    </div>
+
+    <div class="verses-container">
+        <div class="theme-header">
+            <h2 class="theme-title" id="theme-title">Cargando...</h2>
+            <h3 class="subtheme-title" id="subtheme-title">Cargando...</h3>
+        </div>
+        <div id="verses-container"></div>
+        <a href="temas.html" class="back-button">Volver a temas</a>
+    </div>
+
+    <script>
+        let currentTheme = null;
+        let currentSubtheme = null;
+        let memorizedVerses = [];
+        let temas = [];
+
+        // Obtener parámetros de la URL
+        function getURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                tema: decodeURIComponent(urlParams.get('tema') || ''),
+                subtema: decodeURIComponent(urlParams.get('subtema') || '')
+            };
+        }
+
+        // Cargar temas y mostrar los versículos correspondientes
+        async function loadVersiculos() {
+            try {
+                const { tema, subtema } = getURLParameters();
+                if (!tema || !subtema) return;
+
+                const response = await fetch('biblia-files/temas-versiculos.xml');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                temas = xml.getElementsByTagName('tema');
+
+                // Actualizar títulos
+                document.getElementById('theme-title').textContent = tema;
+                document.getElementById('subtheme-title').textContent = subtema;
+
+                // Cargar versículos del subtema
+                const temaElement = Array.from(temas).find(t => t.getAttribute('nombre') === tema);
+                if (!temaElement) return;
+
+                const subtemaElement = Array.from(temaElement.getElementsByTagName('subtema'))
+                    .find(s => s.getAttribute('nombre') === subtema);
+                if (!subtemaElement) return;
+
+                const versos = Array.from(subtemaElement.getElementsByTagName('referencia'));
+                displayVerses(versos);
+            } catch (error) {
+                console.error('Error loading versículos:', error);
+            }
+        }
+
+        // Mostrar versículos
+        function displayVerses(versos) {
+            const container = document.getElementById('verses-container');
+            container.innerHTML = '';
+
+            versos.forEach((verso, index) => {
+                const verseCard = document.createElement('div');
+                verseCard.className = 'verse-card';
+                
+                const isMemorized = memorizedVerses.includes(index);
+                verseCard.className += isMemorized ? ' memorized-verse' : '';
+
+                verseCard.innerHTML = `
+                    <div class="verse-reference">
+                        ${verso.getElementsByTagName('libro')[0].textContent} 
+                        ${verso.getElementsByTagName('capitulo')[0].textContent}:
+                        ${verso.getElementsByTagName('versiculo')[0].textContent}
+                    </div>
+                    <div class="verse-text">${verso.getElementsByTagName('texto')[0].textContent}</div>
+                    <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
+                            onclick="markAsMemorized(${index})">
+                        ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
+                    </button>
+                `;
+
+                container.appendChild(verseCard);
+            });
+        }
+
+        // Marcar como memorizado
+        function markAsMemorized(index) {
+            memorizedVerses.push(index);
+            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
+            updateVerseDisplay(index);
+        }
+
+        // Actualizar la visualización de un versículo
+        function updateVerseDisplay(index) {
+            const verseCard = document.querySelector(`.verse-card:nth-child(${index + 1})`);
+            const isMemorized = memorizedVerses.includes(index);
+            verseCard.className = `verse-card ${isMemorized ? 'memorized-verse' : ''}`;
+            const button = verseCard.querySelector('.memorize-button');
+            button.className = `memorize-button ${isMemorized ? 'hide-button' : 'show-button'}`;
+            button.textContent = isMemorized ? 'Ocultar' : 'Marcar como memorizado';
+        }
+
+        // Inicializar
+        loadVersiculos();
+    </script>
+</body>
+</html>
