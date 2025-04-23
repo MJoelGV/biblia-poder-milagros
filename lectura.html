@@ -675,8 +675,7 @@
         }
 
         // Función de búsqueda
-        window.searchText = function searchText() {
-    console.log('searchText invocado');
+        function searchText() {
             const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
             if (!searchTerm) return;
 
@@ -746,7 +745,7 @@
         }
 
         // Cerrar resultados de búsqueda
-        window.closeSearch = function closeSearch() {
+        function closeSearch() {
             document.getElementById('search-results').classList.remove('active');
         }
 
@@ -833,6 +832,8 @@
 
         // Mostrar los títulos del libro actual
         window.showBookTitles = async function showBookTitles() {
+    console.log('showBookTitles invocado. currentBook:', currentBook);
+    try {
     console.log('showBookTitles invocado. currentBook:', currentBook);
     try {
             const modal = document.getElementById('book-titles-modal');
