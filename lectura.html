@@ -347,17 +347,11 @@
                 <option value="">Selecciona un libro</option>
             </select>
 
-            <div class="search-container" style="margin-top:10px; display:flex; gap:6px;">
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta..." style="flex:1;">
-                <button onclick="searchText()" class="search-button">🔍</button>
-            </div>
+
         </div>
     </div>
 
-    <div class="search-results" id="search-results" style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%); background:var(--bg-color); box-shadow:0 2px 8px rgba(0,0,0,0.15); border-radius:10px; max-width:95vw; width:400px; max-height:65vh; overflow-y:auto; z-index:2000;">
-        <button class="close-search" onclick="closeSearch()" style="float:right; margin:8px 8px 0 0; font-size:22px; background:none; border:none; cursor:pointer;">×</button>
-        <div id="results-content" style="padding:18px 18px 8px 18px;"></div>
-    </div>
+
 
     <div class="chapter-grid" id="chapter-grid"></div>
 
@@ -781,19 +775,27 @@
     async function init() {
         await loadBible(currentVersion);
         setupBookSelector();
-        loadFromUrl();
-    }
-
-    init();
-
-    window.addEventListener('DOMContentLoaded', async () => {
-        const version = document.getElementById('version-selector').value || 'Reina-Valera-1960';
-        await loadBible(version);
-        setupBookSelector();
+        const params = new URLSearchParams(window.location.search);
+        const bookParam = params.get('book');
+        const chapterParam = params.get('chapter');
+        if (bookParam) {
+            currentBook = bookParam;
+            currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+        } else {
+            // Seleccionar el primer libro y capítulo si no hay parámetros
+            const books = xmlDoc.getElementsByTagName('b');
+            if (books.length > 0) {
+                currentBook = books[0].getAttribute('n');
+                currentChapter = 1;
+            }
+        }
+        document.getElementById('book-select').value = currentBook;
         loadChapters();
         loadChapter();
         updateControls();
-    });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
 
     function searchText() {
         const searchTerm = document.getElementById('search-input').value.trim();
