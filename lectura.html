@@ -355,10 +355,20 @@
             <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
-            <div class="search-container">
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
-                <button onclick="searchText()" class="search-button">🔍</button>
-            </div>
+            <div class="search-container" style="gap: 4px; flex-wrap: wrap;">
+    <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta...">
+    <button onclick="searchText()" class="search-button">🔍</button>
+    <input type="text" id="title-search-input" class="search-input" placeholder="Buscar título o tema..." style="max-width:220px;">
+    <button onclick="showAllTitles()" class="search-button" style="min-width:40px;">📖</button>
+</div>
+<div id="title-search-results" class="search-results" style="display:none; top:70px;">
+    <button class="close-search" onclick="closeTitleSearch()">×</button>
+    <div id="title-results-content"></div>
+</div>
+<div id="all-titles-list" class="search-results" style="display:none; top:70px;">
+    <button class="close-search" onclick="closeAllTitles()">×</button>
+    <div id="all-titles-content"></div>
+</div>
         </div>
     </div>
 
@@ -806,6 +816,132 @@
         }
 
         init();
-    </script>
+    // --- BÚSQUEDA Y LISTADO DE TÍTULOS/TEMAS ---
+let temasData = [];
+
+async function loadTemas() {
+    try {
+        const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+        const url = `${baseUrl}biblia-files/temas-versiculos.xml`;
+        const resp = await fetch(url);
+        const xml = await resp.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xml, 'text/xml');
+        temasData = [];
+        const temas = doc.getElementsByTagName('tema');
+        for (const tema of temas) {
+            const temaNombre = tema.getAttribute('nombre');
+            const subtemas = tema.getElementsByTagName('subtema');
+            for (const subtema of subtemas) {
+                const subtemaNombre = subtema.getAttribute('nombre');
+                const referencias = subtema.getElementsByTagName('referencia');
+                for (const ref of referencias) {
+                    temasData.push({
+                        tema: temaNombre,
+                        subtema: subtemaNombre,
+                        libro: ref.getAttribute('libro'),
+                        capitulo: ref.getAttribute('capitulo'),
+                        versiculo: ref.getAttribute('versiculo'),
+                        texto: ref.getAttribute('texto')
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error cargando temas:', e);
+    }
+}
+
+// Buscar títulos/temas al escribir
+const titleSearchInput = document.getElementById('title-search-input');
+titleSearchInput.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) {
+        document.getElementById('title-search-results').style.display = 'none';
+        return;
+    }
+    const results = temasData.filter(item =>
+        item.tema.toLowerCase().includes(q) ||
+        item.subtema.toLowerCase().includes(q) ||
+        item.texto.toLowerCase().includes(q)
+    );
+    showTitleResults(results, q);
+});
+
+function showTitleResults(results, q) {
+    const resultsDiv = document.getElementById('title-search-results');
+    const contentDiv = document.getElementById('title-results-content');
+    if (results.length === 0) {
+        contentDiv.innerHTML = '<div style="text-align:center">No se encontraron títulos</div>';
+    } else {
+        contentDiv.innerHTML = results.map(item => `
+            <div class="result-item" onclick="goToTitle('${item.libro}', '${item.capitulo}', '${item.versiculo}')">
+                <div class="result-book"><b>${highlightTerm(item.tema, q)}</b> &rarr; <span>${highlightTerm(item.subtema, q)}</span></div>
+                <div class="result-text">${highlightTerm(item.texto, q)}<br><small>${item.libro} ${item.capitulo}:${item.versiculo}</small></div>
+            </div>
+        `).join('');
+    }
+    resultsDiv.style.display = 'block';
+}
+
+function closeTitleSearch() {
+    document.getElementById('title-search-results').style.display = 'none';
+}
+
+function highlightTerm(text, term) {
+    if (!term) return text;
+    return text.replace(new RegExp(term, 'gi'), match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
+}
+
+// Mostrar todos los títulos/temas
+function showAllTitles() {
+    const listDiv = document.getElementById('all-titles-list');
+    const contentDiv = document.getElementById('all-titles-content');
+    // Agrupar por tema y subtema
+    let html = '';
+    let lastTema = '', lastSubtema = '';
+    for (const item of temasData) {
+        if (item.tema !== lastTema) {
+            if (lastTema) html += '</ul>';
+            html += `<div style="margin-top:10px;font-weight:bold;color:var(--primary-color);font-size:1.1em;">${item.tema}</div><ul style="margin:0 0 8px 14px;padding:0;">`;
+            lastTema = item.tema;
+            lastSubtema = '';
+        }
+        if (item.subtema !== lastSubtema) {
+            html += `<li style="margin-bottom:2px;"><span style="font-weight:600;">${item.subtema}</span></li>`;
+            lastSubtema = item.subtema;
+        }
+        html += `<li style="margin-bottom:6px;cursor:pointer;" onclick="goToTitle('${item.libro}', '${item.capitulo}', '${item.versiculo}')">
+            <span>${item.texto}</span> <span style="color:#888;font-size:0.95em;">(${item.libro} ${item.capitulo}:${item.versiculo})</span>
+        </li>`;
+    }
+    if (lastTema) html += '</ul>';
+    contentDiv.innerHTML = html;
+    listDiv.style.display = 'block';
+}
+function closeAllTitles() {
+    document.getElementById('all-titles-list').style.display = 'none';
+}
+
+// Navegar a la referencia al hacer clic en un título/tema
+function goToTitle(libro, capitulo, versiculo) {
+    // Seleccionar el libro y cargar capítulo/versículo
+    currentBook = libro;
+    currentChapter = parseInt(capitulo);
+    currentVerse = parseInt((versiculo||'').split('-')[0]);
+    document.getElementById('book-select').value = libro;
+    loadChapters();
+    loadChapter();
+    updateControls();
+    updateURL();
+    closeTitleSearch();
+    closeAllTitles();
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Cargar los temas al iniciar
+loadTemas();
+
+</script>
 </body>
 </html>
