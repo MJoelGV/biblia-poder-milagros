@@ -381,6 +381,21 @@
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
+    <div class="audio-player" id="audioPlayer" style="display: none;">
+        <div class="audio-info">
+            <span id="currentChapter">Capítulo</span>
+            <span id="currentTime">0:00</span>
+        </div>
+        <div class="audio-controls">
+            <button id="prevChapter" title="Anterior capítulo">⏮</button>
+            <button id="playPause" title="Pausar/Reproducir">⏸</button>
+            <button id="nextChapter" title="Siguiente capítulo">⏭</button>
+        </div>
+        <div class="audio-progress">
+            <div class="progress-filled" id="progressFilled"></div>
+        </div>
+    </div>
+
     <script>
         let xmlDoc = null;
         let currentBook = '';
@@ -395,7 +410,7 @@
         let touchStartY = 0;
         let menuVisible = true;
 
-        // === LECTOR DE CAPÍTULO EN VOZ ALTA ===
+        // === LECTOR DE CAPÍTULO CON API VOZME ===
         function leerCapitulo() {
             // Junta todos los versículos del capítulo actual
             const versos = document.querySelectorAll('#verses .verse');
@@ -407,48 +422,38 @@
                 alert('No hay versículos para leer en este capítulo.');
                 return;
             }
-            // Detiene cualquier lectura anterior
-            window.speechSynthesis.cancel();
-            // Verifica si el navegador soporta la síntesis de voz
-            if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
-                alert('Tu navegador no soporta la función de lectura en voz alta. Prueba con Chrome, Safari o actualiza tu navegador.');
-                return;
+            // Limita el texto a 500 caracteres (límite de VozMe)
+            if (textoCompleto.length > 500) {
+                textoCompleto = textoCompleto.slice(0, 500);
             }
-            function speakWhenVoicesReady() {
-                const voces = window.speechSynthesis.getVoices();
-                if (!voces || voces.length === 0) {
-                    alert('No se encontraron voces en tu dispositivo.\n\nEn Android: Ve a Ajustes > Accesibilidad > Texto a voz y descarga una voz en español.\nEn iPhone/iPad: Ajustes > Accesibilidad > Contenido hablado > Voces > Español.');
-                    return;
-                }
-                const utterance = new SpeechSynthesisUtterance(textoCompleto);
-                utterance.lang = 'es-ES';
-                let vozEncontrada = false;
-                for (let voz of voces) {
-                    if (voz.lang.startsWith('es')) {
-                        utterance.voice = voz;
-                        vozEncontrada = true;
-                        break;
-                    }
-                }
-                if (!vozEncontrada && voces.length > 0) {
-                    utterance.voice = voces[0]; // Usa la primera voz disponible
-                }
-                window.speechSynthesis.speak(utterance);
+            // Construye la URL de VozMe
+            const vozMeUrl = `https://vozme.com/text2voice.php?lang=es&text=${encodeURIComponent(textoCompleto)}&type=mp3`;
+            // Inserta o actualiza el reproductor de audio
+            let audioPlayer = document.getElementById('audio-player');
+            if (!audioPlayer) {
+                audioPlayer = document.createElement('audio');
+                audioPlayer.id = 'audio-player';
+                audioPlayer.controls = true;
+                audioPlayer.style.display = 'block';
+                audioPlayer.style.margin = '10px auto';
+                const controlsDiv = document.querySelector('.top-row');
+                controlsDiv.parentNode.insertAdjacentElement('afterend', audioPlayer);
             }
-            if (window.speechSynthesis.getVoices().length === 0) {
-                window.speechSynthesis.onvoiceschanged = speakWhenVoicesReady;
-                // Forzar carga de voces en algunos navegadores móviles
-                window.speechSynthesis.getVoices();
-                setTimeout(speakWhenVoicesReady, 500);
-            } else {
-                speakWhenVoicesReady();
-            }
+            audioPlayer.src = vozMeUrl;
+            audioPlayer.load();
+            audioPlayer.play();
         }
         document.addEventListener('DOMContentLoaded', function() {
             const btnEscuchar = document.getElementById('listen-chapter-btn');
             if (btnEscuchar) btnEscuchar.onclick = leerCapitulo;
             const btnDetener = document.getElementById('stop-audio-btn');
-            if (btnDetener) btnDetener.onclick = () => window.speechSynthesis.cancel();
+            if (btnDetener) btnDetener.onclick = () => {
+                let audioPlayer = document.getElementById('audio-player');
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                }
+            };
         });
 
         // Función para manejar el scroll
@@ -853,6 +858,121 @@
         }
 
         init();
+        // === REPRODUCTOR DE AUDIO ===
+        let isPlaying = false;
+        let audioElement = new Audio();
+
+        // Inicializar Media Session
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: 'Biblia de Poder y Milagros',
+                artist: 'Lectura en voz alta',
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                togglePlayPause();
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                togglePlayPause();
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                loadPreviousChapter();
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                loadNextChapter();
+            });
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                audioElement.pause();
+                document.getElementById('playPause').textContent = '▶️';
+                isPlaying = false;
+            } else {
+                audioElement.play();
+                document.getElementById('playPause').textContent = '⏸';
+                isPlaying = true;
+            }
+        }
+
+        function loadPreviousChapter() {
+            currentChapter--;
+            if (currentChapter < 1) currentChapter = 1;
+            loadChapterAudio();
+        }
+
+        function loadNextChapter() {
+            currentChapter++;
+            loadChapterAudio();
+        }
+
+        function updateProgress() {
+            if (!audioElement.duration) return;
+            const progress = (audioElement.currentTime / audioElement.duration) * 100;
+            document.getElementById('progressFilled').style.width = progress + '%';
+            document.getElementById('currentTime').textContent = formatTime(audioElement.currentTime);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        audioElement.addEventListener('timeupdate', updateProgress);
+        audioElement.addEventListener('ended', loadNextChapter);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnEscuchar = document.getElementById('listen-chapter-btn');
+            if (btnEscuchar) btnEscuchar.onclick = startAudioPlayer;
+            const btnDetener = document.getElementById('stop-audio-btn');
+            if (btnDetener) btnDetener.onclick = stopAudioPlayer;
+            document.getElementById('playPause').addEventListener('click', togglePlayPause);
+            document.getElementById('prevChapter').addEventListener('click', loadPreviousChapter);
+            document.getElementById('nextChapter').addEventListener('click', loadNextChapter);
+        });
+
+        function loadChapterAudio() {
+            const versos = document.querySelectorAll('#verses .verse');
+            let textoCompleto = '';
+            versos.forEach((el) => {
+                textoCompleto += el.textContent + ' ';
+            });
+            if (!textoCompleto.trim()) {
+                alert('No hay versículos para leer en este capítulo.');
+                stopAudioPlayer();
+                return;
+            }
+            if (textoCompleto.length > 500) {
+                textoCompleto = textoCompleto.slice(0, 500);
+            }
+            const vozMeUrl = `https://vozme.com/text2voice.php?lang=es&text=${encodeURIComponent(textoCompleto)}&type=mp3`;
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: `Capítulo ${currentChapter}`,
+                    artist: 'Biblia de Poder y Milagros',
+                });
+            }
+            audioElement.src = vozMeUrl;
+            audioElement.load();
+            audioElement.play();
+            document.getElementById('currentChapter').textContent = `Capítulo ${currentChapter}`;
+            document.getElementById('playPause').textContent = '⏸';
+            isPlaying = true;
+            document.getElementById('audioPlayer').style.display = 'flex';
+        }
+
+        function startAudioPlayer() {
+            loadChapterAudio();
+        }
+
+        function stopAudioPlayer() {
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            document.getElementById('playPause').textContent = '▶️';
+            isPlaying = false;
+            document.getElementById('audioPlayer').style.display = 'none';
+        }
     </script>
 </body>
 </html>
