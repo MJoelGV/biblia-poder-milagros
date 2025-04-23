@@ -347,11 +347,17 @@
                 <option value="">Selecciona un libro</option>
             </select>
 
-
+            <div class="search-container" style="margin-top:10px; display:flex; gap:6px;">
+                <input type="text" id="search-input" class="search-input" placeholder="Buscar palabra exacta..." style="flex:1;">
+                <button onclick="searchText()" class="search-button">🔍</button>
+            </div>
         </div>
     </div>
 
-
+    <div class="search-results" id="search-results" style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%); background:var(--bg-color); box-shadow:0 2px 8px rgba(0,0,0,0.15); border-radius:10px; max-width:95vw; width:400px; max-height:65vh; overflow-y:auto; z-index:2000;">
+        <button class="close-search" onclick="closeSearch()" style="float:right; margin:8px 8px 0 0; font-size:22px; background:none; border:none; cursor:pointer;">×</button>
+        <div id="results-content" style="padding:18px 18px 8px 18px;"></div>
+    </div>
 
     <div class="chapter-grid" id="chapter-grid"></div>
 
@@ -459,7 +465,8 @@
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             document.body.setAttribute('data-theme', savedTheme);
-            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('theme-toggle').textContent = 
+                savedTheme === 'dark' ? '☀️' : '🌙';
         }
 
         // Event listeners para los selectores
@@ -541,6 +548,14 @@
         button.textContent = isDark ? '🌙' : '☀️';
         
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Cargar preferencia de tema
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-toggle').textContent = 
+            savedTheme === 'dark' ? '☀️' : '🌙';
     }
 
     // Event listeners para los selectores
@@ -766,32 +781,30 @@
     async function init() {
         await loadBible(currentVersion);
         setupBookSelector();
-        const params = new URLSearchParams(window.location.search);
-        const bookParam = params.get('book');
-        const chapterParam = params.get('chapter');
-        if (bookParam) {
-            currentBook = bookParam;
-            currentChapter = chapterParam ? parseInt(chapterParam) : 1;
-        } else {
-            // Seleccionar el primer libro y capítulo si no hay parámetros
-            const books = xmlDoc.getElementsByTagName('b');
-            if (books.length > 0) {
-                currentBook = books[0].getAttribute('n');
-                currentChapter = 1;
-            }
-        }
-        document.getElementById('book-select').value = currentBook;
+        loadFromUrl();
+    }
+
+    init();
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const version = document.getElementById('version-selector').value || 'Reina-Valera-1960';
+        await loadBible(version);
+        setupBookSelector();
         loadChapters();
         loadChapter();
         updateControls();
+    });
+
+    // Función para quitar acentos y hacer minúsculas
+    function normalize(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
 
-    window.addEventListener('DOMContentLoaded', init);
-
     function searchText() {
-        const searchTerm = document.getElementById('search-input').value.trim();
-        if (!searchTerm) return;
+        const searchTermRaw = document.getElementById('search-input').value.trim();
+        if (!searchTermRaw) return;
         if (!xmlDoc) return;
+        const searchTerm = normalize(searchTermRaw);
         const resultsDiv = document.getElementById('search-results');
         const resultsContent = document.getElementById('results-content');
         resultsContent.innerHTML = '<div style="text-align:center;">Buscando...</div>';
@@ -799,7 +812,8 @@
 
         const results = [];
         const books = xmlDoc.getElementsByTagName('b');
-        const searchRegex = new RegExp(`\\b${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        // Palabra exacta, pero sin acentos ni mayúsculas
+        const searchRegex = new RegExp(`(^|[^\wáéíóúüñ])${searchTerm}([^\wáéíóúüñ]|$)`, 'i');
 
         for (const book of books) {
             const bookName = book.getAttribute('n');
@@ -810,12 +824,13 @@
                 for (const verse of verses) {
                     const verseNum = verse.getAttribute('n');
                     const verseText = verse.textContent;
-                    if (searchRegex.test(verseText)) {
+                    if (searchRegex.test(normalize(verseText))) {
                         results.push({
                             book: bookName,
                             chapter: chapterNum,
                             verse: verseNum,
-                            text: verseText
+                            text: verseText,
+                            searchTerm: searchTermRaw
                         });
                     }
                 }
@@ -826,18 +841,31 @@
             resultsContent.innerHTML = results.map(result => `
                 <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})" style="margin-bottom:14px; cursor:pointer; padding:10px; border-radius:8px; background:rgba(76,175,80,0.08); transition:background 0.2s;">
                     <div class="result-book" style="font-weight:bold; color:var(--primary-color);">${result.book} ${result.chapter}:${result.verse}</div>
-                    <div class="result-text" style="font-size:1em;">${highlightSearchTerm(result.text, searchTerm)}</div>
+                    <div class="result-text" style="font-size:1em;">${highlightSearchTerm(result.text, result.searchTerm)}</div>
                 </div>
             `).join('');
         } else {
             resultsContent.innerHTML = '<div style="text-align:center;">No se encontraron resultados</div>';
-        }
-    }
+            }
 
-    function highlightSearchTerm(text, searchTerm) {
-        const regex = new RegExp(`\\b${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        return text.replace(regex, match => `<mark style='background:var(--primary-color);color:white;'>${match}</mark>`);
-    }
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar el selector de capítulos
+            chapterSelect.value = currentChapter;
+        }
+
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
+
+        // Función para cargar la Biblia
         async function loadBible(version) {
             try {
                 const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
