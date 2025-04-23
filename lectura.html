@@ -360,6 +360,13 @@
     <button onclick="searchText()" class="search-button">🔍</button>
     <button id="book-titles-btn" class="search-button" title="Índice de títulos" style="min-width:40px;">📑</button>
 </div>
+<div id="book-titles-modal" class="chapter-grid" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.32); backdrop-filter: blur(2px); align-items:center; justify-content:center;">
+  <div style="background: var(--bg-color, #fff); max-width: 380px; margin: 60px auto; border-radius: 14px; box-shadow: 0 6px 32px #0002; padding: 22px 18px 18px 18px; position:relative;">
+    <button class="close-search" onclick="closeBookTitles()" style="position:absolute; top:8px; right:12px; font-size:1.6em; background:none; border:none; cursor:pointer;">×</button>
+    <h3 style="margin:0 0 16px 0; text-align:center; font-size:1.18em; color:var(--primary-color,#3a5)">Índice de títulos</h3>
+    <div id="book-titles-content" style="max-height:60vh; overflow-y:auto;"></div>
+  </div>
+</div>
 <div id="book-titles-list" class="search-results" style="display:none; top:70px;">
     <button class="close-search" onclick="closeBookTitles()">×</button>
     <div id="book-titles-content"></div>
@@ -384,11 +391,7 @@
         <select id="chapter-select" class="select-css">
     <option value="">Capítulo</option>
 </select>
-<button id="book-titles-btn" class="search-button" title="Índice de títulos" style="margin-left:6px;">📑</button>
-<div id="book-titles-list" class="search-results" style="display:none; top:70px;">
-    <button class="close-search" onclick="closeBookTitles()">×</button>
-    <div id="book-titles-content"></div>
-</div>
+
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -865,7 +868,7 @@ function showBookTitles() {
           </button>
         `).join('');
     }
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
 }
 
 function closeBookTitles() {
