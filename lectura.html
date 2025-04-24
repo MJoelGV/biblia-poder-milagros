@@ -532,10 +532,11 @@ document.getElementById('prev-button').addEventListener('click', () => {
                     behavior: 'smooth'
                 });
             }
-        }
-        document.getElementById('next-button').addEventListener('click', () => {
-            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
-            if (currentChapter < totalChapters) {
+        });
+
+document.getElementById('next-button').addEventListener('click', () => {
+    const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+    if (currentChapter < totalChapters) {
                 currentChapter++;
                 loadChapter();
                 updateControls();
