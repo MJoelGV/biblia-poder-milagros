@@ -788,43 +788,6 @@
         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
 
-
-        const searchTermRaw = document.getElementById('search-input').value.trim();
-        if (!searchTermRaw) return;
-        if (!xmlDoc) return;
-        const searchTerm = normalize(searchTermRaw);
-        const resultsDiv = document.getElementById('search-results');
-        const resultsContent = document.getElementById('results-content');
-        resultsContent.innerHTML = '<div style="text-align:center;">Buscando...</div>';
-        resultsDiv.style.display = 'block';
-
-        const results = [];
-        const books = xmlDoc.getElementsByTagName('b');
-        // Palabra exacta, pero sin acentos ni mayúsculas
-        const searchRegex = new RegExp(`(^|[^\wáéíóúüñ])${searchTerm}([^\wáéíóúüñ]|$)`, 'i');
-
-        for (const book of books) {
-            const bookName = book.getAttribute('n');
-            const chapters = book.getElementsByTagName('c');
-            for (const chapter of chapters) {
-                const chapterNum = chapter.getAttribute('n');
-                const verses = chapter.getElementsByTagName('v');
-                for (const verse of verses) {
-                    const verseNum = verse.getAttribute('n');
-                    const verseText = verse.textContent;
-                    if (searchRegex.test(normalize(verseText))) {
-                        results.push({
-                            book: bookName,
-                            chapter: chapterNum,
-                            verse: verseNum,
-                            text: verseText,
-                            searchTerm: searchTermRaw
-                        });
-                    }
-                }
-            }
-        }
-
         if (results.length > 0) {
             resultsContent.innerHTML = results.map(result => `
                 <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})" style="margin-bottom:14px; cursor:pointer; padding:10px; border-radius:8px; background:rgba(76,175,80,0.08); transition:background 0.2s;">
