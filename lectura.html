@@ -544,13 +544,7 @@
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
 
-    // Cargar preferencia de tema
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.body.setAttribute('data-theme', savedTheme);
-        document.getElementById('theme-toggle').textContent = 
-            savedTheme === 'dark' ? '☀️' : '🌙';
-    }
+    
 
     // Event listeners para los selectores
     document.getElementById('book-select').addEventListener('change', (e) => {
