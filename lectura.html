@@ -685,11 +685,20 @@ async function loadBible(version) {
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
-                loadChapter();
-                updateControls();
-            }
         }
+        const xmlText = await response.text();
+        xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+        currentVersion = version;
 
+        if (currentBook) {
+            loadChapter();
+        }
+        updateControls();
+    } catch (error) {
+        console.error('[BIBLIA] Error loading Bible:', error);
+        document.getElementById('verses').innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
+    }
+}
         // Iniciar la aplicación
         async function init() {
             await loadBible(currentVersion);
