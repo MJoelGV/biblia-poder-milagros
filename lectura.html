@@ -385,6 +385,37 @@
             padding: 8px; cursor: pointer;
         }
         .verse-menu li:hover { background: rgba(0,0,0,0.05); }
+
+        /* Modal para comentarios */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1300;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1301;
+            max-width: 90%; width: 300px;
+        }
+        .modal textarea {
+            width: 100%; height: 100px; resize: vertical;
+        }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+        }
+        .modal-actions button {
+            padding: 6px 12px;
+        }
     </style>
 </head>
 <body>
@@ -422,6 +453,17 @@
             <li id="menu-toggle-bookmark">Marcar versículo</li>
             <li id="menu-add-comment">Agregar comentario</li>
         </ul>
+    </div>
+
+    <!-- Modal de comentarios -->
+    <div id="comment-backdrop" class="modal-backdrop"></div>
+    <div id="comment-modal" class="modal">
+        <h3>Comentario</h3>
+        <textarea id="modal-comment-input"></textarea>
+        <div class="modal-actions">
+            <button id="modal-save-btn">Guardar</button>
+            <button id="modal-cancel-btn">Cancelar</button>
+        </div>
     </div>
 
     <div class="chapter-grid" id="chapter-grid"></div>
@@ -868,13 +910,10 @@
         versesContainer.addEventListener('dblclick', e => {
             const v = e.target.closest('.verse'); if (!v) return;
             menuTarget = v;
-            // Opción marcar
             document.getElementById('menu-toggle-bookmark').textContent =
                 v.classList.contains('bookmarked') ? 'Desmarcar versículo' : 'Marcar versículo';
-            // Opción comentario/ver comentario
             const commentItem = document.getElementById('menu-add-comment');
             commentItem.textContent = v.classList.contains('comment') ? 'Ver comentario' : 'Agregar comentario';
-            // Posicionar menú sobre el verso
             const rect = v.getBoundingClientRect();
             menu.style.top = (rect.top + window.scrollY) + 'px';
             menu.style.left = (rect.left + window.scrollX) + 'px';
@@ -887,20 +926,43 @@
             menu.style.display = 'none';
         });
         document.getElementById('menu-add-comment').addEventListener('click', () => {
-            const key = `${currentBook}-${currentChapter}-${menuTarget.dataset.verse}`;
-            const com = loadComments();
-            const commentItem = document.getElementById('menu-add-comment');
-            if (commentItem.textContent === 'Ver comentario') {
-                alert(com[key]);
-            } else {
-                toggleComment(menuTarget);
-            }
+            openCommentModal(menuTarget);
             menu.style.display = 'none';
         });
         // Cerrar menú al hacer clic fuera
         document.addEventListener('click', e => {
             if (!e.target.closest('#verse-menu')) menu.style.display = 'none';
         });
+
+        // Modal de comentarios
+        function openCommentModal(verseEl) {
+            menuTarget = verseEl;
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const com = loadComments();
+            const input = document.getElementById('modal-comment-input');
+            input.value = com[key] || '';
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            input.focus();
+        }
+        function hideCommentModal() {
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('comment-modal').style.display = 'none';
+        }
+
+        // Guardar o cancelar en el modal
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            const key = `${currentBook}-${currentChapter}-${menuTarget.dataset.verse}`;
+            const input = document.getElementById('modal-comment-input');
+            const c = input.value.trim();
+            const com = loadComments();
+            if (c) com[key] = c;
+            else delete com[key];
+            saveComments(com);
+            menuTarget.classList.toggle('comment', !!c);
+            hideCommentModal();
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', hideCommentModal);
 
         // Función para cargar desde URL
         function loadFromUrl() {
