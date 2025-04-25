@@ -69,36 +69,35 @@
             margin-top: 10px;
         }
 
+        /* Navegación con iconos en grid */
         .navigation-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+            gap: 12px;
+            padding: 0 20px;
+        }
+        .nav-button {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-top: 40px;
             align-items: center;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .nav-button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: rgba(255, 255, 255, 0.9);
+            justify-content: center;
+            padding: 12px;
+            background-color: rgba(255,255,255,0.9);
             color: #333;
+            border-radius: 12px;
             text-decoration: none;
-            border-radius: 25px;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            text-align: center;
-            min-width: 200px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background-color 0.2s;
         }
-
         .nav-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             background-color: white;
+        }
+        .nav-button .icon {
+            font-size: 1.8em;
+            margin-bottom: 6px;
+        }
+        @media (max-width: 480px) {
+            .navigation-buttons { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 768px) {
@@ -128,12 +127,12 @@
                 <p id="proverb-reference" class="reference"></p>
             </div>
             <div class="navigation-buttons">
-                <a href="lectura.html" id="read-more-link" class="nav-button">Leer más</a>
-                <a href="temas.html" class="nav-button">Memorizar Versículos</a>
-                <a href="historias.html" class="nav-button">Historias Bíblicas</a>
-                <a href="diccionario.html" class="nav-button">Diccionario Bíblico</a>
-                <a href="bookmarks.html" class="nav-button">Versículos marcados</a>
-                <a href="comments.html" class="nav-button">Mis comentarios</a>
+                <a href="lectura.html" id="read-more-link" class="nav-button"><span class="icon">📖</span><span>Leer más</span></a>
+                <a href="temas.html" class="nav-button"><span class="icon">📝</span><span>Memorizar</span></a>
+                <a href="historias.html" class="nav-button"><span class="icon">📜</span><span>Historias</span></a>
+                <a href="diccionario.html" class="nav-button"><span class="icon">📚</span><span>Diccionario</span></a>
+                <a href="bookmarks.html" class="nav-button"><span class="icon">⭐</span><span>Marcados</span></a>
+                <a href="comments.html" class="nav-button"><span class="icon">💬</span><span>Comentarios</span></a>
             </div>
         </div>
     </div>
