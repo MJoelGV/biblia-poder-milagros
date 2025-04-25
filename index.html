@@ -80,7 +80,7 @@
         /* Navegación con iconos en grid */
         .navigation-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
             gap: 12px;
             padding: 0 20px;
         }
@@ -118,7 +118,13 @@
             transform: rotate(15deg);
         }
         @media (max-width: 480px) {
+            .navigation-buttons { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
             .navigation-buttons { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .navigation-buttons { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (max-width: 768px) {
