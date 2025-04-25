@@ -48,6 +48,9 @@
         }
 
         .proverb-card {
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             padding: 30px;
@@ -122,12 +125,12 @@
     <div class="hero">
         <div class="hero-content">
             <h1>Biblia de Poder y Milagros</h1>
-            <div class="proverb-card">
+            <a id="proverb-link" class="proverb-card" href="#">
                 <p id="proverb-text">Cargando proverbio del día...</p>
                 <p id="proverb-reference" class="reference"></p>
-            </div>
+            </a>
             <div class="navigation-buttons">
-                <a href="lectura.html" id="read-more-link" class="nav-button"><span class="icon">📖</span><span>Leer más</span></a>
+                <a href="lectura.html" id="read-more-link" class="nav-button"><span class="icon">📖</span></a>
                 <a href="temas.html" class="nav-button"><span class="icon">📝</span><span>Memorizar</span></a>
                 <a href="historias.html" class="nav-button"><span class="icon">📜</span><span>Historias</span></a>
                 <a href="diccionario.html" class="nav-button"><span class="icon">📚</span><span>Diccionario</span></a>
@@ -167,9 +170,10 @@
                 document.getElementById('proverb-text').textContent = verse.textContent;
                 document.getElementById('proverb-reference').textContent = `Proverbios ${randomChapter}:${randomVerse}`;
 
-                // Actualizar el enlace "Leer más"
-                document.getElementById('read-more-link').href = 
-                    `${baseUrl}lectura.html?book=Proverbios&chapter=${randomChapter}&verse=${randomVerse}`;
+                // Actualizar enlaces
+                const url = `${baseUrl}lectura.html?book=Proverbios&chapter=${randomChapter}&verse=${randomVerse}`;
+                document.getElementById('read-more-link').href = url;
+                document.getElementById('proverb-link').href = url;
             } catch (error) {
                 console.error('Error al cargar el proverbio:', error);
                 document.getElementById('proverb-text').textContent = 'Error al cargar el proverbio del día';
