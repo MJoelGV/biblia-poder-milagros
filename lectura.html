@@ -330,7 +330,14 @@
             font-size: 14px;
             background-color: var(--bg-color);
             color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
             outline: none;
+        }
+
+        .search-input:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .search-button {
@@ -483,74 +490,60 @@
         }, { passive: true });
 
         // Función para cambiar el tema
-function toggleTheme() {
-    const body = document.body;
-    const button = document.getElementById('theme-toggle');
-    const isDark = body.getAttribute('data-theme') === 'dark';
-    body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    button.textContent = isDark ? '🌙' : '☀️';
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.getElementById('theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+        document.getElementById('book-select').addEventListener('change', (e) => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            currentVerse = 0;
+            loadChapters();
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
 
-<<<<<<< HEAD
-// Event listeners para los selectores
-=======
+        document.getElementById('chapter-select').addEventListener('change', (e) => {
+            currentChapter = parseInt(e.target.value);
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
 
->>>>>>> 1647740 (Eliminar declaración duplicada de savedTheme en biblia-test para corregir error y mostrar la Biblia)
-
-document.getElementById('book-select').addEventListener('change', (e) => {
-    currentBook = e.target.value;
-    currentChapter = 1;
-    currentVerse = 0;
-    loadChapters();
-    loadChapter();
-    updateControls();
-    updateURL();
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
-
-document.getElementById('chapter-select').addEventListener('change', (e) => {
-    currentChapter = parseInt(e.target.value);
-    loadChapter();
-    updateControls();
-    updateURL();
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
-
-// Event listeners para los botones de navegación
-
-document.getElementById('prev-button').addEventListener('click', () => {
+        // Event listeners para los botones de navegación
+        document.getElementById('prev-button').addEventListener('click', () => {
             if (currentChapter > 1) {
                 currentChapter--;
                 loadChapter();
                 updateControls();
                 updateURL();
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top:0, behavior:'smooth' });
             }
         });
-
-document.getElementById('next-button').addEventListener('click', () => {
-    const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
-    if (currentChapter < totalChapters) {
+        document.getElementById('next-button').addEventListener('click', () => {
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            if (currentChapter < totalChapters) {
                 currentChapter++;
                 loadChapter();
                 updateControls();
                 updateURL();
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top:0, behavior:'smooth' });
             }
         });
+
         // Función para cargar capítulos
         function loadChapters() {
             const book = document.getElementById('book-select').value;
@@ -606,92 +599,40 @@ document.getElementById('next-button').addEventListener('click', () => {
                     }
                 }
             } catch (error) {
-
-// Función para cargar capítulo
-async function loadChapter() {
-    const versesContainer = document.getElementById('verses');
-    versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
-
-    try {
-        const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-        if (!chapter) throw new Error('No se encontró el capítulo');
-
-        let html = `
-            <div class="chapter-title">
-                ${currentBook} - Capítulo ${currentChapter}
-            </div>
-        `;
-        
-        const verses = chapter.getElementsByTagName('v');
-        html += Array.from(verses).map(verse => {
-            const verseNum = verse.getAttribute('n');
-            const isHighlighted = parseInt(verseNum) === currentVerse;
-            return `
-                <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
-                     data-verse="${verseNum}"
-                     onclick="highlightVerse(this)">
-                    <span class="verse-number">${verseNum}</span>
-                    ${verse.textContent}
-                </div>
-            `;
-        }).join('');
-
-        versesContainer.innerHTML = html;
-
-        if (currentVerse > 0) {
-            const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
-            if (verseElement) {
-                setTimeout(() => {
-                    verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+                console.error('Error loading chapter:', error);
+                versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
             }
         }
-    } catch (error) {
-        console.error('Error loading chapter:', error);
-        versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
-    }
-}
 
-// Función para actualizar controles
-function updateControls() {
-    const prevButton = document.getElementById('prev-button');
-    const nextButton = document.getElementById('next-button');
-    const chapterSelect = document.getElementById('chapter-select');
-    
-    if (!currentBook) {
-        prevButton.disabled = true;
-        nextButton.disabled = true;
-        return;
-    }
+        // Función para actualizar controles
+        function updateControls() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!currentBook) {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
 
-    const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
-    
-    prevButton.disabled = currentChapter <= 1;
-    nextButton.disabled = currentChapter >= totalChapters;
-    
-    // Actualizar el selector de capítulos
-    chapterSelect.value = currentChapter;
-}
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar el selector de capítulos
+            chapterSelect.value = currentChapter;
+        }
 
-// Función para actualizar URL
-function updateURL() {
-    const url = new URL(window.location);
-    url.searchParams.set('book', currentBook);
-    url.searchParams.set('chapter', currentChapter);
-    window.history.pushState({}, '', url);
-}
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
 
-<<<<<<< HEAD
-// Función para cargar la Biblia
-async function loadBible(version) {
-    try {
-        const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-        const url = `${baseUrl}biblia-files/${version}.xmm`;
-        console.log('[BIBLIA] Intentando cargar:', url);
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
-=======
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
@@ -860,7 +801,6 @@ async function loadBible(version) {
 
                 document.getElementById('book-select').value = currentBook;
                 loadChapters();
->>>>>>> 1647740 (Eliminar declaración duplicada de savedTheme en biblia-test para corregir error y mostrar la Biblia)
                 loadChapter();
                 updateControls();
             }
@@ -872,10 +812,6 @@ async function loadBible(version) {
             setupBookSelector();
             loadFromUrl();
         }
-
-        init();
-    }
-}
 
         init();
     </script>
