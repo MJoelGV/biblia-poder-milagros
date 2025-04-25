@@ -388,6 +388,11 @@
                 <option value="">Selecciona un libro</option>
             </select>
         </div>
+        <div class="search-container">
+            <input id="search-input" class="search-input" placeholder="Buscar versículo" />
+            <button id="search-button" class="search-button">🔍</button>
+        </div>
+        <div id="search-results" class="search-results"></div>
     </div>
 
 
@@ -498,7 +503,7 @@
             button.textContent = isDark ? '🌙' : '☀️';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
-        document.getElementById('book-select').addEventListener('change', (e) => {
+        document.getElementById('book-select')?.addEventListener('change', (e) => {
             currentBook = e.target.value;
             currentChapter = 1;
             currentVerse = 0;
@@ -512,7 +517,7 @@
             });
         });
 
-        document.getElementById('chapter-select').addEventListener('change', (e) => {
+        document.getElementById('chapter-select')?.addEventListener('change', (e) => {
             currentChapter = parseInt(e.target.value);
             loadChapter();
             updateControls();
@@ -524,7 +529,7 @@
         });
 
         // Event listeners para los botones de navegación
-        document.getElementById('prev-button').addEventListener('click', () => {
+        document.getElementById('prev-button')?.addEventListener('click', () => {
             if (currentChapter > 1) {
                 currentChapter--;
                 loadChapter();
@@ -533,7 +538,7 @@
                 window.scrollTo({ top:0, behavior:'smooth' });
             }
         });
-        document.getElementById('next-button').addEventListener('click', () => {
+        document.getElementById('next-button')?.addEventListener('click', () => {
             const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
             if (currentChapter < totalChapters) {
                 currentChapter++;
@@ -657,7 +662,7 @@
         }
 
         // Event listener para el selector de versiones
-        document.getElementById('version-selector').addEventListener('change', async (e) => {
+        document.getElementById('version-selector')?.addEventListener('change', async (e) => {
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'loading';
             loadingDiv.textContent = 'Cargando versión...';
@@ -764,18 +769,18 @@
             document.getElementById('search-results').classList.remove('active');
         }
 
-        // Event listener para búsqueda con Enter
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchText();
-            }
-        });
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchText();
+            });
+        }
 
-        // Mostrar/ocultar grid de capítulos
-        document.getElementById('chapter-select').addEventListener('click', () => {
-            const chapterGrid = document.getElementById('chapter-grid');
-            chapterGrid.classList.toggle('active');
-        });
+        // Event listener para botón de búsqueda
+        const searchButton = document.getElementById('search-button');
+        if (searchButton) {
+            searchButton.addEventListener('click', searchText);
+        }
 
         // Ocultar grid al hacer click fuera
         document.addEventListener('click', (e) => {
