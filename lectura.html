@@ -367,14 +367,54 @@
                 padding: 0.3em;
             }
         }
+
+        .bookmark-icon {
+            cursor: pointer;
+            margin-right: 8px;
+            color: var(--primary-color);
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+
+        .bookmark-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .bookmarks-panel {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 300px;
+            max-height: calc(100vh - 60px);
+            background: var(--bg-color);
+            box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+            padding: 16px;
+            overflow-y: auto;
+            z-index: 1100;
+        }
+
+        .bookmarks-panel.active {
+            display: block;
+        }
+
+        .bm-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .bm-item:hover {
+            background: rgba(76,175,80,0.1);
+        }
     </style>
 </head>
 <body>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
-            
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <button id="bookmark-toggle" class="theme-toggle">📑</button>
         </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
@@ -392,19 +432,23 @@
             <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             <button id="search-button" class="search-button">🔍</button>
         </div>
-    </div>
+    </div> <!-- cierre .controls -->
 
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
         <div id="results-content"></div>
     </div>
 
+    <div id="bookmarks-panel" class="bookmarks-panel">
+        <h3>Marcadores</h3>
+        <div id="bookmarks-list"></div>
+    </div>
+
     <div class="chapter-grid" id="chapter-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
-
-    </div> 
+    </div> <!-- cierre .chapter-content -->
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
@@ -505,6 +549,7 @@
             button.textContent = isDark ? '🌙' : '☀️';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
+
         document.getElementById('book-select')?.addEventListener('change', (e) => {
             currentBook = e.target.value;
             currentChapter = 1;
@@ -589,6 +634,7 @@
                         <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
                              data-verse="${verseNum}"
                              onclick="highlightVerse(this)">
+                            <span class="bookmark-icon">☆</span>
                             <span class="verse-number">${verseNum}</span>
                             ${verse.textContent}
                         </div>
@@ -605,6 +651,7 @@
                         }, 100);
                     }
                 }
+                renderVerseBookmarks();
             } catch (error) {
                 console.error('Error loading chapter:', error);
                 versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
@@ -792,6 +839,51 @@
             if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
                 chapterGrid.classList.remove('active');
             }
+        });
+
+        // Gestión de marcadores
+        function loadBookmarks() {
+            return JSON.parse(localStorage.getItem('bookmarks') || '[]');
+        }
+        function saveBookmarks(bm) {
+            localStorage.setItem('bookmarks', JSON.stringify(bm));
+        }
+        function toggleBookmark(book, chapter, verse) {
+            const bm = loadBookmarks();
+            const key = `${book}-${chapter}-${verse}`;
+            const idx = bm.findIndex(b=>b.key===key);
+            if (idx>=0) bm.splice(idx,1);
+            else bm.push({ key, book, chapter, verse });
+            saveBookmarks(bm);
+            renderVerseBookmarkIcon(book, chapter, verse);
+        }
+        function renderVerseBookmarkIcon(book, chapter, verse) {
+            const icon = document.querySelector(`.verse[data-verse="${verse}"] .bookmark-icon`);
+            const bm = loadBookmarks();
+            if (icon) icon.textContent = bm.some(b=>b.key===`${book}-${chapter}-${verse}`) ? '★' : '☆';
+        }
+        function renderVerseBookmarks() {
+            document.querySelectorAll('.verse').forEach(v=> {
+                const verse = v.getAttribute('data-verse');
+                renderVerseBookmarkIcon(currentBook, currentChapter, verse);
+            });
+        }
+        function renderBookmarksList() {
+            const list = loadBookmarks();
+            const container = document.getElementById('bookmarks-list');
+            container.innerHTML = list.map(b=> `<div class="bm-item" onclick="goToVerse('${b.book}',${b.chapter},${b.verse})">${b.book} ${b.chapter}:${b.verse}</div>`).join('');
+        }
+        // Click en icono de marcador
+        document.getElementById('verses').addEventListener('click', e=> {
+            if (e.target.classList.contains('bookmark-icon')) {
+                toggleBookmark(currentBook, currentChapter, e.target.parentElement.getAttribute('data-verse'));
+            }
+        });
+        // Toggle panel de marcadores
+        document.getElementById('bookmark-toggle')?.addEventListener('click', ()=> {
+            const panel = document.getElementById('bookmarks-panel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) renderBookmarksList();
         });
 
         // Función para cargar desde URL
