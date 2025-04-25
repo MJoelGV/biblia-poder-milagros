@@ -368,45 +368,23 @@
             }
         }
 
-        .bookmark-icon {
-            cursor: pointer;
-            margin-right: 8px;
-            color: var(--primary-color);
-            font-size: 1.2em;
-            transition: transform 0.2s;
-        }
-
-        .bookmark-icon:hover {
-            transform: scale(1.2);
-        }
-
-        .bookmarks-panel {
+        /* Verso marcado y menú contextual */
+        .verse.bookmarked { background: #fffa8c; }
+        .verse.comment { border-left: 4px solid var(--primary-color); }
+        .verse-menu {
             display: none;
-            position: fixed;
-            top: 60px;
-            right: 0;
-            width: 300px;
-            max-height: calc(100vh - 60px);
+            position: absolute;
             background: var(--bg-color);
-            box-shadow: -2px 0 8px rgba(0,0,0,0.2);
-            padding: 16px;
-            overflow-y: auto;
-            z-index: 1100;
-        }
-
-        .bookmarks-panel.active {
-            display: block;
-        }
-
-        .bm-item {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1200;
             padding: 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            cursor: pointer;
         }
-
-        .bm-item:hover {
-            background: rgba(76,175,80,0.1);
+        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
+        .verse-menu li {
+            padding: 8px; cursor: pointer;
         }
+        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -414,7 +392,6 @@
         <div class="top-row">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="bookmark-toggle" class="theme-toggle">📑</button>
         </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
@@ -439,9 +416,12 @@
         <div id="results-content"></div>
     </div>
 
-    <div id="bookmarks-panel" class="bookmarks-panel">
-        <h3>Marcadores</h3>
-        <div id="bookmarks-list"></div>
+    <!-- Menú contextual para versículos -->
+    <div id="verse-menu" class="verse-menu">
+        <ul>
+            <li id="menu-toggle-bookmark">Marcar versículo</li>
+            <li id="menu-add-comment">Agregar comentario</li>
+        </ul>
     </div>
 
     <div class="chapter-grid" id="chapter-grid"></div>
@@ -634,7 +614,6 @@
                         <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
                              data-verse="${verseNum}"
                              onclick="highlightVerse(this)">
-                            <span class="bookmark-icon">☆</span>
                             <span class="verse-number">${verseNum}</span>
                             ${verse.textContent}
                         </div>
@@ -651,7 +630,7 @@
                         }, 100);
                     }
                 }
-                renderVerseBookmarks();
+                restoreStates();
             } catch (error) {
                 console.error('Error loading chapter:', error);
                 versesContainer.innerHTML = '<div class="error">Error al cargar el capítulo</div>';
@@ -841,49 +820,86 @@
             }
         });
 
-        // Gestión de marcadores
+        // Estados y menú contextual de versículo
         function loadBookmarks() {
             return JSON.parse(localStorage.getItem('bookmarks') || '[]');
         }
-        function saveBookmarks(bm) {
-            localStorage.setItem('bookmarks', JSON.stringify(bm));
+        function saveBookmarks(arr) {
+            localStorage.setItem('bookmarks', JSON.stringify(arr));
         }
-        function toggleBookmark(book, chapter, verse) {
+        function loadComments() {
+            return JSON.parse(localStorage.getItem('comments') || '{}');
+        }
+        function saveComments(obj) {
+            localStorage.setItem('comments', JSON.stringify(obj));
+        }
+        function toggleBookmark(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
             const bm = loadBookmarks();
-            const key = `${book}-${chapter}-${verse}`;
-            const idx = bm.findIndex(b=>b.key===key);
-            if (idx>=0) bm.splice(idx,1);
-            else bm.push({ key, book, chapter, verse });
+            const idx = bm.indexOf(key);
+            if (idx >= 0) bm.splice(idx, 1);
+            else bm.push(key);
             saveBookmarks(bm);
-            renderVerseBookmarkIcon(book, chapter, verse);
+            verseEl.classList.toggle('bookmarked');
         }
-        function renderVerseBookmarkIcon(book, chapter, verse) {
-            const icon = document.querySelector(`.verse[data-verse="${verse}"] .bookmark-icon`);
+        function toggleComment(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const com = loadComments();
+            const c = prompt('Escribe tu comentario:');
+            if (c === null) return;
+            if (c) com[key] = c;
+            else delete com[key];
+            saveComments(com);
+            verseEl.classList.toggle('comment', !!c);
+        }
+        function restoreStates() {
             const bm = loadBookmarks();
-            if (icon) icon.textContent = bm.some(b=>b.key===`${book}-${chapter}-${verse}`) ? '★' : '☆';
-        }
-        function renderVerseBookmarks() {
-            document.querySelectorAll('.verse').forEach(v=> {
-                const verse = v.getAttribute('data-verse');
-                renderVerseBookmarkIcon(currentBook, currentChapter, verse);
+            const com = loadComments();
+            document.querySelectorAll('.verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bm.includes(key)) v.classList.add('bookmarked');
+                if (com[key]) v.classList.add('comment');
             });
         }
-        function renderBookmarksList() {
-            const list = loadBookmarks();
-            const container = document.getElementById('bookmarks-list');
-            container.innerHTML = list.map(b=> `<div class="bm-item" onclick="goToVerse('${b.book}',${b.chapter},${b.verse})">${b.book} ${b.chapter}:${b.verse}</div>`).join('');
-        }
-        // Click en icono de marcador
-        document.getElementById('verses').addEventListener('click', e=> {
-            if (e.target.classList.contains('bookmark-icon')) {
-                toggleBookmark(currentBook, currentChapter, e.target.parentElement.getAttribute('data-verse'));
-            }
+        const versesContainer = document.getElementById('verses');
+        const menu = document.getElementById('verse-menu');
+        let menuTarget = null;
+        // Mostrar menú con doble clic (desktop y móvil)
+        versesContainer.addEventListener('dblclick', e => {
+            const v = e.target.closest('.verse'); if (!v) return;
+            menuTarget = v;
+            // Opción marcar
+            document.getElementById('menu-toggle-bookmark').textContent =
+                v.classList.contains('bookmarked') ? 'Desmarcar versículo' : 'Marcar versículo';
+            // Opción comentario/ver comentario
+            const commentItem = document.getElementById('menu-add-comment');
+            commentItem.textContent = v.classList.contains('comment') ? 'Ver comentario' : 'Agregar comentario';
+            // Posicionar menú sobre el verso
+            const rect = v.getBoundingClientRect();
+            menu.style.top = (rect.top + window.scrollY) + 'px';
+            menu.style.left = (rect.left + window.scrollX) + 'px';
+            menu.style.display = 'block';
         });
-        // Toggle panel de marcadores
-        document.getElementById('bookmark-toggle')?.addEventListener('click', ()=> {
-            const panel = document.getElementById('bookmarks-panel');
-            panel.classList.toggle('active');
-            if (panel.classList.contains('active')) renderBookmarksList();
+
+        // Manejo de opciones del menú
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            toggleBookmark(menuTarget);
+            menu.style.display = 'none';
+        });
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            const key = `${currentBook}-${currentChapter}-${menuTarget.dataset.verse}`;
+            const com = loadComments();
+            const commentItem = document.getElementById('menu-add-comment');
+            if (commentItem.textContent === 'Ver comentario') {
+                alert(com[key]);
+            } else {
+                toggleComment(menuTarget);
+            }
+            menu.style.display = 'none';
+        });
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#verse-menu')) menu.style.display = 'none';
         });
 
         // Función para cargar desde URL
