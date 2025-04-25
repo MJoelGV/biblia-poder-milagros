@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblia de Poder y Milagros</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <style>
         body {
             margin: 0;
@@ -51,6 +53,7 @@
             cursor: pointer;
             display: block;
             text-decoration: none;
+            color: white;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             padding: 30px;
@@ -60,6 +63,9 @@
             text-align: center;
         }
 
+        .proverb-card p { color: white; }
+        .proverb-card .reference { color: white; }
+
         .proverb-text {
             font-size: 1.5em;
             margin-bottom: 15px;
@@ -68,7 +74,6 @@
 
         .reference {
             font-style: italic;
-            color: #4CAF50;
             margin-top: 10px;
         }
 
@@ -96,8 +101,21 @@
             background-color: white;
         }
         .nav-button .icon {
-            font-size: 1.8em;
-            margin-bottom: 6px;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            margin-bottom: 8px;
+        }
+        .nav-button:hover .icon {
+            transform: rotate(15deg);
         }
         @media (max-width: 480px) {
             .navigation-buttons { grid-template-columns: repeat(2, 1fr); }
@@ -130,12 +148,12 @@
                 <p id="proverb-reference" class="reference"></p>
             </a>
             <div class="navigation-buttons">
-                <a href="lectura.html" id="read-more-link" class="nav-button"><span class="icon">📖</span></a>
-                <a href="temas.html" class="nav-button"><span class="icon">📝</span><span>Memorizar</span></a>
-                <a href="historias.html" class="nav-button"><span class="icon">📜</span><span>Historias</span></a>
-                <a href="diccionario.html" class="nav-button"><span class="icon">📚</span><span>Diccionario</span></a>
-                <a href="bookmarks.html" class="nav-button"><span class="icon">⭐</span><span>Marcados</span></a>
-                <a href="comments.html" class="nav-button"><span class="icon">💬</span><span>Comentarios</span></a>
+                <a href="lectura.html" id="read-more-link" class="nav-button"><i class="fas fa-bible icon"></i></a>
+                <a href="temas.html" class="nav-button"><i class="fas fa-lightbulb icon"></i><span>Memorizar</span></a>
+                <a href="historias.html" class="nav-button"><i class="fas fa-book-open icon"></i><span>Historias</span></a>
+                <a href="diccionario.html" class="nav-button"><i class="fas fa-books icon"></i><span>Diccionario</span></a>
+                <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
+                <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
             </div>
         </div>
     </div>
