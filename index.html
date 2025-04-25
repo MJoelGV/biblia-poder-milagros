@@ -13,7 +13,6 @@
             padding: 0;
             font-family: Arial, sans-serif;
             min-height: 100vh;
-            overflow: hidden;
         }
 
         .background {
@@ -141,6 +140,15 @@
                 width: 100%;
                 max-width: 300px;
             }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            body { overflow: auto; }
+            .hero { height: auto; padding: 40px 0; }
+            .hero h1 { font-size: 2.5em; margin-bottom: 20px; }
+            .navigation-buttons { grid-template-columns: 1fr; gap: 8px; padding: 0 10px; }
+            .nav-button { padding: 10px; }
         }
     </style>
 </head>
