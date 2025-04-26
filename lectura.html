@@ -1045,27 +1045,34 @@
             localStorage.setItem('verseFontSize', newSize);
         }
 
+        // Unified speak function: use Kodular native TTS if available, fallback to Web Speech API
+        function speakText(text) {
+            if (window.Kodular && Kodular.speak) {
+                Kodular.speak(text);
+            } else {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'es-ES'; utter.rate = 1;
+                speechSynthesis.speak(utter);
+            }
+        }
+
         // Text-to-speech reader functions
-        const synth = window.speechSynthesis;
         function readBook() {
             if (!xmlDoc || !currentBook) return;
             // Show floating controls
             document.getElementById('pause-reading-float').style.display = '';
             document.getElementById('stop-reading-float').style.display = '';
-            synth.cancel();
+            speechSynthesis.cancel();
             const bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
             if (!bookNode) return;
             const chapters = bookNode.getElementsByTagName('c');
             Array.from(chapters).forEach(c => {
                 const chapNum = c.getAttribute('n');
-                const prefix = new SpeechSynthesisUtterance(`${currentBook}, capítulo ${chapNum}`);
-                prefix.lang = 'es-ES'; prefix.rate = 1;
-                synth.speak(prefix);
+                // prefix using unified TTS
+                speakText(`${currentBook}, capítulo ${chapNum}`);
                 const verses = c.getElementsByTagName('v');
                 Array.from(verses).forEach(v => {
-                    const utter = new SpeechSynthesisUtterance(v.textContent);
-                    utter.lang = 'es-ES'; utter.rate = 1;
-                    synth.speak(utter);
+                    speakText(v.textContent);
                 });
             });
             document.getElementById('pause-reading-btn').style.display = '';
@@ -1074,24 +1081,30 @@
             document.getElementById('stop-reading-bottom').style.display = '';
         }
         function pauseReading() {
-            if (synth.speaking) {
-                if (synth.paused) { 
-                    synth.resume(); 
+            // Pause via Kodular or Web API
+            if (window.Kodular && Kodular.pause) {
+                Kodular.pause();
+            } else if (speechSynthesis.speaking) {
+                if (speechSynthesis.paused) {
+                    speechSynthesis.resume();
                     document.getElementById('pause-reading-btn').textContent = '⏸️ Pausa';
-                    document.getElementById('pause-reading-bottom').textContent = '⏸️ Pausa';
                     const floatBtn = document.getElementById('pause-reading-float');
                     floatBtn.textContent = '⏸️ Pausa';
-                } else { 
-                    synth.pause();
+                } else {
+                    speechSynthesis.pause();
                     document.getElementById('pause-reading-btn').textContent = '▶️ Continuar';
-                    document.getElementById('pause-reading-bottom').textContent = '▶️ Continuar';
                     const floatBtn = document.getElementById('pause-reading-float');
                     floatBtn.textContent = '▶️ Continuar';
                 }
             }
         }
         function stopReading() {
-            synth.cancel();
+            // Stop via Kodular or Web API
+            if (window.Kodular && Kodular.stop) {
+                Kodular.stop();
+            } else {
+                speechSynthesis.cancel();
+            }
             document.getElementById('pause-reading-btn').style.display = 'none';
             document.getElementById('stop-reading-btn').style.display = 'none';
             document.getElementById('pause-reading-float').style.display = 'none';
