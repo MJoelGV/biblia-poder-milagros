@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install espeak-ng and ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng ffmpeg
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
