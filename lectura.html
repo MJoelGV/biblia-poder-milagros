@@ -452,7 +452,7 @@
             <button id="search-button" class="search-button">🔍</button>
         </div>
     </div> <!-- cierre .controls -->
-
+    <audio id="audio-player" playsinline style="display:none;"></audio>
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
         <div id="results-content"></div>
@@ -508,6 +508,9 @@
         let currentChapter = 1;
         let currentVerse = 0;
         let currentVersion = 'Reina-Valera-1960';
+        const audioPlayer = document.getElementById('audio-player');
+        let playlist = [];
+        let trackIndex = 0;
 
         // Controlar la visibilidad de los menús al hacer scroll
         let lastScrollY = window.scrollY;
@@ -1046,72 +1049,47 @@
             localStorage.setItem('verseFontSize', newSize);
         }
 
-        // Unified speak function: use Kodular native TTS if available, fallback to Web Speech API
-        function speakText(text) {
-            if (window.Kodular && Kodular.speak) {
-                Kodular.speak(text);
-            } else {
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.lang = 'es-ES'; utter.rate = 1;
-                speechSynthesis.speak(utter);
-            }
+        function readBook() {
+            if (!currentBook) return;
+            playlist = Array.from(xmlDoc.querySelectorAll(`b[n="${currentBook}"] c`))
+                .map(c => `audio/${encodeURIComponent(currentBook)}-${c.getAttribute('n')}.mp3`);
+            trackIndex = 0;
+            audioPlayer.src = playlist[trackIndex];
+            audioPlayer.play();
+            toggleReadUI(true);
         }
 
-        // Text-to-speech reader functions
-        function readBook() {
-            if (!xmlDoc || !currentBook) return;
-            // Show floating controls
-            document.getElementById('pause-reading-float').style.display = '';
-            document.getElementById('stop-reading-float').style.display = '';
-            speechSynthesis.cancel();
-            const bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
-            if (!bookNode) return;
-            const chapters = bookNode.getElementsByTagName('c');
-            Array.from(chapters).forEach(c => {
-                const chapNum = c.getAttribute('n');
-                // prefix using unified TTS
-                speakText(`${currentBook}, capítulo ${chapNum}`);
-                const verses = c.getElementsByTagName('v');
-                Array.from(verses).forEach(v => {
-                    speakText(v.textContent);
-                });
-            });
-            document.getElementById('pause-reading-btn').style.display = '';
-            document.getElementById('stop-reading-btn').style.display = '';
-            document.getElementById('pause-reading-bottom').style.display = '';
-            document.getElementById('stop-reading-bottom').style.display = '';
-        }
-        function pauseReading() {
-            // Pause via Kodular or Web API
-            if (window.Kodular && Kodular.pause) {
-                Kodular.pause();
-            } else if (speechSynthesis.speaking) {
-                if (speechSynthesis.paused) {
-                    speechSynthesis.resume();
-                    document.getElementById('pause-reading-btn').textContent = '⏸️ Pausa';
-                    const floatBtn = document.getElementById('pause-reading-float');
-                    floatBtn.textContent = '⏸️ Pausa';
-                } else {
-                    speechSynthesis.pause();
-                    document.getElementById('pause-reading-btn').textContent = '▶️ Continuar';
-                    const floatBtn = document.getElementById('pause-reading-float');
-                    floatBtn.textContent = '▶️ Continuar';
-                }
-            }
-        }
-        function stopReading() {
-            // Stop via Kodular or Web API
-            if (window.Kodular && Kodular.stop) {
-                Kodular.stop();
+        audioPlayer.addEventListener('ended', () => {
+            trackIndex++;
+            if (trackIndex < playlist.length) {
+                audioPlayer.src = playlist[trackIndex];
+                audioPlayer.play();
             } else {
-                speechSynthesis.cancel();
+                toggleReadUI(false);
             }
-            document.getElementById('pause-reading-btn').style.display = 'none';
-            document.getElementById('stop-reading-btn').style.display = 'none';
-            document.getElementById('pause-reading-float').style.display = 'none';
-            document.getElementById('stop-reading-float').style.display = 'none';
-            document.getElementById('pause-reading-bottom').style.display = 'none';
-            document.getElementById('stop-reading-bottom').style.display = 'none';
+        });
+
+        function pauseReading() {
+            if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
+        }
+
+        function stopReading() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            trackIndex = 0;
+            toggleReadUI(false);
+        }
+
+        function toggleReadUI(isReading) {
+            document.getElementById('read-book-btn').style.display = isReading ? 'none' : '';
+            document.getElementById('pause-reading-btn').style.display = isReading ? '' : 'none';
+            document.getElementById('stop-reading-btn').style.display = isReading ? '' : 'none';
+            document.getElementById('read-book-bottom').style.display = isReading ? 'none' : '';
+            document.getElementById('pause-reading-bottom').style.display = isReading ? '' : 'none';
+            document.getElementById('stop-reading-bottom').style.display = isReading ? '' : 'none';
+            document.getElementById('read-book-float').style.display = isReading ? 'none' : '';
+            document.getElementById('pause-reading-float').style.display = isReading ? '' : 'none';
+            document.getElementById('stop-reading-float').style.display = isReading ? '' : 'none';
         }
     </script>
 </body>
