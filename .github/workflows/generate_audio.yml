@@ -10,6 +10,8 @@ on:
 jobs:
   generate-audio:
     runs-on: ubuntu-latest
+    env:
+      VOICERSS_VOICE: ${{ secrets.VOICERSS_VOICE }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

@@ -1,0 +1,13 @@
+{
+  "name": "biblia-audio-generator",
+  "version": "1.0.0",
+  "description": "Genera archivos MP3 por capítulo de la Biblia Reina-Valera-1960 usando Google Cloud Text-to-Speech.",
+  "main": "generate_audio.js",
+  "scripts": {
+    "generate-audio": "node generate_audio.js"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^4.3.0",
+    "xmldom": "^0.8.0"
+  }
+}

@@ -6,6 +6,8 @@ Se ejecuta automáticamente en GitHub Actions.
 import os
 import xml.etree.ElementTree as ET
 import subprocess
+import requests
+from gtts import gTTS
 
 # Rutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +21,10 @@ os.makedirs(audio_dir, exist_ok=True)
 tree = ET.parse(xml_path)
 root = tree.getroot()
 
+# API Key para VoiceRSS
+API_KEY = os.environ.get("VOICERSS_API_KEY")
+VOICE = os.environ.get("VOICERSS_VOICE", "Miguel")  # default voice for better quality
+
 # Por cada libro y capítulo genera MP3
 total = 0
 for b in root.findall('b'):
@@ -31,12 +37,25 @@ for b in root.findall('b'):
         filename = f"{book}-{chap}.mp3"
         out_path = os.path.join(audio_dir, filename)
         print(f"Generando: {filename}")
-        wav_path = os.path.join(audio_dir, f"{book}-{chap}.wav")
-        print(f"Creando WAV: {wav_path}")
-        subprocess.run(["espeak-ng", "-v", "es-la", "-w", wav_path, text], check=True)
-        print(f"Convirtiendo a MP3: {out_path}")
-        subprocess.run(["ffmpeg", "-i", wav_path, "-y", out_path], check=True)
-        os.remove(wav_path)
+        if API_KEY:
+            print("Usando VoiceRSS para voz más natural...")
+            resp = requests.get(
+                "https://api.voicerss.org/",
+                params={
+                    "key": API_KEY,
+                    "hl": "es-es",
+                    "v": VOICE,
+                    "src": text,
+                    "c": "MP3",
+                    "f": "48khz_16bit_stereo"
+                },
+            )
+            with open(out_path, 'wb') as f:
+                f.write(resp.content)
+        else:
+            print("Usando gTTS como fallback...")
+            tts = gTTS(text=text, lang='es')
+            tts.save(out_path)
         total += 1
 
 print(f"Generados {total} archivos de audio en {audio_dir}")

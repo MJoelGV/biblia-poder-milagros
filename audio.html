@@ -18,56 +18,126 @@
     </div>
     <div class="chapter-content" id="audio-content" style="margin-top:80px; padding:20px;">
         <h2>Selecciona un libro para escuchar</h2>
+        <div id="audio-settings" style="margin:10px 0; display:flex; gap:20px; align-items:center;">
+            <label>Modo: <select id="mode-select"><option value="tts" selected>Dinámico TTS</option><option value="mp3">MP3</option></select></label>
+            <label>Velocidad: <input type="range" id="speed-slider" min="0.5" max="2" step="0.1" value="1"><span id="speed-value">1</span>x</label>
+            <label id="voice-label" style="display:none;">Voz: <select id="voice-select"></select></label>
+        </div>
         <ul id="books-list" class="select-css"></ul>
         <div id="player-controls" style="margin-top:20px; display:none;">
             <h3 id="now-playing"></h3>
-            <audio id="audio-player" controls style="width:100%;"></audio>
+            <button id="pause-reading">⏸️ Pausar/Continuar</button>
+            <button id="stop-reading">⏹️ Detener</button>
+            <audio id="audio-player" playsinline style="width:100%; display:none;"></audio>
         </div>
     </div>
     <script>
-        // Carga lista de libros desde XML
+        // Configuración de modos y voces
+        const modeSelect = document.getElementById('mode-select');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const voiceLabel = document.getElementById('voice-label');
+        const voiceSelect = document.getElementById('voice-select');
+        const audioPlayer = document.getElementById('audio-player');
+        let xmlDoc, playlist = [], trackIndex = 0, verseList = [], verseIndex = 0, voices = [];
+
+        // Poblar voces Web Speech API
+        function populateVoices() {
+            voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('es'));
+            voiceSelect.innerHTML = '';
+            voices.forEach((v,i) => voiceSelect.appendChild(new Option(v.name, i)));
+        }
+        speechSynthesis.onvoiceschanged = populateVoices;
+        populateVoices();
+        // Cambiar modo: MP3 o TTS
+        modeSelect.onchange = function() {
+            if (modeSelect.value === 'tts') {
+                voiceLabel.style.display = '';
+                audioPlayer.style.display = 'none';
+            } else {
+                voiceLabel.style.display = 'none';
+                audioPlayer.style.display = '';
+            }
+        };
+        // Por defecto, modo TTS y mostrar selector de voz
+        modeSelect.value = 'tts';
+        modeSelect.onchange();
+        // Actualizar velocidad
+        speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
+
+        // Cargar libros desde XML
         async function loadBooks() {
-            const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
-            const text = await res.text();
-            const xml = new DOMParser().parseFromString(text,'text/xml');
-            const books = xml.querySelectorAll('b');
-            const list = document.getElementById('books-list');
-            books.forEach(b => {
-                const li = document.createElement('li');
-                li.style.cursor = 'pointer';
-                li.textContent = b.getAttribute('n');
-                li.onclick = () => playBook(b.getAttribute('n'), b);
-                list.appendChild(li);
-            });
-        }
-        const player = document.getElementById('audio-player');
-        // Dynamic Google TTS per verse
-        let verseList = [], verseIndex = 0, currentBook = '';
-        function getTTSUrl(text) {
-            return 'https://translate.google.com/translate_tts?ie=UTF-8&tl=es-ES&client=tw-ob&q=' + encodeURIComponent(text);
-        }
-        async function playBook(bookName, bookNode) {
-            currentBook = bookName;
-            verseList = [];
-            verseIndex = 0;
-            // Build verses array
-            Array.from(bookNode.getElementsByTagName('c')).forEach(c => {
-                const chap = c.getAttribute('n');
-                Array.from(c.getElementsByTagName('v')).forEach(v => {
-                    const num = v.getAttribute('n');
-                    verseList.push(`${bookName}, capítulo ${chap}, versículo ${num}: ${v.textContent}`);
+            try {
+                const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
+                const text = await res.text();
+                xmlDoc = new DOMParser().parseFromString(text, 'text/xml');
+                const books = xmlDoc.querySelectorAll('b');
+                const list = document.getElementById('books-list'); list.innerHTML = '';
+                books.forEach(b => {
+                    const li = document.createElement('li'); li.style.cursor = 'pointer';
+                    li.textContent = b.getAttribute('n');
+                    li.onclick = () => playBook(b.getAttribute('n'), b);
+                    list.appendChild(li);
                 });
-            });
+            } catch (err) {
+                console.error('Error cargando libros:', err);
+            }
+        }
+
+        // Reproducción de libro
+        function playBook(bookName, bookNode) {
             document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
             document.getElementById('player-controls').style.display = '';
-            playNext();
+            if (modeSelect.value === 'tts') {
+                if (speechSynthesis.speaking) speechSynthesis.cancel();
+                verseList = []; verseIndex = 0;
+                Array.from(bookNode.getElementsByTagName('c')).forEach(c => {
+                    const chap = c.getAttribute('n');
+                    Array.from(c.getElementsByTagName('v')).forEach(v => {
+                        verseList.push(`${bookName} capítulo ${chap} versículo ${v.getAttribute('n')}: ${v.textContent}`);
+                    });
+                });
+                speakNext();
+            } else {
+                const chapters = Array.from(bookNode.getElementsByTagName('c'));
+                playlist = chapters.map((c) => `audio/${encodeURIComponent(bookName)}-${c.getAttribute('n')}.mp3`);
+                trackIndex = 0;
+                audioPlayer.playbackRate = parseFloat(speedSlider.value);
+                audioPlayer.src = playlist[trackIndex];
+                audioPlayer.play().catch(err => console.error('Error MP3:', err));
+            }
         }
-        function playNext() {
+
+        // TTS secuencial
+        function speakNext() {
             if (verseIndex >= verseList.length) return;
-            player.src = getTTSUrl(verseList[verseIndex++]);
-            player.play();
+            const utter = new SpeechSynthesisUtterance(verseList[verseIndex++]);
+            utter.voice = voices[voiceSelect.value] || voices[0];
+            utter.rate = parseFloat(speedSlider.value);
+            utter.lang = 'es-ES';
+            utter.onend = speakNext;
+            speechSynthesis.speak(utter);
         }
-        player.addEventListener('ended', playNext);
+        // Controls pausa y stop
+        document.getElementById('pause-reading').onclick = () => {
+            if (modeSelect.value === 'tts') {
+                if (speechSynthesis.paused) speechSynthesis.resume(); else speechSynthesis.pause();
+            } else {
+                if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
+            }
+        };
+        document.getElementById('stop-reading').onclick = () => {
+            if (modeSelect.value === 'tts') speechSynthesis.cancel(); else { audioPlayer.pause(); audioPlayer.currentTime = 0; }
+            document.getElementById('player-controls').style.display = 'none';
+        };
+        // MP3 cambia track
+        audioPlayer.addEventListener('ended', () => {
+            if (modeSelect.value === 'mp3') {
+                trackIndex++;
+                if (trackIndex < playlist.length) audioPlayer.src = playlist[trackIndex], audioPlayer.play();
+            }
+        });
+        // Iniciar
         loadBooks();
     </script>
 </body>

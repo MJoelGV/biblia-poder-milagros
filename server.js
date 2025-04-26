@@ -3,18 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
-    // Obtener la ruta del archivo
-    let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
-    
-    // Si la URL termina en /, servir index.html
-    if (req.url.endsWith('/')) {
-        filePath = path.join(__dirname, 'index.html');
-    }
-    
-    // Si la URL es /lectura.html o contiene parámetros de consulta, servir lectura.html
-    if (req.url.startsWith('/lectura.html')) {
-        filePath = path.join(__dirname, 'lectura.html');
-    }
+    // Obtener ruta sin query y sin slash inicial
+    const requestUrl = req.url.split('?')[0];
+    const relativePath = requestUrl === '/' ? 'index.html' : requestUrl.replace(/^\/+/, '');
+    let filePath = path.join(__dirname, relativePath);
     
     // Obtener la extensión del archivo
     const extname = path.extname(filePath);
@@ -24,6 +16,7 @@ const server = http.createServer((req, res) => {
         '.html': 'text/html',
         '.js': 'text/javascript',
         '.css': 'text/css',
+        '.mp3': 'audio/mpeg',
         '.xmm': 'text/xml; charset=utf-8',
         '.jpg': 'image/jpeg',
         '.png': 'image/png',
