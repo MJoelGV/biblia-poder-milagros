@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lectura - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/pymicon.png">
     <style>
         :root {
             --primary-color: #4CAF50;
             --text-color: #333;
             --bg-color: #fff;
+            --verse-font-size: 1.1em;
         }
 
         [data-theme="dark"] {
@@ -137,7 +143,6 @@
             line-height: 1.6;
             border-radius: 4px;
             transition: background-color 0.3s;
-            font-size: 1.1em;
         }
 
         .verse:hover {
@@ -156,7 +161,7 @@
         }
 
         .verse-text {
-            font-size: 1.1em;
+            font-size: var(--verse-font-size);
             line-height: 1.6;
         }
 
@@ -423,6 +428,8 @@
         <div class="top-row">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <button id="decrease-font" class="theme-toggle">A-</button>
+            <button id="increase-font" class="theme-toggle">A+</button>
         </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
@@ -479,6 +486,8 @@
         </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
+
+    <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Instalar app</button>
 
     <script>
         let xmlDoc = null;
@@ -991,6 +1000,40 @@
         }
 
         init();
+
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('SW registered'))
+                .catch(console.error);
+        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Font size controls and persistence
+        const btnDec = document.getElementById('decrease-font');
+        const btnInc = document.getElementById('increase-font');
+        btnDec.addEventListener('click', () => adjustFontSize(-0.1));
+        btnInc.addEventListener('click', () => adjustFontSize(0.1));
+        function adjustFontSize(delta) {
+          const root = document.documentElement;
+          const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
+          const newSize = Math.min(Math.max(current + delta, 0.6), 3);
+          root.style.setProperty('--verse-font-size', newSize + 'em');
+          localStorage.setItem('verseFontSize', newSize);
+        }
+        // Load saved size
+        const saved = localStorage.getItem('verseFontSize');
+        if (saved) document.documentElement.style.setProperty('--verse-font-size', saved + 'em');
     </script>
 </body>
 </html>
