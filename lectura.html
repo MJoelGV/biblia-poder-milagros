@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Build timestamp: 2025-04-25T21:20:00Z -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -488,6 +489,15 @@
             <option value="">Capítulo</option>
         </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
+        <button class="nav-button" id="read-book-bottom" onclick="readBook()">🔊</button>
+        <button class="nav-button" id="pause-reading-bottom" onclick="pauseReading()" style="display:none;">⏸️</button>
+        <button class="nav-button" id="stop-reading-bottom" onclick="stopReading()" style="display:none;">⏹️</button>
+    </div>
+
+    <div id="audio-controls" style="position:fixed;bottom:100px;right:20px;z-index:1001;display:flex;gap:8px;">
+        <button id="read-book-float" class="theme-toggle" onclick="readBook()">🔊</button>
+        <button id="pause-reading-float" class="theme-toggle" onclick="pauseReading()" style="display:none;">⏸️</button>
+        <button id="stop-reading-float" class="theme-toggle" onclick="stopReading()" style="display:none;">⏹️</button>
     </div>
 
     <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Instalar app</button>
@@ -1039,6 +1049,9 @@
         const synth = window.speechSynthesis;
         function readBook() {
             if (!xmlDoc || !currentBook) return;
+            // Show floating controls
+            document.getElementById('pause-reading-float').style.display = '';
+            document.getElementById('stop-reading-float').style.display = '';
             synth.cancel();
             const bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
             if (!bookNode) return;
@@ -1057,17 +1070,34 @@
             });
             document.getElementById('pause-reading-btn').style.display = '';
             document.getElementById('stop-reading-btn').style.display = '';
+            document.getElementById('pause-reading-bottom').style.display = '';
+            document.getElementById('stop-reading-bottom').style.display = '';
         }
         function pauseReading() {
             if (synth.speaking) {
-                if (synth.paused) { synth.resume(); document.getElementById('pause-reading-btn').textContent = '⏸️ Pausa'; }
-                else { synth.pause(); document.getElementById('pause-reading-btn').textContent = '▶️ Continuar'; }
+                if (synth.paused) { 
+                    synth.resume(); 
+                    document.getElementById('pause-reading-btn').textContent = '⏸️ Pausa';
+                    document.getElementById('pause-reading-bottom').textContent = '⏸️ Pausa';
+                    const floatBtn = document.getElementById('pause-reading-float');
+                    floatBtn.textContent = '⏸️ Pausa';
+                } else { 
+                    synth.pause();
+                    document.getElementById('pause-reading-btn').textContent = '▶️ Continuar';
+                    document.getElementById('pause-reading-bottom').textContent = '▶️ Continuar';
+                    const floatBtn = document.getElementById('pause-reading-float');
+                    floatBtn.textContent = '▶️ Continuar';
+                }
             }
         }
         function stopReading() {
             synth.cancel();
             document.getElementById('pause-reading-btn').style.display = 'none';
             document.getElementById('stop-reading-btn').style.display = 'none';
+            document.getElementById('pause-reading-float').style.display = 'none';
+            document.getElementById('stop-reading-float').style.display = 'none';
+            document.getElementById('pause-reading-bottom').style.display = 'none';
+            document.getElementById('stop-reading-bottom').style.display = 'none';
         }
     </script>
 </body>
