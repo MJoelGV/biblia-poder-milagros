@@ -9,20 +9,24 @@ const urlsToCache = [
   './icons/pymicon.png'
 ];
 
+// Install: cache assets and activate immediately
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
 });
 
+// Activate: clean old caches and take control of clients
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => 
-      Promise.all(
+    caches.keys()
+      .then(keys => Promise.all(
         keys.filter(key => key !== CACHE_NAME)
             .map(key => caches.delete(key))
-      )
-    )
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
