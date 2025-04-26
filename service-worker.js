@@ -3,6 +3,7 @@ const urlsToCache = [
   './',
   './index.html',
   './lectura.html',
+  './audio.html',
   './books.html',
   './topics.html',
   './manifest.json',

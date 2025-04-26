@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escuchar Biblia - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="icons/pymicon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <a href="index.html" class="home-icon">🏠</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+        </div>
+    </div>
+    <div class="chapter-content" id="audio-content" style="margin-top:80px; padding:20px;">
+        <h2>Selecciona un libro para escuchar</h2>
+        <ul id="books-list" class="select-css"></ul>
+        <div id="player-controls" style="margin-top:20px; display:none;">
+            <h3 id="now-playing"></h3>
+            <audio id="audio-player" controls style="width:100%;"></audio>
+        </div>
+    </div>
+    <script>
+        // Carga lista de libros desde XML
+        async function loadBooks() {
+            const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
+            const text = await res.text();
+            const xml = new DOMParser().parseFromString(text,'text/xml');
+            const books = xml.querySelectorAll('b');
+            const list = document.getElementById('books-list');
+            books.forEach(b => {
+                const li = document.createElement('li');
+                li.style.cursor = 'pointer';
+                li.textContent = b.getAttribute('n');
+                li.onclick = () => playBook(b.getAttribute('n'), b);
+                list.appendChild(li);
+            });
+        }
+        const player = document.getElementById('audio-player');
+        let currentBook, chapters;
+        function playBook(bookName, bookNode) {
+            currentBook = bookName;
+            chapters = Array.from(bookNode.getElementsByTagName('c')).map(c=>c.getAttribute('n'));
+            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName + ' 1';
+            document.getElementById('player-controls').style.display = '';
+            player.src = 'audio/' + bookName + '-1.mp3';
+            player.play();
+        }
+        player.addEventListener('ended', () => {
+            const chapterNum = player.src.split('/').pop().replace(currentBook + '-','').replace('.mp3','');
+            const idx = chapters.indexOf(chapterNum);
+            const next = chapters[idx+1];
+            if (next) {
+                document.getElementById('now-playing').textContent = 'Escuchando ' + currentBook + ' ' + next;
+                player.src = 'audio/' + currentBook + '-' + next + '.mp3';
+                player.play();
+            }
+        });
+        loadBooks();
+    </script>
+</body>
+</html>
