@@ -41,25 +41,33 @@
             });
         }
         const player = document.getElementById('audio-player');
-        let currentBook, chapters;
-        function playBook(bookName, bookNode) {
+        // Dynamic Google TTS per verse
+        let verseList = [], verseIndex = 0, currentBook = '';
+        function getTTSUrl(text) {
+            return 'https://translate.google.com/translate_tts?ie=UTF-8&tl=es-ES&client=tw-ob&q=' + encodeURIComponent(text);
+        }
+        async function playBook(bookName, bookNode) {
             currentBook = bookName;
-            chapters = Array.from(bookNode.getElementsByTagName('c')).map(c=>c.getAttribute('n'));
-            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName + ' 1';
+            verseList = [];
+            verseIndex = 0;
+            // Build verses array
+            Array.from(bookNode.getElementsByTagName('c')).forEach(c => {
+                const chap = c.getAttribute('n');
+                Array.from(c.getElementsByTagName('v')).forEach(v => {
+                    const num = v.getAttribute('n');
+                    verseList.push(`${bookName}, capítulo ${chap}, versículo ${num}: ${v.textContent}`);
+                });
+            });
+            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
             document.getElementById('player-controls').style.display = '';
-            player.src = 'audio/' + bookName + '-1.mp3';
+            playNext();
+        }
+        function playNext() {
+            if (verseIndex >= verseList.length) return;
+            player.src = getTTSUrl(verseList[verseIndex++]);
             player.play();
         }
-        player.addEventListener('ended', () => {
-            const chapterNum = player.src.split('/').pop().replace(currentBook + '-','').replace('.mp3','');
-            const idx = chapters.indexOf(chapterNum);
-            const next = chapters[idx+1];
-            if (next) {
-                document.getElementById('now-playing').textContent = 'Escuchando ' + currentBook + ' ' + next;
-                player.src = 'audio/' + currentBook + '-' + next + '.mp3';
-                player.play();
-            }
-        });
+        player.addEventListener('ended', playNext);
         loadBooks();
     </script>
 </body>
