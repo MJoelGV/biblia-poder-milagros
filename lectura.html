@@ -430,6 +430,9 @@
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
             <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
             <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+            <button id="read-book-btn" class="theme-toggle" onclick="readBook()">🔊 Leer Libro</button>
+            <button id="pause-reading-btn" class="theme-toggle" onclick="pauseReading()" style="display:none;">⏸️ Pausa</button>
+            <button id="stop-reading-btn" class="theme-toggle" onclick="stopReading()" style="display:none;">⏹️ Detener</button>
         </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
@@ -1030,6 +1033,41 @@
             const newSize = Math.min(Math.max(current + delta, 0.6), 3);
             root.style.setProperty('--verse-font-size', newSize + 'em');
             localStorage.setItem('verseFontSize', newSize);
+        }
+
+        // Text-to-speech reader functions
+        const synth = window.speechSynthesis;
+        function readBook() {
+            if (!xmlDoc || !currentBook) return;
+            synth.cancel();
+            const bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
+            if (!bookNode) return;
+            const chapters = bookNode.getElementsByTagName('c');
+            Array.from(chapters).forEach(c => {
+                const chapNum = c.getAttribute('n');
+                const prefix = new SpeechSynthesisUtterance(`${currentBook}, capítulo ${chapNum}`);
+                prefix.lang = 'es-ES'; prefix.rate = 1;
+                synth.speak(prefix);
+                const verses = c.getElementsByTagName('v');
+                Array.from(verses).forEach(v => {
+                    const utter = new SpeechSynthesisUtterance(v.textContent);
+                    utter.lang = 'es-ES'; utter.rate = 1;
+                    synth.speak(utter);
+                });
+            });
+            document.getElementById('pause-reading-btn').style.display = '';
+            document.getElementById('stop-reading-btn').style.display = '';
+        }
+        function pauseReading() {
+            if (synth.speaking) {
+                if (synth.paused) { synth.resume(); document.getElementById('pause-reading-btn').textContent = '⏸️ Pausa'; }
+                else { synth.pause(); document.getElementById('pause-reading-btn').textContent = '▶️ Continuar'; }
+            }
+        }
+        function stopReading() {
+            synth.cancel();
+            document.getElementById('pause-reading-btn').style.display = 'none';
+            document.getElementById('stop-reading-btn').style.display = 'none';
         }
     </script>
 </body>
