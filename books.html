@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libros de la Biblia - Biblia de Poder y Milagros</n>    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f9f9f9; color: #333; }
+        .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
+        .nav { text-align: center; margin: 10px 0; }
+        .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
+        .list { max-width: 800px; margin: 20px auto; padding: 0; list-style: none; }
+        .list-item { display: block; padding: 12px; background: white; margin-bottom: 6px; border-radius: 8px; text-decoration: none; color: #4CAF50; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .list-item:hover { background: #e8f5e9; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>Libros de la Biblia</h1></div>
+    <div class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="lectura.html">Lectura</a>
+    </div>
+    <ul id="books-list" class="list"></ul>
+    <script>
+        async function loadBooks() {
+            try {
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const resp = await fetch(`${baseUrl}biblia-files/Reina-Valera-1960.xmm`);
+                const text = await resp.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const books = xml.getElementsByTagName('b');
+                const listEl = document.getElementById('books-list');
+                if (!books.length) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No se encontraron libros.';
+                    listEl.appendChild(li);
+                    return;
+                }
+                Array.from(books).forEach(bookEl => {
+                    const name = bookEl.getAttribute('n');
+                    const a = document.createElement('a');
+                    a.href = `lectura.html?book=${encodeURIComponent(name)}&chapter=1`;
+                    a.className = 'list-item';
+                    a.textContent = name;
+                    listEl.appendChild(a);
+                });
+            } catch (err) {
+                console.error('Error loading books:', err);
+                const listEl = document.getElementById('books-list');
+                const li = document.createElement('li');
+                li.textContent = 'Error cargando la lista de libros.';
+                listEl.appendChild(li);
+            }
+        }
+        loadBooks();
+    </script>
+</body>
+</html>
