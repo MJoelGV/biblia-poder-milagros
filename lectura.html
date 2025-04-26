@@ -428,8 +428,8 @@
         <div class="top-row">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="decrease-font" class="theme-toggle">A-</button>
-            <button id="increase-font" class="theme-toggle">A+</button>
+            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
         </div>
         <div class="navigation">
             <select id="version-selector" class="select-css">
@@ -1019,21 +1019,18 @@
         });
     </script>
     <script>
-        // Font size controls and persistence
-        const btnDec = document.getElementById('decrease-font');
-        const btnInc = document.getElementById('increase-font');
-        btnDec.addEventListener('click', () => adjustFontSize(-0.1));
-        btnInc.addEventListener('click', () => adjustFontSize(0.1));
+        // Load saved font size
+        const savedSize = localStorage.getItem('verseFontSize');
+        if (savedSize) document.documentElement.style.setProperty('--verse-font-size', savedSize + 'em');
+
+        // Adjust font size globally
         function adjustFontSize(delta) {
-          const root = document.documentElement;
-          const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
-          const newSize = Math.min(Math.max(current + delta, 0.6), 3);
-          root.style.setProperty('--verse-font-size', newSize + 'em');
-          localStorage.setItem('verseFontSize', newSize);
+            const root = document.documentElement;
+            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
+            const newSize = Math.min(Math.max(current + delta, 0.6), 3);
+            root.style.setProperty('--verse-font-size', newSize + 'em');
+            localStorage.setItem('verseFontSize', newSize);
         }
-        // Load saved size
-        const saved = localStorage.getItem('verseFontSize');
-        if (saved) document.documentElement.style.setProperty('--verse-font-size', saved + 'em');
     </script>
 </body>
 </html>
