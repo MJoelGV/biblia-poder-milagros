@@ -449,7 +449,7 @@
             <button id="search-button" class="search-button">🔍</button>
         </div>
     </div> <!-- cierre .controls -->
-    <audio id="audio-player" playsinline style="display:none;"></audio>
+
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
         <div id="results-content"></div>
@@ -480,21 +480,12 @@
         <div id="verses"></div>
     </div> <!-- cierre .chapter-content -->
 
-    <div id="audio-controls" style="position:fixed;bottom:100px;right:20px;z-index:1001;display:flex;gap:8px;">
-        <button id="read-book-float" class="theme-toggle" onclick="readBook()">🔊</button>
-        <button id="pause-reading-float" class="theme-toggle" onclick="pauseReading()" style="display:none;">⏸️</button>
-        <button id="stop-reading-float" class="theme-toggle" onclick="stopReading()" style="display:none;">⏹️</button>
-    </div>
-
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
         <select id="chapter-select" class="select-css">
             <option value="">Capítulo</option>
         </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
-        <button class="nav-button" id="read-book-bottom" onclick="readBook()">🔊</button>
-        <button class="nav-button" id="pause-reading-bottom" onclick="pauseReading()" style="display:none;">⏸️</button>
-        <button class="nav-button" id="stop-reading-bottom" onclick="stopReading()" style="display:none;">⏹️</button>
     </div>
 
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Instalar app</div>
@@ -505,7 +496,7 @@
         let currentChapter = 1;
         let currentVerse = 0;
         let currentVersion = 'Reina-Valera-1960';
-        const audioPlayer = document.getElementById('audio-player');
+        const audioPlayer = null;
         let playlist = [];
         let trackIndex = 0;
 
@@ -1044,49 +1035,6 @@
             const newSize = Math.min(Math.max(current + delta, 0.6), 3);
             root.style.setProperty('--verse-font-size', newSize + 'em');
             localStorage.setItem('verseFontSize', newSize);
-        }
-
-        function readBook() {
-            if (!currentBook) return;
-            playlist = Array.from(xmlDoc.querySelectorAll(`b[n="${currentBook}"] c`))
-                .map(c => `audio/${encodeURIComponent(currentBook)}-${c.getAttribute('n')}.mp3`);
-            trackIndex = 0;
-            audioPlayer.src = playlist[trackIndex];
-            audioPlayer.play();
-            toggleReadUI(true);
-        }
-
-        audioPlayer.addEventListener('ended', () => {
-            trackIndex++;
-            if (trackIndex < playlist.length) {
-                audioPlayer.src = playlist[trackIndex];
-                audioPlayer.play();
-            } else {
-                toggleReadUI(false);
-            }
-        });
-
-        function pauseReading() {
-            if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
-        }
-
-        function stopReading() {
-            audioPlayer.pause();
-            audioPlayer.currentTime = 0;
-            trackIndex = 0;
-            toggleReadUI(false);
-        }
-
-        function toggleReadUI(isReading) {
-            document.getElementById('read-book-btn').style.display = isReading ? 'none' : '';
-            document.getElementById('pause-reading-btn').style.display = isReading ? '' : 'none';
-            document.getElementById('stop-reading-btn').style.display = isReading ? '' : 'none';
-            document.getElementById('read-book-bottom').style.display = isReading ? 'none' : '';
-            document.getElementById('pause-reading-bottom').style.display = isReading ? '' : 'none';
-            document.getElementById('stop-reading-bottom').style.display = isReading ? '' : 'none';
-            document.getElementById('read-book-float').style.display = isReading ? 'none' : '';
-            document.getElementById('pause-reading-float').style.display = isReading ? '' : 'none';
-            document.getElementById('stop-reading-float').style.display = isReading ? '' : 'none';
         }
     </script>
 </body>
