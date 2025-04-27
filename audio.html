@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         .sidebar { display: none!important; }
-        #menu-panel { position: fixed; top: 60px; right: 20px; width: 300px; height: calc(100% - 60px); background: rgba(255,255,255,0.95); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
-        #menu-panel.open { transform: translateX(0); }
+        #menu-panel { position: fixed; top: 60px; left: 50%; width: 300px; height: calc(100% - 60px); background: rgba(255,255,255,0.95); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
+        #menu-panel.open { transform: translateX(-50%); }
         #menu-panel h2 { padding: 16px; margin: 0; font-size: 1.2em; }
         #menu-panel input { width: calc(100% - 32px); margin: 8px 16px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         #menu-panel ul { list-style: none; padding: 0 16px 16px; margin: 0; }
@@ -106,6 +106,9 @@
         // Actualizar velocidad
         speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
 
+        // Orden canónico de los libros
+        const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','titus','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
+
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
             try {
@@ -113,7 +116,8 @@
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
                 // extraer códigos únicos (abreviaciones)
-                const codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
+                let codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
+                codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
                 booksListEl.innerHTML = '';
                 menuBooksListEl.innerHTML = '';
                 chaptersListEl.innerHTML = '';
@@ -131,7 +135,13 @@
                     const mli = document.createElement('li');
                     mli.style.cursor = 'pointer';
                     mli.textContent = bookDisplayNames[code] || code;
-                    mli.onclick = () => { loadChaptersForBook(code, manifest); menuPanel.classList.remove('open'); };
+                    mli.onclick = () => {
+                        loadChaptersForBook(code, manifest);
+                        menuPanel.classList.remove('open');
+                        // Auto-play capítulo 1
+                        const first = manifest.find(item => item.name === `${code}-1`);
+                        if (first) playCustom(`${bookDisplayNames[code]} 1`, `audio/${first.file}`);
+                    };
                     menuBooksListEl.appendChild(mli);
                 });
             } catch (err) {
@@ -157,7 +167,7 @@
                 const li = document.createElement('li');
                 li.style.cursor = 'pointer';
                 li.textContent = chapNum;
-                li.onclick = () => playCustom(`${bookDisplayNames[code] || code} ${chapNum}`, 'audio/' + item.file);
+                li.onclick = () => playCustom(`${bookDisplayNames[code]} ${chapNum}`, 'audio/' + item.file);
                 chaptersListEl.appendChild(li);
             });
         }
@@ -203,6 +213,8 @@
             trackIndex++;
             if (trackIndex < playlist.length) {
                 audioPlayer.src = playlist[trackIndex];
+                const [code, chap] = playlist[trackIndex].split('/').pop().replace('.mp3','').split('-');
+                document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code]} ${chap}`;
                 audioPlayer.play();
             }
         });
