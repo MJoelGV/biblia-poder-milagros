@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escuchar Biblia - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="icons/pymicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .sidebar { display: none!important; }
+        #menu-panel { position: fixed; top: 60px; right: 20px; width: 300px; height: calc(100% - 60px); background: rgba(255,255,255,0.95); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
+        #menu-panel.open { transform: translateX(0); }
+        #menu-panel h2 { padding: 16px; margin: 0; font-size: 1.2em; }
+        #menu-panel input { width: calc(100% - 32px); margin: 8px 16px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        #menu-panel ul { list-style: none; padding: 0 16px 16px; margin: 0; }
+        #menu-panel li { padding: 8px 0; cursor: pointer; }
+        #menu-panel li:hover { background: rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <button id="menu-toggle" style="position:fixed; top:10px; right:10px; z-index:1001;">📖 Seleccionar Libro</button>
+    <div id="menu-panel">
+        <h2>Libros</h2>
+        <input type="search" id="menu-search" placeholder="Buscar libro...">
+        <ul id="menu-books-list"></ul>
+    </div>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <a href="index.html" class="home-icon">🏠</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+        </div>
+    </div>
+    <div class="audio-container" style="display:flex; gap:20px; margin-top:80px; padding:20px;">
+        <div class="sidebar" style="flex:1; max-width:300px;">
+            <h2>Selecciona un libro</h2>
+            <input type="search" id="book-search" placeholder="Buscar libro..." style="width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:4px;">
+            <ul id="books-list" class="select-css" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
+        </div>
+        <div class="main" style="flex:2;">
+            <h2 id="book-title">Información del libro</h2>
+            <div id="book-info" style="margin-bottom:20px;">Selecciona un libro para ver detalles.</div>
+            <div id="audio-settings" style="margin:10px 0; display:flex; align-items:center; gap:20px;">
+                <label>Velocidad: <input type="range" id="speed-slider" min="0.5" max="2" step="0.1" value="1"><span id="speed-value">1</span>x</label>
+            </div>
+            <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
+            <div id="player-controls" style="margin-top:20px; display:none;">
+                <h3 id="now-playing"></h3>
+                <button id="pause-reading">⏸️ Pausar/Continuar</button>
+                <button id="stop-reading">⏹️ Detener</button>
+                <audio id="audio-player" playsinline controls style="width:100%; display:none;"></audio>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Mapa de códigos a nombres completos global
+        const bookDisplayNames = {
+            'genesis': 'Génesis', 'exodus': 'Éxodo', 'lev': 'Levítico', 'num': 'Números', 'deu': 'Deuteronomio',
+            'joshua': 'Josué', 'judges': 'Jueces', 'ruth': 'Rut', '1sam': '1 Samuel', '2sam': '2 Samuel',
+            '1kin': '1 Reyes', '2kin': '2 Reyes', '1chron': '1 Crónicas', '2chron': '2 Crónicas',
+            'ezra': 'Esdras', 'nehemiah': 'Nehemías', 'esther': 'Ester', 'job': 'Job', 'psalm': 'Salmos',
+            'proverbs': 'Proverbios', 'ecc': 'Eclesiastés', 'song': 'Cantar de los Cantares', 'wisdom': 'Sabiduría',
+            'sirach': 'Eclesiástico', 'isaiah': 'Isaías', 'jere': 'Jeremías', 'lam': 'Lamentaciones', 'ezek': 'Ezequiel',
+            'dan': 'Daniel', 'hosea': 'Oseas', 'joel': 'Joel', 'amos': 'Amós', 'oba': 'Abdías', 'jonah': 'Jonás',
+            'micah': 'Miqueas', 'nahum': 'Nahúm', 'habak': 'Habacuc', 'haggai': 'Hageo', 'zeph': 'Sofonías',
+            'zech': 'Zacarías', 'mal': 'Malaquías', 'matt': 'Mateo', 'mark': 'Marcos', 'luke': 'Lucas',
+            'john': 'Juan', 'acts': 'Hechos de los Apóstoles', 'romans': 'Romanos', '1cor': '1 Corintios',
+            '2cor': '2 Corintios', 'gal': 'Gálatas', 'eph': 'Efesios', 'phil': 'Filipenses', 'phi': 'Filemón',
+            'col': 'Colosenses', '1the': '1 Tesalonicenses', '2the': '2 Tesalonicenses',
+            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'titus': 'Tito', 'heb': 'Hebreos', 'jam': 'Santiago',
+            '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan',
+            'jude': 'Judas', 'rev': 'Apocalipsis'
+        };
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const audioPlayer = document.getElementById('audio-player');
+        const chaptersListEl = document.getElementById('chapters-list');
+        const bookSearch = document.getElementById('book-search');
+        const bookTitleEl = document.getElementById('book-title');
+        const bookInfoEl = document.getElementById('book-info');
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuPanel = document.getElementById('menu-panel');
+        const menuSearch = document.getElementById('menu-search');
+        const menuBooksListEl = document.getElementById('menu-books-list');
+        console.log('Audio page script loaded');
+        // Filtrar lista de libros por búsqueda
+        bookSearch.oninput = () => {
+            const filter = bookSearch.value.toLowerCase();
+            Array.from(booksListEl.children).forEach(li => {
+                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        };
+        menuToggle.onclick = () => menuPanel.classList.toggle('open');
+        menuSearch.oninput = () => {
+            const filter = menuSearch.value.toLowerCase();
+            Array.from(menuBooksListEl.children).forEach(li => {
+                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        };
+        // Mostrar indicador inicial de carga
+        const booksListEl = document.getElementById('books-list');
+        booksListEl.innerHTML = '<li>Cargando libros...</li>';
+        let xmlDoc, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
+
+        // Actualizar velocidad
+        speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
+
+        // Cargar lista de libros desde el manifest.json dinámico
+        async function loadBooks() {
+            try {
+                const res = await fetch('audio/manifest.json');
+                if (!res.ok) throw new Error(res.statusText);
+                const manifest = await res.json();
+                // extraer códigos únicos (abreviaciones)
+                const codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
+                booksListEl.innerHTML = '';
+                menuBooksListEl.innerHTML = '';
+                chaptersListEl.innerHTML = '';
+                bookTitleEl.textContent = 'Información del libro';
+                bookInfoEl.innerHTML = 'Selecciona un libro para ver detalles.';
+                codes.forEach(code => {
+                    const li = document.createElement('li');
+                    li.style.cursor = 'pointer';
+                    li.textContent = bookDisplayNames[code] || code;
+                    li.onclick = () => loadChaptersForBook(code, manifest);
+                    booksListEl.appendChild(li);
+                });
+                // populate floating menu list
+                codes.forEach(code => {
+                    const mli = document.createElement('li');
+                    mli.style.cursor = 'pointer';
+                    mli.textContent = bookDisplayNames[code] || code;
+                    mli.onclick = () => { loadChaptersForBook(code, manifest); menuPanel.classList.remove('open'); };
+                    menuBooksListEl.appendChild(mli);
+                });
+            } catch (err) {
+                console.error('Error cargando manifest:', err);
+                booksListEl.innerHTML = '<li>Error cargando audio</li>';
+            }
+        }
+
+        // Mostrar capítulos de un libro seleccionado
+        function loadChaptersForBook(code, manifest) {
+            // Filtrar archivos cuyo nombre de archivo (item.file) comience con el código y separador '_'
+            const chapters = manifest
+                .filter(item => item.file.startsWith(code + '_'))
+                .sort((a, b) => {
+                    const numA = parseInt(a.file.match(/_(\d+)/)[1]);
+                    const numB = parseInt(b.file.match(/_(\d+)/)[1]);
+                    return numA - numB;
+                });
+            chaptersListEl.innerHTML = '';
+            showBookInfo(code, chapters);
+            chapters.forEach(item => {
+                const chapNum = item.file.match(/_(\d+)/)[1];
+                const li = document.createElement('li');
+                li.style.cursor = 'pointer';
+                li.textContent = chapNum;
+                li.onclick = () => playCustom(`${bookDisplayNames[code] || code} ${chapNum}`, 'audio/' + item.file);
+                chaptersListEl.appendChild(li);
+            });
+        }
+
+        // Reproducción de libro (solo MP3)
+        function playBook(bookName, bookNode) {
+            currentBookName = bookName;
+            currentBookNode = bookNode;
+            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
+            document.getElementById('player-controls').style.display = '';
+            const chapters = Array.from(bookNode.getElementsByTagName('c'));
+            playlist = chapters.map(c => {
+                const chap = c.getAttribute('n');
+                return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+            });
+            trackIndex = 0;
+            audioPlayer.style.display = '';
+            audioPlayer.playbackRate = parseFloat(speedSlider.value);
+            audioPlayer.src = playlist[trackIndex];
+            audioPlayer.play().catch(err => console.error('Error MP3:', err));
+        }
+
+        function playCustom(name, src) {
+            console.log('playCustom src:', src);
+            document.getElementById('now-playing').textContent = 'Escuchando ' + name;
+            document.getElementById('player-controls').style.display = 'block';
+            audioPlayer.style.display = 'block';
+            audioPlayer.playbackRate = parseFloat(speedSlider.value);
+            audioPlayer.src = src;
+            audioPlayer.play().catch(err => console.error('Error MP3:', err));
+        }
+
+        // Controles pausa y stop
+        document.getElementById('pause-reading').onclick = () => {
+            if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
+        };
+        document.getElementById('stop-reading').onclick = () => {
+            audioPlayer.pause(); audioPlayer.currentTime = 0;
+            document.getElementById('player-controls').style.display = 'none';
+        };
+        // MP3 cambia track
+        audioPlayer.addEventListener('ended', () => {
+            trackIndex++;
+            if (trackIndex < playlist.length) {
+                audioPlayer.src = playlist[trackIndex];
+                audioPlayer.play();
+            }
+        });
+        // Iniciar lista y reproducción
+        loadBooks();
+        // Función para mostrar info básica del libro
+        function showBookInfo(code, chapters) {
+            bookTitleEl.textContent = `Libro: ${bookDisplayNames[code] || code}`;
+            bookInfoEl.innerHTML = `<p>Número de capítulos: ${chapters.length}</p><p>Descripción no disponible.</p>`;
+        }
+    </script>
+</body>
+</html>
