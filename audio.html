@@ -66,16 +66,21 @@
 
         // Mostrar capítulos de un libro seleccionado
         function loadChaptersForBook(code, manifest) {
+            // Filtrar archivos cuyo nombre de archivo (item.file) comience con el código y separador '_'
             const chapters = manifest
-                .filter(item => item.name.startsWith(code + '-'))
-                .sort((a, b) => parseInt(a.name.split('-')[1]) - parseInt(b.name.split('-')[1]));
+                .filter(item => item.file.startsWith(code + '_'))
+                .sort((a, b) => {
+                    const numA = parseInt(a.file.match(/_(\d+)/)[1]);
+                    const numB = parseInt(b.file.match(/_(\d+)/)[1]);
+                    return numA - numB;
+                });
             booksListEl.innerHTML = '';
             chapters.forEach(item => {
-                const chapNum = item.name.split('-')[1];
+                const chapNum = item.file.match(/_(\d+)/)[1];
                 const li = document.createElement('li');
                 li.style.cursor = 'pointer';
                 li.textContent = chapNum;
-                li.onclick = () => playCustom(code + ' ' + chapNum, 'audio/' + item.file);
+                li.onclick = () => playCustom(`${code} ${chapNum}`, 'audio/' + item.file);
                 booksListEl.appendChild(li);
             });
         }
