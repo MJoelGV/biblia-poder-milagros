@@ -101,7 +101,7 @@
         // Mostrar indicador inicial de carga
         const booksListEl = document.getElementById('books-list');
         booksListEl.innerHTML = '<li>Cargando libros...</li>';
-        let xmlDoc, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
+        let xmlDoc, manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
 
         // Actualizar velocidad
         speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
@@ -115,8 +115,9 @@
                 const res = await fetch('audio/manifest.json');
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
+                manifestData = manifest;
                 // extraer códigos únicos (abreviaciones)
-                let codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
+                let codes = [...new Set(manifest.map(item => item.name.split(/[-_]/)[0].toLowerCase()))];
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
                 booksListEl.innerHTML = '';
                 menuBooksListEl.innerHTML = '';
@@ -192,11 +193,20 @@
 
         function playCustom(name, src) {
             console.log('playCustom src:', src);
+            // Construir playlist completo del libro
+            const fileName = src.split('/').pop();
+            const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            const chapters = manifestData
+                .filter(item => item.file.startsWith(code + '_'))
+                .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
+            playlist = chapters.map(item => `audio/${item.file}`);
+            trackIndex = playlist.indexOf(src);
+            // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
             document.getElementById('player-controls').style.display = 'block';
             audioPlayer.style.display = 'block';
             audioPlayer.playbackRate = parseFloat(speedSlider.value);
-            audioPlayer.src = src;
+            audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
         }
 
