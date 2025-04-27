@@ -4,9 +4,7 @@ permissions:
   pages: write     # allow actions to publish Pages
   id-token: write  # for any OIDC needs
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest

@@ -3,9 +3,25 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
-    // Obtener ruta sin query y sin slash inicial
-    const requestUrl = req.url.split('?')[0];
-    const relativePath = requestUrl === '/' ? 'index.html' : requestUrl.replace(/^\/+/, '');
+    // Endpoint para listar archivos de audio pregrabado
+    if (req.url === '/audio/list') {
+        const audioDir = path.join(__dirname, 'audio');
+        fs.readdir(audioDir, (err, files) => {
+            if (err) {
+                res.writeHead(500);
+                res.end('Error listando audio');
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(files));
+            }
+        });
+        return;
+    }
+
+    // Obtener ruta sin query y manejar percent-encoding
+    const rawUrl = req.url.split('?')[0];
+    const decodedUrl = decodeURIComponent(rawUrl);
+    const relativePath = decodedUrl === '/' ? 'index.html' : decodedUrl.replace(/^\/+/, '');
     let filePath = path.join(__dirname, relativePath);
     
     // Obtener la extensión del archivo
