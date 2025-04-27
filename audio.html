@@ -42,20 +42,41 @@
         // Actualizar velocidad
         speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
 
-        // Cargar libros desde XML principal
+        // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
-            const list = booksListEl;
-            list.innerHTML = '';
-            const entries = [
-                { name: 'Antiguo Testamento', src: '/audio/OT.mp3' },
-                { name: 'Nuevo Testamento', src: '/audio/NT.mp3' }
-            ];
-            entries.forEach(e => {
+            try {
+                const res = await fetch('audio/manifest.json');
+                if (!res.ok) throw new Error(res.statusText);
+                const manifest = await res.json();
+                // extraer códigos únicos (abreviaciones)
+                const codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
+                booksListEl.innerHTML = '';
+                codes.forEach(code => {
+                    const li = document.createElement('li');
+                    li.style.cursor = 'pointer';
+                    li.textContent = code;
+                    li.onclick = () => loadChaptersForBook(code, manifest);
+                    booksListEl.appendChild(li);
+                });
+            } catch (err) {
+                console.error('Error cargando manifest:', err);
+                booksListEl.innerHTML = '<li>Error cargando audio</li>';
+            }
+        }
+
+        // Mostrar capítulos de un libro seleccionado
+        function loadChaptersForBook(code, manifest) {
+            const chapters = manifest
+                .filter(item => item.name.startsWith(code + '-'))
+                .sort((a, b) => parseInt(a.name.split('-')[1]) - parseInt(b.name.split('-')[1]));
+            booksListEl.innerHTML = '';
+            chapters.forEach(item => {
+                const chapNum = item.name.split('-')[1];
                 const li = document.createElement('li');
                 li.style.cursor = 'pointer';
-                li.textContent = e.name;
-                li.onclick = () => playCustom(e.name, e.src);
-                list.appendChild(li);
+                li.textContent = chapNum;
+                li.onclick = () => playCustom(code + ' ' + chapNum, 'audio/' + item.file);
+                booksListEl.appendChild(li);
             });
         }
 
@@ -68,7 +89,7 @@
             const chapters = Array.from(bookNode.getElementsByTagName('c'));
             playlist = chapters.map(c => {
                 const chap = c.getAttribute('n');
-                return `/audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+                return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
             });
             trackIndex = 0;
             audioPlayer.style.display = '';

@@ -34,6 +34,16 @@ jobs:
       - name: Generate audio MP3s
         run: python generate_audio.py
 
+      - name: Generate audio manifest
+        run: |
+          python - << 'EOF'
+          import os, json
+          files = [f for f in os.listdir('audio') if f.endswith('.mp3')]
+          manifest = [{"name": os.path.splitext(f)[0], "file": f} for f in files]
+          with open('audio/manifest.json','w',encoding='utf-8') as out:
+            json.dump(manifest, out, ensure_ascii=False)
+          EOF
+
       - name: Commit generated audio files
         uses: EndBug/add-and-commit@v9
         with:
