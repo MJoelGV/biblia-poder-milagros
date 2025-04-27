@@ -8,8 +8,24 @@
     <meta name="theme-color" content="#4CAF50">
     <link rel="apple-touch-icon" href="icons/pymicon.png">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .sidebar { display: none!important; }
+        #menu-panel { position: fixed; top: 60px; right: 20px; width: 300px; height: calc(100% - 60px); background: rgba(255,255,255,0.95); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
+        #menu-panel.open { transform: translateX(0); }
+        #menu-panel h2 { padding: 16px; margin: 0; font-size: 1.2em; }
+        #menu-panel input { width: calc(100% - 32px); margin: 8px 16px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        #menu-panel ul { list-style: none; padding: 0 16px 16px; margin: 0; }
+        #menu-panel li { padding: 8px 0; cursor: pointer; }
+        #menu-panel li:hover { background: rgba(0,0,0,0.05); }
+    </style>
 </head>
 <body>
+    <button id="menu-toggle" style="position:fixed; top:10px; right:10px; z-index:1001;">📖 Seleccionar Libro</button>
+    <div id="menu-panel">
+        <h2>Libros</h2>
+        <input type="search" id="menu-search" placeholder="Buscar libro...">
+        <ul id="menu-books-list"></ul>
+    </div>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
@@ -45,11 +61,22 @@
         const bookSearch = document.getElementById('book-search');
         const bookTitleEl = document.getElementById('book-title');
         const bookInfoEl = document.getElementById('book-info');
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuPanel = document.getElementById('menu-panel');
+        const menuSearch = document.getElementById('menu-search');
+        const menuBooksListEl = document.getElementById('menu-books-list');
         console.log('Audio page script loaded');
         // Filtrar lista de libros por búsqueda
         bookSearch.oninput = () => {
             const filter = bookSearch.value.toLowerCase();
             Array.from(booksListEl.children).forEach(li => {
+                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        };
+        menuToggle.onclick = () => menuPanel.classList.toggle('open');
+        menuSearch.oninput = () => {
+            const filter = menuSearch.value.toLowerCase();
+            Array.from(menuBooksListEl.children).forEach(li => {
                 li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
             });
         };
@@ -70,6 +97,7 @@
                 // extraer códigos únicos (abreviaciones)
                 const codes = [...new Set(manifest.map(item => item.name.split('-')[0]))];
                 booksListEl.innerHTML = '';
+                menuBooksListEl.innerHTML = '';
                 chaptersListEl.innerHTML = '';
                 bookTitleEl.textContent = 'Información del libro';
                 bookInfoEl.innerHTML = 'Selecciona un libro para ver detalles.';
@@ -79,6 +107,14 @@
                     li.textContent = code;
                     li.onclick = () => loadChaptersForBook(code, manifest);
                     booksListEl.appendChild(li);
+                });
+                // populate floating menu list
+                codes.forEach(code => {
+                    const mli = document.createElement('li');
+                    mli.style.cursor = 'pointer';
+                    mli.textContent = code;
+                    mli.onclick = () => { loadChaptersForBook(code, manifest); menuPanel.classList.remove('open'); };
+                    menuBooksListEl.appendChild(mli);
                 });
             } catch (err) {
                 console.error('Error cargando manifest:', err);
