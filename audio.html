@@ -101,10 +101,23 @@
                 chaptersListEl.innerHTML = '';
                 bookTitleEl.textContent = 'Información del libro';
                 bookInfoEl.innerHTML = 'Selecciona un libro para ver detalles.';
+                const bookDisplayNames = {
+                    'genesis': 'Génesis',
+                    'exodus': 'Éxodo',
+                    'leviticus': 'Levítico',
+                    'numbers': 'Números',
+                    'deuteronomy': 'Deuteronomio',
+                    'romans': 'Romanos',
+                    '1cor': '1 Corintios',
+                    '2cor': '2 Corintios',
+                    '1chron': '1 Crónicas',
+                    '2chron': '2 Crónicas'
+                    // TODO: agregar más mapeos según sea necesario
+                };
                 codes.forEach(code => {
                     const li = document.createElement('li');
                     li.style.cursor = 'pointer';
-                    li.textContent = code;
+                    li.textContent = bookDisplayNames[code] || code;
                     li.onclick = () => loadChaptersForBook(code, manifest);
                     booksListEl.appendChild(li);
                 });
@@ -112,7 +125,7 @@
                 codes.forEach(code => {
                     const mli = document.createElement('li');
                     mli.style.cursor = 'pointer';
-                    mli.textContent = code;
+                    mli.textContent = bookDisplayNames[code] || code;
                     mli.onclick = () => { loadChaptersForBook(code, manifest); menuPanel.classList.remove('open'); };
                     menuBooksListEl.appendChild(mli);
                 });
@@ -139,7 +152,7 @@
                 const li = document.createElement('li');
                 li.style.cursor = 'pointer';
                 li.textContent = chapNum;
-                li.onclick = () => playCustom(`${code} ${chapNum}`, 'audio/' + item.file);
+                li.onclick = () => playCustom(`${bookDisplayNames[code] || code} ${chapNum}`, 'audio/' + item.file);
                 chaptersListEl.appendChild(li);
             });
         }
@@ -192,7 +205,7 @@
         loadBooks();
         // Función para mostrar info básica del libro
         function showBookInfo(code, chapters) {
-            bookTitleEl.textContent = `Libro: ${code}`;
+            bookTitleEl.textContent = `Libro: ${bookDisplayNames[code] || code}`;
             bookInfoEl.innerHTML = `<p>Número de capítulos: ${chapters.length}</p><p>Descripción no disponible.</p>`;
         }
     </script>
