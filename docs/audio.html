@@ -62,6 +62,8 @@
         .player-button:hover {
             background: #43A047;
         }
+        .seek-slider { width: 100%; accent-color: #4CAF50; margin-bottom: 10px; }
+        .time-display { text-align: center; font-size: 0.9em; color: #666; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -108,7 +110,9 @@
                     <button id="next-reading" class="player-button"><i class="fas fa-forward"></i></button>
                     <button id="stop-reading" class="player-button"><i class="fas fa-stop"></i></button>
                 </div>
-                <audio id="audio-player" playsinline style="width:100%;"></audio>
+                <div class="time-display"><span id="current-time">0:00</span> / <span id="duration">0:00</span></div>
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
+                <audio id="audio-player" playsinline style="display:none;"></audio>
             </div>
         </div>
     </div>
@@ -329,6 +333,26 @@
                 audioPlayer.pause();
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             }
+        };
+        // Seek slider and time update
+        const seekSlider = document.getElementById('seek-slider');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        function formatTime(sec) {
+            const m = Math.floor(sec/60);
+            const s = String(Math.floor(sec%60)).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            seekSlider.max = audioPlayer.duration;
+            durationEl.textContent = formatTime(audioPlayer.duration);
+        });
+        audioPlayer.addEventListener('timeupdate', () => {
+            seekSlider.value = audioPlayer.currentTime;
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+        });
+        seekSlider.oninput = () => {
+            audioPlayer.currentTime = seekSlider.value;
         };
         // Iniciar lista y reproducción
         loadBooks();
