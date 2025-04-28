@@ -925,6 +925,18 @@
             saveMemorized(mem);
             verseEl.classList.toggle('memorized');
         }
+        // Restaurar estados de marcados, comentarios y memorización
+        function restoreStates() {
+            const bm = loadBookmarks();
+            const com = loadComments();
+            const mem = loadMemorized();
+            document.querySelectorAll('.verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bm.includes(key)) v.classList.add('bookmarked');
+                if (com[key]) v.classList.add('comment');
+                if (mem.includes(key)) v.classList.add('memorized');
+            });
+        }
         const versesContainer = document.getElementById('verses');
         const menu = document.getElementById('verse-menu');
         let menuTarget = null;
