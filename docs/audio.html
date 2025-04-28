@@ -27,13 +27,15 @@
         #menu-toggle, #menu-panel { display: none !important; }
         #chapters-list { display: none !important; }
 
-        /* Modern player styles */
+        /* Modern player styles and layout */
+        body { background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%); }
         .player-wrapper {
-            background: #f9f9f9;
+            background: #fff;
+            max-width: 600px;
+            margin: 60px auto;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .player-header {
             font-size: 1.2em;
@@ -64,6 +66,20 @@
         }
         .seek-slider { width: 100%; accent-color: #4CAF50; margin-bottom: 10px; }
         .time-display { text-align: center; font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .audio-cover {
+            width: 100%;
+            height: 200px;
+            background-image: url('icons/pymicon.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .player-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +119,8 @@
             </div>
             <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
             <div id="player-controls" class="player-wrapper" style="display:none;">
+                <div class="audio-cover" id="player-cover"></div>
+                <div class="player-content">
                 <h3 id="now-playing" class="player-header"></h3>
                 <div class="player-buttons">
                     <button id="prev-reading" class="player-button"><i class="fas fa-backward"></i></button>
@@ -112,6 +130,7 @@
                 </div>
                 <div class="time-display"><span id="current-time">0:00</span> / <span id="duration">0:00</span></div>
                 <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
+                </div> <!-- .player-content -->
                 <audio id="audio-player" playsinline style="display:none;"></audio>
             </div>
         </div>
@@ -251,7 +270,7 @@
                 const li = document.createElement('li');
                 li.style.cursor = 'pointer';
                 li.textContent = chapNum;
-                li.onclick = () => playCustom(`${bookDisplayNames[code]} ${chapNum}`, 'audio/' + item.file);
+                li.onclick = () => playCustom(`${bookDisplayNames[code]} ${chapNum}`, `audio/${item.file}`);
                 chaptersListEl.appendChild(li);
             });
             setupChapterDropdown();
