@@ -191,47 +191,37 @@
     <!-- Install button and SW registration -->
     <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">descargar biblia de Poder y Milagros</button>
     <script>
-        // Cargar proverbio del día
-        async function loadDailyProverb() {
+        // Cargar versículo del día
+        async function loadDailyVerse() {
             try {
                 const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
                 const response = await fetch(`${baseUrl}biblia-files/Reina-Valera-1960.xmm`);
                 const xmlText = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-                // Obtener el libro de Proverbios
-                const proverbios = xmlDoc.querySelector('b[n="Proverbios"]');
-                if (!proverbios) throw new Error('No se encontró el libro de Proverbios');
-
-                // Obtener un capítulo aleatorio
-                const chapters = proverbios.getElementsByTagName('c');
-                const randomChapter = Math.floor(Math.random() * chapters.length) + 1;
-                const chapter = proverbios.querySelector(`c[n="${randomChapter}"]`);
-                if (!chapter) throw new Error('No se encontró el capítulo');
-
-                // Obtener un versículo aleatorio
-                const verses = chapter.getElementsByTagName('v');
-                const randomVerse = Math.floor(Math.random() * verses.length) + 1;
-                const verse = chapter.querySelector(`v[n="${randomVerse}"]`);
-                if (!verse) throw new Error('No se encontró el versículo');
-
-                // Mostrar el versículo
-                document.getElementById('proverb-text').textContent = verse.textContent;
-                document.getElementById('proverb-reference').textContent = `Proverbios ${randomChapter}:${randomVerse}`;
-
-                // Actualizar enlaces
-                const url = `${baseUrl}lectura.html?book=Proverbios&chapter=${randomChapter}&verse=${randomVerse}`;
+                const verses = xmlDoc.getElementsByTagName('v');
+                const total = verses.length;
+                const today = new Date();
+                const seed = Math.floor(today.setHours(0,0,0,0) / 86400000);
+                const idx = seed % total;
+                const verseEl = verses[idx];
+                const verseNum = verseEl.getAttribute('n');
+                const chapterEl = verseEl.parentNode;
+                const chapterNum = chapterEl.getAttribute('n');
+                const bookEl = chapterEl.parentNode;
+                const bookName = bookEl.getAttribute('n');
+                document.getElementById('proverb-text').textContent = verseEl.textContent;
+                document.getElementById('proverb-reference').textContent = `${bookName} ${chapterNum}:${verseNum}`;
+                const url = `${baseUrl}lectura.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
                 document.getElementById('read-more-link').href = url;
                 document.getElementById('proverb-link').href = url;
             } catch (error) {
-                console.error('Error al cargar el proverbio:', error);
-                document.getElementById('proverb-text').textContent = 'Error al cargar el proverbio del día';
+                console.error('Error al cargar el versículo del día:', error);
+                document.getElementById('proverb-text').textContent = 'Error al cargar el versículo del día';
             }
         }
-
-        // Cargar el proverbio cuando la página esté lista
-        loadDailyProverb();
+        // Cargar el versículo cuando la página esté lista
+        loadDailyVerse();
     </script>
     <script>
         if('serviceWorker' in navigator) {
