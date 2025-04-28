@@ -1,6 +1,6 @@
 {
   "name": "Biblia de Poder y Milagros",
-  "short_name": "BibliaPDM",
+  "short_name": "BibliaPYM",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
