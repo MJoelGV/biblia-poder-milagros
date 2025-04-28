@@ -17,6 +17,12 @@
         #menu-panel ul { list-style: none; padding: 0 16px 16px; margin: 0; }
         #menu-panel li { padding: 8px 0; cursor: pointer; }
         #menu-panel li:hover { background: rgba(0,0,0,0.05); }
+        /* Dropdown styles */
+        .dropdown { position: relative; display: inline-block; margin-right: 10px; }
+        .dropdown-btn { background: #f0f0f0; border: 1px solid #ccc; padding: 6px 12px; border-radius:4px; cursor:pointer; }
+        .dropdown-list { position:absolute; top:100%; left:0; background:#fff; border:1px solid #ccc; border-radius:4px; list-style:none; margin:0; padding:0; max-height:200px; overflow:auto; display:none; z-index:1002; min-width:150px; }
+        .dropdown-list li { padding:8px; cursor: pointer; }
+        .dropdown-list li:hover { background:#f5f5f5; }
     </style>
 </head>
 <body>
@@ -43,6 +49,16 @@
             <div id="book-info" style="margin-bottom:20px;">Selecciona un libro para ver detalles.</div>
             <div id="audio-settings" style="margin:10px 0; display:flex; align-items:center; gap:20px;">
                 <label>Velocidad: <input type="range" id="speed-slider" min="0.5" max="2" step="0.1" value="1"><span id="speed-value">1</span>x</label>
+            </div>
+            <div id="dropdowns" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
+                <div class="dropdown">
+                    <button id="book-dropdown-btn" class="dropdown-btn">Libro: <span id="book-dropdown-label">Seleccione</span> ▼</button>
+                    <ul id="book-dropdown-list" class="dropdown-list"></ul>
+                </div>
+                <div class="dropdown">
+                    <button id="chapter-dropdown-btn" class="dropdown-btn">Capítulo: <span id="chapter-dropdown-label">1</span> ▼</button>
+                    <ul id="chapter-dropdown-list" class="dropdown-list"></ul>
+                </div>
             </div>
             <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
             <div id="player-controls" style="margin-top:20px; display:none;">
@@ -171,6 +187,7 @@
                 li.onclick = () => playCustom(`${bookDisplayNames[code]} ${chapNum}`, 'audio/' + item.file);
                 chaptersListEl.appendChild(li);
             });
+            setupChapterDropdown();
         }
 
         // Reproducción de libro (solo MP3)
@@ -230,10 +247,51 @@
         });
         // Iniciar lista y reproducción
         loadBooks();
+        setupDropdowns();
         // Función para mostrar info básica del libro
         function showBookInfo(code, chapters) {
             bookTitleEl.textContent = `Libro: ${bookDisplayNames[code] || code}`;
             bookInfoEl.innerHTML = `<p>Número de capítulos: ${chapters.length}</p><p>Descripción no disponible.</p>`;
+        }
+        // Funciones dropdowns
+        function setupDropdowns() {
+            const list = document.getElementById('book-dropdown-list');
+            const lbl = document.getElementById('book-dropdown-label');
+            const btn = document.getElementById('book-dropdown-btn');
+            list.innerHTML = '';
+            Object.keys(bookDisplayNames).forEach(code => {
+                const li = document.createElement('li');
+                li.textContent = bookDisplayNames[code];
+                li.onclick = () => {
+                    loadChaptersForBook(code, manifestData);
+                    lbl.textContent = bookDisplayNames[code];
+                    list.style.display = 'none';
+                    // Auto-play capítulo 1 al seleccionar libro
+                    const firstItem = manifestData.find(item => item.name === `${code}-1`);
+                    if (firstItem) {
+                        playCustom(`${bookDisplayNames[code]} 1`, `audio/${firstItem.file}`);
+                    }
+                };
+                list.appendChild(li);
+            });
+            btn.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
+        }
+        function setupChapterDropdown() {
+            const list = document.getElementById('chapter-dropdown-list');
+            const btn = document.getElementById('chapter-dropdown-btn');
+            list.innerHTML = '';
+            document.querySelectorAll('#chapters-list li').forEach(el => {
+                const num = el.textContent;
+                const li = document.createElement('li');
+                li.textContent = num;
+                li.onclick = () => {
+                    document.getElementById('chapter-dropdown-label').textContent = num;
+                    el.click();
+                    list.style.display = 'none';
+                };
+                list.appendChild(li);
+            });
+            btn.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
         }
     </script>
 </body>
