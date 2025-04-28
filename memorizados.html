@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versículos memorizados - Biblia de Poder y Milagros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-color, #f9f9f9); color: #333; }
+        .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
+        .list { max-width: 800px; margin: 20px auto; padding: 0; list-style: none; }
+        .list-item { display: block; padding: 12px; background: white; margin-bottom: 8px; border-radius: 8px; text-decoration: none; color: var(--primary-color, #4CAF50); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .list-item:hover { background: #e8f5e9; }
+        .nav { text-align: center; margin-top: 10px; }
+        .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>Versículos memorizados</h1></div>
+    <div class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="lectura.html">Lectura</a>
+    </div>
+    <ul id="memorized-list" class="list"></ul>
+    <script>
+        const list = JSON.parse(localStorage.getItem('memorized') || '[]');
+        const container = document.getElementById('memorized-list');
+        if (!list.length) {
+            const li = document.createElement('li');
+            li.textContent = 'No tienes versículos memorizados.';
+            container.appendChild(li);
+        } else {
+            list.forEach(key => {
+                const [book, chapter, verse] = key.split('-');
+                const a = document.createElement('a');
+                a.href = `lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                a.className = 'list-item';
+                a.textContent = `${book} ${chapter}:${verse}`;
+                container.appendChild(a);
+            });
+        }
+    </script>
+</body>
+</html>
