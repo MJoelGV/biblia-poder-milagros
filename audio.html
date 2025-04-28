@@ -26,6 +26,42 @@
         /* Ocultar antiguo selector y lista de capítulos */
         #menu-toggle, #menu-panel { display: none !important; }
         #chapters-list { display: none !important; }
+
+        /* Modern player styles */
+        .player-wrapper {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .player-header {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        .player-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .player-button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .player-button:hover {
+            background: #43A047;
+        }
     </style>
 </head>
 <body>
@@ -64,13 +100,15 @@
                 </div>
             </div>
             <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
-            <div id="player-controls" style="margin-top:20px; display:none;">
-                <h3 id="now-playing"></h3>
-                <button id="prev-reading">⏮️ Anterior</button>
-                <button id="pause-reading">⏸️ Pausar/Continuar</button>
-                <button id="next-reading">⏭️ Siguiente</button>
-                <button id="stop-reading">⏹️ Detener</button>
-                <audio id="audio-player" playsinline controls style="width:100%; display:none;"></audio>
+            <div id="player-controls" class="player-wrapper" style="display:none;">
+                <h3 id="now-playing" class="player-header"></h3>
+                <div class="player-buttons">
+                    <button id="prev-reading" class="player-button"><i class="fas fa-backward"></i></button>
+                    <button id="play-pause" class="player-button"><i class="fas fa-play"></i></button>
+                    <button id="next-reading" class="player-button"><i class="fas fa-forward"></i></button>
+                    <button id="stop-reading" class="player-button"><i class="fas fa-stop"></i></button>
+                </div>
+                <audio id="audio-player" playsinline style="width:100%;"></audio>
             </div>
         </div>
     </div>
@@ -264,18 +302,15 @@
         }
 
         // Controles pausa y stop
-        document.getElementById('pause-reading').onclick = () => {
-            if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
-        };
-        document.getElementById('stop-reading').onclick = () => {
-            audioPlayer.pause(); audioPlayer.currentTime = 0;
-            document.getElementById('player-controls').style.display = 'none';
-        };
         document.getElementById('prev-reading').onclick = () => {
             if (trackIndex > 0) { trackIndex--; playTrack(trackIndex); }
         };
         document.getElementById('next-reading').onclick = () => {
             if (trackIndex < playlist.length - 1) { trackIndex++; playTrack(trackIndex); }
+        };
+        document.getElementById('stop-reading').onclick = () => {
+            audioPlayer.pause(); audioPlayer.currentTime = 0;
+            document.getElementById('player-controls').style.display = 'none';
         };
         // MP3 cambia track
         audioPlayer.addEventListener('ended', () => {
@@ -284,6 +319,17 @@
                 playTrack(trackIndex);
             }
         });
+        // Play/Pause toggle
+        const playPauseBtn = document.getElementById('play-pause');
+        playPauseBtn.onclick = () => {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        };
         // Iniciar lista y reproducción
         loadBooks();
         // Función para mostrar info del libro con detalles
