@@ -16,8 +16,8 @@ def slugify(text):
 
 # Rutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-xml_dir = os.path.join(BASE_DIR, 'biblia-files')
-xml_files = [os.path.join(xml_dir, f) for f in os.listdir(xml_dir) if f.endswith('.xmm')]
+xml_dir = os.path.join(BASE_DIR, 'docs', 'biblia-files')
+xml_files = [os.path.join(xml_dir, f) for f in os.listdir(xml_dir) if f.endswith('.xml')]
 audio_dir = os.path.join(BASE_DIR, 'audio')
 
 # Crear directorio de audio si no existe
