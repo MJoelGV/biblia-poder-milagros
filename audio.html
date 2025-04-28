@@ -10,77 +10,20 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        .sidebar { display: none!important; }
-        #menu-panel { position: fixed; top: 60px; left: 50%; width: 300px; height: calc(100% - 60px); background: rgba(255,255,255,0.95); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
-        #menu-panel.open { transform: translateX(-50%); }
-        #menu-panel h2 { padding: 16px; margin: 0; font-size: 1.2em; }
-        #menu-panel input { width: calc(100% - 32px); margin: 8px 16px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        #menu-panel ul { list-style: none; padding: 0 16px 16px; margin: 0; }
-        #menu-panel li { padding: 8px 0; cursor: pointer; }
-        #menu-panel li:hover { background: rgba(0,0,0,0.05); }
-        /* Dropdown styles */
-        .dropdown { position: relative; display: inline-block; margin-right: 10px; }
-        .dropdown-btn { background: #f0f0f0; border: 1px solid #ccc; padding: 6px 12px; border-radius:4px; cursor:pointer; }
-        .dropdown-list { position:absolute; top:100%; left:0; background:#fff; border:1px solid #ccc; border-radius:4px; list-style:none; margin:0; padding:0; max-height:200px; overflow:auto; display:none; z-index:1002; min-width:150px; }
-        .dropdown-list li { padding:8px; cursor: pointer; }
-        .dropdown-list li:hover { background:#f5f5f5; }
-        /* Ocultar antiguo selector y lista de capítulos */
-        #menu-toggle, #menu-panel { display: none !important; }
-        #chapters-list { display: none !important; }
-
-        /* Modern player styles and layout */
-        body { background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%); }
-        .player-wrapper {
-            background: #fff;
-            max-width: 600px;
-            margin: 60px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .player-header {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            color: #4CAF50;
-        }
-        .player-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        .player-button {
-            background: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .player-button:hover {
-            background: #43A047;
-        }
-        .seek-slider { width: 100%; accent-color: #4CAF50; margin-bottom: 10px; }
-        .time-display { text-align: center; font-size: 0.9em; color: #666; margin-bottom: 10px; }
-        .audio-cover {
-            width: 100%;
-            height: 200px;
-            background-image: url('icons/pymicon.png');
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .player-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        /* Audio page mobile modern layout */
+        body { margin: 0; background: #121212; color: #fff; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        #player-controls { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; box-sizing: border-box; overflow: hidden; }
+        #player-controls::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('icons/pymicon.png') center/cover no-repeat; filter: blur(20px) brightness(40%); z-index: -1; }
+        .audio-cover { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; margin-top: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .audio-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .player-header { font-size: 1.2em; margin: 20px 0 10px; }
+        .seek-slider { width: calc(100% - 40px); accent-color: #1DB954; margin: 0 20px; }
+        .time-display { display: flex; justify-content: space-between; width: calc(100% - 40px); font-size: 0.9em; margin: 10px 20px; }
+        .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
+        .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
+        .player-button:hover { color: #1DB954; }
+        /* Mostrar menú lateral y lista de capítulos */
+        /* .sidebar, #menu-toggle, #menu-panel, #chapters-list { display: none !important; } */
     </style>
 </head>
 <body>
@@ -119,19 +62,16 @@
                 </div>
             </div>
             <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
-            <div id="player-controls" class="player-wrapper" style="display:none;">
-                <div class="audio-cover" id="player-cover"></div>
-                <div class="player-content">
-                <h3 id="now-playing" class="player-header"></h3>
+            <div id="player-controls" style="display:none;">
+                <div class="audio-cover"><img src="icons/pymicon.png" alt="Cover"></div>
+                <h3 id="now-playing"></h3>
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
+                <div class="time-display"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
                 <div class="player-buttons">
                     <button id="prev-reading" class="player-button" title="Anterior"><i class="fas fa-backward"></i></button>
-                    <button id="play-pause" class="player-button" title="Reproducir/Pausar"><i class="fas fa-play"></i></button>
+                    <button id="play-pause" class="player-button" title="Play/Pause"><i class="fas fa-play"></i></button>
                     <button id="next-reading" class="player-button" title="Siguiente"><i class="fas fa-forward"></i></button>
-                    <button id="stop-reading" class="player-button" title="Detener"><i class="fas fa-stop"></i></button>
                 </div>
-                <div class="time-display"><span id="current-time">0:00</span> / <span id="duration">0:00</span></div>
-                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
-                </div> <!-- .player-content -->
                 <audio id="audio-player" playsinline style="display:none;"></audio>
             </div>
         </div>
