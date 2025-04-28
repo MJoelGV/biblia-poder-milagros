@@ -154,6 +154,10 @@
             background-color: rgba(76, 175, 80, 0.15);
         }
 
+        .verse.bookmarked { background: #fffa8c; }
+        .verse.comment { border-left: 4px solid var(--primary-color); }
+        .verse.memorized { background: #c6f4d6; }
+
         .verse-number {
             color: var(--primary-color);
             font-weight: bold;
@@ -375,8 +379,6 @@
         }
 
         /* Verso marcado y menú contextual */
-        .verse.bookmarked { background: #fffa8c; }
-        .verse.comment { border-left: 4px solid var(--primary-color); }
         .verse-menu {
             display: none;
             position: absolute;
@@ -460,6 +462,7 @@
         <ul>
             <li id="menu-toggle-bookmark">Marcar versículo</li>
             <li id="menu-add-comment">Agregar comentario</li>
+            <li id="menu-memorize-verse">Memorizar versículo</li>
         </ul>
     </div>
 
@@ -889,6 +892,12 @@
         function saveComments(obj) {
             localStorage.setItem('comments', JSON.stringify(obj));
         }
+        function loadMemorized() {
+            return JSON.parse(localStorage.getItem('memorized') || '[]');
+        }
+        function saveMemorized(arr) {
+            localStorage.setItem('memorized', JSON.stringify(arr));
+        }
         function toggleBookmark(verseEl) {
             const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
             const bm = loadBookmarks();
@@ -908,14 +917,14 @@
             saveComments(com);
             verseEl.classList.toggle('comment', !!c);
         }
-        function restoreStates() {
-            const bm = loadBookmarks();
-            const com = loadComments();
-            document.querySelectorAll('.verse').forEach(v => {
-                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-                if (bm.includes(key)) v.classList.add('bookmarked');
-                if (com[key]) v.classList.add('comment');
-            });
+        function toggleMemorize(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const mem = loadMemorized();
+            const idx = mem.indexOf(key);
+            if (idx >= 0) mem.splice(idx, 1);
+            else mem.push(key);
+            saveMemorized(mem);
+            verseEl.classList.toggle('memorized');
         }
         const versesContainer = document.getElementById('verses');
         const menu = document.getElementById('verse-menu');
@@ -928,6 +937,9 @@
                 v.classList.contains('bookmarked') ? 'Desmarcar versículo' : 'Marcar versículo';
             const commentItem = document.getElementById('menu-add-comment');
             commentItem.textContent = v.classList.contains('comment') ? 'Ver comentario' : 'Agregar comentario';
+            const memItem = document.getElementById('menu-memorize-verse');
+            const memKey = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+            memItem.textContent = loadMemorized().includes(memKey) ? 'Dejar de memorizar versículo' : 'Memorizar versículo';
             const rect = v.getBoundingClientRect();
             menu.style.top = (rect.top + window.scrollY) + 'px';
             menu.style.left = (rect.left + window.scrollX) + 'px';
@@ -941,6 +953,10 @@
         });
         document.getElementById('menu-add-comment').addEventListener('click', () => {
             openCommentModal(menuTarget);
+            menu.style.display = 'none';
+        });
+        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            toggleMemorize(menuTarget);
             menu.style.display = 'none';
         });
         // Cerrar menú al hacer clic fuera
