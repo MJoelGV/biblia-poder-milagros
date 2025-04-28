@@ -12,6 +12,7 @@ jobs:
   generate-audio:
     runs-on: ubuntu-latest
     env:
+      VOICERSS_API_KEY: ${{ secrets.VOICERSS_API_KEY }}
       VOICERSS_VOICE: ${{ secrets.VOICERSS_VOICE }}
     steps:
       - name: Checkout repository
