@@ -87,7 +87,7 @@
             'john': 'Juan', 'acts': 'Hechos de los Apóstoles', 'romans': 'Romanos', '1cor': '1 Corintios',
             '2cor': '2 Corintios', 'gal': 'Gálatas', 'eph': 'Efesios', 'phil': 'Filipenses', 'phi': 'Filemón',
             'col': 'Colosenses', '1the': '1 Tesalonicenses', '2the': '2 Tesalonicenses',
-            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'titus': 'Tito', 'tit': 'Tito',
+            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'tit': 'Tito',
             'heb': 'Hebreos', 'jam': 'Santiago',
             '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan',
             'jude': 'Judas', 'rev': 'Apocalipsis'
@@ -127,7 +127,7 @@
         speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
 
         // Orden canónico de los libros
-        const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','titus','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
+        const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','tit','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
 
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
@@ -165,6 +165,8 @@
                     };
                     menuBooksListEl.appendChild(mli);
                 });
+                // Inicializar dropdown de libros tras cargar manifest
+                setupDropdowns();
             } catch (err) {
                 console.error('Error cargando manifest:', err);
                 booksListEl.innerHTML = '<li>Error cargando audio</li>';
@@ -251,7 +253,6 @@
         });
         // Iniciar lista y reproducción
         loadBooks();
-        setupDropdowns();
         // Función para mostrar info básica del libro
         function showBookInfo(code, chapters) {
             bookTitleEl.textContent = `Libro: ${bookDisplayNames[code] || code}`;
@@ -263,17 +264,21 @@
             const lbl = document.getElementById('book-dropdown-label');
             const btn = document.getElementById('book-dropdown-btn');
             list.innerHTML = '';
-            Object.keys(bookDisplayNames).forEach(code => {
+            // Solo códigos disponibles en el manifest (ej. 'tit', no 'titus')
+            const codes = [...new Set(manifestData.map(item => item.name))];
+            // Orden canónico según bibleOrder
+            codes.sort((a, b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
+            codes.forEach(code => {
                 const li = document.createElement('li');
-                li.textContent = bookDisplayNames[code];
+                li.textContent = bookDisplayNames[code] || code;
                 li.onclick = () => {
                     loadChaptersForBook(code, manifestData);
-                    lbl.textContent = bookDisplayNames[code];
+                    lbl.textContent = bookDisplayNames[code] || code;
                     list.style.display = 'none';
-                    // Auto-play capítulo 1 al seleccionar libro
-                    const firstItem = manifestData.find(item => item.name === `${code}-1`);
+                    // Auto-play capítulo 1
+                    const firstItem = manifestData.find(item => item.name === code && item.file.startsWith(code + '_1'));
                     if (firstItem) {
-                        playCustom(`${bookDisplayNames[code]} 1`, `audio/${firstItem.file}`);
+                        playCustom(`${bookDisplayNames[code] || code} 1`, `audio/${firstItem.file}`);
                     }
                 };
                 list.appendChild(li);
