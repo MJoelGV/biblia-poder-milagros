@@ -66,7 +66,9 @@
             <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
             <div id="player-controls" style="margin-top:20px; display:none;">
                 <h3 id="now-playing"></h3>
+                <button id="prev-reading">⏮️ Anterior</button>
                 <button id="pause-reading">⏸️ Pausar/Continuar</button>
+                <button id="next-reading">⏭️ Siguiente</button>
                 <button id="stop-reading">⏹️ Detener</button>
                 <audio id="audio-player" playsinline controls style="width:100%; display:none;"></audio>
             </div>
@@ -91,6 +93,23 @@
             'heb': 'Hebreos', 'jam': 'Santiago',
             '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan',
             'jude': 'Judas', 'rev': 'Apocalipsis'
+        };
+        // Mapa de metadatos de libros para descripción (autor, fecha, tema, descripción, temas clave)
+        const bookMeta = {
+            'genesis': {
+                author: 'Moisés',
+                date: '1445-1405 a.C.',
+                theme: 'Los orígenes y el pacto de Dios',
+                description: 'El libro del Génesis narra la creación del mundo, la caída del hombre, el diluvio universal y las historias de los patriarcas Abraham, Isaac y Jacob. Establece los fundamentos de la relación entre Dios y la humanidad.',
+                keyTopics: ['La Creación', 'El Diluvio', 'Abraham y el Pacto', 'José en Egipto']
+            },
+            'tit': {
+                author: 'Pablo',
+                date: 'c. 63-65 d.C.',
+                theme: 'Organización de la Iglesia y Conducta Cristiana',
+                description: 'La carta a Tito contiene instrucciones pastorales para el liderazgo de la iglesia en Creta y la conducta de los creyentes.',
+                keyTopics: ['Liderazgo Pastoral', 'Carácter Cristiano', 'Vida en Comunidad']
+            }
         };
         const speedSlider = document.getElementById('speed-slider');
         const speedValue = document.getElementById('speed-value');
@@ -233,6 +252,17 @@
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
         }
 
+        // Función para reproducir track y actualizar indicador
+        function playTrack(index) {
+            const src = playlist[index];
+            audioPlayer.src = src;
+            const fileName = src.split('/').pop().replace('.mp3','');
+            const parts = fileName.includes('-') ? fileName.split('-') : fileName.split('_');
+            const code = parts[0], chap = parts[1];
+            document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code]} ${chap}`;
+            audioPlayer.play();
+        }
+
         // Controles pausa y stop
         document.getElementById('pause-reading').onclick = () => {
             if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
@@ -241,22 +271,37 @@
             audioPlayer.pause(); audioPlayer.currentTime = 0;
             document.getElementById('player-controls').style.display = 'none';
         };
+        document.getElementById('prev-reading').onclick = () => {
+            if (trackIndex > 0) { trackIndex--; playTrack(trackIndex); }
+        };
+        document.getElementById('next-reading').onclick = () => {
+            if (trackIndex < playlist.length - 1) { trackIndex++; playTrack(trackIndex); }
+        };
         // MP3 cambia track
         audioPlayer.addEventListener('ended', () => {
-            trackIndex++;
-            if (trackIndex < playlist.length) {
-                audioPlayer.src = playlist[trackIndex];
-                const [code, chap] = playlist[trackIndex].split('/').pop().replace('.mp3','').split('-');
-                document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code]} ${chap}`;
-                audioPlayer.play();
+            if (trackIndex < playlist.length - 1) {
+                trackIndex++;
+                playTrack(trackIndex);
             }
         });
         // Iniciar lista y reproducción
         loadBooks();
-        // Función para mostrar info básica del libro
+        // Función para mostrar info del libro con detalles
         function showBookInfo(code, chapters) {
-            bookTitleEl.textContent = `Libro: ${bookDisplayNames[code] || code}`;
-            bookInfoEl.innerHTML = `<p>Número de capítulos: ${chapters.length}</p><p>Descripción no disponible.</p>`;
+            const key = code.toLowerCase();
+            bookTitleEl.textContent = `Libro: ${bookDisplayNames[key] || code}`;
+            const meta = bookMeta[key];
+            if (meta) {
+                bookInfoEl.innerHTML = `
+                    <p>Autor: ${meta.author}</p>
+                    <p>Fecha: ${meta.date}</p>
+                    <p>Tema: ${meta.theme}</p>
+                    <p>${meta.description}</p>
+                    <p>Temas Clave: ${meta.keyTopics.join(' · ')}</p>
+                `;
+            } else {
+                bookInfoEl.innerHTML = `<p>Número de capítulos: ${chapters.length}</p><p>Descripción no disponible.</p>`;
+            }
         }
         // Funciones dropdowns
         function setupDropdowns() {
