@@ -410,6 +410,19 @@
             padding: 8px; cursor: pointer;
         }
         .verse-menu li:hover { background: rgba(0,0,0,0.05); }
+        /* Responsive: wrap controls and selectors on small screens */
+        @media (max-width: 768px) {
+            .top-row, .navigation {
+                flex-wrap: wrap;
+            }
+            .top-row > *, .navigation > * {
+                margin: 5px 8px;
+            }
+            .navigation {
+                margin: 10px 0;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
