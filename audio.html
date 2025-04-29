@@ -22,24 +22,18 @@
         .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
         .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
         .player-button:hover { color: #1DB954; }
-        /* Mostrar menú lateral y lista de capítulos */
-        /* .sidebar, #menu-toggle, #menu-panel, #chapters-list { display: none !important; } */
+        /* Show sidebar, hide floating menu */
+        #menu-toggle, #menu-panel { display: none !important; }
     </style>
 </head>
 <body>
-    <button id="menu-toggle" style="position:fixed; top:10px; right:10px; z-index:1001;">📖 Seleccionar Libro</button>
-    <div id="menu-panel">
-        <h2>Libros</h2>
-        <input type="search" id="menu-search" placeholder="Buscar libro...">
-        <ul id="menu-books-list"></ul>
-    </div>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
         </div>
     </div>
-    <div class="audio-container" style="display:flex; gap:20px; margin-top:80px; padding:20px;">
+    <div class="audio-container" style="display:flex; flex-direction:row; gap:20px; margin-top:80px; padding:20px;">
         <div class="sidebar" style="flex:1; max-width:300px;">
             <h2>Selecciona un libro</h2>
             <input type="search" id="book-search" placeholder="Buscar libro..." style="width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:4px;">
