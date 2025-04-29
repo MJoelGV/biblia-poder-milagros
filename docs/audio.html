@@ -24,21 +24,36 @@
         .player-button:hover { color: #1DB954; }
         /* Ensure static lists always visible */
         #books-list, #chapters-list { display:block !important; max-height:60vh; overflow:auto !important; }
-        /* Floating menu selector styles */
-        #menu-toggle { position: fixed; top: 10px; right: 10px; z-index: 1001; background: rgba(255,255,255,0.8); border: none; border-radius: 4px; padding: 8px; cursor: pointer; }
-        #menu-panel { position: fixed; top: 60px; right: 10px; width: 300px; max-height: calc(100% - 70px); background: #fff; color: #000; padding: 10px; border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
-        #menu-panel.open { transform: translateX(0); }
-        #menu-panel input { width: 100%; margin-bottom: 8px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
-        #menu-panel ul { list-style: none; padding: 0; margin: 0; }
+        /* Dropdowns */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .dropdown-list {
+            position: absolute;
+            background: #fff;
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            overflow: auto;
+            display: none;
+        }
+        .dropdown-list li {
+            cursor: pointer;
+        }
+        .dropdown-list li:hover {
+            background: #ccc;
+        }
     </style>
 </head>
 <body>
-    <button id="menu-toggle">📖 Seleccionar Libro</button>
-    <div id="menu-panel">
-        <h2>Libros</h2>
-        <input type="search" id="menu-search" placeholder="Buscar libro...">
-        <ul id="menu-books-list"></ul>
-    </div>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
@@ -127,18 +142,6 @@
         const bookTitleEl = document.getElementById('book-title');
         const bookInfoEl = document.getElementById('book-info');
         console.log('Audio page script loaded');
-        // Floating menu JS
-        const menuToggle = document.getElementById('menu-toggle');
-        const menuPanel = document.getElementById('menu-panel');
-        const menuSearch = document.getElementById('menu-search');
-        const menuBooksListEl = document.getElementById('menu-books-list');
-        menuToggle.onclick = () => menuPanel.classList.toggle('open');
-        menuSearch.oninput = () => {
-            const filter = menuSearch.value.toLowerCase();
-            Array.from(menuBooksListEl.children).forEach(li => {
-                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
-            });
-        };
         // Filtrar lista de libros por búsqueda
         bookSearch.oninput = () => {
             const filter = bookSearch.value.toLowerCase();
@@ -178,20 +181,6 @@
                     li.textContent = bookDisplayNames[code] || code;
                     li.onclick = () => loadChaptersForBook(code, manifest);
                     booksListEl.appendChild(li);
-                });
-                // Populate floating menu list
-                menuBooksListEl.innerHTML = '';
-                codes.forEach(code => {
-                    const mli = document.createElement('li');
-                    mli.style.cursor = 'pointer';
-                    mli.textContent = bookDisplayNames[code] || code;
-                    mli.onclick = () => {
-                        loadChaptersForBook(code, manifest);
-                        menuPanel.classList.remove('open');
-                        const first = manifest.find(item => item.name === `${code}-1`);
-                        if (first) playCustom(`${bookDisplayNames[code]} 1`, `audio/${first.file}`);
-                    };
-                    menuBooksListEl.appendChild(mli);
                 });
                 // Inicializar dropdown de libros tras cargar manifest
                 setupDropdowns();
