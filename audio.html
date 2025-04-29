@@ -22,11 +22,23 @@
         .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
         .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
         .player-button:hover { color: #1DB954; }
-        /* Show sidebar, hide floating menu */
-        #menu-toggle, #menu-panel { display: none !important; }
+        /* Ensure static lists always visible */
+        #books-list, #chapters-list { display:block !important; max-height:60vh; overflow:auto !important; }
+        /* Floating menu selector styles */
+        #menu-toggle { position: fixed; top: 10px; right: 10px; z-index: 1001; background: rgba(255,255,255,0.8); border: none; border-radius: 4px; padding: 8px; cursor: pointer; }
+        #menu-panel { position: fixed; top: 60px; right: 10px; width: 300px; max-height: calc(100% - 70px); background: #fff; color: #000; padding: 10px; border-radius: 8px; overflow: auto; transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; }
+        #menu-panel.open { transform: translateX(0); }
+        #menu-panel input { width: 100%; margin-bottom: 8px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+        #menu-panel ul { list-style: none; padding: 0; margin: 0; }
     </style>
 </head>
 <body>
+    <button id="menu-toggle">📖 Seleccionar Libro</button>
+    <div id="menu-panel">
+        <h2>Libros</h2>
+        <input type="search" id="menu-search" placeholder="Buscar libro...">
+        <ul id="menu-books-list"></ul>
+    </div>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
@@ -37,7 +49,7 @@
         <div class="sidebar" style="flex:1; max-width:300px;">
             <h2>Selecciona un libro</h2>
             <input type="search" id="book-search" placeholder="Buscar libro..." style="width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:4px;">
-            <ul id="books-list" class="select-css" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
+            <ul id="books-list" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
         </div>
         <div class="main" style="flex:2;">
             <h2 id="book-title">Información del libro</h2>
@@ -55,8 +67,8 @@
                     <ul id="chapter-dropdown-list" class="dropdown-list"></ul>
                 </div>
             </div>
-            <ul id="chapters-list" class="select-css" style="list-style:none;padding:0;"></ul>
-            <div id="player-controls" style="display:none;">
+            <ul id="chapters-list" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
+            <div id="player-controls">
                 <div class="audio-cover"><img src="icons/pymicon.png" alt="Cover"></div>
                 <h3 id="now-playing"></h3>
                 <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
@@ -114,22 +126,23 @@
         const bookSearch = document.getElementById('book-search');
         const bookTitleEl = document.getElementById('book-title');
         const bookInfoEl = document.getElementById('book-info');
+        console.log('Audio page script loaded');
+        // Floating menu JS
         const menuToggle = document.getElementById('menu-toggle');
         const menuPanel = document.getElementById('menu-panel');
         const menuSearch = document.getElementById('menu-search');
         const menuBooksListEl = document.getElementById('menu-books-list');
-        console.log('Audio page script loaded');
-        // Filtrar lista de libros por búsqueda
-        bookSearch.oninput = () => {
-            const filter = bookSearch.value.toLowerCase();
-            Array.from(booksListEl.children).forEach(li => {
-                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
-            });
-        };
         menuToggle.onclick = () => menuPanel.classList.toggle('open');
         menuSearch.oninput = () => {
             const filter = menuSearch.value.toLowerCase();
             Array.from(menuBooksListEl.children).forEach(li => {
+                li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        };
+        // Filtrar lista de libros por búsqueda
+        bookSearch.oninput = () => {
+            const filter = bookSearch.value.toLowerCase();
+            Array.from(booksListEl.children).forEach(li => {
                 li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
             });
         };
@@ -155,10 +168,10 @@
                 let codes = [...new Set(manifest.map(item => item.name.split(/[-_]/)[0].toLowerCase()))];
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
                 booksListEl.innerHTML = '';
-                menuBooksListEl.innerHTML = '';
                 chaptersListEl.innerHTML = '';
                 bookTitleEl.textContent = 'Información del libro';
                 bookInfoEl.innerHTML = 'Selecciona un libro para ver detalles.';
+                // Populate static sidebar
                 codes.forEach(code => {
                     const li = document.createElement('li');
                     li.style.cursor = 'pointer';
@@ -166,7 +179,8 @@
                     li.onclick = () => loadChaptersForBook(code, manifest);
                     booksListEl.appendChild(li);
                 });
-                // populate floating menu list
+                // Populate floating menu list
+                menuBooksListEl.innerHTML = '';
                 codes.forEach(code => {
                     const mli = document.createElement('li');
                     mli.style.cursor = 'pointer';
@@ -174,7 +188,6 @@
                     mli.onclick = () => {
                         loadChaptersForBook(code, manifest);
                         menuPanel.classList.remove('open');
-                        // Auto-play capítulo 1
                         const first = manifest.find(item => item.name === `${code}-1`);
                         if (first) playCustom(`${bookDisplayNames[code]} 1`, `audio/${first.file}`);
                     };
