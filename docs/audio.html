@@ -22,12 +22,6 @@
         .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
         .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
         .player-button:hover { color: #1DB954; }
-        /* Dropdown styles */
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-btn { background: none; border: none; color: #fff; font-size: 1em; cursor: pointer; padding: 8px; }
-        .dropdown-list { position: absolute; top: 100%; left: 0; z-index: 1000; background: #fff; color: #000; padding: 10px; border-radius: 8px; max-height:60vh; overflow:auto; display: none; list-style: none; margin: 0; min-width: 200px; }
-        .dropdown-list li { padding: 4px; cursor: pointer; }
-        .dropdown-list li:hover { background: #eee; }
     </style>
 </head>
 <body>
@@ -35,10 +29,16 @@
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <!-- Book selector dropdown replaced with native select -->
+            <select id="book-select" style="margin-left:20px;padding:8px;border-radius:4px;">
+                <option disabled selected>Selecciona un libro</option>
+            </select>
         </div>
-        <div class="dropdown">
-            <button id="book-dropdown-btn" class="dropdown-btn">Libro: <span id="book-dropdown-label">Seleccione</span> ▼</button>
-            <ul id="book-dropdown-list" class="dropdown-list"></ul>
+        <div id="dropdowns" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
+            <div class="dropdown">
+                <button id="chapter-dropdown-btn" class="dropdown-btn">Capítulo: <span id="chapter-dropdown-label">1</span> ▼</button>
+                <ul id="chapter-dropdown-list" class="dropdown-list"></ul>
+            </div>
         </div>
     </div>
     <div class="audio-container" style="margin-top:80px; padding:20px;">
@@ -47,12 +47,6 @@
             <div id="book-info" style="margin-bottom:20px;">Selecciona un libro para ver detalles.</div>
             <div id="audio-settings" style="margin:10px 0; display:flex; align-items:center; gap:20px;">
                 <label>Velocidad: <input type="range" id="speed-slider" min="0.5" max="2" step="0.1" value="1"><span id="speed-value">1</span>x</label>
-            </div>
-            <div id="dropdowns" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
-                <div class="dropdown">
-                    <button id="chapter-dropdown-btn" class="dropdown-btn">Capítulo: <span id="chapter-dropdown-label">1</span> ▼</button>
-                    <ul id="chapter-dropdown-list" class="dropdown-list"></ul>
-                </div>
             </div>
             <ul id="chapters-list" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
             <div id="player-controls">
@@ -111,13 +105,8 @@
         const audioPlayer = document.getElementById('audio-player');
         const chaptersListEl = document.getElementById('chapters-list');
         console.log('Audio page script loaded');
-        // Book dropdown toggle
-        const bookDropdownBtn = document.getElementById('book-dropdown-btn');
-        const bookDropdownList = document.getElementById('book-dropdown-list');
-        const bookDropdownLabel = document.getElementById('book-dropdown-label');
-        bookDropdownBtn.onclick = () => {
-            bookDropdownList.style.display = bookDropdownList.style.display === 'block' ? 'none' : 'block';
-        };
+        // Get book <select>
+        const bookSelect = document.getElementById('book-select');
         // Orden canónico de los libros
         const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','tit','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
 
@@ -130,29 +119,26 @@
                 const res = await fetch('audio/manifest.json');
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
-                // Store manifest globally for use in playCustom and chapter listing
+                // Store manifest globally
                 manifestData = manifest;
+                // Populate native book <select>
                 const codes = [...new Set(manifest.map(item => item.name))];
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
-                const list = document.getElementById('book-dropdown-list');
-                list.innerHTML = '';
+                // Clear existing options
+                bookSelect.innerHTML = '<option disabled selected>Selecciona un libro</option>';
                 codes.forEach(code => {
-                    const li = document.createElement('li');
-                    li.textContent = bookDisplayNames[code] || code;
-                    li.onclick = () => {
-                        loadChaptersForBook(code, manifest);
-                        bookDropdownLabel.textContent = bookDisplayNames[code] || code;
-                        bookDropdownList.style.display = 'none';
-                        // Auto-play capítulo 1
-                        const firstItem = manifest.find(item => item.name === code && item.file.startsWith(code + '_1'));
-                        if (firstItem) {
-                            playCustom(`${bookDisplayNames[code] || code} 1`, `audio/${firstItem.file}`);
-                        }
-                    };
-                    list.appendChild(li);
+                    const opt = document.createElement('option');
+                    opt.value = code;
+                    opt.textContent = bookDisplayNames[code] || code;
+                    bookSelect.appendChild(opt);
                 });
-                // Auto-open book dropdown for visibility
-                list.style.display = 'block';
+                // On book selection, load chapters and autoplay capítulo 1
+                bookSelect.onchange = () => {
+                    const code = bookSelect.value;
+                    loadChaptersForBook(code, manifestData);
+                    const firstItem = manifestData.find(item => item.name === code && item.file.startsWith(code + '_1'));
+                    if (firstItem) playCustom(`${bookDisplayNames[code] || code} 1`, `audio/${firstItem.file}`);
+                };
             } catch (err) {
                 console.error(err);
             }
@@ -297,32 +283,6 @@
             }
         }
         // Funciones dropdowns
-        function setupDropdowns() {
-            const list = document.getElementById('book-dropdown-list');
-            const lbl = document.getElementById('book-dropdown-label');
-            const btn = document.getElementById('book-dropdown-btn');
-            list.innerHTML = '';
-            // Solo códigos disponibles en el manifest (ej. 'tit', no 'titus')
-            const codes = [...new Set(manifestData.map(item => item.name))];
-            // Orden canónico según bibleOrder
-            codes.sort((a, b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
-            codes.forEach(code => {
-                const li = document.createElement('li');
-                li.textContent = bookDisplayNames[code] || code;
-                li.onclick = () => {
-                    loadChaptersForBook(code, manifestData);
-                    lbl.textContent = bookDisplayNames[code] || code;
-                    list.style.display = 'none';
-                    // Auto-play capítulo 1
-                    const firstItem = manifestData.find(item => item.name === code && item.file.startsWith(code + '_1'));
-                    if (firstItem) {
-                        playCustom(`${bookDisplayNames[code] || code} 1`, `audio/${firstItem.file}`);
-                    }
-                };
-                list.appendChild(li);
-            });
-            btn.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
-        }
         function setupChapterDropdown() {
             const list = document.getElementById('chapter-dropdown-list');
             const btn = document.getElementById('chapter-dropdown-btn');
