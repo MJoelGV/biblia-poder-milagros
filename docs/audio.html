@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
     <link rel="apple-touch-icon" href="icons/pymicon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* Audio page mobile modern layout */
@@ -50,7 +50,7 @@
             </div>
             <ul id="chapters-list" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
             <div id="player-controls">
-                <div class="audio-cover"><img src="icons/pymicon.png" alt="Cover"></div>
+                <div class="audio-cover"><img src="./icons/pymicon.png" alt="Cover"></div>
                 <h3 id="now-playing"></h3>
                 <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
                 <div class="time-display"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
@@ -123,7 +123,6 @@
                 manifestData = manifest;
                 // Populate native book <select>
                 const codes = [...new Set(manifest.map(item => item.name))];
-                console.log('Loaded books:', codes);
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
                 // Clear existing options
                 bookSelect.innerHTML = '<option disabled selected>Selecciona un libro</option>';
@@ -221,10 +220,14 @@
         document.getElementById('next-reading').onclick = () => {
             if (trackIndex < playlist.length - 1) { trackIndex++; playTrack(trackIndex); }
         };
-        document.getElementById('stop-reading').onclick = () => {
-            audioPlayer.pause(); audioPlayer.currentTime = 0;
-            document.getElementById('player-controls').style.display = 'none';
-        };
+        const stopBtn = document.getElementById('stop-reading');
+        if (stopBtn) {
+            stopBtn.onclick = () => {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                document.getElementById('player-controls').style.display = 'none';
+            };
+        }
         // MP3 cambia track
         audioPlayer.addEventListener('ended', () => {
             if (trackIndex < playlist.length - 1) {
