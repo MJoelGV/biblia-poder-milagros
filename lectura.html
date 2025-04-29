@@ -415,17 +415,18 @@
             .top-row, .navigation {
                 flex-wrap: wrap;
             }
+            /* Reduce spacing on mobile */
             .top-row > *, .navigation > * {
-                margin: 5px 8px;
+                margin: 3px 5px;
             }
             .navigation {
-                margin: 10px 0;
-                gap: 8px;
+                margin: 8px 0;
+                gap: 6px;
             }
-            /* Limit selector and search input width for mobile */
+            /* Allow selectors and input to shrink and limit width */
             .select-css, .search-input {
-                max-width: 100px;
-                flex: none;
+                max-width: 80px;
+                flex: 0 1 auto;
             }
         }
     </style>
