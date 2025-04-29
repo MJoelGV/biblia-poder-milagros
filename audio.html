@@ -30,7 +30,7 @@
             <a href="index.html" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
             <!-- Book selector dropdown replaced with native select -->
-            <select id="book-select" style="margin-left:20px;padding:8px;border-radius:4px;">
+            <select id="book-select" style="margin-left:20px;padding:8px;border-radius:4px;background:#fff;color:#000;">
                 <option disabled selected>Selecciona un libro</option>
             </select>
         </div>
@@ -123,6 +123,7 @@
                 manifestData = manifest;
                 // Populate native book <select>
                 const codes = [...new Set(manifest.map(item => item.name))];
+                console.log('Loaded books:', codes);
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
                 // Clear existing options
                 bookSelect.innerHTML = '<option disabled selected>Selecciona un libro</option>';
