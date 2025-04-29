@@ -14,43 +14,37 @@
         body { margin: 0; background: #121212; color: #fff; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
         #player-controls { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; box-sizing: border-box; overflow: hidden; }
         #player-controls::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('icons/pymicon.png') center/cover no-repeat; filter: blur(20px) brightness(40%); z-index: -1; }
-        .audio-cover { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; margin-top: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .audio-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .audio-cover { width: 200px; height: 200px; border-radius: 50%; overflow: hidden; margin-top: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); background-color: #fff; }
+        .audio-cover img { width: 100%; height: 100%; object-fit: contain; object-position: center center; }
         .player-header { font-size: 1.2em; margin: 20px 0 10px; }
         .seek-slider { width: calc(100% - 40px); accent-color: #1DB954; margin: 0 20px; }
         .time-display { display: flex; justify-content: space-between; width: calc(100% - 40px); font-size: 0.9em; margin: 10px 20px; }
         .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
         .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
         .player-button:hover { color: #1DB954; }
+        .home-icon { font-size: 3em; margin-right: 20px; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="controls" id="controls">
         <div class="top-row">
             <a href="index.html" class="home-icon">🏠</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <!-- Book selector dropdown replaced with native select -->
-            <select id="book-select" style="margin-left:20px;padding:8px;border-radius:4px;background:#fff;color:#000;">
-                <option disabled selected>Selecciona un libro</option>
-            </select>
-        </div>
-        <div id="dropdowns" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
-            <div class="dropdown">
-                <button id="chapter-dropdown-btn" class="dropdown-btn">Capítulo: <span id="chapter-dropdown-label">1</span> ▼</button>
-                <ul id="chapter-dropdown-list" class="dropdown-list"></ul>
+            <!-- Book and Chapter selectors -->
+            <div class="selects" style="display:flex; gap:10px; align-items:center; margin-left:20px;">
+                <select id="book-select" style="padding:8px;border-radius:4px;background:#fff;color:#000;">
+                    <option disabled selected>Selecciona un libro</option>
+                </select>
+                <select id="chapter-select" disabled style="padding:8px;border-radius:4px;background:#fff;color:#000;">
+                    <option disabled selected>Selecciona un capítulo</option>
+                </select>
             </div>
         </div>
     </div>
     <div class="audio-container" style="margin-top:80px; padding:20px;">
         <div class="main" style="width:100%;">
-            <h2 id="book-title">Información del libro</h2>
-            <div id="book-info" style="margin-bottom:20px;">Selecciona un libro para ver detalles.</div>
-            <div id="audio-settings" style="margin:10px 0; display:flex; align-items:center; gap:20px;">
-                <label>Velocidad: <input type="range" id="speed-slider" min="0.5" max="2" step="0.1" value="1"><span id="speed-value">1</span>x</label>
-            </div>
-            <ul id="chapters-list" style="list-style:none;padding:0;max-height:60vh;overflow:auto;"></ul>
+            <!-- chapters list hidden in favor of chapter-select -->
             <div id="player-controls">
-                <div class="audio-cover"><img src="./icons/pymicon.png" alt="Cover"></div>
+                <div class="audio-cover"><img src="../LOGO BLANCO.png" alt="Cover"></div>
                 <h3 id="now-playing"></h3>
                 <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
                 <div class="time-display"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
@@ -100,18 +94,13 @@
                 keyTopics: ['Liderazgo Pastoral', 'Carácter Cristiano', 'Vida en Comunidad']
             }
         };
-        const speedSlider = document.getElementById('speed-slider');
-        const speedValue = document.getElementById('speed-value');
         const audioPlayer = document.getElementById('audio-player');
-        const chaptersListEl = document.getElementById('chapters-list');
         console.log('Audio page script loaded');
         // Get book <select>
         const bookSelect = document.getElementById('book-select');
+        const chapterSelect = document.getElementById('chapter-select');
         // Orden canónico de los libros
         const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','tit','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
-
-        // Actualizar velocidad
-        speedSlider.oninput = () => speedValue.textContent = speedSlider.value;
 
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
@@ -132,53 +121,48 @@
                     opt.textContent = bookDisplayNames[code] || code;
                     bookSelect.appendChild(opt);
                 });
-                // On book selection, load chapters and autoplay capítulo 1
+                // On book selection, populate chapter-select and play first
                 bookSelect.onchange = () => {
                     const code = bookSelect.value;
-                    loadChaptersForBook(code, manifestData);
-                    const firstItem = manifestData.find(item => item.name === code && item.file.startsWith(code + '_1'));
-                    if (firstItem) playCustom(`${bookDisplayNames[code] || code} 1`, `audio/${firstItem.file}`);
+                    const chapters = manifestData
+                        .filter(item => item.name === code)
+                        .sort((a, b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
+                    chapterSelect.disabled = false;
+                    chapterSelect.innerHTML = '<option disabled selected>Selecciona un capítulo</option>';
+                    chapters.forEach(item => {
+                        const num = item.file.match(/_(\d+)/)[1];
+                        const opt = document.createElement('option');
+                        opt.value = item.file;
+                        opt.textContent = (bookDisplayNames[code] || code) + ' ' + num;
+                        chapterSelect.appendChild(opt);
+                    });
+                    if (chapters.length > 0) {
+                        const first = chapters[0];
+                        const num = first.file.match(/_(\d+)/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${first.file}`);
+                    }
+                    chapterSelect.onchange = e => {
+                        const file = e.target.value;
+                        const num = file.match(/_(\d+)/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${file}`);
+                    };
                 };
             } catch (err) {
                 console.error(err);
             }
         }
 
-        // Mostrar capítulos de un libro seleccionado
-        function loadChaptersForBook(code, manifest) {
-            // Filtrar archivos cuyo nombre de archivo (item.file) comience con el código y separador '_'
-            const chapters = manifest
-                .filter(item => item.file.startsWith(code + '_'))
-                .sort((a, b) => {
-                    const numA = parseInt(a.file.match(/_(\d+)/)[1]);
-                    const numB = parseInt(b.file.match(/_(\d+)/)[1]);
-                    return numA - numB;
-                });
-            chaptersListEl.innerHTML = '';
-            showBookInfo(code, chapters);
-            chapters.forEach(item => {
-                const chapNum = item.file.match(/_(\d+)/)[1];
-                const li = document.createElement('li');
-                li.style.cursor = 'pointer';
-                li.textContent = chapNum;
-                li.onclick = () => playCustom(`${bookDisplayNames[code]} ${chapNum}`, `audio/${item.file}`);
-                chaptersListEl.appendChild(li);
-            });
-            setupChapterDropdown();
-        }
-
         // Reproducción de libro (solo MP3)
         function playBook(bookName, bookNode) {
             document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
-            document.getElementById('player-controls').style.display = '';
+            document.getElementById('player-controls').style.display = 'flex';
             const chapters = Array.from(bookNode.getElementsByTagName('c'));
             const playlist = chapters.map(c => {
                 const chap = c.getAttribute('n');
                 return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
             });
-            let trackIndex = 0;
+            trackIndex = 0;
             audioPlayer.style.display = '';
-            audioPlayer.playbackRate = parseFloat(speedSlider.value);
             audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
         }
@@ -191,13 +175,12 @@
             const chapters = manifestData
                 .filter(item => item.file.startsWith(code + '_'))
                 .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-            const playlist = chapters.map(item => `audio/${item.file}`);
-            let trackIndex = playlist.indexOf(src);
+            playlist = chapters.map(item => `audio/${item.file}`);
+            trackIndex = playlist.indexOf(src);
             // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
-            document.getElementById('player-controls').style.display = 'block';
+            document.getElementById('player-controls').style.display = 'flex';
             audioPlayer.style.display = 'block';
-            audioPlayer.playbackRate = parseFloat(speedSlider.value);
             audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
         }
@@ -269,41 +252,6 @@
         // Iniciar lista y reproducción
         let manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
         loadBooks();
-        // Función para mostrar info del libro con detalles
-        function showBookInfo(code, chapters) {
-            const key = code.toLowerCase();
-            document.getElementById('book-title').textContent = `Libro: ${bookDisplayNames[key] || code}`;
-            const meta = bookMeta[key];
-            if (meta) {
-                document.getElementById('book-info').innerHTML = `
-                    <p>Autor: ${meta.author}</p>
-                    <p>Fecha: ${meta.date}</p>
-                    <p>Tema: ${meta.theme}</p>
-                    <p>${meta.description}</p>
-                    <p>Temas Clave: ${meta.keyTopics.join(' · ')}</p>
-                `;
-            } else {
-                document.getElementById('book-info').innerHTML = `<p>Número de capítulos: ${chapters.length}</p>`;
-            }
-        }
-        // Funciones dropdowns
-        function setupChapterDropdown() {
-            const list = document.getElementById('chapter-dropdown-list');
-            const btn = document.getElementById('chapter-dropdown-btn');
-            list.innerHTML = '';
-            document.querySelectorAll('#chapters-list li').forEach(el => {
-                const num = el.textContent;
-                const li = document.createElement('li');
-                li.textContent = num;
-                li.onclick = () => {
-                    document.getElementById('chapter-dropdown-label').textContent = num;
-                    el.click();
-                    list.style.display = 'none';
-                };
-                list.appendChild(li);
-            });
-            btn.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
-        }
     </script>
 </body>
 </html>
