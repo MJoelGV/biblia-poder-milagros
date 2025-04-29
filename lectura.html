@@ -188,7 +188,10 @@
         .verse.highlighted {
             background-color: rgba(76, 175, 80, 0.15);
         }
-
+        /* Dark mode: highlighted verse text black for readability */
+        [data-theme="dark"] .verse.highlighted {
+            color: #000;
+        }
         .verse.bookmarked { background: #fffa8c; }
         .verse.comment { border-left: 4px solid var(--primary-color); }
         .verse.memorized { background: #c6f4d6; }
