@@ -96,8 +96,9 @@
 
         .navigation {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
         }
 
         .select-css {
@@ -121,6 +122,40 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             padding: 8px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .search-input:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .chapter-content {
@@ -326,74 +361,6 @@
             line-height: 1.5;
         }
 
-        .search-container {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            font-size: 14px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all 0.3s;
-            outline: none;
-        }
-
-        .search-input:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .search-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        @media (max-width: 768px) {
-            .chapter-content {
-                padding: 0 15px;
-                margin-top: 140px;
-            }
-
-            .verse {
-                margin-bottom: 0.6em;
-                padding: 0.3em;
-            }
-        }
-
-        /* Verso marcado y menú contextual */
-        .verse-menu {
-            display: none;
-            position: absolute;
-            background: var(--bg-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border-radius: 8px;
-            z-index: 1200;
-            padding: 8px;
-        }
-        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
-        .verse-menu li {
-            padding: 8px; cursor: pointer;
-        }
-        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
-
         /* Modal para comentarios */
         .modal-backdrop {
             display: none;
@@ -424,6 +391,22 @@
         .modal-actions button {
             padding: 6px 12px;
         }
+
+        /* Verso marcado y menú contextual */
+        .verse-menu {
+            display: none;
+            position: absolute;
+            background: var(--bg-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1200;
+            padding: 8px;
+        }
+        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
+        .verse-menu li {
+            padding: 8px; cursor: pointer;
+        }
+        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -431,10 +414,6 @@
         <div class="top-row">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
-            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
-        </div>
-        <div class="navigation">
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -442,11 +421,13 @@
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
+            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+        </div>
+        <div class="navigation" style="display:flex; align-items:center; gap:10px; margin:10px 20px;">
             <select id="book-select" class="select-css">
                 <option value="">Selecciona un libro</option>
             </select>
-        </div>
-        <div class="search-container">
             <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             <button id="search-button" class="search-button">🔍</button>
         </div>
