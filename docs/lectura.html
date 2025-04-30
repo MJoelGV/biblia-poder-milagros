@@ -100,13 +100,6 @@
             background-color: rgba(76, 175, 80, 0.1);
         }
 
-        .navigation {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-        }
-
         .select-css {
             padding: 8px 12px;
             border: 1px solid var(--primary-color);
@@ -514,16 +507,14 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
+            <input id="search-input" class="search-input" placeholder="Buscar versículo" />
+            <button id="search-button" class="search-button">🔍</button>
         </div>
         <div id="extra-controls" class="extra-controls">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
             <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
             <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
-        </div>
-        <div class="navigation" style="display:flex; align-items:center; gap:10px; margin:10px 20px;">
-            <input id="search-input" class="search-input" placeholder="Buscar versículo" />
-            <button id="search-button" class="search-button">🔍</button>
         </div>
     </div> <!-- cierre .controls -->
 
