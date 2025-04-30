@@ -437,6 +437,26 @@
                 flex: 0 1 auto;
             }
         }
+        /* Responsive: menú más compacto en móviles */
+        @media (max-width: 600px) {
+            .controls {
+                padding: 8px;
+            }
+            .controls .home-icon,
+            .controls .theme-toggle {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                padding: 4px;
+            }
+            .navigation {
+                gap: 6px;
+            }
+            .selector-row {
+                padding: 8px;
+                top: 48px; /* altura de controls reducida */
+            }
+        }
     </style>
 </head>
 <body>

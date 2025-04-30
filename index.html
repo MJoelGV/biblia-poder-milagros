@@ -201,9 +201,18 @@
                 const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
                 const verses = xmlDoc.getElementsByTagName('v');
                 const total = verses.length;
-                const today = new Date();
-                const seed = Math.floor(today.setHours(0,0,0,0) / 86400000);
-                const idx = seed % total;
+                // Selección aleatoria diaria, cacheada en localStorage
+                const todayDate = new Date().toISOString().slice(0,10);
+                let idx;
+                const storedDate = localStorage.getItem('dailyVerseDate');
+                const storedIdx = localStorage.getItem('dailyVerseIndex');
+                if (storedDate === todayDate && storedIdx !== null) {
+                    idx = parseInt(storedIdx, 10);
+                } else {
+                    idx = Math.floor(Math.random() * total);
+                    localStorage.setItem('dailyVerseDate', todayDate);
+                    localStorage.setItem('dailyVerseIndex', idx);
+                }
                 const verseEl = verses[idx];
                 const verseNum = verseEl.getAttribute('n');
                 const chapterEl = verseEl.parentNode;
