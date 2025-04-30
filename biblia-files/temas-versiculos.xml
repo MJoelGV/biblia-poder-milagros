@@ -15,8 +15,8 @@
 
     <tema nombre="Depresión">
         <subtema nombre="Consuelo y esperanza">
-            <referencia libro="Salmo" capitulo="34" versiculo="18" texto="El Señor está cerca de los quebrantados de corazón, y salva a los contritos de espíritu." />
-            <referencia libro="Salmo" capitulo="46" versiculo="1" texto="Dios es nuestro refugio y fortaleza, nuestro pronto auxilio en la tribulación." />
+            <referencia libro="Salmos" capitulo="34" versiculo="18" texto="El Señor está cerca de los quebrantados de corazón, y salva a los contritos de espíritu." />
+            <referencia libro="Salmos" capitulo="46" versiculo="1" texto="Dios es nuestro refugio y fortaleza, nuestro pronto auxilio en la tribulación." />
             <referencia libro="Isaías" capitulo="41" versiculo="10" texto="No temas, porque yo estoy contigo; no te confundas, porque yo soy tu Dios; te fortaleceré, y te ayudaré, y te sustentaré con la diestra de mi justicia." />
         </subtema>
         <subtema nombre="Fuerza y valor">
@@ -28,9 +28,9 @@
 
     <tema nombre="Miedo">
         <subtema nombre="Confianza en Dios">
-            <referencia libro="Salmo" capitulo="91" versiculo="1-2" texto="El que habita en el escondrijimiento del Altísimo, a la sombra del Omnipotente descansará. Diré al Señor: Refugio mío y fortaleza mía, Dios mío, en quien confío." />
+            <referencia libro="Salmos" capitulo="91" versiculo="1-2" texto="El que habita en el escondrijimiento del Altísimo, a la sombra del Omnipotente descansará. Diré al Señor: Refugio mío y fortaleza mía, Dios mío, en quien confío." />
             <referencia libro="Isaías" capitulo="26" versiculo="3" texto="Tú guardarás en perfecta paz a aquel cuyo propósito es firme; porque en ti confía." />
-            <referencia libro="Salmo" capitulo="23" versiculo="4" texto="Aunque ande en valle de sombra de muerte, no temeré mal alguno; porque tú estarás conmigo; tu vara y tu cayado me confortan." />
+            <referencia libro="Salmos" capitulo="23" versiculo="4" texto="Aunque ande en valle de sombra de muerte, no temeré mal alguno; porque tú estarás conmigo; tu vara y tu cayado me confortan." />
         </subtema>
         <subtema nombre="Valor y coraje">
             <referencia libro="Deuteronomio" capitulo="31" versiculo="6" texto="Sé fuerte y valiente, no temas ni te espantes de ellos, porque el Señor tu Dios es el que va contigo; no te dejará, ni te desamparará." />
@@ -41,9 +41,9 @@
 
     <tema nombre="Perdón">
         <subtema nombre="Perdón de Dios">
-            <referencia libro="Salmo" capitulo="103" versiculo="12" texto="Como está lejos el oriente del occidente, así aleja de nosotros nuestras transgresiones." />
+            <referencia libro="Salmos" capitulo="103" versiculo="12" texto="Como está lejos el oriente del occidente, así aleja de nosotros nuestras transgresiones." />
             <referencia libro="1 Juan" capitulo="1" versiculo="9" texto="Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad." />
-            <referencia libro="Salmo" capitulo="51" versiculo="1-2" texto="Ten misericordia de mí, oh Dios, conforme a tu bondad; conforme a la multitud de tus misericordias, borra mis rebeliones. Lávame del todo de mi iniquidad, y límpiame de mi pecado." />
+            <referencia libro="Salmos" capitulo="51" versiculo="1-2" texto="Ten misericordia de mí, oh Dios, conforme a tu bondad; conforme a la multitud de tus misericordias, borra mis rebeliones. Lávame del todo de mi iniquidad, y límpiame de mi pecado." />
         </subtema>
         <subtema nombre="Perdonar a otros">
             <referencia libro="Mateo" capitulo="6" versiculo="14-15" texto="Porque si perdonáis a los hombres sus ofensas, os perdonará también a vosotros vuestro Padre celestial; mas si no perdonáis a los hombres sus ofensas, tampoco vuestro Padre os perdonará a vosotros vuestras ofensas." />
