@@ -9,19 +9,23 @@
     <meta name="theme-color" content="#4CAF50">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icons/pymicon.png">
+    <!-- corregido path para iOS icon -->
+    <link rel="apple-touch-icon" href="../icons/pymicon.png">
     <style>
         :root {
             --primary-color: #4CAF50;
             --text-color: #333;
             --bg-color: #fff;
             --verse-font-size: 1.1em;
+            --menu-bg: rgba(0, 0, 0, 0.6);
+            --menu-blur: blur(10px);
         }
 
         [data-theme="dark"] {
             --primary-color: #45a049;
             --text-color: #fff;
             --bg-color: #121212;
+            --menu-bg: rgba(0, 0, 0, 0.8);
         }
 
         body {
@@ -39,7 +43,9 @@
             top: 0;
             left: 0;
             right: 0;
-            background: var(--bg-color);
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
             padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 1000;
@@ -213,7 +219,9 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--bg-color);
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
             padding: 12px;
             box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
             display: flex;
@@ -494,7 +502,8 @@
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
-    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Instalar app</div>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 
     <script>
         let xmlDoc = null;
