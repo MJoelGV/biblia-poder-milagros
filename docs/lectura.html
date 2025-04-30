@@ -945,6 +945,12 @@
                 });
             }
         })();
+        // Reactivar cierre de búsqueda: botón X y tecla Esc
+        const closeBtn = document.getElementById('close-search');
+        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearch();
+        });
 
         // Ocultar grid al hacer click fuera
         document.addEventListener('click', (e) => {
