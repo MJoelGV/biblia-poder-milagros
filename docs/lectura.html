@@ -60,6 +60,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: nowrap;
         }
 
         .home-icon {
@@ -123,16 +124,20 @@
             padding: 8px;
         }
 
-        .search-input {
-            display:none;
-            width:0;
-            transition: width 0.3s ease;
-        }
-
-        .search-wrapper.active .search-input {
-            display:inline-block;
-            width:120px;
-            margin-left:8px;
+        .search-wrapper { display: inline-flex; align-items: center; }
+        .search-wrapper .search-input { display: none; }
+        .search-wrapper.active .search-input { 
+            display: inline-block;
+            max-width: 180px;
+            opacity: 1;
+            margin-left: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
         }
 
         .search-button {
@@ -441,9 +446,7 @@
         }
         /* Responsive: menú más compacto en móviles */
         @media (max-width: 600px) {
-            .controls {
-                padding: 8px;
-            }
+            .controls { padding: 8px; }
             .controls .home-icon,
             .controls .theme-toggle {
                 width: 32px;
@@ -454,6 +457,11 @@
             .selector-row {
                 padding: 8px;
                 top: 48px; /* altura de controls reducida */
+            }
+            #version-selector,
+            #book-select {
+                width: 180px;
+                min-width: 150px;
             }
         }
         /* Extra controls (hidden por defecto) */
@@ -482,10 +490,6 @@
         }
         .main-menu-toggle:hover {
             background-color: rgba(76, 175, 80, 0.1);
-        }
-        .search-wrapper {
-            display:inline-flex;
-            align-items:center;
         }
     </style>
 </head>
@@ -919,24 +923,25 @@
             document.getElementById('search-results').classList.remove('active');
         }
 
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') searchText();
-            });
-        }
-
-        // Event listener para botón de búsqueda
-        const searchButton = document.getElementById('search-button');
-        if (searchButton) {
-            searchButton.addEventListener('click', searchText);
-        }
-
-        const closeBtn = document.getElementById('close-search');
-        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeSearch();
-        });
+        // Search input toggle and execution: primer click muestra input, segundo click o Enter busca
+        (function(){
+            const wrapper = document.querySelector('.search-wrapper');
+            const input = document.getElementById('search-input');
+            const button = document.getElementById('search-button');
+            if (wrapper && input && button) {
+                button.addEventListener('click', () => {
+                    if (!wrapper.classList.contains('active')) {
+                        wrapper.classList.add('active');
+                        input.focus();
+                    } else if (input.value.trim()) {
+                        searchText();
+                    }
+                });
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && input.value.trim()) searchText();
+                });
+            }
+        })();
 
         // Ocultar grid al hacer click fuera
         document.addEventListener('click', (e) => {
@@ -1121,20 +1126,6 @@
             document.getElementById('install-button').style.display = 'none';
             deferredPrompt = null;
         });
-    </script>
-    <script>
-        // Toggle campo de búsqueda
-        const searchWrapper = document.querySelector('.search-wrapper');
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.getElementById('search-button');
-        if (searchWrapper && searchButton && searchInput) {
-            searchButton.addEventListener('click', () => {
-                if (!searchWrapper.classList.contains('active')) {
-                    searchWrapper.classList.add('active');
-                    searchInput.focus();
-                }
-            });
-        }
     </script>
     <script>
         // Load saved font size
