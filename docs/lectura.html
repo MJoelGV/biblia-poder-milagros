@@ -124,21 +124,15 @@
         }
 
         .search-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid var(--primary-color);
-            border-radius: 20px;
-            font-size: 14px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all 0.3s;
-            outline: none;
+            display:none;
+            width:0;
+            transition: width 0.3s ease;
         }
 
-        .search-input:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .search-wrapper.active .search-input {
+            display:inline-block;
+            width:120px;
+            margin-left:8px;
         }
 
         .search-button {
@@ -438,7 +432,6 @@
             }
             .navigation {
                 margin: 8px 0;
-                gap: 6px;
             }
             /* Allow selectors and input to shrink and limit width */
             .select-css, .search-input {
@@ -457,9 +450,6 @@
                 height: 32px;
                 font-size: 20px;
                 padding: 4px;
-            }
-            .navigation {
-                gap: 6px;
             }
             .selector-row {
                 padding: 8px;
@@ -493,6 +483,10 @@
         .main-menu-toggle:hover {
             background-color: rgba(76, 175, 80, 0.1);
         }
+        .search-wrapper {
+            display:inline-flex;
+            align-items:center;
+        }
     </style>
 </head>
 <body>
@@ -507,8 +501,10 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
-            <input id="search-input" class="search-input" placeholder="Buscar versículo" />
-            <button id="search-button" class="search-button">🔍</button>
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button">🔍</button>
+                <input id="search-input" class="search-input" placeholder="Buscar versículo" />
+            </div>
         </div>
         <div id="extra-controls" class="extra-controls">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
@@ -1125,6 +1121,20 @@
             document.getElementById('install-button').style.display = 'none';
             deferredPrompt = null;
         });
+    </script>
+    <script>
+        // Toggle campo de búsqueda
+        const searchWrapper = document.querySelector('.search-wrapper');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        if (searchWrapper && searchButton && searchInput) {
+            searchButton.addEventListener('click', () => {
+                if (!searchWrapper.classList.contains('active')) {
+                    searchWrapper.classList.add('active');
+                    searchInput.focus();
+                }
+            });
+        }
     </script>
     <script>
         // Load saved font size
