@@ -1,5 +1,5 @@
 // Service Worker stub to enable registration and always fetch from network
-const SW_VERSION = 'v2';
+const SW_VERSION = 'v3';
 console.log('Service Worker version:', SW_VERSION);
 
 self.addEventListener('install', event => {
