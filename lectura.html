@@ -193,6 +193,11 @@
         .verse.bookmarked { background: #fffa8c; }
         .verse.comment { border-left: 4px solid var(--primary-color); }
         .verse.memorized { background: #c6f4d6; }
+        /* Dark mode: texto negro para bookmarked y memorized */
+        [data-theme="dark"] .verse.bookmarked,
+        [data-theme="dark"] .verse.memorized {
+            color: #000;
+        }
 
         .verse-number {
             color: var(--primary-color);
