@@ -473,13 +473,39 @@
                 top: 48px; /* altura de controls reducida */
             }
         }
+        /* Extra controls (hidden por defecto) */
+        .extra-controls {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 20px;
+        }
+        .extra-controls.active {
+            display: flex;
+        }
+        /* Main menu toggle button */
+        .main-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-menu-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
     </style>
 </head>
 <body>
     <div class="controls" id="controls">
         <div class="top-row">
-            <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <button id="main-menu-toggle" class="main-menu-toggle">☰</button>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -488,6 +514,12 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
+        </div>
+        <div id="extra-controls" class="extra-controls">
+            <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
         </div>
         <div class="navigation" style="display:flex; align-items:center; gap:10px; margin:10px 20px;">
             <input id="search-input" class="search-input" placeholder="Buscar versículo" />
@@ -529,11 +561,9 @@
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
-        <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
         <select id="chapter-select" class="select-css">
             <option value="">Capítulo</option>
         </select>
-        <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -1117,6 +1147,14 @@
             const newSize = Math.min(Math.max(current + delta, 0.6), 3);
             root.style.setProperty('--verse-font-size', newSize + 'em');
             localStorage.setItem('verseFontSize', newSize);
+        }
+    </script>
+    <script>
+        // Toggle extra controls
+        const menuToggle = document.getElementById('main-menu-toggle');
+        const extraControls = document.getElementById('extra-controls');
+        if (menuToggle && extraControls) {
+            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
         }
     </script>
 </body>
