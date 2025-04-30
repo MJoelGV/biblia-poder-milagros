@@ -350,6 +350,22 @@
             display: block;
         }
 
+        /* Botón cerrar resultados de búsqueda */
+        .search-results .close-search {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .search-results .close-search:hover {
+            color: var(--primary-color);
+        }
+
         .result-item {
             padding: 12px;
             border-bottom: 1px solid rgba(128,128,128,0.2);
@@ -471,13 +487,9 @@
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
-            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
-            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+            <select id="book-select" class="select-css"></select>
         </div>
         <div class="navigation" style="display:flex; align-items:center; gap:10px; margin:10px 20px;">
-            <select id="book-select" class="select-css">
-                <option value="">Selecciona un libro</option>
-            </select>
             <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             <button id="search-button" class="search-button">🔍</button>
         </div>
@@ -485,6 +497,7 @@
 
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
+        <button id="close-search" class="close-search">&times;</button>
         <div id="results-content"></div>
     </div>
 
@@ -516,9 +529,11 @@
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
+        <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
         <select id="chapter-select" class="select-css">
             <option value="">Capítulo</option>
         </select>
+        <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -899,6 +914,12 @@
         if (searchButton) {
             searchButton.addEventListener('click', searchText);
         }
+
+        const closeBtn = document.getElementById('close-search');
+        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearch();
+        });
 
         // Ocultar grid al hacer click fuera
         document.addEventListener('click', (e) => {
