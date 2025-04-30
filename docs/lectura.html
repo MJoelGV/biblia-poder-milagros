@@ -538,6 +538,7 @@
             <li id="menu-toggle-bookmark">Marcar versículo</li>
             <li id="menu-add-comment">Agregar comentario</li>
             <li id="menu-memorize-verse">Memorizar versículo</li>
+            <li id="menu-copy-verse">Copiar versículo</li>
         </ul>
     </div>
 
@@ -1042,6 +1043,8 @@
             const memItem = document.getElementById('menu-memorize-verse');
             const memKey = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
             memItem.textContent = loadMemorized().includes(memKey) ? 'Dejar de memorizar versículo' : 'Memorizar versículo';
+            const copyItem = document.getElementById('menu-copy-verse');
+            copyItem.textContent = 'Copiar versículo';
             const rect = v.getBoundingClientRect();
             menu.style.top = (rect.top + window.scrollY) + 'px';
             menu.style.left = (rect.left + window.scrollX) + 'px';
@@ -1059,6 +1062,14 @@
         });
         document.getElementById('menu-memorize-verse').addEventListener('click', () => {
             toggleMemorize(menuTarget);
+            menu.style.display = 'none';
+        });
+        document.getElementById('menu-copy-verse').addEventListener('click', () => {
+            const v = menuTarget;
+            const ref = `${currentBook} ${currentChapter}:${v.dataset.verse}`;
+            const text = v.querySelector('.verse-text').textContent.trim();
+            const toCopy = `${ref} ${text}`;
+            navigator.clipboard.writeText(toCopy);
             menu.style.display = 'none';
         });
         // Cerrar menú al hacer clic fuera
