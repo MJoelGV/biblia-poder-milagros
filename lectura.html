@@ -504,7 +504,6 @@
 <body>
     <div class="controls" id="controls">
         <div class="top-row">
-            <button id="main-menu-toggle" class="main-menu-toggle">☰</button>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -517,6 +516,7 @@
                 <button id="search-button" class="search-button">🔍</button>
                 <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
+            <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
             <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
@@ -751,7 +751,12 @@
                              data-verse="${verseNum}"
                              onclick="highlightVerse(this)">
                             <span class="verse-number">${verseNum}</span>
-                            <span class="verse-text">${verse.textContent}</span>
+                            <span class="verse-text">${
+                                Array.from(verse.childNodes)
+                                    .filter(n => n.nodeType === Node.TEXT_NODE)
+                                    .map(n => n.textContent)
+                                    .join('').trim()
+                            }</span>
                         </div>
                     `;
                 }).join('');
