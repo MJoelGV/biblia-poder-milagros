@@ -499,11 +499,54 @@
         .main-menu-toggle:hover {
             background-color: rgba(76, 175, 80, 0.1);
         }
+
+        /* Menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: var(--bg-color);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 1001;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
     </style>
 </head>
 <body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="alert('Ir a Escuchar')">Escuchar</li>
+            <li onclick="alert('Ir a Memorizar historias')">Memorizar historias</li>
+            <li onclick="alert('Ir a Favoritos')">Favoritos</li>
+            <li onclick="alert('Ir a Búsqueda')">Búsqueda</li>
+        </ul>
+    </div>
     <div class="controls" id="controls">
         <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -1179,6 +1222,12 @@
         const extraControls = document.getElementById('extra-controls');
         if (menuToggle && extraControls) {
             menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        // Toggle side menu
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn && sideMenu) {
+            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
         }
     </script>
 </body>
