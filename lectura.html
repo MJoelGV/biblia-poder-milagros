@@ -538,10 +538,14 @@
     <!-- Menú lateral -->
     <div id="side-menu" class="side-menu">
         <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='index.html#proverbio'">Leer más</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='marcados.html'">Marcados</li>
+            <li onclick="window.location.href='comentarios.html'">Comentarios</li>
+            <li onclick="window.location.href='temas.html'">Temas</li>
             <li onclick="alert('Ir a Escuchar')">Escuchar</li>
             <li onclick="alert('Ir a Memorizar historias')">Memorizar historias</li>
-            <li onclick="alert('Ir a Favoritos')">Favoritos</li>
-            <li onclick="alert('Ir a Búsqueda')">Búsqueda</li>
         </ul>
     </div>
     <div class="controls" id="controls">
@@ -1229,6 +1233,12 @@
         if (sideMenuToggleBtn && sideMenu) {
             sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
         }
+        // Cerrar menú lateral al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>
