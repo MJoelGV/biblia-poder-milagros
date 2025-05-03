@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compartir Versículo</title>
+    <style>
+        :root { --primary-color: #4CAF50; --bg-color: #fff; --text-color: #333; }
+        body { margin:0; font-family: Arial, sans-serif; background:#f0f0f0; color:var(--text-color); }
+        .header { display:flex; align-items:center; padding:10px; background:var(--primary-color); color:#fff; }
+        .header a { color:#fff; text-decoration:none; margin-right:10px; font-size:24px; }
+        #share-container { display:flex; justify-content:center; padding:20px; }
+        #verse-card { width:400px; height:400px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;
+            background-size:cover; background-position:center; color:#fff; text-shadow:0 0 5px rgba(0,0,0,0.7);
+            padding:20px; box-sizing:border-box; }
+        #verse-text { font-size:24px; margin-bottom:20px; text-align:center; }
+        #verse-ref { font-size:18px; }
+        #bg-options { padding:0 20px; }
+        #bg-options .bg-list { display:flex; gap:10px; }
+        .bg-thumb { width:80px; height:80px; object-fit:cover; border:2px solid transparent; cursor:pointer; border-radius:4px; }
+        .bg-thumb.active { border-color:var(--primary-color); }
+        #download-btn { display:block; margin:20px auto; padding:10px 20px; background:var(--primary-color);
+            color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:16px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html">🏠 Inicio</a>
+        <h1>Compartir Versículo</h1>
+    </div>
+    <div id="share-container">
+        <div id="verse-card"></div>
+    </div>
+    <div id="bg-options">
+        <h2>Elegir fondo</h2>
+        <div class="bg-list">
+            <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80" class="bg-thumb active">
+            <img src="https://images.unsplash.com/photo-1516455207990-7a41ce80f7ee?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1516455207990-7a41ce80f7ee?auto=format&fit=crop&w=800&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=800&q=80" class="bg-thumb">
+        </div>
+    </div>
+    <button id="download-btn">Descargar imagen</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const book = params.get('book'), chapter = params.get('chapter'), verse = params.get('verse');
+        const verseCard = document.getElementById('verse-card');
+        const bgThumbs = document.querySelectorAll('.bg-thumb');
+        const downloadBtn = document.getElementById('download-btn');
+
+        bgThumbs.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                document.querySelector('.bg-thumb.active').classList.remove('active');
+                thumb.classList.add('active');
+                verseCard.style.backgroundImage = `url('${thumb.dataset.bg}')`;
+            });
+        });
+
+        (async () => {
+            try {
+                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
+                const xmlText = await response.text();
+                const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+                const chapters = xml.getElementsByTagName('capitulo');
+                for (let ch of chapters) {
+                    if (ch.getAttribute('n') === chapter) {
+                        const vs = ch.getElementsByTagName('v');
+                        for (let v of vs) {
+                            if (v.getAttribute('n') === verse) {
+                                verseCard.innerHTML = `<div id="verse-text">${v.textContent}</div><div id="verse-ref">${book} ${chapter}:${verse}</div>`;
+                                verseCard.style.backgroundImage = `url('${document.querySelector('.bg-thumb.active').dataset.bg}')`;
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                verseCard.textContent = 'Error cargando versículo';
+            }
+        })();
+
+        downloadBtn.addEventListener('click', () => {
+            html2canvas(verseCard).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `verse-${book}-${chapter}-${verse}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html>
