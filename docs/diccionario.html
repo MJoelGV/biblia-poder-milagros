@@ -143,11 +143,7 @@
         }
 
         .alphabet-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin: 20px 0;
-            justify-content: center;
+            display: none;
             position: sticky;
             top: 70px;
             z-index: 90;
@@ -155,6 +151,23 @@
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .alphabet-toggle-btn {
+            background: var(--bg-color);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .alphabet-toggle-btn:hover {
+            background: var(--primary-color);
+            color: #fff;
         }
 
         .letter-btn {
@@ -250,6 +263,7 @@
             <input type="text" class="search-input" id="search-input" placeholder="Buscar término bíblico...">
         </div>
         <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+        <button id="alphabet-toggle" class="alphabet-toggle-btn">🔤 Letras</button>
     </div>
 
     <div class="content" id="content">
@@ -263,6 +277,10 @@
         const termsContainer = document.getElementById('terms-container');
         const searchInput = document.getElementById('search-input');
         const alphabetNav = document.getElementById('alphabet-nav');
+        const alphabetToggleBtn = document.getElementById('alphabet-toggle');
+        if (alphabetToggleBtn) alphabetToggleBtn.addEventListener('click', () => {
+            alphabetNav.style.display = (alphabetNav.style.display === 'none' || !alphabetNav.style.display) ? 'flex' : 'none';
+        });
 
         // Crear navegación alfabética
         function createAlphabetNav() {
