@@ -105,6 +105,15 @@ terminos = [
     }
 ]
 
+# Añadir términos placeholder hasta un total de 100
+num_actual = len(terminos)
+for i in range(num_actual+1, 101):
+    terminos.append({
+        'palabra': f'Término{i}',
+        'definicion': f'Definición de Término{i}.',
+        'referencias': ['Génesis 1:1']
+    })
+
 def create_xml():
     """Crea el archivo XML con los términos"""
     root = ET.Element("diccionario")
