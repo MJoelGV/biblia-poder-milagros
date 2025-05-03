@@ -155,18 +155,42 @@
             display: flex;
             align-items: center;
         }
-        .home-icon, .audio-icon {
+        .audio-icon {
             font-size: 24px;
             margin-right: 20px;
             text-decoration: none;
             color: white;
         }
+
+        /* Menú lateral */
+        .side-menu {position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; color: #333;}
+        .side-menu.active {left: 0;}
+        .side-menu ul {list-style: none; padding: 20px; margin: 0;}
+        .side-menu ul li {padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer;}
+        .side-menu ul li:last-child {border-bottom: none;}
+        .side-menu-toggle {background: none; border: none; font-size: 24px; color: #fff; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px;}
+        .side-menu-toggle:hover {background-color: rgba(0,0,0,0.05); border-radius: 50%;}
     </style>
 </head>
 <body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
     <div class="background"></div>
     <div class="controls" id="controls">
         <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
         </div>
     </div>
     <div class="hero">
@@ -248,6 +272,19 @@
             await deferredPrompt.userChoice;
             document.getElementById('install-button').style.display = 'none';
             deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Toggle side-menu
+        const sideMenuToggleBtnIdx = document.getElementById('side-menu-toggle');
+        const sideMenuIdx = document.getElementById('side-menu');
+        if (sideMenuToggleBtnIdx) {
+            sideMenuToggleBtnIdx.addEventListener('click', () => sideMenuIdx.classList.toggle('active'));
+        }
+        document.addEventListener('click', e => {
+            if (sideMenuIdx.classList.contains('active') && !sideMenuIdx.contains(e.target) && !sideMenuToggleBtnIdx.contains(e.target)) {
+                sideMenuIdx.classList.remove('active');
+            }
         });
     </script>
 </body>
