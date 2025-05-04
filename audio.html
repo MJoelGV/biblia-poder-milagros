@@ -262,10 +262,17 @@
         audioPlayer.addEventListener('loadedmetadata', () => {
             seekSlider.max = audioPlayer.duration;
             durationEl.textContent = formatTime(audioPlayer.duration);
+            // Restore saved position
+            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+            const saved = localStorage.getItem(key);
+            if (saved) audioPlayer.currentTime = parseFloat(saved);
         });
         audioPlayer.addEventListener('timeupdate', () => {
             seekSlider.value = audioPlayer.currentTime;
             currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            // Save current position
+            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+            localStorage.setItem(key, audioPlayer.currentTime);
         });
         seekSlider.oninput = () => {
             audioPlayer.currentTime = seekSlider.value;
