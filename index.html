@@ -145,22 +145,6 @@
                 padding: 6px 2px;
             }
         }
-        .controls {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-        .top-row {
-            display: flex;
-            align-items: center;
-        }
-        .audio-icon {
-            font-size: 24px;
-            margin-right: 20px;
-            text-decoration: none;
-            color: white;
-        }
 
         /* Menú lateral */
         .side-menu {position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; color: #333;}
@@ -188,11 +172,6 @@
         </ul>
     </div>
     <div class="background"></div>
-    <div class="controls" id="controls">
-        <div class="top-row">
-            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
-        </div>
-    </div>
     <div class="hero">
         <div class="hero-content">
             <h1>Biblia de Poder y Milagros</h1>
@@ -245,9 +224,10 @@
                 const bookName = bookEl.getAttribute('n');
                 document.getElementById('proverb-text').textContent = verseEl.textContent;
                 document.getElementById('proverb-reference').textContent = `${bookName} ${chapterNum}:${verseNum}`;
-                const url = `${baseUrl}lectura.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
-                document.getElementById('read-more-link').href = url;
-                document.getElementById('proverb-link').href = url;
+                const readUrl = `${baseUrl}lectura.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
+                const shareUrl = `${baseUrl}share.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
+                document.getElementById('read-more-link').href = readUrl;
+                document.getElementById('proverb-link').href = shareUrl;
             } catch (error) {
                 console.error('Error al cargar el versículo del día:', error);
                 document.getElementById('proverb-text').textContent = 'Error al cargar el versículo del día';
