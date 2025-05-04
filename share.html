@@ -85,7 +85,7 @@
                 const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
                 const xmlText = await response.text();
                 const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
-                const chapters = xml.getElementsByTagName('capitulo');
+                const chapters = xml.getElementsByTagName('c');
                 for (let ch of chapters) {
                     if (ch.getAttribute('n') === chapter) {
                         const vs = ch.getElementsByTagName('v');
