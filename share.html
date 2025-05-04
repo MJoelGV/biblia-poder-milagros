@@ -102,7 +102,7 @@
         })();
 
         downloadBtn.addEventListener('click', () => {
-            html2canvas(verseCard).then(canvas => {
+            html2canvas(verseCard, { useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `verse-${book}-${chapter}-${verse}.png`;
                 link.href = canvas.toDataURL();
