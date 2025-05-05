@@ -26,6 +26,17 @@
             border-radius: 15px;
             box-sizing: border-box;
         }
+        #text-box {
+            position: absolute;
+            top: 75%;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
         #verse-text { font-size:1.5em; margin-bottom:15px; line-height:1.6; text-align:center; color: #fff!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5)!important; }
         #verse-ref { font-style:italic; margin-top:10px; color: #fff!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5)!important; }
         #bg-options { padding:0 20px; }
@@ -54,11 +65,11 @@
         <h2>Elegir fondo</h2>
         <div class="bg-list">
             <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80" class="bg-thumb active">
-            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1519666213637-42aa705478d9?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1519666213637-42aa705478d9?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1518733057094-95b53151d6b7?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1518733057094-95b53151d6b7?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+            <img src="https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
         </div>
     </div>
     <button id="download-btn">Descargar imagen</button>
@@ -104,7 +115,7 @@
                         for (let v of vs) {
                             if (v.getAttribute('n') === verse) {
                                 await loadBg(document.querySelector('.bg-thumb.active').dataset.bg);
-                                verseCard.innerHTML = `<div id="verse-text">${v.textContent}</div><div id="verse-ref">${book} ${chapter}:${verse}</div>`;
+                                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${v.textContent}</div><div id="verse-ref">${book} ${chapter}:${verse}</div></div>`;
                                 return;
                             }
                         }
