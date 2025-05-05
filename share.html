@@ -21,14 +21,13 @@
             align-items: center;
             background-size: cover;
             background-position: center;
-            background-color: transparent;
-            text-shadow: none;
-            padding: 30px;
+            background-repeat: no-repeat;
+            padding: 0;
             border-radius: 15px;
             box-sizing: border-box;
         }
-        #verse-text { font-size:1.5em; margin-bottom:15px; line-height:1.6; text-align:center; }
-        #verse-ref { font-style:italic; margin-top:10px; }
+        #verse-text { font-size:1.5em; margin-bottom:15px; line-height:1.6; text-align:center; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        #verse-ref { font-style:italic; margin-top:10px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         #bg-options { padding:0 20px; }
         #bg-options .bg-list { display:flex; gap:10px; }
         .bg-thumb { width:80px; height:80px; object-fit:cover; border:2px solid transparent; cursor:pointer; border-radius:4px; }
@@ -69,11 +68,24 @@
         const bgThumbs = document.querySelectorAll('.bg-thumb');
         const downloadBtn = document.getElementById('download-btn');
 
+        // fetch image as dataURL then set as CSS background
+        async function loadBg(url) {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            }).then(dataUrl => { verseCard.style.backgroundImage = `url('${dataUrl}')`; });
+        }
+        // load initial background
+        loadBg(document.querySelector('.bg-thumb.active').dataset.bg);
+
         bgThumbs.forEach(thumb => {
             thumb.addEventListener('click', () => {
                 document.querySelector('.bg-thumb.active').classList.remove('active');
                 thumb.classList.add('active');
-                verseCard.style.backgroundImage = `url('${thumb.dataset.bg}')`;
+                loadBg(thumb.dataset.bg);
             });
         });
 
@@ -88,8 +100,8 @@
                         const vs = ch.getElementsByTagName('v');
                         for (let v of vs) {
                             if (v.getAttribute('n') === verse) {
+                                await loadBg(document.querySelector('.bg-thumb.active').dataset.bg);
                                 verseCard.innerHTML = `<div id="verse-text">${v.textContent}</div><div id="verse-ref">${book} ${chapter}:${verse}</div>`;
-                                verseCard.style.backgroundImage = `url('${document.querySelector('.bg-thumb.active').dataset.bg}')`;
                                 return;
                             }
                         }
@@ -102,7 +114,7 @@
         })();
 
         downloadBtn.addEventListener('click', () => {
-            html2canvas(verseCard, { useCORS: true }).then(canvas => {
+            html2canvas(verseCard).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `verse-${book}-${chapter}-${verse}.png`;
                 link.href = canvas.toDataURL();
