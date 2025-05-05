@@ -71,6 +71,9 @@
         }
         #download-btn { display:block; margin:20px auto; padding:10px 20px; background:var(--primary-color);
             color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:16px; }
+        /* Verse search selectors */
+        #search-panel { text-align: center; margin: 20px 0; }
+        #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -83,6 +86,11 @@
     <div class="header">
         <a href="index.html">🏠 Inicio</a>
         <h1>Compartir Versículo</h1>
+    </div>
+    <div id="search-panel">
+        <select id="book-select"></select>
+        <select id="chapter-select"></select>
+        <select id="verse-select"></select>
     </div>
     <div id="share-container">
         <div id="verse-card"></div>
@@ -106,8 +114,8 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const bookParam = (params.get('book') || '').toLowerCase();
-        const chapter = params.get('chapter'), verse = params.get('verse');
+        let bookParam = (params.get('book') || '').toLowerCase();
+        let chapter = params.get('chapter'), verse = params.get('verse');
         const bookNames = {
             genesis: 'Génesis', exodus: 'Éxodo', leviticus: 'Levítico', numbers: 'Números', deuteronomy: 'Deuteronomio',
             joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel',
@@ -118,6 +126,10 @@
         const displayBook = bookNames[bookParam] || bookParam;
         const verseCard = document.getElementById('verse-card');
         const downloadBtn = document.getElementById('download-btn');
+        let xmlData;
+        const bookSelect = document.getElementById('book-select');
+        const chapterSelect = document.getElementById('chapter-select');
+        const verseSelect = document.getElementById('verse-select');
 
         async function loadBg(url) {
             const res = await fetch(url);
@@ -146,24 +158,63 @@
         swiper.on('init', () => loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg));
         swiper.init();
 
+        function populateBookSelect() {
+            bookSelect.innerHTML = '';
+            for (let slug in bookNames) {
+                const opt = document.createElement('option'); opt.value = slug; opt.text = bookNames[slug];
+                if (slug === bookParam) opt.selected = true;
+                bookSelect.append(opt);
+            }
+        }
+
+        function loadChapters(bSlug) {
+            chapterSelect.innerHTML = '';
+            const name = bookNames[bSlug];
+            const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
+            if (!bNode) return;
+            Array.from(bNode.getElementsByTagName('c')).forEach(c=>{
+                const n = c.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
+                if (n===chapter) o.selected=true; chapterSelect.append(o);
+            });
+        }
+
+        function loadVerses(bSlug, chNum) {
+            verseSelect.innerHTML = '';
+            const name = bookNames[bSlug];
+            const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
+            if (!bNode) return;
+            const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chNum);
+            if (!cNode) return;
+            Array.from(cNode.getElementsByTagName('v')).forEach(vn=>{
+                const n=vn.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
+                if (n===verse) o.selected=true; verseSelect.append(o);
+            });
+        }
+
+        function updateVerse() {
+            const name = bookNames[bookParam];
+            const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
+            const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chapter);
+            const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
+            if (vNode) {
+                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>`;
+            }
+        }
+
+        // Load XML and initialize selectors
         (async () => {
             try {
-                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
-                const xmlText = await response.text();
-                const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
-                const chapters = xml.getElementsByTagName('c');
-                for (let ch of chapters) {
-                    if (ch.getAttribute('n') === chapter) {
-                        const vs = ch.getElementsByTagName('v');
-                        for (let v of vs) {
-                            if (v.getAttribute('n') === verse) {
-                                await loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg);
-                                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${v.textContent}</div><div id="verse-ref">${displayBook} ${chapter}:${verse}</div></div>`;
-                                return;
-                            }
-                        }
-                    }
-                }
+                const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
+                const xmlText = await res.text();
+                xmlData = new DOMParser().parseFromString(xmlText, 'text/xml');
+                populateBookSelect();
+                loadChapters(bookParam);
+                loadVerses(bookParam, chapter);
+                updateVerse();
+                // attach selector events
+                bookSelect.onchange = e=>{bookParam=e.target.value; loadChapters(bookParam); chapter=chapterSelect.value; loadVerses(bookParam,chapter); updateVerse();};
+                chapterSelect.onchange = e=>{chapter=e.target.value; loadVerses(bookParam,chapter); updateVerse();};
+                verseSelect.onchange = e=>{verse=e.target.value; updateVerse();};
             } catch(e) {
                 console.error(e);
                 verseCard.textContent = 'Error cargando versículo';
