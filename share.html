@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compartir Versículo</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
         :root { --primary-color: #4CAF50; --bg-color: #fff; --text-color: #333; }
         body { margin:0; font-family: Arial, sans-serif, 'Great Vibes'; background:#f0f0f0; color:var(--text-color); }
@@ -39,31 +40,34 @@
         }
         #verse-text { font-size:1.5em; margin-bottom:15px; line-height:1.6; text-align:center; color: #fff!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5)!important; }
         #verse-ref { font-style:italic; margin-top:10px; color: #fff!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5)!important; }
-        #bg-options { padding:0 20px; }
-        /* Carousel styles */
-        #bg-options .bg-list {
+        /* Swiper Carousel styles */
+        .swiper-container {
+            width: 260px;
+            margin: 0 auto;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+        .swiper-slide {
             display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            padding: 0 20px;
-            gap: 10px;
+            justify-content: center;
+            align-items: center;
         }
         .bg-thumb {
-            flex: 0 0 auto;
             width: 80px;
             height: 80px;
             object-fit: cover;
             border: 2px solid transparent;
-            cursor: pointer;
             border-radius: 4px;
-            scroll-snap-align: center;
-            transition: transform 0.3s;
+            transition: transform 0.3s, border-color 0.3s;
             transform: scale(0.8);
         }
-        .bg-thumb.active {
-            border-color: var(--primary-color);
+        .swiper-slide-active .bg-thumb {
             transform: scale(1.2);
+            border-color: var(--primary-color);
+        }
+        .swiper-slide-next .bg-thumb,
+        .swiper-slide-prev .bg-thumb {
+            transform: scale(0.8);
         }
         #download-btn { display:block; margin:20px auto; padding:10px 20px; background:var(--primary-color);
             color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:16px; }
@@ -85,24 +89,25 @@
     </div>
     <div id="bg-options">
         <h2>Elegir fondo</h2>
-        <div class="bg-list">
-            <!-- Peaceful landscapes & starry skies -->
-            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80" class="bg-thumb active">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1535905748047-14d8ce5b9ca9?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1535905748047-14d8ce5b9ca9?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
-            <img src="https://images.unsplash.com/photo-1542129369-0c505709a64c?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1542129369-0c505709a64c?auto=format&fit=crop&w=1200&q=80" class="bg-thumb">
+        <div class="swiper-container" id="carousel">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1535905748047-14d8ce5b9ca9?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1535905748047-14d8ce5b9ca9?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1542129369-0c505709a64c?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1542129369-0c505709a64c?auto=format&fit=crop&w=1200&q=80"></div>
+            </div>
         </div>
     </div>
     <button id="download-btn">Descargar imagen</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const bookParam = (params.get('book') || '').toLowerCase();
         const chapter = params.get('chapter'), verse = params.get('verse');
-        // Map slug to Spanish book names
         const bookNames = {
             genesis: 'Génesis', exodus: 'Éxodo', leviticus: 'Levítico', numbers: 'Números', deuteronomy: 'Deuteronomio',
             joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel',
@@ -112,10 +117,8 @@
         };
         const displayBook = bookNames[bookParam] || bookParam;
         const verseCard = document.getElementById('verse-card');
-        const bgThumbs = document.querySelectorAll('.bg-thumb');
         const downloadBtn = document.getElementById('download-btn');
 
-        // fetch image as dataURL then set as CSS background
         async function loadBg(url) {
             const res = await fetch(url);
             const blob = await res.blob();
@@ -125,34 +128,22 @@
                 reader.readAsDataURL(blob);
             }).then(dataUrl => { verseCard.style.backgroundImage = `url('${dataUrl}')`; });
         }
-        // load initial background and setup carousel
-        const activeThumb = document.querySelector('.bg-thumb.active');
-        loadBg(activeThumb.dataset.bg);
-        const carousel = document.querySelector('.bg-list');
-        const thumbs = document.querySelectorAll('.bg-thumb');
-        // center active thumb
-        if (activeThumb) {
-            carousel.scrollLeft = activeThumb.offsetLeft - (carousel.clientWidth/2) + (activeThumb.clientWidth/2);
-        }
-        // observe thumb visibility to update active and load background
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-                    thumbs.forEach(t => t.classList.remove('active'));
-                    entry.target.classList.add('active');
-                    loadBg(entry.target.dataset.bg);
-                }
-            });
-        }, { root: carousel, threshold: 0.5 });
-        thumbs.forEach(t => observer.observe(t));
 
-        bgThumbs.forEach(thumb => {
-            thumb.addEventListener('click', () => {
-                document.querySelector('.bg-thumb.active').classList.remove('active');
-                thumb.classList.add('active');
-                loadBg(thumb.dataset.bg);
-            });
+        const swiper = new Swiper('#carousel', {
+            slidesPerView: 3,
+            spaceBetween: 10,
+            centeredSlides: true,
+            loop: true,
         });
+
+        swiper.on('slideChange', () => {
+            const slide = swiper.slides[swiper.activeIndex];
+            const img = slide.querySelector('.bg-thumb');
+            loadBg(img.dataset.bg);
+        });
+
+        swiper.on('init', () => loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg));
+        swiper.init();
 
         (async () => {
             try {
@@ -165,7 +156,7 @@
                         const vs = ch.getElementsByTagName('v');
                         for (let v of vs) {
                             if (v.getAttribute('n') === verse) {
-                                await loadBg(document.querySelector('.bg-thumb.active').dataset.bg);
+                                await loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg);
                                 verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${v.textContent}</div><div id="verse-ref">${displayBook} ${chapter}:${verse}</div></div>`;
                                 return;
                             }
