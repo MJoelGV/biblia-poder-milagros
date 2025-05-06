@@ -145,6 +145,7 @@
                 // On book selection, populate chapter-select and play first
                 bookSelect.onchange = () => {
                     const code = bookSelect.value;
+                    localStorage.setItem('audio-last-book', code);
                     const chapters = manifestData
                         .filter(item => item.name === code)
                         .sort((a, b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
@@ -164,10 +165,26 @@
                     }
                     chapterSelect.onchange = e => {
                         const file = e.target.value;
+                        localStorage.setItem('audio-last-book', code);
+                        localStorage.setItem('audio-last-file', file);
                         const num = file.match(/_(\d+)/)[1];
                         playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${file}`);
                     };
                 };
+                // Auto-load last listened book and chapter
+                const lastBook = localStorage.getItem('audio-last-book');
+                const lastFile = localStorage.getItem('audio-last-file');
+                if (lastBook && codes.includes(lastBook)) {
+                    bookSelect.value = lastBook;
+                    bookSelect.onchange();
+                    if (lastFile) {
+                        const optValues = Array.from(chapterSelect.options).map(o => o.value);
+                        if (optValues.includes(lastFile)) {
+                            chapterSelect.value = lastFile;
+                            chapterSelect.onchange();
+                        }
+                    }
+                }
             } catch (err) {
                 console.error(err);
             }
