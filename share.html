@@ -181,11 +181,20 @@
             }
         }
 
+        function getBookName(key) {
+            if (bookNames[key]) return bookNames[key];
+            return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        }
+
         function loadChapters(bSlug) {
             chapterSelect.innerHTML = '';
-            const name = bookNames[bSlug];
+            const name = getBookName(bSlug);
             const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
-            if (!bNode) return;
+            if (!bNode) {
+                console.error('Book not found:', name);
+                chapterSelect.textContent = 'No chapters';
+                return;
+            }
             Array.from(bNode.getElementsByTagName('c')).forEach(c=>{
                 const n = c.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
                 if (n===chapter) o.selected=true; chapterSelect.append(o);
@@ -194,11 +203,19 @@
 
         function loadVerses(bSlug, chNum) {
             verseSelect.innerHTML = '';
-            const name = bookNames[bSlug];
+            const name = getBookName(bSlug);
             const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
-            if (!bNode) return;
+            if (!bNode) {
+                console.error('Book not found:', name);
+                verseSelect.textContent = 'No verses';
+                return;
+            }
             const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chNum);
-            if (!cNode) return;
+            if (!cNode) {
+                console.error('Chapter not found:', chNum);
+                verseSelect.textContent = 'No verses';
+                return;
+            }
             Array.from(cNode.getElementsByTagName('v')).forEach(vn=>{
                 const n=vn.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
                 if (n===verse) o.selected=true; verseSelect.append(o);
@@ -206,10 +223,13 @@
         }
 
         function updateVerse() {
-            const name = bookNames[bookParam];
+            const name = getBookName(bookParam);
             const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
+            if (!bNode) { console.error('Book not found:', name); verseCard.textContent = 'Libro no encontrado'; return; }
             const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chapter);
+            if (!cNode) { console.error('Chapter not found:', chapter); verseCard.textContent = 'Capítulo no encontrado'; return; }
             const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
+            if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
             if (vNode) {
                 verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>`;
             }
