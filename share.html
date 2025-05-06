@@ -117,12 +117,26 @@
         let bookParam = (params.get('book') || '').toLowerCase();
         let chapter = params.get('chapter'), verse = params.get('verse');
         const bookNames = {
+            // Antiguo Testamento
             genesis: 'Génesis', exodus: 'Éxodo', leviticus: 'Levítico', numbers: 'Números', deuteronomy: 'Deuteronomio',
-            joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel',
-            kings1: '1 Reyes', kings2: '2 Reyes', psalms: 'Salmos', proverbs: 'Proverbios', isaiah: 'Isaías', jeremiah: 'Jeremías',
-            daniel: 'Daniel', hosea: 'Oseas', joel: 'Joel', amos: 'Amós', obadiah: 'Abdías', jonah: 'Jonás', micah: 'Miqueas',
-            nahum: 'Nahúm', habakkuk: 'Habacuc', zephaniah: 'Sofonías', haggai: 'Hageo', zechariah: 'Zacarías', malachi: 'Malaquías'
+            joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel', kings1: '1 Reyes', kings2: '2 Reyes',
+            psalms: 'Salmos', proverbs: 'Proverbios',
+            isaiah: 'Isaías', jeremiah: 'Jeremías', lamentations: 'Lamentaciones', ezekiel: 'Ezequiel', daniel: 'Daniel',
+            hosea: 'Oseas', joel: 'Joel', amos: 'Amós', obadiah: 'Abdías', jonah: 'Jonás', micah: 'Miqueas', nahum: 'Nahúm',
+            habakkuk: 'Habacuc', zephaniah: 'Sofonías', haggai: 'Hageo', zechariah: 'Zacarías', malachi: 'Malaquías',
+            // Nuevo Testamento
+            matthew: 'Mateo', mark: 'Marcos', luke: 'Lucas', john: 'Juan', acts: 'Hechos', romans: 'Romanos',
+            corinthians1: '1 Corintios', corinthians2: '2 Corintios', galatians: 'Gálatas', ephesians: 'Efesios',
+            philippians: 'Filipenses', colossians: 'Colosenses', thessalonians1: '1 Tesalonicenses', thessalonians2: '2 Tesalonicenses',
+            timothy1: '1 Timoteo', timothy2: '2 Timoteo', titus: 'Tito', philemon: 'Filemón', hebrews: 'Hebreos',
+            james: 'Santiago', peter1: '1 Pedro', peter2: '2 Pedro', john1: '1 Juan', john2: '2 Juan', john3: '3 Juan',
+            jude: 'Judas', revelation: 'Apocalipsis'
         };
+        // Map display name param to slug if needed
+        if (bookParam && !(bookParam in bookNames)) {
+            const lookup = Object.entries(bookNames).find(([, name]) => name.toLowerCase() === bookParam);
+            if (lookup) bookParam = lookup[0];
+        }
         const displayBook = bookNames[bookParam] || bookParam;
         const verseCard = document.getElementById('verse-card');
         const downloadBtn = document.getElementById('download-btn');
@@ -201,21 +215,94 @@
             }
         }
 
-        // Load XML and initialize selectors
-        (async () => {
+        // Handlers for dynamic selection
+        function handleBookChange() {
+            bookParam = bookSelect.value;
+            loadChapters(bookParam);
+            chapter = chapterSelect.value;
+            loadVerses(bookParam, chapter);
+            verse = verseSelect.value;
+            updateVerse();
+        }
+        function handleChapterChange() {
+            loadVerses(bookSelect.value, chapterSelect.value);
+            chapter = chapterSelect.value;
+            verse = verseSelect.value;
+            updateVerse();
+        }
+        function handleVerseChange() {
+            verse = verseSelect.value;
+            updateVerse();
+        }
+
+        // Verse del día helper
+        function getDailyVerse() {
+            const verses = [];
+            const dateStr = new Date().toISOString().slice(0,10);
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) {
+                hash = (hash * 31 + dateStr.charCodeAt(i)) >>> 0;
+            }
+            for (let slug in bookNames) {
+                const name = bookNames[slug];
+                const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b => b.getAttribute('n') === name);
+                if (!bNode) return;
+                Array.from(bNode.getElementsByTagName('c')).forEach(c => {
+                    const ch = c.getAttribute('n');
+                    Array.from(c.getElementsByTagName('v')).forEach(v => {
+                        verses.push({slug, chapter: ch, verse: v.getAttribute('n')});
+                    });
+                });
+            }
+            return verses[hash % verses.length];
+        }
+
+        (async function init() {
             try {
                 const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
                 const xmlText = await res.text();
                 xmlData = new DOMParser().parseFromString(xmlText, 'text/xml');
+                // Verse del día si no hay parámetros URL
+                if (!bookParam || !chapter || !verse) {
+                    const daily = getDailyVerse();
+                    bookParam = daily.slug;
+                    chapter = daily.chapter;
+                    verse = daily.verse;
+                }
+                // Populate book selector
                 populateBookSelect();
+                // Initial book selection
+                if (bookParam in bookNames) {
+                    bookSelect.value = bookParam;
+                } else {
+                    bookSelect.selectedIndex = 0;
+                    bookParam = bookSelect.value;
+                }
+                // Populate chapters
                 loadChapters(bookParam);
+                // Initial chapter selection
+                if (chapter && Array.from(chapterSelect.options).some(o=>o.value===chapter)) {
+                    chapterSelect.value = chapter;
+                } else {
+                    chapterSelect.selectedIndex = 0;
+                }
+                chapter = chapterSelect.value;
+                // Populate verses
                 loadVerses(bookParam, chapter);
+                // Initial verse selection
+                if (verse && Array.from(verseSelect.options).some(o=>o.value===verse)) {
+                    verseSelect.value = verse;
+                } else {
+                    verseSelect.selectedIndex = 0;
+                }
+                verse = verseSelect.value;
+                // Display verse
                 updateVerse();
-                // attach selector events
-                bookSelect.onchange = e=>{bookParam=e.target.value; loadChapters(bookParam); chapter=chapterSelect.value; loadVerses(bookParam,chapter); updateVerse();};
-                chapterSelect.onchange = e=>{chapter=e.target.value; loadVerses(bookParam,chapter); updateVerse();};
-                verseSelect.onchange = e=>{verse=e.target.value; updateVerse();};
-            } catch(e) {
+                // Bind change events
+                bookSelect.addEventListener('change', handleBookChange);
+                chapterSelect.addEventListener('change', handleChapterChange);
+                verseSelect.addEventListener('change', handleVerseChange);
+            } catch (e) {
                 console.error(e);
                 verseCard.textContent = 'Error cargando versículo';
             }
