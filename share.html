@@ -75,6 +75,7 @@
         #search-panel { text-align: center; margin: 20px 0; }
         #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
         .signature { text-align: center; font-family: 'Great Vibes', cursive; font-size: 1.2em; margin: 10px 0; color: var(--text-color); }
+        #verse-card .signature { position: absolute; bottom: 10px; left: 0; width: 100%; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
     </style>
 </head>
 <body>
@@ -97,7 +98,6 @@
     <div id="share-container">
         <div id="verse-card"></div>
     </div>
-    <div class="signature">Biblia de Poder y Milagros</div>
     <div id="bg-options">
         <h2>Elegir fondo</h2>
         <div class="swiper-container" id="carousel">
@@ -232,6 +232,7 @@
         }
 
         function updateVerse() {
+            const sig = '<div class="signature">Biblia de Poder y Milagros</div>';
             const name = getBookName(bookParam);
             const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
             if (!bNode) { console.error('Book not found:', name); verseCard.textContent = 'Libro no encontrado'; return; }
@@ -240,7 +241,7 @@
             const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
             if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
             if (vNode) {
-                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>`;
+                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>${sig}`;
             }
         }
 
