@@ -29,7 +29,7 @@
         }
         #text-box {
             position: absolute;
-            top: 30%;
+            top: 20%;
             left: 0;
             width: 100%;
             display: flex;
@@ -74,6 +74,7 @@
         /* Verse search selectors */
         #search-panel { text-align: center; margin: 20px 0; }
         #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
+        .signature { text-align: center; font-family: 'Great Vibes', cursive; font-size: 1.2em; margin: 10px 0; color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -88,6 +89,7 @@
         <h1>Compartir Versículo</h1>
     </div>
     <div id="search-panel">
+        <select id="version-select"></select>
         <select id="book-select"></select>
         <select id="chapter-select"></select>
         <select id="verse-select"></select>
@@ -95,6 +97,7 @@
     <div id="share-container">
         <div id="verse-card"></div>
     </div>
+    <div class="signature">Biblia de Poder y Milagros</div>
     <div id="bg-options">
         <h2>Elegir fondo</h2>
         <div class="swiper-container" id="carousel">
@@ -114,6 +117,12 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
+        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm' };
+        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA' };
+        let versionParam = (params.get('version') || 'rv1960').toLowerCase();
+        const versionSelect = document.getElementById('version-select');
+        function populateVersionSelect() { versionSelect.innerHTML=''; for (let k in versionNames) { const o=document.createElement('option'); o.value=k; o.text=versionNames[k]; if (k===versionParam) o.selected=true; versionSelect.append(o);} }
+        function loadXml() { return fetch(`biblia-files/${versionMap[versionParam]}`).then(r=>r.text()).then(t=>{ xmlData=new DOMParser().parseFromString(t,'text/xml'); }); }
         let bookParam = (params.get('book') || '').toLowerCase();
         let chapter = params.get('chapter'), verse = params.get('verse');
         const bookNames = {
@@ -279,9 +288,10 @@
 
         (async function init() {
             try {
-                const res = await fetch('biblia-files/Reina-Valera-1960.xmm');
-                const xmlText = await res.text();
-                xmlData = new DOMParser().parseFromString(xmlText, 'text/xml');
+                await loadXml();
+                // Populate version dropdown and handle changes
+                populateVersionSelect();
+                versionSelect.addEventListener('change', () => { const p=new URLSearchParams(window.location.search); p.set('version', versionSelect.value); window.location.search=p.toString(); });
                 // Verse del día si no hay parámetros URL
                 if (!bookParam || !chapter || !verse) {
                     const daily = getDailyVerse();
