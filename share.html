@@ -12,6 +12,7 @@
         body { margin:0; font-family: Arial, sans-serif, 'Great Vibes'; background:#f0f0f0; color:var(--text-color); }
         .header { display:flex; align-items:center; padding:10px; background:var(--primary-color); color:#fff; }
         .header a { color:#fff; text-decoration:none; margin-right:10px; font-size:24px; }
+        .header .side-menu-toggle { background:none; border:none; color:#fff; font-size:24px; margin-right:10px; cursor:pointer; }
         #share-container { display:flex; justify-content:center; padding:20px; }
         #verse-card {
             width: 360px;
@@ -110,6 +111,11 @@
         #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
         .signature { text-align: center; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.2em; margin: 10px 0; color: var(--text-color); letter-spacing: 0.5px; }
         #verse-card .signature { position: absolute; bottom: 10px; left: 0; width: 100%; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #f9f9f9; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
+        .side-menu.active { left: 0; }
+        .side-menu ul { list-style:none; padding:20px; margin:0; }
+        .side-menu ul li { padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.1); cursor:pointer; }
+        .side-menu ul li:last-child { border-bottom:none; }
     </style>
 </head>
 <body>
