@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
+    console.log(`Petición recibida: ${req.url}`);
     // Endpoint para listar archivos de audio pregrabado
     if (req.url === '/audio/list') {
         const audioDir = path.join(__dirname, 'audio');
