@@ -1025,6 +1025,15 @@
             sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const sideMenu = document.getElementById('side-menu');
+            const toggleBtn = document.getElementById('side-menu-toggle');
+            if (sideMenu.style.display === 'block' && !sideMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sideMenu.style.display = 'none';
+            }
+        });
+
         // Cargar tema guardado
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
