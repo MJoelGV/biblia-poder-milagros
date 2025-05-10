@@ -75,14 +75,14 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        .home-icon {
+        .side-menu-toggle {
             text-decoration: none;
             font-size: 24px;
             color: var(--primary-color);
             transition: transform 0.3s;
         }
 
-        .home-icon:hover {
+        .side-menu-toggle:hover {
             transform: scale(1.1);
         }
 
@@ -232,6 +232,34 @@
             transform: translateY(-2px);
         }
 
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 250px;
+            background-color: var(--nav-bg);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .side-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column;
@@ -253,8 +281,23 @@
     </style>
 </head>
 <body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+
     <div class="header">
-        <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
+        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
         <div class="filters">
             <select id="testament-selector">
                 <option value="all">Todos los Testamentos</option>
@@ -977,6 +1020,11 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
+        function toggleSideMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
         // Cargar tema guardado
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
@@ -992,6 +1040,7 @@
         document.getElementById('testament-selector').addEventListener('change', filterBooks);
         document.getElementById('category-selector').addEventListener('change', filterBooks);
         document.getElementById('author-selector').addEventListener('change', filterBooks);
+        document.getElementById('side-menu-toggle').addEventListener('click', toggleSideMenu);
 
         // Mostrar libros inicialmente
         filterBooks();
