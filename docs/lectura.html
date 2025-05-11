@@ -720,24 +720,20 @@
 
         document.getElementById('book-select').addEventListener('change', (e) => {
             currentBook = e.target.value;
-            currentChapter = 0;
-            currentVerse = 0;
-            loadChapters();
-            // reset verse selector
-            const verseSelect = document.getElementById('verse-select');
-            verseSelect.innerHTML = '<option value="">Versículo</option>';
-            verseSelect.disabled = true;
-            // clear verses container
-            document.getElementById('verses').innerHTML = '<div class="info">Selecciona un capítulo para ver el texto</div>';
-            // disable navigation until chapter selected
-            document.getElementById('prev-button').disabled = true;
-            document.getElementById('next-button').disabled = true;
-            // update URL: only book
-            const url = new URL(window.location);
-            url.searchParams.set('book', currentBook);
-            url.searchParams.delete('chapter');
-            url.searchParams.delete('verse');
-            window.history.pushState({}, '', url);
+            // Prompt for chapter
+            var chaps = xmlDoc.querySelector('b[n="' + currentBook + '"]').getElementsByTagName('c');
+            var totalCh = chaps.length;
+            var selCh = parseInt(prompt('Selecciona capítulo (1 - ' + totalCh + '):'));
+            if (isNaN(selCh) || selCh < 1 || selCh > totalCh) return;
+            currentChapter = selCh;
+            // Prompt for verse
+            var ves = xmlDoc.querySelector('b[n="' + currentBook + '"] c[n="' + currentChapter + '"]').getElementsByTagName('v');
+            var totalV = ves.length;
+            var selV = parseInt(prompt('Selecciona versículo (1 - ' + totalV + '):'));
+            if (!isNaN(selV) && selV >= 1 && selV <= totalV) currentVerse = selV;
+            loadChapter();
+            updateControls();
+            updateURL();
         });
 
         document.getElementById('chapter-select').addEventListener('change', (e) => {
