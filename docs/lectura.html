@@ -612,6 +612,9 @@
         <select id="chapter-select" class="select-css">
             <option value="">Capítulo</option>
         </select>
+        <select id="verse-select" class="select-css" disabled>
+            <option value="">Versículo</option>
+        </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -717,27 +720,35 @@
 
         document.getElementById('book-select').addEventListener('change', (e) => {
             currentBook = e.target.value;
-            currentChapter = 1;
+            currentChapter = 0;
             currentVerse = 0;
             loadChapters();
-            loadChapter();
-            updateControls();
-            updateURL();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            // reset verse selector
+            const verseSelect = document.getElementById('verse-select');
+            verseSelect.innerHTML = '<option value="">Versículo</option>';
+            verseSelect.disabled = true;
+            // clear verses container
+            document.getElementById('verses').innerHTML = '<div class="info">Selecciona un capítulo para ver el texto</div>';
+            // disable navigation until chapter selected
+            document.getElementById('prev-button').disabled = true;
+            document.getElementById('next-button').disabled = true;
+            // update URL: only book
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.delete('chapter');
+            url.searchParams.delete('verse');
+            window.history.pushState({}, '', url);
         });
 
         document.getElementById('chapter-select').addEventListener('change', (e) => {
             currentChapter = parseInt(e.target.value);
+            currentVerse = 0;
             loadChapter();
             updateControls();
             updateURL();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            // Populate verse dropdown after selecting chapter
+            populateVerseSelect();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         // Event listeners para los botones de navegación
@@ -768,11 +779,12 @@
 
             const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
             const chapterSelect = document.getElementById('chapter-select');
-            chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
-                <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
-                    Capítulo ${index + 1}
-                </option>
-            `).join('');
+            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
+                Array.from(chapters).map((_, index) => `
+                    <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                        Capítulo ${index + 1}
+                    </option>
+                `).join('');
         }
 
         // Función para cargar capítulo
@@ -911,118 +923,111 @@
             });
         }
 
-        // Función de búsqueda
-        function searchText() {
-            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
-            if (!searchTerm) return;
+        // Función para cargar desde URL
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+            const verseParam = params.get('verse');
 
-            const resultsDiv = document.getElementById('search-results');
-            const resultsContent = document.getElementById('results-content');
-            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
-            resultsDiv.classList.add('active');
+            if (bookParam) {
+                currentBook = bookParam;
+                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+                currentVerse = verseParam ? parseInt(verseParam) : 0;
 
-            const results = [];
-            const books = xmlDoc.getElementsByTagName('b');
-            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
-
-            for (const book of books) {
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-
-                for (const chapter of chapters) {
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-
-                    for (const verse of verses) {
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-
-                        if (searchRegex.test(verseText)) {
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: verseText
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (results.length > 0) {
-                resultsContent.innerHTML = results.map(result => `
-                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
-                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
-                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
-                    </div>
-                `).join('');
-            } else {
-                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
             }
         }
 
-        // Resaltar término de búsqueda
-        function highlightSearchTerm(text, searchTerm) {
-            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
-            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
+        // Iniciar la aplicación
+        async function init() {
+            await loadBible(currentVersion);
+            setupBookSelector();
+            loadFromUrl();
         }
 
-        // Ir a un versículo específico
-        function goToVerse(book, chapter, verse) {
-            currentBook = book;
-            currentChapter = parseInt(chapter);
-            currentVerse = parseInt(verse);
+        init();
 
-            document.getElementById('book-select').value = book;
-            loadChapters();
+        if('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(() => console.log('SW registered'))
+                    .catch(err => console.error('SW registration failed:', err));
+            });
+        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Load saved font size
+        const savedSize = localStorage.getItem('verseFontSize');
+        if (savedSize) document.documentElement.style.setProperty('--verse-font-size', savedSize + 'em');
+
+        // Adjust font size globally
+        function adjustFontSize(delta) {
+            const root = document.documentElement;
+            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
+            const newSize = Math.min(Math.max(current + delta, 0.6), 3);
+            root.style.setProperty('--verse-font-size', newSize + 'em');
+            localStorage.setItem('verseFontSize', newSize);
+        }
+    </script>
+    <script>
+        // Toggle extra controls
+        const menuToggle = document.getElementById('main-menu-toggle');
+        const extraControls = document.getElementById('extra-controls');
+        if (menuToggle && extraControls) {
+            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        // Toggle side menu
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn && sideMenu) {
+            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        }
+        // Cerrar menú lateral al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        // Populate verse-select with verses of current chapter
+        function populateVerseSelect() {
+            const verseSelect = document.getElementById('verse-select');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            verseSelect.innerHTML = '<option value="" disabled selected>Selecciona un versículo</option>';
+            Array.from(verses).forEach(v => {
+                const num = v.getAttribute('n');
+                const opt = document.createElement('option');
+                opt.value = num;
+                opt.textContent = 'Versículo ' + num;
+                verseSelect.appendChild(opt);
+            });
+            verseSelect.disabled = false;
+        }
+        // Handle verse selection
+        document.getElementById('verse-select').addEventListener('change', (e) => {
+            currentVerse = parseInt(e.target.value);
             loadChapter();
             updateControls();
             updateURL();
-            
-            closeSearch();
-        }
-
-        // Cerrar resultados de búsqueda
-        function closeSearch() {
-            document.getElementById('search-results').classList.remove('active');
-        }
-
-        // Search input toggle and execution: primer click muestra input, segundo click o Enter busca
-        (function(){
-            const wrapper = document.querySelector('.search-wrapper');
-            const input = document.getElementById('search-input');
-            const button = document.getElementById('search-button');
-            if (wrapper && input && button) {
-                button.addEventListener('click', () => {
-                    if (!wrapper.classList.contains('active')) {
-                        wrapper.classList.add('active');
-                        input.focus();
-                    } else if (input.value.trim()) {
-                        searchText();
-                    }
-                });
-                input.addEventListener('keydown', e => {
-                    if (e.key === 'Enter' && input.value.trim()) searchText();
-                });
-            }
-        })();
-        // Reactivar cierre de búsqueda: botón X y tecla Esc
-        const closeBtn = document.getElementById('close-search');
-        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeSearch();
         });
-
-        // Ocultar grid al hacer click fuera
-        document.addEventListener('click', (e) => {
-            const chapterGrid = document.getElementById('chapter-grid');
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
-                chapterGrid.classList.remove('active');
-            }
-        });
-
+    </script>
+    <script>
         // Estados y menú contextual de versículo
         function loadBookmarks() {
             return JSON.parse(localStorage.getItem('bookmarks') || '[]');
@@ -1160,84 +1165,115 @@
         });
         document.getElementById('modal-cancel-btn').addEventListener('click', hideCommentModal);
 
-        // Función para cargar desde URL
-        function loadFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const bookParam = params.get('book');
-            const chapterParam = params.get('chapter');
-            const verseParam = params.get('verse');
+        // Función de búsqueda
+        function searchText() {
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!searchTerm) return;
 
-            if (bookParam) {
-                currentBook = bookParam;
-                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
-                currentVerse = verseParam ? parseInt(verseParam) : 0;
+            const resultsDiv = document.getElementById('search-results');
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
+            resultsDiv.classList.add('active');
 
-                document.getElementById('book-select').value = currentBook;
-                loadChapters();
-                loadChapter();
-                updateControls();
+            const results = [];
+            const books = xmlDoc.getElementsByTagName('b');
+            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
+
+            for (const book of books) {
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+
+                for (const chapter of chapters) {
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+
+                    for (const verse of verses) {
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+
+                        if (searchRegex.test(verseText)) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: verseText
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (results.length > 0) {
+                resultsContent.innerHTML = results.map(result => `
+                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
+                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
+                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
             }
         }
 
-        // Iniciar la aplicación
-        async function init() {
-            await loadBible(currentVersion);
-            setupBookSelector();
-            loadFromUrl();
+        // Resaltar término de búsqueda
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
+            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
         }
 
-        init();
+        // Ir a un versículo específico
+        function goToVerse(book, chapter, verse) {
+            currentBook = book;
+            currentChapter = parseInt(chapter);
+            currentVerse = parseInt(verse);
 
-        if('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(() => console.log('SW registered'))
-                    .catch(err => console.error('SW registration failed:', err));
-            });
+            document.getElementById('book-select').value = book;
+            loadChapters();
+            loadChapter();
+            updateControls();
+            updateURL();
+            
+            closeSearch();
         }
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault(); deferredPrompt = e;
-            document.getElementById('install-button').style.display = 'block';
+
+        // Cerrar resultados de búsqueda
+        function closeSearch() {
+            document.getElementById('search-results').classList.remove('active');
+        }
+
+        // Search input toggle and execution: primer click muestra input, segundo click o Enter busca
+        (function(){
+            const wrapper = document.querySelector('.search-wrapper');
+            const input = document.getElementById('search-input');
+            const button = document.getElementById('search-button');
+            if (wrapper && input && button) {
+                button.addEventListener('click', () => {
+                    if (!wrapper.classList.contains('active')) {
+                        wrapper.classList.add('active');
+                        input.focus();
+                    } else if (input.value.trim()) {
+                        searchText();
+                    }
+                });
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && input.value.trim()) searchText();
+                });
+            }
+        })();
+        // Reactivar cierre de búsqueda: botón X y tecla Esc
+        const closeBtn = document.getElementById('close-search');
+        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearch();
         });
-        document.getElementById('install-button').addEventListener('click', async () => {
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            document.getElementById('install-button').style.display = 'none';
-            deferredPrompt = null;
-        });
-    </script>
-    <script>
-        // Load saved font size
-        const savedSize = localStorage.getItem('verseFontSize');
-        if (savedSize) document.documentElement.style.setProperty('--verse-font-size', savedSize + 'em');
 
-        // Adjust font size globally
-        function adjustFontSize(delta) {
-            const root = document.documentElement;
-            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
-            const newSize = Math.min(Math.max(current + delta, 0.6), 3);
-            root.style.setProperty('--verse-font-size', newSize + 'em');
-            localStorage.setItem('verseFontSize', newSize);
-        }
-    </script>
-    <script>
-        // Toggle extra controls
-        const menuToggle = document.getElementById('main-menu-toggle');
-        const extraControls = document.getElementById('extra-controls');
-        if (menuToggle && extraControls) {
-            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
-        }
-        // Toggle side menu
-        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
-        const sideMenu = document.getElementById('side-menu');
-        if (sideMenuToggleBtn && sideMenu) {
-            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
-        }
-        // Cerrar menú lateral al hacer clic fuera
-        document.addEventListener('click', e => {
-            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
-                sideMenu.classList.remove('active');
+        // Ocultar grid al hacer click fuera
+        document.addEventListener('click', (e) => {
+            const chapterGrid = document.getElementById('chapter-grid');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
+                chapterGrid.classList.remove('active');
             }
         });
     </script>
