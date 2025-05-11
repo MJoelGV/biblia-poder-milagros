@@ -262,37 +262,43 @@
             text-align: center;
         }
 
-        .chapter-grid {
-            display: none;
+        .chapter-grid, .verse-grid {
             position: fixed;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .chapter-grid.active, .verse-grid.active {
+            display: flex;
+        }
+        .chapter-grid .grid-content, .verse-grid .grid-content {
             background: var(--bg-color);
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-            z-index: 999;
-            max-width: 90%;
-            width: 300px;
-            max-height: 60vh;
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            position: relative;
-            padding-top: 40px;
-            padding-bottom: 40px;
-        }
-        .chapter-grid.active {
             display: grid;
-            /* Siempre 1 columna en móvil/tablet */
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
         }
-
-        /* Pantallas grandes: 4 columnas */
-        @media (min-width: 701px) {
-            .chapter-grid.active {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        /* Header for modal grids */
+        .chapter-grid .grid-header, .verse-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .close-grid {
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
         }
 
         /* Botón de título: línea única con indicador */
@@ -539,49 +545,13 @@
         .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
         
         /* Verse grid styling and hide dropdowns */
-        .verse-grid {
-            display: none;
-            position: fixed;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-color);
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-            z-index: 999;
-            max-width: 90%;
-            width: 300px;
-            overflow-y: auto;
-            max-height: 50vh;
-        }
-        .verse-grid.active {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
-        }
         #chapter-select, #verse-select {
             display: none !important;
         }
 
-        .scroll-btn {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 30px;
-            background: var(--bg-color);
-            border: 1px solid var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1001;
-        }
-        #scroll-up { top: 5px; }
-        #scroll-down { bottom: 5px; }
     </style>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 </head>
 <body>
     <!-- Menú lateral -->
@@ -661,9 +631,6 @@
         <button class="nav-button" id="prev-button">← Anterior</button>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
-
-    <!-- texto actualizado -->
-    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 
     <script>
         let xmlDoc = null;
@@ -1028,26 +995,28 @@
             const chapterButtons = Array.from(chapters).map((_, i) =>
                 `<button class="chapter-btn" data-chapter="${i+1}">Capítulo ${i+1}</button>`
             ).join('');
-            grid.innerHTML = `<button id="scroll-up" class="scroll-btn">▲</button>` +
-                             chapterButtons +
-                             `<button id="scroll-down" class="scroll-btn">▼</button>`;
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
+                </div>
+                ${chapterButtons}
+            </div>`;
             grid.classList.add('active');
-            document.getElementById('scroll-up').addEventListener('click', () => grid.scrollBy({ top: -100, behavior: 'smooth' }));
-            document.getElementById('scroll-down').addEventListener('click', () => grid.scrollBy({ top: 100, behavior: 'smooth' }));
         }
         function showVerseGrid() {
             const grid = document.getElementById('verse-grid');
             const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
-            grid.innerHTML = Array.from(verses).map(v =>
-                `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`
-            ).join('');
+            const buttons = Array.from(verses)
+                .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
+                .join('');
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
+                </div>
+                ${buttons}
+            </div>`;
             grid.classList.add('active');
         }
-        // Override book select click for grid flow
-        document.getElementById('book-select').addEventListener('change', e => {
-            currentBook = e.target.value;
-            showChapterGrid();
-        });
         // Handle chapter button click
         document.getElementById('chapter-grid').addEventListener('click', e => {
             if (!e.target.dataset.chapter) return;
@@ -1061,6 +1030,12 @@
             currentVerse = parseInt(e.target.dataset.verse);
             document.getElementById('verse-grid').classList.remove('active');
             loadChapter(); updateControls(); updateURL();
+        });
+        // Close modal grids
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('close-grid')) {
+                document.getElementById(e.target.dataset.target).classList.remove('active');
+            }
         });
     </script>
     <script>
