@@ -275,8 +275,13 @@
             z-index: 999;
             max-width: 90%;
             width: 300px;
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            padding-top: 40px;
+            padding-bottom: 40px;
         }
-
         .chapter-grid.active {
             display: grid;
             /* Siempre 1 columna en móvil/tablet */
@@ -558,6 +563,24 @@
         #chapter-select, #verse-select {
             display: none !important;
         }
+
+        .scroll-btn {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: var(--bg-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        #scroll-up { top: 5px; }
+        #scroll-down { bottom: 5px; }
     </style>
 </head>
 <body>
@@ -1002,10 +1025,15 @@
         function showChapterGrid() {
             const grid = document.getElementById('chapter-grid');
             const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
-            grid.innerHTML = Array.from(chapters).map((_, i) =>
+            const chapterButtons = Array.from(chapters).map((_, i) =>
                 `<button class="chapter-btn" data-chapter="${i+1}">Capítulo ${i+1}</button>`
             ).join('');
+            grid.innerHTML = `<button id="scroll-up" class="scroll-btn">▲</button>` +
+                             chapterButtons +
+                             `<button id="scroll-down" class="scroll-btn">▼</button>`;
             grid.classList.add('active');
+            document.getElementById('scroll-up').addEventListener('click', () => grid.scrollBy({ top: -100, behavior: 'smooth' }));
+            document.getElementById('scroll-down').addEventListener('click', () => grid.scrollBy({ top: 100, behavior: 'smooth' }));
         }
         function showVerseGrid() {
             const grid = document.getElementById('verse-grid');
