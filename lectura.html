@@ -532,6 +532,32 @@
             margin-right: 8px;
         }
         .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+        
+        /* Verse grid styling and hide dropdowns */
+        .verse-grid {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 90%;
+            width: 300px;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+        .verse-grid.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+        }
+        #chapter-select, #verse-select {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -602,6 +628,7 @@
     </div>
 
     <div class="chapter-grid" id="chapter-grid"></div>
+    <div class="verse-grid" id="verse-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
@@ -609,12 +636,6 @@
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
-        <select id="chapter-select" class="select-css">
-            <option value="">Capítulo</option>
-        </select>
-        <select id="verse-select" class="select-css" disabled>
-            <option value="">Versículo</option>
-        </select>
         <button class="nav-button" id="next-button">Siguiente →</button>
     </div>
 
@@ -720,31 +741,7 @@
 
         document.getElementById('book-select').addEventListener('change', (e) => {
             currentBook = e.target.value;
-            // Prompt for chapter
-            var chaps = xmlDoc.querySelector('b[n="' + currentBook + '"]').getElementsByTagName('c');
-            var totalCh = chaps.length;
-            var selCh = parseInt(prompt('Selecciona capítulo (1 - ' + totalCh + '):'));
-            if (isNaN(selCh) || selCh < 1 || selCh > totalCh) return;
-            currentChapter = selCh;
-            // Prompt for verse
-            var ves = xmlDoc.querySelector('b[n="' + currentBook + '"] c[n="' + currentChapter + '"]').getElementsByTagName('v');
-            var totalV = ves.length;
-            var selV = parseInt(prompt('Selecciona versículo (1 - ' + totalV + '):'));
-            if (!isNaN(selV) && selV >= 1 && selV <= totalV) currentVerse = selV;
-            loadChapter();
-            updateControls();
-            updateURL();
-        });
-
-        document.getElementById('chapter-select').addEventListener('change', (e) => {
-            currentChapter = parseInt(e.target.value);
-            currentVerse = 0;
-            loadChapter();
-            updateControls();
-            updateURL();
-            // Populate verse dropdown after selecting chapter
-            populateVerseSelect();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showChapterGrid();
         });
 
         // Event listeners para los botones de navegación
@@ -769,7 +766,7 @@
         });
 
         // Función para cargar capítulos
-        function loadChapters() {
+        async function loadChapters() {
             const book = document.getElementById('book-select').value;
             if (!book) return;
 
@@ -998,6 +995,44 @@
             if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
                 sideMenu.classList.remove('active');
             }
+        });
+    </script>
+    <script>
+        // Chapter & verse grid selection
+        function showChapterGrid() {
+            const grid = document.getElementById('chapter-grid');
+            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            grid.innerHTML = Array.from(chapters).map((_, i) =>
+                `<button class="chapter-btn" data-chapter="${i+1}">Capítulo ${i+1}</button>`
+            ).join('');
+            grid.classList.add('active');
+        }
+        function showVerseGrid() {
+            const grid = document.getElementById('verse-grid');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            grid.innerHTML = Array.from(verses).map(v =>
+                `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`
+            ).join('');
+            grid.classList.add('active');
+        }
+        // Override book select click for grid flow
+        document.getElementById('book-select').addEventListener('change', e => {
+            currentBook = e.target.value;
+            showChapterGrid();
+        });
+        // Handle chapter button click
+        document.getElementById('chapter-grid').addEventListener('click', e => {
+            if (!e.target.dataset.chapter) return;
+            currentChapter = parseInt(e.target.dataset.chapter);
+            document.getElementById('chapter-grid').classList.remove('active');
+            showVerseGrid();
+        });
+        // Handle verse button click
+        document.getElementById('verse-grid').addEventListener('click', e => {
+            if (!e.target.dataset.verse) return;
+            currentVerse = parseInt(e.target.dataset.verse);
+            document.getElementById('verse-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
         });
     </script>
     <script>
