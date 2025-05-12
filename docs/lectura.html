@@ -301,6 +301,40 @@
             line-height: 1;
         }
 
+        /* Outline grid styling */
+        .outline-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .outline-grid.active {
+            display: flex;
+        }
+        .outline-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        .outline-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
         /* Botón de título: línea única con indicador */
         .chapter-btn {
             display: flex;
@@ -622,6 +656,7 @@
 
     <div class="chapter-grid" id="chapter-grid"></div>
     <div class="verse-grid" id="verse-grid"></div>
+    <div class="outline-grid" id="outline-grid"></div>
 
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
@@ -630,6 +665,7 @@
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
         <button class="nav-button" id="next-button">Siguiente →</button>
+        <button class="nav-button" id="outline-button">Temas</button>
     </div>
 
     <script>
@@ -1309,6 +1345,43 @@
             if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
                 chapterGrid.classList.remove('active');
             }
+        });
+    </script>
+    <script>
+        // Load headings for outlines
+        let headingsData = {};
+        (async () => {
+            try {
+                const res = await fetch('headings.json');
+                headingsData = await res.json();
+            } catch (err) {
+                console.error('Error cargando headings.json', err);
+            }
+        })();
+        // Outline button handler
+        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+        // Function to show outline grid
+        function showOutlineGrid() {
+            const grid = document.getElementById('outline-grid');
+            const outlines = (headingsData[currentBook] && headingsData[currentBook][currentChapter]) || [];
+            const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
+            const buttons = outlines.map(o =>
+                `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
+            ).join('');
+            grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            grid.classList.add('active');
+        }
+        // Handle outline selection
+        document.getElementById('outline-grid').addEventListener('click', e => {
+            if (!e.target.dataset.start) return;
+            const start = parseInt(e.target.dataset.start);
+            currentVerse = start;
+            document.getElementById('outline-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+            setTimeout(() => {
+                const el = document.querySelector(`.verse[data-verse=\"${start}\"]`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         });
     </script>
 </body>
