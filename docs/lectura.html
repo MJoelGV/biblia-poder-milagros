@@ -1017,7 +1017,7 @@
             sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
         }
         // Cerrar menú lateral al hacer clic fuera
-        document.addEventListener('click', e => {
+        document.addEventListener('click', (e) => {
             if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
                 sideMenu.classList.remove('active');
             }
@@ -1365,10 +1365,14 @@
             const grid = document.getElementById('outline-grid');
             const outlines = (headingsData[currentBook] && headingsData[currentBook][currentChapter]) || [];
             const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
-            const buttons = outlines.map(o =>
-                `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
-            ).join('');
-            grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            if (outlines.length === 0) {
+                grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
+            } else {
+                const buttons = outlines.map(o =>
+                    `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
+                ).join('');
+                grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            }
             grid.classList.add('active');
         }
         // Handle outline selection
