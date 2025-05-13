@@ -301,40 +301,6 @@
             line-height: 1;
         }
 
-        /* Outline grid styling */
-        .outline-grid {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .outline-grid.active {
-            display: flex;
-        }
-        .outline-grid .grid-content {
-            background: var(--bg-color);
-            border-radius: 8px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
-            gap: 10px;
-        }
-        .outline-grid .grid-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
         /* Botón de título: línea única con indicador */
         .chapter-btn {
             display: flex;
@@ -578,12 +544,53 @@
         }
         .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
         
+        /* Outline grid styling */
+        .outline-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .outline-grid.active {
+            display: flex;
+        }
+        .outline-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        .outline-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
         /* Verse grid styling and hide dropdowns */
         #chapter-select, #verse-select {
             display: none !important;
         }
 
+        /* Mostrar grid de capítulos cuando esté activo */
+        .chapter-grid.active { display: flex; }
     </style>
+    <script>
+        let strongsData = {};
+        fetch('strongs.json')
+          .then(res => res.json())
+          .then(data => { strongsData = data; });
+    </script>
     <!-- texto actualizado -->
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 </head>
@@ -599,7 +606,7 @@
             <li onclick="window.location.href='diccionario.html'">Diccionario</li>
             <li onclick="window.location.href='bookmarks.html'">Marcados</li>
             <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='temas.html'">Temas</li>
+            <li id="chapter-menu-toggle">Capítulos</li>
         </ul>
     </div>
     <div class="controls" id="controls">
@@ -657,15 +664,21 @@
     <div class="chapter-grid" id="chapter-grid"></div>
     <div class="verse-grid" id="verse-grid"></div>
     <div class="outline-grid" id="outline-grid"></div>
-
+    <!-- outline-grid removed temporarily until feature complete -->
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
     </div> <!-- cierre .chapter-content -->
 
     <div class="navigation-bottom" id="navigation-bottom">
         <button class="nav-button" id="prev-button">← Anterior</button>
+        <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
         <button class="nav-button" id="next-button">Siguiente →</button>
-        <button class="nav-button" id="outline-button">Temas</button>
+    </div>
+
+    <div id="strongs-backdrop" class="modal-backdrop"></div>
+    <div id="strongs-modal" class="modal">
+        <div id="strongs-content"></div>
+        <button id="strongs-close">Cerrar</button>
     </div>
 
     <script>
@@ -970,13 +983,10 @@
 
         init();
 
-        if('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(() => console.log('SW registered'))
-                    .catch(err => console.error('SW registration failed:', err));
-            });
-        }
+        // Deshabilitado Service Worker para evitar caché en lectura.html
+        // if('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('service-worker.js');
+        // }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', e => {
             e.preventDefault(); deferredPrompt = e;
@@ -1021,6 +1031,12 @@
             if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
                 sideMenu.classList.remove('active');
             }
+        });
+        // Agregar listener al item de capítulos
+        const chapterMenuToggle = document.getElementById('chapter-menu-toggle');
+        if (chapterMenuToggle) chapterMenuToggle.addEventListener('click', () => {
+            showChapterGrid();
+            sideMenu.classList.remove('active');
         });
     </script>
     <script>
@@ -1098,272 +1114,20 @@
         });
     </script>
     <script>
-        // Estados y menú contextual de versículo
-        function loadBookmarks() {
-            return JSON.parse(localStorage.getItem('bookmarks') || '[]');
-        }
-        function saveBookmarks(arr) {
-            localStorage.setItem('bookmarks', JSON.stringify(arr));
-        }
-        function loadComments() {
-            return JSON.parse(localStorage.getItem('comments') || '{}');
-        }
-        function saveComments(obj) {
-            localStorage.setItem('comments', JSON.stringify(obj));
-        }
-        function loadMemorized() {
-            return JSON.parse(localStorage.getItem('memorized') || '[]');
-        }
-        function saveMemorized(arr) {
-            localStorage.setItem('memorized', JSON.stringify(arr));
-        }
-        function toggleBookmark(verseEl) {
-            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
-            const bm = loadBookmarks();
-            const idx = bm.indexOf(key);
-            if (idx >= 0) bm.splice(idx, 1);
-            else bm.push(key);
-            saveBookmarks(bm);
-            verseEl.classList.toggle('bookmarked');
-        }
-        function toggleComment(verseEl) {
-            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
-            const com = loadComments();
-            const c = prompt('Escribe tu comentario:');
-            if (c === null) return;
-            if (c) com[key] = c;
-            else delete com[key];
-            saveComments(com);
-            verseEl.classList.toggle('comment', !!c);
-        }
-        function toggleMemorize(verseEl) {
-            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
-            const mem = loadMemorized();
-            const idx = mem.indexOf(key);
-            if (idx >= 0) mem.splice(idx, 1);
-            else mem.push(key);
-            saveMemorized(mem);
-            verseEl.classList.toggle('memorized');
-        }
-        // Restaurar estados de marcados, comentarios y memorización
-        function restoreStates() {
-            const bm = loadBookmarks();
-            const com = loadComments();
-            const mem = loadMemorized();
-            document.querySelectorAll('.verse').forEach(v => {
-                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-                if (bm.includes(key)) v.classList.add('bookmarked');
-                if (com[key]) v.classList.add('comment');
-                if (mem.includes(key)) v.classList.add('memorized');
-            });
-        }
-        const versesContainer = document.getElementById('verses');
-        const menu = document.getElementById('verse-menu');
-        let menuTarget = null;
-        // Mostrar menú con doble clic (desktop y móvil)
-        versesContainer.addEventListener('dblclick', e => {
-            const v = e.target.closest('.verse'); if (!v) return;
-            menuTarget = v;
-            document.getElementById('menu-toggle-bookmark').textContent =
-                v.classList.contains('bookmarked') ? 'Desmarcar versículo' : 'Marcar versículo';
-            const commentItem = document.getElementById('menu-add-comment');
-            commentItem.textContent = v.classList.contains('comment') ? 'Ver comentario' : 'Agregar comentario';
-            const memItem = document.getElementById('menu-memorize-verse');
-            const memKey = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-            memItem.textContent = loadMemorized().includes(memKey) ? 'Dejar de memorizar versículo' : 'Memorizar versículo';
-            const copyItem = document.getElementById('menu-copy-verse');
-            copyItem.textContent = 'Copiar versículo';
-            const rect = v.getBoundingClientRect();
-            menu.style.top = (rect.top + window.scrollY) + 'px';
-            menu.style.left = (rect.left + window.scrollX) + 'px';
-            menu.style.display = 'block';
-        });
-
-        // Manejo de opciones del menú
-        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
-            toggleBookmark(menuTarget);
-            menu.style.display = 'none';
-        });
-        document.getElementById('menu-add-comment').addEventListener('click', () => {
-            openCommentModal(menuTarget);
-            menu.style.display = 'none';
-        });
-        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
-            toggleMemorize(menuTarget);
-            menu.style.display = 'none';
-        });
-        document.getElementById('menu-copy-verse').addEventListener('click', () => {
-            const v = menuTarget;
-            const ref = `${currentBook} ${currentChapter}:${v.dataset.verse}`;
-            const text = v.querySelector('.verse-text').textContent.trim();
-            const toCopy = `${ref} ${text}`;
-            navigator.clipboard.writeText(toCopy);
-            menu.style.display = 'none';
-        });
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', e => {
-            if (!e.target.closest('#verse-menu')) menu.style.display = 'none';
-        });
-
-        // Modal de comentarios
-        function openCommentModal(verseEl) {
-            menuTarget = verseEl;
-            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
-            const com = loadComments();
-            const input = document.getElementById('modal-comment-input');
-            input.value = com[key] || '';
-            document.getElementById('comment-backdrop').style.display = 'block';
-            document.getElementById('comment-modal').style.display = 'block';
-            input.focus();
-        }
-        function hideCommentModal() {
-            document.getElementById('comment-backdrop').style.display = 'none';
-            document.getElementById('comment-modal').style.display = 'none';
+        // Obtiene los temas directamente del XML
+        function getOutlines(book, chapter) {
+            const nodes = xmlDoc.querySelectorAll(`b[n="${book}"] c[n="${chapter}"] o`);
+            return Array.from(nodes).map(o => ({
+                title: o.getAttribute('title'),
+                start: parseInt(o.getAttribute('start'), 10),
+                end: parseInt(o.getAttribute('end'), 10)
+            }));
         }
 
-        // Guardar o cancelar en el modal
-        document.getElementById('modal-save-btn').addEventListener('click', () => {
-            const key = `${currentBook}-${currentChapter}-${menuTarget.dataset.verse}`;
-            const input = document.getElementById('modal-comment-input');
-            const c = input.value.trim();
-            const com = loadComments();
-            if (c) com[key] = c;
-            else delete com[key];
-            saveComments(com);
-            menuTarget.classList.toggle('comment', !!c);
-            hideCommentModal();
-        });
-        document.getElementById('modal-cancel-btn').addEventListener('click', hideCommentModal);
-
-        // Función de búsqueda
-        function searchText() {
-            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
-            if (!searchTerm) return;
-
-            const resultsDiv = document.getElementById('search-results');
-            const resultsContent = document.getElementById('results-content');
-            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
-            resultsDiv.classList.add('active');
-
-            const results = [];
-            const books = xmlDoc.getElementsByTagName('b');
-            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
-
-            for (const book of books) {
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-
-                for (const chapter of chapters) {
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-
-                    for (const verse of verses) {
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-
-                        if (searchRegex.test(verseText)) {
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: verseText
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (results.length > 0) {
-                resultsContent.innerHTML = results.map(result => `
-                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
-                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
-                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
-                    </div>
-                `).join('');
-            } else {
-                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
-            }
-        }
-
-        // Resaltar término de búsqueda
-        function highlightSearchTerm(text, searchTerm) {
-            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
-            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
-        }
-
-        // Ir a un versículo específico
-        function goToVerse(book, chapter, verse) {
-            currentBook = book;
-            currentChapter = parseInt(chapter);
-            currentVerse = parseInt(verse);
-
-            document.getElementById('book-select').value = book;
-            loadChapters();
-            loadChapter();
-            updateControls();
-            updateURL();
-            
-            closeSearch();
-        }
-
-        // Cerrar resultados de búsqueda
-        function closeSearch() {
-            document.getElementById('search-results').classList.remove('active');
-        }
-
-        // Search input toggle and execution: primer click muestra input, segundo click o Enter busca
-        (function(){
-            const wrapper = document.querySelector('.search-wrapper');
-            const input = document.getElementById('search-input');
-            const button = document.getElementById('search-button');
-            if (wrapper && input && button) {
-                button.addEventListener('click', () => {
-                    if (!wrapper.classList.contains('active')) {
-                        wrapper.classList.add('active');
-                        input.focus();
-                    } else if (input.value.trim()) {
-                        searchText();
-                    }
-                });
-                input.addEventListener('keydown', e => {
-                    if (e.key === 'Enter' && input.value.trim()) searchText();
-                });
-            }
-        })();
-        // Reactivar cierre de búsqueda: botón X y tecla Esc
-        const closeBtn = document.getElementById('close-search');
-        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeSearch();
-        });
-
-        // Ocultar grid al hacer click fuera
-        document.addEventListener('click', (e) => {
-            const chapterGrid = document.getElementById('chapter-grid');
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
-                chapterGrid.classList.remove('active');
-            }
-        });
-    </script>
-    <script>
-        // Load headings for outlines
-        let headingsData = {};
-        (async () => {
-            try {
-                const res = await fetch('headings.json');
-                headingsData = await res.json();
-            } catch (err) {
-                console.error('Error cargando headings.json', err);
-            }
-        })();
-        // Outline button handler
-        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
-        // Function to show outline grid
+        // Muestra modal de temas
         function showOutlineGrid() {
             const grid = document.getElementById('outline-grid');
-            const outlines = (headingsData[currentBook] && headingsData[currentBook][currentChapter]) || [];
+            const outlines = getOutlines(currentBook, currentChapter);
             const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
             if (outlines.length === 0) {
                 grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
@@ -1375,18 +1139,85 @@
             }
             grid.classList.add('active');
         }
-        // Handle outline selection
+        // Maneja selección de tema
         document.getElementById('outline-grid').addEventListener('click', e => {
             if (!e.target.dataset.start) return;
-            const start = parseInt(e.target.dataset.start);
+            const start = parseInt(e.target.dataset.start, 10);
             currentVerse = start;
             document.getElementById('outline-grid').classList.remove('active');
-            loadChapter(); updateControls(); updateURL();
+            loadChapter();
+            updateControls();
+            updateURL();
             setTimeout(() => {
-                const el = document.querySelector(`.verse[data-verse=\"${start}\"]`);
+                const el = document.querySelector(`.verse[data-verse="${start}"]`);
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
         });
+        // Listener Botón Temas
+        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+    </script>
+    <script>
+        // Mostrar selector de capítulos
+        function showChapterGrid() {
+            const grid = document.getElementById('chapter-grid');
+            const chaptersElem = xmlDoc.querySelectorAll(`b[n=\"${currentBook}\"] c`);
+            let html = '<div class="chapter-btn">';
+            chaptersElem.forEach(ch => {
+                const n = ch.getAttribute('n');
+                html += `<button class=\"chapter-item\" data-chap=\"${n}\">${n}</button>`;
+            });
+            html += '</div>';
+            grid.innerHTML = html;
+            grid.classList.add('active');
+            grid.querySelectorAll('.chapter-item').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    currentChapter = parseInt(e.target.dataset.chap);
+                    loadChapter();
+                    updateChapterButton();
+                    updateURL();
+                    grid.classList.remove('active');
+                });
+            });
+        }
+        // Listener para botón Capítulo
+        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
+    </script>
+    <script>
+        // Annotate strong numbers
+        function annotateStrongNumbers() {
+            const verseEls = document.querySelectorAll('.verse-text');
+            const wordMap = {};
+            for (const code in strongsData) {
+                const entry = strongsData[code];
+                wordMap[entry.word.toLowerCase()] = code;
+            }
+            verseEls.forEach(el => {
+                el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
+                    const code = wordMap[match.toLowerCase()];
+                    return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+                });
+            });
+        }
+        document.body.addEventListener('click', e => {
+            const sw = e.target.closest('.strong-word');
+            if (!sw) return;
+            const info = strongsData[sw.dataset.strong];
+            if (!info) return;
+            document.getElementById('strongs-content').innerHTML = '<strong>' + info.word + ' (' + sw.dataset.strong + ')</strong><br>' +
+                'Translit: ' + info.translit + '<br>' +
+                'Def: ' + info.meaning;
+            document.getElementById('strongs-backdrop').style.display = 'block';
+            document.getElementById('strongs-modal').style.display = 'block';
+        });
+        document.getElementById('strongs-close').addEventListener('click', () => {
+            document.getElementById('strongs-backdrop').style.display = 'none';
+            document.getElementById('strongs-modal').style.display = 'none';
+        });
+        const origLoadChapter = window.loadChapter;
+        window.loadChapter = async function() {
+            await origLoadChapter();
+            annotateStrongNumbers();
+        };
     </script>
 </body>
 </html>
