@@ -776,13 +776,6 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
-        // Event listeners para los selectores
-
-        document.getElementById('book-select').addEventListener('change', (e) => {
-            currentBook = e.target.value;
-            showChapterGrid();
-        });
-
         // Event listeners para los botones de navegación
         document.getElementById('prev-button').addEventListener('click', () => {
             if (currentChapter > 1) {
@@ -865,7 +858,6 @@
                         }, 100);
                     }
                 }
-                restoreStates();
             } catch (error) {
                 console.error('Error loading chapter:', error);
                 versesContainer.innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
@@ -876,7 +868,6 @@
         function updateControls() {
             const prevButton = document.getElementById('prev-button');
             const nextButton = document.getElementById('next-button');
-            const chapterSelect = document.getElementById('chapter-select');
             
             if (!currentBook) {
                 prevButton.disabled = true;
@@ -889,8 +880,8 @@
             prevButton.disabled = currentChapter <= 1;
             nextButton.disabled = currentChapter >= totalChapters;
             
-            // Actualizar el selector de capítulos
-            chapterSelect.value = currentChapter;
+            // Actualizar texto del botón de capítulo
+            document.getElementById('current-chapter-button').textContent = currentChapter;
         }
 
         // Función para actualizar URL
@@ -1045,7 +1036,7 @@
             const grid = document.getElementById('chapter-grid');
             const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
             const chapterButtons = Array.from(chapters).map((_, i) =>
-                `<button class="chapter-btn" data-chapter="${i+1}">Capítulo ${i+1}</button>`
+                `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
             ).join('');
             grid.innerHTML = `<div class="grid-content">
                 <div class="grid-header">
@@ -1071,9 +1062,11 @@
         }
         // Handle chapter button click
         document.getElementById('chapter-grid').addEventListener('click', e => {
-            if (!e.target.dataset.chapter) return;
-            currentChapter = parseInt(e.target.dataset.chapter);
+            const chap = e.target.dataset.chap;
+            if (!chap) return;
+            currentChapter = parseInt(chap, 10);
             document.getElementById('chapter-grid').classList.remove('active');
+            updateControls();
             showVerseGrid();
         });
         // Handle verse button click
@@ -1088,6 +1081,18 @@
             if (e.target.classList.contains('close-grid')) {
                 document.getElementById(e.target.dataset.target).classList.remove('active');
             }
+        });
+    </script>
+    <script>
+        // Bind botón 'Capítulo' inferior al grid principal
+        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
+        // Bind selector de libro para abrir grid de capítulos
+        document.getElementById('book-select').addEventListener('change', e => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            updateControls();
+            updateURL();
+            showChapterGrid();
         });
     </script>
     <script>
@@ -1155,32 +1160,6 @@
         });
         // Listener Botón Temas
         document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
-    </script>
-    <script>
-        // Mostrar selector de capítulos
-        function showChapterGrid() {
-            const grid = document.getElementById('chapter-grid');
-            const chaptersElem = xmlDoc.querySelectorAll(`b[n=\"${currentBook}\"] c`);
-            let html = '<div class="chapter-btn">';
-            chaptersElem.forEach(ch => {
-                const n = ch.getAttribute('n');
-                html += `<button class=\"chapter-item\" data-chap=\"${n}\">${n}</button>`;
-            });
-            html += '</div>';
-            grid.innerHTML = html;
-            grid.classList.add('active');
-            grid.querySelectorAll('.chapter-item').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    currentChapter = parseInt(e.target.dataset.chap);
-                    loadChapter();
-                    updateChapterButton();
-                    updateURL();
-                    grid.classList.remove('active');
-                });
-            });
-        }
-        // Listener para botón Capítulo
-        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
     </script>
     <script>
         // Annotate strong numbers
