@@ -1205,6 +1205,66 @@
         };
     </script>
     <script>
+        // Búsqueda de versículos en toda la Biblia y resaltado de término
+        const searchWrapper = document.querySelector('.search-wrapper');
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const resultsContent = document.getElementById('results-content');
+        const closeSearchBtn = document.getElementById('close-search');
+        // Escapar texto para RegExp
+        function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\\]\\]/g, '\\\\$&'); }
+        searchButton.addEventListener('click', () => {
+            searchWrapper.classList.toggle('active');
+            if (searchWrapper.classList.contains('active')) searchInput.focus();
+        });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                const rawQuery = searchInput.value.trim();
+                if (!rawQuery) return;
+                const query = rawQuery.toLowerCase();
+                resultsContent.innerHTML = '';
+                // Buscar en todo xmlDoc (toda la Biblia)
+                const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
+                const regex = new RegExp(escapeRegExp(query), 'gi');
+                const matches = verses.filter(v => v.textContent.toLowerCase().includes(query));
+                if (matches.length) {
+                    matches.forEach(v => {
+                        const verseNum = v.getAttribute('n');
+                        const chapterNum = v.parentNode.getAttribute('n');
+                        const bookName = v.parentNode.parentNode.getAttribute('n');
+                        const text = v.textContent;
+                        // Resaltar término
+                        const highlighted = text.replace(regex, match => `<mark>${match}</mark>`);
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `<div class="result-book">${bookName} ${chapterNum}:${verseNum}</div><div class="result-text">${highlighted}</div>`;
+                        item.addEventListener('click', () => {
+                            searchResults.classList.remove('active');
+                            // Navegar a capítulo y versículo
+                            currentBook = bookName;
+                            currentChapter = parseInt(chapterNum);
+                            currentVerse = parseInt(verseNum);
+                            document.getElementById('book-select').value = currentBook;
+                            loadChapters(); loadChapter(); updateControls(); updateURL();
+                            setTimeout(() => {
+                                const el = document.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        });
+                        resultsContent.appendChild(item);
+                    });
+                    searchResults.classList.add('active');
+                } else {
+                    alert('No se encontraron resultados');
+                }
+            }
+        });
+        closeSearchBtn.addEventListener('click', () => {
+            searchResults.classList.remove('active');
+        });
+    </script>
+    <script>
         // Menú contextual al hacer doble clic en versículo
         const verseContainer = document.getElementById('verses');
         const verseMenu = document.getElementById('verse-menu');
@@ -1258,51 +1318,6 @@
             const text = activeVerseEl.querySelector('.verse-text').textContent;
             navigator.clipboard.writeText(text);
             verseMenu.style.display = 'none';
-        });
-    </script>
-    <script>
-        // Búsqueda de versículos al hacer clic en lupa y presionar Enter
-        const searchWrapper = document.querySelector('.search-wrapper');
-        const searchButton = document.getElementById('search-button');
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const resultsContent = document.getElementById('results-content');
-        const closeSearchBtn = document.getElementById('close-search');
-        searchButton.addEventListener('click', () => {
-            searchWrapper.classList.toggle('active');
-            if (searchWrapper.classList.contains('active')) searchInput.focus();
-        });
-        searchInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter') {
-                const query = searchInput.value.trim().toLowerCase();
-                if (!query) return;
-                resultsContent.innerHTML = '';
-                const versesEls = Array.from(document.querySelectorAll('#verses .verse'));
-                const matches = versesEls.filter(v => {
-                    const text = v.querySelector('.verse-text').textContent.toLowerCase();
-                    return text.includes(query) || v.dataset.verse === query;
-                });
-                if (matches.length) {
-                    matches.forEach(v => {
-                        const num = v.dataset.verse;
-                        const text = v.querySelector('.verse-text').textContent;
-                        const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.innerHTML = `<div class="result-book">${currentBook} ${currentChapter}:${num}</div><div class="result-text">${text}</div>`;
-                        item.addEventListener('click', () => {
-                            searchResults.classList.remove('active');
-                            v.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        });
-                        resultsContent.appendChild(item);
-                    });
-                    searchResults.classList.add('active');
-                } else {
-                    alert('No se encontraron resultados');
-                }
-            }
-        });
-        closeSearchBtn.addEventListener('click', () => {
-            searchResults.classList.remove('active');
         });
     </script>
 </body>
