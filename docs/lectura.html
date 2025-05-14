@@ -1198,5 +1198,13 @@
             annotateStrongNumbers();
         };
     </script>
+    <script>
+        // Doble clic en versículo para resaltar
+        document.getElementById('verses').addEventListener('dblclick', e => {
+            const v = e.target.closest('.verse');
+            if (!v) return;
+            v.classList.toggle('highlighted');
+        });
+    </script>
 </body>
 </html>
