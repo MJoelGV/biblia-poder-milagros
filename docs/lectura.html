@@ -1202,7 +1202,25 @@
         window.loadChapter = async function() {
             await origLoadChapter();
             annotateStrongNumbers();
+            applySavedStates();
         };
+        // Reaplicar marcas guardadas: marcados, comentarios y memorizados
+        function applySavedStates() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            document.querySelectorAll('#verses .verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bookmarks.includes(key)) v.classList.add('bookmarked');
+                if (comments[key]) v.classList.add('comment');
+                if (memorized.includes(key)) v.classList.add('memorized');
+            });
+        }
+        // Aplicar anotaciones y estados guardados al cargar la página
+        window.addEventListener('load', () => {
+            annotateStrongNumbers();
+            applySavedStates();
+        });
     </script>
     <script>
         // Búsqueda de versículos en toda la Biblia y resaltado de término
@@ -1285,6 +1303,14 @@
         document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
             if (!activeVerseEl) return;
             activeVerseEl.classList.toggle('bookmarked');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            if (activeVerseEl.classList.contains('bookmarked')) {
+                if (!bookmarks.includes(key)) bookmarks.push(key);
+            } else {
+                bookmarks = bookmarks.filter(k => k !== key);
+            }
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
             verseMenu.style.display = 'none';
         });
         document.getElementById('menu-add-comment').addEventListener('click', () => {
@@ -1298,6 +1324,10 @@
             if (comment) {
                 activeVerseEl.classList.add('comment');
                 activeVerseEl.dataset.comment = comment;
+                const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                comments[key] = comment;
+                localStorage.setItem('comments', JSON.stringify(comments));
             }
             document.getElementById('comment-modal').style.display = 'none';
             document.getElementById('comment-backdrop').style.display = 'none';
@@ -1311,6 +1341,14 @@
         document.getElementById('menu-memorize-verse').addEventListener('click', () => {
             if (!activeVerseEl) return;
             activeVerseEl.classList.toggle('memorized');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            if (activeVerseEl.classList.contains('memorized')) {
+                if (!memorized.includes(key)) memorized.push(key);
+            } else {
+                memorized = memorized.filter(k => k !== key);
+            }
+            localStorage.setItem('memorized', JSON.stringify(memorized));
             verseMenu.style.display = 'none';
         });
         document.getElementById('menu-copy-verse').addEventListener('click', () => {
