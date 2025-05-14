@@ -946,7 +946,7 @@
             });
         }
 
-        // Función para cargar desde URL
+        // Función para cargar desde URL y carga por defecto del primer libro
         function loadFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const bookParam = params.get('book');
@@ -957,12 +957,20 @@
                 currentBook = bookParam;
                 currentChapter = chapterParam ? parseInt(chapterParam) : 1;
                 currentVerse = verseParam ? parseInt(verseParam) : 0;
-
-                document.getElementById('book-select').value = currentBook;
-                loadChapters();
-                loadChapter();
-                updateControls();
+            } else {
+                // Cargar primer libro por defecto
+                const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
+                currentBook = firstBookElem.getAttribute('n');
+                currentChapter = 1;
+                currentVerse = 0;
             }
+
+            // Actualizar selector de libros y cargar capítulo
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
         }
 
         // Iniciar la aplicación
