@@ -1150,9 +1150,7 @@
             const start = parseInt(e.target.dataset.start, 10);
             currentVerse = start;
             document.getElementById('outline-grid').classList.remove('active');
-            loadChapter();
-            updateControls();
-            updateURL();
+            loadChapter(); updateControls(); updateURL();
             setTimeout(() => {
                 const el = document.querySelector(`.verse[data-verse="${start}"]`);
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1199,11 +1197,59 @@
         };
     </script>
     <script>
-        // Doble clic en versículo para resaltar
-        document.getElementById('verses').addEventListener('dblclick', e => {
-            const v = e.target.closest('.verse');
-            if (!v) return;
-            v.classList.toggle('highlighted');
+        // Menú contextual al hacer doble clic en versículo
+        const verseContainer = document.getElementById('verses');
+        const verseMenu = document.getElementById('verse-menu');
+        let activeVerseEl = null;
+        verseContainer.addEventListener('dblclick', e => {
+            activeVerseEl = e.target.closest('.verse');
+            if (!activeVerseEl) return;
+            const rect = activeVerseEl.getBoundingClientRect();
+            verseMenu.style.display = 'block';
+            verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
+            verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#verse-menu')) {
+                verseMenu.style.display = 'none';
+            }
+        });
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('bookmarked');
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            const comment = document.getElementById('modal-comment-input').value.trim();
+            if (comment) {
+                activeVerseEl.classList.add('comment');
+                activeVerseEl.dataset.comment = comment;
+            }
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('memorized');
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-copy-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            const text = activeVerseEl.querySelector('.verse-text').textContent;
+            navigator.clipboard.writeText(text);
+            verseMenu.style.display = 'none';
         });
     </script>
 </body>
