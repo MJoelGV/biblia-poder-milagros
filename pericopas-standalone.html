@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perícopas Bíblicas en Español</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+            font-size: 16px;
+            flex-grow: 1;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        
+        .pericopes-list {
+            margin-top: 20px;
+        }
+        
+        .pericope-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f1f8e9;
+            border-radius: 5px;
+            border-left: 5px solid #4CAF50;
+            transition: transform 0.2s;
+        }
+        
+        .pericope-item:hover {
+            transform: translateX(5px);
+            background-color: #e8f5e9;
+        }
+        
+        .pericope-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        
+        .pericope-verses {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Perícopas Bíblicas en Español</h1>
+        
+        <div class="controls">
+            <select id="book-select">
+                <option value="" disabled selected>Selecciona un libro</option>
+                <!-- Los libros se cargarán desde JavaScript -->
+            </select>
+            
+            <select id="chapter-select" disabled>
+                <option value="" disabled selected>Selecciona un capítulo</option>
+                <!-- Los capítulos se cargarán desde JavaScript -->
+            </select>
+            
+            <button id="view-button" disabled>Ver perícopas</button>
+        </div>
+        
+        <div id="status" class="status">Selecciona un libro y un capítulo para ver las perícopas.</div>
+        
+        <div id="pericopes-container" class="pericopes-list"></div>
+    </div>
+    
+    <script>
+        // Datos de perícopas - Cargados desde el archivo generado
+        const PERICOPES_DATA = {
+            "GEN-1": [
+                { "title": "Dios crea el cielo y la tierra", "verses": "1-2", "startVerseId": "1", "endVerseId": "2" },
+                { "title": "la luz", "verses": "3-5", "startVerseId": "3", "endVerseId": "5" },
+                { "title": "el firmamento", "verses": "6-8", "startVerseId": "6", "endVerseId": "8" },
+                { "title": "separa la tierra seca", "verses": "9-13", "startVerseId": "9", "endVerseId": "13" },
+                { "title": "forma el sol, la luna y las estrellas", "verses": "14-19", "startVerseId": "14", "endVerseId": "19" },
+                { "title": "peces y aves", "verses": "20-23", "startVerseId": "20", "endVerseId": "23" },
+                { "title": "ganado, bestias salvajes y reptiles", "verses": "24-25", "startVerseId": "24", "endVerseId": "25" },
+                { "title": "crea al hombre a su imagen, lo bendice", "verses": "26-28", "startVerseId": "26", "endVerseId": "28" },
+                { "title": "concede los frutos de la tierra para alimentación", "verses": "29-31", "startVerseId": "29", "endVerseId": "31" }
+            ],
+            "GEN-2": [
+                { "title": "El primer sábado", "verses": "1-3", "startVerseId": "1", "endVerseId": "3" },
+                { "title": "Más detalles sobre el modo de la creación", "verses": "4-7", "startVerseId": "4", "endVerseId": "7" },
+                { "title": "La plantación del jardín del Edén, y su ubicación", "verses": "8-14", "startVerseId": "8", "endVerseId": "14" },
+                { "title": "el hombre es colocado en él y sólo el árbol del conocimiento está prohibido", "verses": "15-17", "startVerseId": "15", "endVerseId": "17" },
+                { "title": "Los animales son nombrados por Adán", "verses": "18-20", "startVerseId": "18", "endVerseId": "20" },
+                { "title": "La creación de la mujer y la institución del matrimonio", "verses": "21-25", "startVerseId": "21", "endVerseId": "25" }
+            ],
+            "HEB-1": [
+                { "title": "Cristo es superior a los ángeles", "verses": "1-3", "startVerseId": "1", "endVerseId": "3" },
+                { "title": "Es preferido sobre los ángeles", "verses": "4-14", "startVerseId": "4", "endVerseId": "14" }
+            ]
+            // Los datos completos se cargarán desde pericopas-datos-completo.js
+        };
+        
+        // Libros de la Biblia
+        const BIBLE_BOOKS = [
+            { code: 'GEN', name: 'Génesis' },
+            { code: 'EXO', name: 'Éxodo' },
+            { code: 'LEV', name: 'Levítico' },
+            { code: 'NUM', name: 'Números' },
+            { code: 'DEU', name: 'Deuteronomio' },
+            { code: 'JOS', name: 'Josué' },
+            { code: 'JDG', name: 'Jueces' },
+            { code: 'RUT', name: 'Rut' },
+            { code: '1SA', name: '1 Samuel' },
+            { code: '2SA', name: '2 Samuel' },
+            { code: '1KI', name: '1 Reyes' },
+            { code: '2KI', name: '2 Reyes' },
+            { code: '1CH', name: '1 Crónicas' },
+            { code: '2CH', name: '2 Crónicas' },
+            { code: 'EZR', name: 'Esdras' },
+            { code: 'NEH', name: 'Nehemías' },
+            { code: 'EST', name: 'Ester' },
+            { code: 'JOB', name: 'Job' },
+            { code: 'PSA', name: 'Salmos' },
+            { code: 'PRO', name: 'Proverbios' },
+            { code: 'ECC', name: 'Eclesiastés' },
+            { code: 'SNG', name: 'Cantares' },
+            { code: 'ISA', name: 'Isaías' },
+            { code: 'JER', name: 'Jeremías' },
+            { code: 'LAM', name: 'Lamentaciones' },
+            { code: 'EZK', name: 'Ezequiel' },
+            { code: 'DAN', name: 'Daniel' },
+            { code: 'HOS', name: 'Oseas' },
+            { code: 'JOL', name: 'Joel' },
+            { code: 'AMO', name: 'Amós' },
+            { code: 'OBA', name: 'Abdías' },
+            { code: 'JON', name: 'Jonás' },
+            { code: 'MIC', name: 'Miqueas' },
+            { code: 'NAM', name: 'Nahúm' },
+            { code: 'HAB', name: 'Habacuc' },
+            { code: 'ZEP', name: 'Sofonías' },
+            { code: 'HAG', name: 'Hageo' },
+            { code: 'ZEC', name: 'Zacarías' },
+            { code: 'MAL', name: 'Malaquías' },
+            { code: 'MAT', name: 'Mateo' },
+            { code: 'MRK', name: 'Marcos' },
+            { code: 'LUK', name: 'Lucas' },
+            { code: 'JHN', name: 'Juan' },
+            { code: 'ACT', name: 'Hechos' },
+            { code: 'ROM', name: 'Romanos' },
+            { code: '1CO', name: '1 Corintios' },
+            { code: '2CO', name: '2 Corintios' },
+            { code: 'GAL', name: 'Gálatas' },
+            { code: 'EPH', name: 'Efesios' },
+            { code: 'PHP', name: 'Filipenses' },
+            { code: 'COL', name: 'Colosenses' },
+            { code: '1TH', name: '1 Tesalonicenses' },
+            { code: '2TH', name: '2 Tesalonicenses' },
+            { code: '1TI', name: '1 Timoteo' },
+            { code: '2TI', name: '2 Timoteo' },
+            { code: 'TIT', name: 'Tito' },
+            { code: 'PHM', name: 'Filemón' },
+            { code: 'HEB', name: 'Hebreos' },
+            { code: 'JAS', name: 'Santiago' },
+            { code: '1PE', name: '1 Pedro' },
+            { code: '2PE', name: '2 Pedro' },
+            { code: '1JN', name: '1 Juan' },
+            { code: '2JN', name: '2 Juan' },
+            { code: '3JN', name: '3 Juan' },
+            { code: 'JUD', name: 'Judas' },
+            { code: 'REV', name: 'Apocalipsis' }
+        ];
+        
+        // Variables globales
+        let selectedBook = '';
+        let selectedChapter = '';
+        
+        // Elementos DOM
+        const bookSelect = document.getElementById('book-select');
+        const chapterSelect = document.getElementById('chapter-select');
+        const viewButton = document.getElementById('view-button');
+        const statusElement = document.getElementById('status');
+        const pericopesContainer = document.getElementById('pericopes-container');
+        
+        // Cargar el selector de libros
+        function loadBooks() {
+            // Encontrar libros que tengan perícopas
+            const booksWithPericopes = new Set();
+            
+            for (const key in PERICOPES_DATA) {
+                const bookCode = key.split('-')[0];
+                booksWithPericopes.add(bookCode);
+            }
+            
+            // Agregar opciones solo para libros con perícopas
+            bookSelect.innerHTML = '<option value="" disabled selected>Selecciona un libro</option>';
+            BIBLE_BOOKS.forEach(book => {
+                if (booksWithPericopes.has(book.code)) {
+                    const option = document.createElement('option');
+                    option.value = book.code;
+                    option.textContent = book.name;
+                    bookSelect.appendChild(option);
+                }
+            });
+        }
+        
+        // Cargar capítulos al seleccionar un libro
+        function loadChapters(bookCode) {
+            // Encontrar capítulos que tienen perícopas para este libro
+            const chaptersWithPericopes = new Set();
+            
+            for (const key in PERICOPES_DATA) {
+                if (key.startsWith(bookCode + '-')) {
+                    const chapterNum = key.split('-')[1];
+                    chaptersWithPericopes.add(chapterNum);
+                }
+            }
+            
+            // Ordenar los capítulos numéricamente
+            const sortedChapters = Array.from(chaptersWithPericopes).sort((a, b) => {
+                return parseInt(a) - parseInt(b);
+            });
+            
+            // Agregar opciones
+            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>';
+            sortedChapters.forEach(chapter => {
+                const option = document.createElement('option');
+                option.value = chapter;
+                option.textContent = `Capítulo ${chapter}`;
+                chapterSelect.appendChild(option);
+            });
+            
+            // Habilitar el selector de capítulos
+            chapterSelect.disabled = false;
+        }
+        
+        // Mostrar perícopas del capítulo seleccionado
+        function showPericopes(bookCode, chapterNum) {
+            const key = `${bookCode}-${chapterNum}`;
+            const pericopes = PERICOPES_DATA[key] || [];
+            
+            if (pericopes.length === 0) {
+                statusElement.textContent = 'No hay perícopas disponibles para este capítulo.';
+                pericopesContainer.innerHTML = '';
+                return;
+            }
+            
+            // Mostrar el título y las perícopas
+            const bookName = BIBLE_BOOKS.find(b => b.code === bookCode)?.name || bookCode;
+            statusElement.textContent = `Perícopas para ${bookName} capítulo ${chapterNum}:`;
+            
+            // Crear elementos HTML para cada perícopa
+            pericopesContainer.innerHTML = '';
+            pericopes.forEach(pericope => {
+                const div = document.createElement('div');
+                div.className = 'pericope-item';
+                div.innerHTML = `
+                    <div class="pericope-title">${pericope.title}</div>
+                    <div class="pericope-verses">Versículos ${pericope.verses}</div>
+                `;
+                pericopesContainer.appendChild(div);
+            });
+        }
+        
+        // Inicializar la aplicación
+        function init() {
+            // Intentar cargar los datos completos desde el archivo local
+            try {
+                // Este código intentará cargar el archivo pero fallará sin servidor
+                // Es solo para compatibilidad con la versión en línea
+                fetch('pericopas-datos-completo.js')
+                    .then(response => response.text())
+                    .then(text => {
+                        if (text.includes('PERICOPES_DATA')) {
+                            // Extraer solo el objeto de datos
+                            const dataStart = text.indexOf('{');
+                            const dataEnd = text.lastIndexOf('}') + 1;
+                            const dataJson = text.substring(dataStart, dataEnd);
+                            
+                            try {
+                                const fullData = JSON.parse(dataJson);
+                                Object.assign(PERICOPES_DATA, fullData);
+                                console.log('Datos completos de perícopas cargados.');
+                            } catch (e) {
+                                console.error('Error al analizar los datos:', e);
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Usando datos de ejemplo incorporados:', err);
+                    })
+                    .finally(() => {
+                        loadBooks();
+                    });
+            } catch (e) {
+                console.log('Usando datos de ejemplo incorporados');
+                loadBooks();
+            }
+            
+            // Event listeners
+            bookSelect.addEventListener('change', function() {
+                selectedBook = this.value;
+                loadChapters(selectedBook);
+                chapterSelect.value = '';
+                viewButton.disabled = true;
+                statusElement.textContent = 'Selecciona un capítulo para ver las perícopas.';
+                pericopesContainer.innerHTML = '';
+            });
+            
+            chapterSelect.addEventListener('change', function() {
+                selectedChapter = this.value;
+                viewButton.disabled = false;
+            });
+            
+            viewButton.addEventListener('click', function() {
+                if (selectedBook && selectedChapter) {
+                    showPericopes(selectedBook, selectedChapter);
+                }
+            });
+        }
+        
+        // Iniciar la aplicación cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <!-- Cargar datos completos de perícopas, si está disponible -->
+    <script>
+        // Cargar los datos completos desde el archivo generado si está disponible
+        // Este código usa una técnica que funciona incluso sin servidor
+        document.addEventListener('DOMContentLoaded', function() {
+            // Intentar cargar los datos completos de manera alternativa
+            const script = document.createElement('script');
+            script.src = 'pericopas-datos-completo.js?v=' + new Date().getTime();
+            script.onerror = function() {
+                console.log('No se pudo cargar el archivo de datos completos. Usando datos de ejemplo.');
+                loadBooks(); // Cargar con datos de ejemplo
+            };
+            document.body.appendChild(script);
+        });
+    </script>
+</body>
+</html>
