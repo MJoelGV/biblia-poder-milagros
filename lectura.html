@@ -654,14 +654,18 @@
             position: fixed;
             top: 60px;
             left: 0;
+            right: 0;
             width: 100%;
+            max-width: 100%;
             max-height: 80vh;
             background-color: white;
             border-bottom: 1px solid #ddd;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 100;
+            z-index: 1000;
             overflow-y: auto;
+            overflow-x: hidden;
             padding-bottom: 15px;
+            box-sizing: border-box;
         }
         
         .search-results-header {
@@ -691,12 +695,20 @@
         
         #results-content {
             padding: 10px 15px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0 auto;
         }
         
         .result-item {
             margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 10px;
+            padding-right: 10px;
         }
         
         .result-reference {
@@ -704,6 +716,8 @@
             margin-bottom: 5px;
             cursor: pointer;
             color: #1a73e8;
+            display: block;
+            width: 100%;
         }
         
         .result-reference:hover {
@@ -712,6 +726,10 @@
         
         .result-text {
             line-height: 1.5;
+            width: 100%;
+            display: block;
+            word-wrap: break-word;
+            white-space: normal;
         }
         
         .search-highlight {
@@ -1582,6 +1600,12 @@
                         </div>
                     `;
                 }).join('');
+                
+                // Forzar al contenedor a usar el ancho completo
+                searchResults.style.width = '100%';
+                searchResults.style.maxWidth = '100%';
+                searchResults.style.left = '0';
+                searchResults.style.right = '0';
                 
                 resultsContent.innerHTML = html;
             }
