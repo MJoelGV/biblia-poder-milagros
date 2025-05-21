@@ -1679,8 +1679,8 @@
             clearTimeout(longPressTimer);
         }
         
-        // Iniciar la aplicación
-        async function init() {
+        // Iniciar la aplicación (OLD - REMOVED)
+        /* async function init() {
             console.log('Iniciando aplicación...');
             
             // Establecer la versión inicial como Reina-Valera 1960
@@ -1728,7 +1728,7 @@
             }
             
             console.log('Aplicación iniciada correctamente');
-        }
+        } */
         
         // Configurar comportamiento de menús superior e inferior
         function setupMenuBehavior() {
@@ -1760,7 +1760,7 @@
             navigationBottom.classList.remove('hidden');
         }
 
-        init();
+        // init(); // OLD - REMOVED
 
         // Deshabilitado Service Worker para evitar caché en lectura.html
         // if('serviceWorker' in navigator) {
@@ -2427,6 +2427,7 @@
             updateURL();      // Ensure URL reflects the loaded state (especially if defaults were used)
             
             console.log("[Init] Page initialization complete.");
+            setupMenuBehavior(); // Call menu behavior setup after app is initialized
         }
 
         // Event listener for when the DOM is fully loaded
