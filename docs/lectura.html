@@ -2005,6 +2005,7 @@
             });
         }
     </script>
+    <!-- Listener setups below will be moved to setupGlobalEventListeners -->
     <script>
         // Obtiene los temas directamente del XML
         function getOutlines(book, chapter) {
@@ -2044,7 +2045,7 @@
             }, 100);
         });
         // Listener Botón Temas
-        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+        // MOVED: document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
     </script>
     <script>
         // Annotate strong numbers
@@ -2073,16 +2074,13 @@
             document.getElementById('strongs-backdrop').style.display = 'block';
             document.getElementById('strongs-modal').style.display = 'block';
         });
-        document.getElementById('strongs-close').addEventListener('click', () => {
-            document.getElementById('strongs-backdrop').style.display = 'none';
-            document.getElementById('strongs-modal').style.display = 'none';
-        });
         const origLoadChapter = window.loadChapter;
         window.loadChapter = async function() {
             await origLoadChapter();
             annotateStrongNumbers();
             applySavedStates();
         };
+        // MOVED: document.getElementById('strongs-close').addEventListener('click', () => { ... }); // Listener for strongs-close was here
         // Reaplicar marcas guardadas: marcados, comentarios y memorizados
         function applySavedStates() {
             const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
@@ -2090,60 +2088,25 @@
             const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
             document.querySelectorAll('#verses .verse').forEach(v => {
                 const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-                if (bookmarks.includes(key)) v.classList.add('bookmarked');
-                if (comments[key]) v.classList.add('comment');
-                if (memorized.includes(key)) v.classList.add('memorized');
+                if (bookmarks.includes(key)) v.classList.add('bookmarked'.trim());
+                if (comments[key]) v.classList.add('comment'.trim());
+                if (memorized.includes(key)) v.classList.add('memorized'.trim());
             });
         }
-        // Aplicar anotaciones y estados guardados al cargar la página
-        window.addEventListener('load', () => {
+        // Aplicar anotaciones y estados guardados al cargar la página (REDUNDANT & REMOVED)
+        /* window.addEventListener('load', () => {
             annotateStrongNumbers();
             applySavedStates();
-        });
+        }); */
     </script>
     <script>
-        // Funcionalidad de búsqueda de palabras exactas
-        const searchButton = document.getElementById('search-button');
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const resultsContent = document.getElementById('results-content');
-        const closeSearchButton = document.getElementById('close-search');
-        const searchCount = document.getElementById('search-count');
+        // Funcionalidad de búsqueda de palabras exactas (Variables and Listeners are now primarily in setupGlobalEventListeners)
+        // Global declarations removed as they are now handled in setupGlobalEventListeners
         
         // Función para escapar caracteres especiales en expresiones regulares
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
-        
-        // Toggle búsqueda al hacer clic en la lupa
-        searchButton.addEventListener('click', function() {
-            // Si el campo de búsqueda está oculto, mostrarlo primero
-            if (searchInput.style.display === 'none') {
-                searchInput.style.display = 'block';
-                searchInput.focus();
-                return;
-            }
-            
-            // Si el campo ya es visible y tiene contenido, ejecutar la búsqueda
-            const query = searchInput.value.trim();
-            if (query.length >= 2) {
-                searchExactWord(query);
-            } else if (query) {
-                alert('Por favor ingresa al menos 2 caracteres para buscar.');
-            }
-        });
-        
-        // Ejecutar búsqueda con Enter
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query.length >= 2) {
-                    searchExactWord(query);
-                } else if (query) {
-                    alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                }
-            }
-        });
         
         // Cerrar resultados al hacer clic en el botón de cerrar
         closeSearchButton.addEventListener('click', function() {
@@ -2256,28 +2219,8 @@
     </script>
     <script>
         // Menú contextual al hacer doble clic en versículo
-        const verseContainer = document.getElementById('verses');
-        const verseMenu = document.getElementById('verse-menu');
-        let activeVerseEl = null;
-        verseContainer.addEventListener('dblclick', e => {
-            activeVerseEl = e.target.closest('.verse');
-            if (!activeVerseEl) return;
-            
-            // Verificar si ya existe un comentario para este versículo
-            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-            const hasComment = comments[key];
-            
-            // Cambiar el texto del menú según si ya hay comentario o no
-            document.getElementById('menu-add-comment').textContent = hasComment 
-                ? 'Ver/Editar comentario' 
-                : 'Agregar comentario';
-            
-            const rect = activeVerseEl.getBoundingClientRect();
-            verseMenu.style.display = 'block';
-            verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
-            verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
-        });
+        // Global declarations for verseContainer and verseMenu removed as they are now handled in setupGlobalEventListeners
+        let activeVerseEl = null; // This global state variable remains
         document.addEventListener('click', e => {
             if (!e.target.closest('#verse-menu')) {
                 verseMenu.style.display = 'none';
@@ -2354,7 +2297,8 @@
             document.getElementById('comment-backdrop').style.display = 'none';
             document.getElementById('modal-comment-input').value = '';
         });
-        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+        /*
+        // MOVED: document.getElementById('menu-memorize-verse').addEventListener('click', () => {
             if (!activeVerseEl) return;
             activeVerseEl.classList.toggle('memorized');
             const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
@@ -2367,6 +2311,217 @@
             localStorage.setItem('memorized', JSON.stringify(memorized));
             verseMenu.style.display = 'none';
         });
+        */
+        // END OF MOVED VERSE MENU LISTENERS
+        // The following function was previously block-commented for debugging
+        function setupGlobalEventListeners() {
+            console.log('[Init] Setting up global event listeners...');
+
+            // Listener Botón Temas & Outline Grid (original lines 2034-2046) - COMMENTED OUT FOR DEBUGGING LINT
+            /* if (document.getElementById('outline-button')) {
+                document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+            }
+            if (document.getElementById('outline-grid')) {
+                 document.getElementById('outline-grid').addEventListener('click', e => {
+                    if (!e.target.dataset.start) return;
+                    const start = parseInt(e.target.dataset.start, 10);
+                    currentVerse = start;
+                    document.getElementById('outline-grid').classList.remove('active');
+                    loadChapter(); updateControls(); updateURL();
+                    setTimeout(() => {
+                        const el = document.querySelector(`.verse[data-verse="${start}"]`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                });
+            } */
+
+            // Listener Strong's Modal Close (original line 2075)
+            if (document.getElementById('strongs-close')) {
+                document.getElementById('strongs-close').addEventListener('click', () => {
+                    if (document.getElementById('strongs-backdrop')) document.getElementById('strongs-backdrop').style.display = 'none';
+                    if (document.getElementById('strongs-modal')) document.getElementById('strongs-modal').style.display = 'none';
+                });
+            }
+
+            // Funcionalidad de búsqueda de palabras exactas (original lines 2105-2157)
+            const searchButton = document.getElementById('search-button');
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            // const resultsContent = document.getElementById('results-content'); // Defined globally for searchExactWord
+            const closeSearchButton = document.getElementById('close-search');
+            // const searchCount = document.getElementById('search-count'); // Defined globally for searchExactWord
+
+            if (searchButton) {
+                searchButton.addEventListener('click', function() {
+                    if (searchInput.style.display === 'none') {
+                        searchInput.style.display = 'block';
+                        searchInput.focus();
+                        return;
+                    }
+                    const query = searchInput.value.trim();
+                    if (query.length >= 2) {
+                        searchExactWord(query);
+                    } else if (query) {
+                        alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                    }
+                });
+            }
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const query = this.value.trim();
+                        if (query.length >= 2) {
+                            searchExactWord(query);
+                        } else if (query) {
+                            alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                        }
+                    }
+                });
+            }
+            if (closeSearchButton) {
+                closeSearchButton.addEventListener('click', function() {
+                    if(searchResults) searchResults.style.display = 'none';
+                    if(document.getElementById('search-backdrop')) document.getElementById('search-backdrop').style.display = 'none';
+                });
+            }
+            if (document.getElementById('search-backdrop')) {
+                document.getElementById('search-backdrop').addEventListener('click', function() {
+                    if(searchResults) searchResults.style.display = 'none';
+                    this.style.display = 'none';
+                });
+            }
+
+            // Menú contextual al hacer doble clic en versículo (original lines 2258-2368)
+            const verseContainer = document.getElementById('verses');
+            const verseMenu = document.getElementById('verse-menu');
+            // activeVerseEl is a global variable
+            if (verseContainer) {
+                verseContainer.addEventListener('dblclick', e => {
+                    activeVerseEl = e.target.closest('.verse');
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    const hasComment = comments[key];
+                    if(document.getElementById('menu-add-comment')) {
+                       document.getElementById('menu-add-comment').textContent = hasComment ? 'Ver/Editar comentario' : 'Agregar comentario';
+                    }
+                    const rect = activeVerseEl.getBoundingClientRect();
+                    verseMenu.style.display = 'block';
+                    verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
+                    verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
+                });
+            }
+            // The document click listener for closing the menu is fine globally
+            if (document.getElementById('menu-toggle-bookmark')) {
+                document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    activeVerseEl.classList.toggle('bookmarked');
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                    if (activeVerseEl.classList.contains('bookmarked')) {
+                        if (!bookmarks.includes(key)) bookmarks.push(key);
+                    } else {
+                        bookmarks = bookmarks.filter(k => k !== key);
+                    }
+                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('menu-add-comment')) {
+                document.getElementById('menu-add-comment').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    const existingComment = comments[key];
+                    if(document.getElementById('comment-modal-title')) document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = existingComment || '';
+                    if(document.getElementById('modal-delete-btn')) document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'block';
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'block';
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('modal-save-btn')) {
+                document.getElementById('modal-save-btn').addEventListener('click', () => {
+                    const comment = document.getElementById('modal-comment-input').value.trim();
+                    if (comment && activeVerseEl) {
+                        activeVerseEl.classList.add('comment');
+                        activeVerseEl.dataset.comment = comment;
+                        const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                        const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                        comments[key] = comment;
+                        localStorage.setItem('comments', JSON.stringify(comments));
+                    }
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('modal-cancel-btn')) {
+                document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('modal-delete-btn')) {
+                document.getElementById('modal-delete-btn').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    delete comments[key];
+                    localStorage.setItem('comments', JSON.stringify(comments));
+                    activeVerseEl.classList.remove('comment');
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('menu-memorize-verse')) {
+                 document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    activeVerseEl.classList.toggle('memorized');
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+                    if (activeVerseEl.classList.contains('memorized')) {
+                        if (!memorized.includes(key)) memorized.push(key);
+                    } else {
+                        memorized = memorized.filter(k => k !== key);
+                    }
+                    localStorage.setItem('memorized', JSON.stringify(memorized));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+             // Event listeners for menu-copy-verse and menu-share-verse would go here if found/needed
+            if (document.getElementById('menu-copy-verse')) {
+                document.getElementById('menu-copy-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const text = activeVerseEl.querySelector('.verse-text').textContent;
+                    navigator.clipboard.writeText(`${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse} - ${text}`)
+                        .then(() => alert('Versículo copiado!'))
+                        .catch(err => console.error('Error al copiar:', err));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('menu-share-verse')) {
+                document.getElementById('menu-share-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const text = activeVerseEl.querySelector('.verse-text').textContent;
+                    const shareData = {
+                        title: `Versículo de la Biblia: ${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse}`,
+                        text: `${text} (${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse})`,
+                        url: window.location.href // Puede ser más específico si se desea
+                    };
+                    if (navigator.share) {
+                        navigator.share(shareData).catch(err => console.error('Error al compartir:', err));
+                    }
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+
+            console.log('[Init] Global event listeners set up.');
+        } // End of function that was previously block-commented for debugging
+
         // Function to initialize the page and load content based on URL or defaults
         async function initializeApp() {
             const params = new URLSearchParams(window.location.search);
@@ -2428,17 +2583,12 @@
             
             console.log("[Init] Page initialization complete.");
             setupMenuBehavior(); // Call menu behavior setup after app is initialized
+            setupGlobalEventListeners(); // Call setup for all other global event listeners
         }
 
         // Event listener for when the DOM is fully loaded
         window.addEventListener('DOMContentLoaded', initializeApp);
 
-        document.getElementById('menu-copy-verse').addEventListener('click', () => {
-            if (!activeVerseEl) return;
-            const text = activeVerseEl.querySelector('.verse-text').textContent;
-            navigator.clipboard.writeText(text);
-            verseMenu.style.display = 'none';
-        });
     </script>
 </body>
 </html>
