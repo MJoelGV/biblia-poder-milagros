@@ -218,6 +218,10 @@
             padding-left: 10px;
             border-radius: 4px;
         }
+
+        .navigation-bottom {
+            position: fixed;
+            bottom: 0;
             left: 0;
             right: 0;
             background: var(--menu-bg);
@@ -1118,12 +1122,21 @@
 
         // Función para cargar capítulo
         async function loadChapter() {
+            console.log(`Cargando ${currentBook} capítulo ${currentChapter}...`);
             const versesContainer = document.getElementById('verses');
             versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
 
             try {
+                // Verificar si el documento XML está disponible
+                if (!xmlDoc) {
+                    throw new Error('La Biblia no ha sido cargada correctamente');
+                }
+                
+                // Buscar el capítulo solicitado
                 const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-                if (!chapter) throw new Error('No se encontró el capítulo');
+                if (!chapter) {
+                    throw new Error(`No se encontró el capítulo ${currentChapter} en ${currentBook}`);
+                }
 
                 let html = `
                     <div class="chapter-title">
@@ -1131,7 +1144,15 @@
                     </div>
                 `;
                 
+                // Obtener todos los versículos del capítulo
                 const verses = chapter.getElementsByTagName('v');
+                console.log(`Encontrados ${verses.length} versículos`);
+                
+                if (verses.length === 0) {
+                    throw new Error('El capítulo no contiene versículos');
+                }
+                
+                // Iterar y construir el HTML de los versículos
                 html += Array.from(verses).map(verse => {
                     const verseNum = verse.getAttribute('n');
                     const isHighlighted = parseInt(verseNum) === currentVerse;
@@ -1139,6 +1160,16 @@
                     const isMemorized = isVerseMemorized(currentBook, currentChapter, verseNum);
                     const hasComment = hasVerseComment(currentBook, currentChapter, verseNum);
                     
+                    // Extraer texto del versículo de forma segura
+                    let verseText = '';
+                    try {
+                        verseText = verse.textContent || 'Error al cargar el texto';
+                    } catch (e) {
+                        console.error('Error al extraer texto del versículo:', e);
+                        verseText = 'Error al cargar el texto';
+                    }
+                    
+                    // Construir HTML para el versículo
                     return `
                         <div class="verse ${isHighlighted ? 'highlighted' : ''} ${isBookmarked ? 'bookmarked' : ''} ${isMemorized ? 'memorized' : ''} ${hasComment ? 'commented' : ''}" 
                              data-verse="${verseNum}"
@@ -1146,15 +1177,18 @@
                              data-chapter="${currentChapter}"
                              onclick="highlightVerse(this)">
                             <span class="verse-number">${verseNum}</span>
-                            <span class="verse-text">${verse.textContent}</span>
+                            <span class="verse-text">${verseText}</span>
                         </div>
                     `;
                 }).join('');
 
+                // Actualizar el contenido del contenedor
                 versesContainer.innerHTML = html;
                 
                 // Aplicar menú contextual a todos los versículos recién cargados
                 applyVerseContextMenu();
+                
+                console.log('Capítulo cargado correctamente');
 
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
@@ -1205,14 +1239,36 @@
             try {
                 const url = `biblia-files/${version}.xmm`;
                 console.log('[BIBLIA] Intentando cargar:', url);
+                
+                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
+                
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
                 }
+                
                 const xmlText = await response.text();
+                if (!xmlText || xmlText.trim().length === 0) {
+                    throw new Error('El archivo de la Biblia está vacío');
+                }
+                
+                console.log(`XML cargado: ${xmlText.length} caracteres`);
+                
+                // Parsear el XML
                 xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
+                // Verificar errores de parseo
+                const parseError = xmlDoc.querySelector('parsererror');
+                if (parseError) {
+                    throw new Error('Error al analizar el XML: ' + parseError.textContent);
+                }
+                
+                // Guardar la versión actual
                 currentVersion = version;
                 
+                console.log('[BIBLIA] Biblia cargada correctamente');
+                
+                // Si ya hay un libro seleccionado, cargar el capítulo
                 if (currentBook) {
                     loadChapter();
                 }
@@ -1535,47 +1591,97 @@
             document.getElementById('comment-modal').style.display = 'none';
         });
         
-        // Variables para detectar doble clic/toque
-        let lastClickTime = 0;
-        let lastClickedVerse = null;
-        
-        // Aplicar eventos a los versículos (doble clic y clic derecho)
+        // Función para aplicar eventos a los versículos
         function applyVerseContextMenu() {
             document.querySelectorAll('.verse').forEach(verse => {
-                // Mantener clic derecho para computadoras
-                verse.addEventListener('contextmenu', (e) => {
-                    showVerseMenu(verse, e);
-                });
+                // Eliminar eventos previos para evitar duplicados
+                verse.removeEventListener('contextmenu', handleContextMenu);
+                verse.removeEventListener('touchstart', handleTouchStart);
+                verse.removeEventListener('touchend', handleTouchEnd);
+                verse.removeEventListener('touchmove', handleTouchMove);
                 
-                // Agregar soporte para doble clic/toque para móviles
-                verse.addEventListener('click', (e) => {
-                    const currentTime = new Date().getTime();
-                    const clickTimeDiff = currentTime - lastClickTime;
-                    
-                    // Si es doble clic (menos de 300ms entre clics en el mismo verso)
-                    if (clickTimeDiff < 300 && verse === lastClickedVerse) {
-                        // Es un doble clic, mostrar menú
-                        e.preventDefault(); // Prevenir highlight del verso
-                        showVerseMenu(verse, e);
-                    } else {
-                        // Es un clic simple, actualizar referencia para el próximo clic
-                        lastClickTime = currentTime;
-                        lastClickedVerse = verse;
-                    }
-                });
+                // Clic derecho para computadoras
+                verse.addEventListener('contextmenu', handleContextMenu);
+                
+                // Mantener clic largo para móviles
+                verse.addEventListener('touchstart', handleTouchStart);
+                verse.addEventListener('touchend', handleTouchEnd);
+                verse.addEventListener('touchmove', handleTouchMove);
             });
+        }
+        
+        // Variables para el clic largo
+        let longPressTimer;
+        
+        // Funciones para manejar eventos táctiles
+        function handleContextMenu(e) {
+            e.preventDefault();
+            showVerseMenu(this, e);
+        }
+        
+        function handleTouchStart(e) {
+            const verse = this;
+            longPressTimer = setTimeout(() => {
+                showVerseMenu(verse, e.touches[0]);
+            }, 500);
+        }
+        
+        function handleTouchEnd() {
+            clearTimeout(longPressTimer);
+        }
+        
+        function handleTouchMove() {
+            clearTimeout(longPressTimer);
         }
         
         // Iniciar la aplicación
         async function init() {
+            console.log('Iniciando aplicación...');
+            
             // Cargar los versículos marcados, memorizados y comentarios desde localStorage
             loadBookmarkedVerses();
             loadMemorizedVerses();
             loadVerseComments();
             
+            // Configurar eventos para mostrar/ocultar menús
+            setupMenuBehavior();
+            
+            // Cargar la biblia y preparar la interfaz
             await loadBible(currentVersion);
             setupBookSelector();
             loadFromUrl();
+            
+            console.log('Aplicación iniciada correctamente');
+        }
+        
+        // Configurar comportamiento de menús superior e inferior
+        function setupMenuBehavior() {
+            // Variables para controlar la visibilidad de los menús
+            let lastScrollTop = 0;
+            const controlsElement = document.getElementById('controls');
+            const navigationBottom = document.getElementById('navigation-bottom');
+            
+            // Función para manejar el scroll y mostrar/ocultar menús
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Si se desplaza hacia abajo, ocultar menús
+                if (scrollTop > lastScrollTop && scrollTop > 50) {
+                    controlsElement.classList.add('hidden');
+                    navigationBottom.classList.add('hidden');
+                } 
+                // Si se desplaza hacia arriba, mostrar menús
+                else if (scrollTop < lastScrollTop) {
+                    controlsElement.classList.remove('hidden');
+                    navigationBottom.classList.remove('hidden');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // Asegurar que ambos menús estén visibles al inicio
+            controlsElement.classList.remove('hidden');
+            navigationBottom.classList.remove('hidden');
         }
 
         init();
