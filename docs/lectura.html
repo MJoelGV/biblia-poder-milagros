@@ -1322,8 +1322,8 @@
             });
         }
 
-        // Función para cargar desde URL y carga por defecto del primer libro
-        function loadFromUrl() {
+        // OLD loadFromUrl function - REMOVED AND REPLACED BY initializeApp
+        /* function loadFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const bookParam = params.get('book');
             const chapterParam = params.get('chapter');
@@ -1347,7 +1347,7 @@
             loadChapters();
             loadChapter();
             updateControls();
-        }
+        } */
 
         // Variables para el menú contextual de versículos
         let contextMenuVerse = null;
@@ -2367,6 +2367,71 @@
             localStorage.setItem('memorized', JSON.stringify(memorized));
             verseMenu.style.display = 'none';
         });
+        // Function to initialize the page and load content based on URL or defaults
+        async function initializeApp() {
+            const params = new URLSearchParams(window.location.search);
+            const urlVersion = params.get('version');
+            const urlBook = params.get('book');
+            const urlChapter = params.get('chapter');
+            const urlVerse = params.get('verse');
+
+            // Determine version to load (from URL or default to 'rvr1960')
+            const versionToLoad = urlVersion || 'rvr1960';
+            document.getElementById('version-selector').value = versionToLoad;
+
+            console.log(`[Init] Loading version: ${versionToLoad}`);
+            await loadBible(versionToLoad); // loadBible takes version name e.g. 'rvr1960'
+
+            // Ensure xmlDoc is loaded
+            if (!xmlDoc) {
+                console.error("[Init] Bible XML document (xmlDoc) not loaded. Cannot proceed.");
+                document.getElementById('verses').innerHTML = '<div class="error">Error crítico: No se pudo cargar el archivo de la Biblia.</div>';
+                return;
+            }
+            
+            console.log("[Init] Bible XML loaded. Setting up books and chapters.");
+            setupBookSelector(); // Populate book selector
+
+            // Determine book, chapter, verse (from URL or defaults)
+            if (urlBook) {
+                currentBook = urlBook;
+                currentChapter = urlChapter ? parseInt(urlChapter) : 1;
+                currentVerse = urlVerse ? parseInt(urlVerse) : 0;
+                console.log(`[Init] From URL: Book=${currentBook}, Ch=${currentChapter}, V=${currentVerse}`);
+            } else {
+                // Default to the first book in the XML, chapter 1, verse 0 (no specific verse highlight)
+                if (xmlDoc.getElementsByTagName('b').length > 0) {
+                    currentBook = xmlDoc.getElementsByTagName('b')[0].getAttribute('n');
+                } else {
+                    // Fallback if XML is empty or malformed
+                    currentBook = 'Génesis'; // Or handle error appropriately
+                    console.error("[Init] No books found in XML, defaulting to Génesis.");
+                }
+                currentChapter = 1;
+                currentVerse = 0;
+                console.log(`[Init] Default: Book=${currentBook}, Ch=${currentChapter}, V=${currentVerse}`);
+            }
+
+            // Update UI selectors
+            const bookSelect = document.getElementById('book-select');
+            if (bookSelect) { // Check if book-select exists
+                 bookSelect.value = currentBook;
+            } else {
+                console.warn("[Init] book-select element not found.");
+            }
+            
+            await loadChapters(); // Populate chapter selector (if present and used) and ensure currentChapter is valid
+            await loadChapter();  // Load the actual chapter content
+            
+            updateControls(); // Update navigation buttons (prev/next)
+            updateURL();      // Ensure URL reflects the loaded state (especially if defaults were used)
+            
+            console.log("[Init] Page initialization complete.");
+        }
+
+        // Event listener for when the DOM is fully loaded
+        window.addEventListener('DOMContentLoaded', initializeApp);
+
         document.getElementById('menu-copy-verse').addEventListener('click', () => {
             if (!activeVerseEl) return;
             const text = activeVerseEl.querySelector('.verse-text').textContent;
