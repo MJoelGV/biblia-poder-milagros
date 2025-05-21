@@ -1240,41 +1240,17 @@
                 // Mostrar indicador de carga
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
                 
-                // Intentar varias rutas posibles para encontrar los archivos de la Biblia
-                // 1. Primero la ruta que usa la página share.html (que funciona en GitHub Pages)
-                // 2. Luego otras posibles ubicaciones
-                const possiblePaths = [
-                    `./biblia-files/${version}.xmm`,           // Como en share.html (misma carpeta que docs)
-                    `../biblia-files/${version}.xmm`,          // Un nivel arriba
-                    `biblia-files/${version}.xmm`,             // Sin prefijo
-                    `/biblia-files/${version}.xmm`,            // Desde la raíz del servidor
-                    `/biblia-poder-milagros/biblia-files/${version}.xmm` // Ruta completa desde raíz GitHub Pages
-                ];
+                // Solución directa - usar la misma ruta que funciona en share.html
+                // IMPORTANTE: La ruta absoluta funciona tanto en desarrollo local como en GitHub Pages
+                const url = `/biblia-poder-milagros/biblia-files/${version}.xmm`;
+                console.log('[BIBLIA] Intentando cargar directamente:', url);
                 
-                let response = null;
-                let url = '';
-                let errorMessages = [];
-                
-                for (const path of possiblePaths) {
-                    url = path;
-                    console.log('[BIBLIA] Intentando cargar:', url);
-                    try {
-                        response = await fetch(url);
-                        if (response.ok) {
-                            console.log(`[BIBLIA] ¡Encontrado en: ${url}!`);
-                            break;
-                        }
-                        errorMessages.push(`Fallo con estado HTTP ${response.status} en: ${url}`);
-                    } catch (e) {
-                        console.log(`[BIBLIA] Error al cargar: ${url}`, e);
-                        errorMessages.push(`Error: ${e.message} en: ${url}`);
-                    }
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`No se pudo cargar el archivo: ${url} (HTTP ${response.status})`);
                 }
                 
-                if (!response || !response.ok) {
-                    throw new Error('No se pudo encontrar la Biblia en ninguna ubicación. Errores: ' + errorMessages.join(' | '));
-                }
-
+                console.log(`[BIBLIA] ¡Archivo cargado exitosamente desde: ${url}!`);
                 
                 const xmlText = await response.text();
                 if (!xmlText || xmlText.trim().length === 0) {
