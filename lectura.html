@@ -1424,34 +1424,49 @@
         
         // Marcar o desmarcar un versículo como memorizado
         function toggleMemorized(book, chapter, verse) {
-            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
-            if (!verseElement) return;
+            console.log(`Toggle memorizar: ${book} ${chapter}:${verse}`);
             
-            // Buscar si el versículo ya está memorizado
-            const memorizedIndex = memorizedVerses.findIndex(item => 
-                item.book === book && 
-                item.chapter === parseInt(chapter) && 
-                item.verse === parseInt(verse)
-            );
-            
-            if (memorizedIndex >= 0) {
-                // Si ya está memorizado, quitarlo
-                memorizedVerses.splice(memorizedIndex, 1);
-                verseElement.classList.remove('memorized');
-            } else {
-                // Si no está memorizado, añadirlo
-                memorizedVerses.push({
-                    book,
-                    chapter: parseInt(chapter),
-                    verse: parseInt(verse),
-                    text: verseElement.querySelector('.verse-text').textContent
-                });
-                verseElement.classList.add('memorized');
+            try {
+                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+                if (!verseElement) {
+                    console.error('No se encontró el elemento del versículo para memorizar');
+                    return false;
+                }
+                
+                // Buscar si el versículo ya está memorizado
+                const memorizedIndex = memorizedVerses.findIndex(item => 
+                    item.book === book && 
+                    item.chapter === parseInt(chapter) && 
+                    item.verse === parseInt(verse)
+                );
+                
+                let isNowMemorized = false;
+                
+                if (memorizedIndex >= 0) {
+                    // Si ya está memorizado, quitarlo
+                    memorizedVerses.splice(memorizedIndex, 1);
+                    verseElement.classList.remove('memorized');
+                    console.log('Versículo desmarcado como memorizado');
+                } else {
+                    // Si no está memorizado, añadirlo
+                    memorizedVerses.push({
+                        book,
+                        chapter: parseInt(chapter),
+                        verse: parseInt(verse),
+                        text: verseElement.querySelector('.verse-text').textContent
+                    });
+                    verseElement.classList.add('memorized');
+                    isNowMemorized = true;
+                    console.log('Versículo marcado como memorizado');
+                }
+                
+                // Guardar cambios en localStorage
+                saveMemorizedVerses();
+                return isNowMemorized;
+            } catch (error) {
+                console.error('Error al marcar/desmarcar versículo como memorizado:', error);
+                return false;
             }
-            
-            // Guardar cambios en localStorage
-            saveMemorizedVerses();
-            return memorizedIndex < 0; // Devuelve true si ahora está memorizado, false si se ha desmarcado
         }
         
         // FUNCIONES PARA COMENTARIOS DE VERSÍCULOS
@@ -1494,39 +1509,49 @@
         
         // Guardar o actualizar comentario para un versículo
         function saveComment(book, chapter, verse, commentText) {
-            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
-            if (!verseElement) return;
+            console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
             
-            // Buscar si ya existe un comentario
-            const commentIndex = verseComments.findIndex(item => 
-                item.book === book && 
-                item.chapter === parseInt(chapter) && 
-                item.verse === parseInt(verse)
-            );
-            
-            if (commentText.trim() === '') {
-                // Si el comentario está vacío y existe, eliminarlo
-                if (commentIndex >= 0) {
-                    verseComments.splice(commentIndex, 1);
-                    verseElement.classList.remove('commented');
+            try {
+                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+                if (!verseElement) {
+                    console.error('No se encontró el elemento del versículo');
+                    return;
                 }
-            } else {
-                // Guardar o actualizar comentario
-                if (commentIndex >= 0) {
-                    verseComments[commentIndex].text = commentText;
+                
+                // Buscar si ya existe un comentario
+                const commentIndex = verseComments.findIndex(item => 
+                    item.book === book && 
+                    item.chapter === parseInt(chapter) && 
+                    item.verse === parseInt(verse)
+                );
+                
+                if (commentText.trim() === '') {
+                    // Si el comentario está vacío y existe, eliminarlo
+                    if (commentIndex >= 0) {
+                        verseComments.splice(commentIndex, 1);
+                        verseElement.classList.remove('commented');
+                    }
                 } else {
-                    verseComments.push({
-                        book,
-                        chapter: parseInt(chapter),
-                        verse: parseInt(verse),
-                        text: commentText
-                    });
-                    verseElement.classList.add('commented');
+                    // Guardar o actualizar comentario
+                    if (commentIndex >= 0) {
+                        verseComments[commentIndex].text = commentText;
+                    } else {
+                        verseComments.push({
+                            book,
+                            chapter: parseInt(chapter),
+                            verse: parseInt(verse),
+                            text: commentText
+                        });
+                        verseElement.classList.add('commented');
+                    }
                 }
+                
+                // Guardar cambios en localStorage
+                saveVerseComments();
+                console.log('Comentario guardado correctamente');
+            } catch (error) {
+                console.error('Error al guardar comentario:', error);
             }
-            
-            // Guardar cambios en localStorage
-            saveVerseComments();
         }
         
         // Manejar acciones del menú contextual
@@ -1576,19 +1601,39 @@
         });
         
         // Botón cancelar comentario
-        document.getElementById('cancel-comment').addEventListener('click', () => {
+        document.getElementById('cancel-comment').addEventListener('click', function() {
+            console.log('Botón cancelar comentario clickeado');
             document.getElementById('comment-modal').style.display = 'none';
         });
         
         // Botón guardar comentario
-        document.getElementById('save-comment').addEventListener('click', () => {
-            const commentText = document.getElementById('comment-text');
-            const book = commentText.dataset.book;
-            const chapter = commentText.dataset.chapter;
-            const verse = commentText.dataset.verse;
+        document.getElementById('save-comment').addEventListener('click', function() {
+            console.log('Botón guardar comentario clickeado');
             
-            saveComment(book, chapter, verse, commentText.value);
-            document.getElementById('comment-modal').style.display = 'none';
+            try {
+                const commentText = document.getElementById('comment-text');
+                const book = commentText.dataset.book;
+                const chapter = commentText.dataset.chapter;
+                const verse = commentText.dataset.verse;
+                
+                if (!book || !chapter || !verse) {
+                    console.error('Faltan datos del versículo para guardar el comentario');
+                    return;
+                }
+                
+                console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
+                saveComment(book, chapter, verse, commentText.value);
+                
+                // Cerrar el modal explícitamente
+                const commentModal = document.getElementById('comment-modal');
+                commentModal.style.display = 'none';
+                
+                // Recargar el capítulo actual para reflejar los cambios
+                loadChapter();
+            } catch (error) {
+                console.error('Error al guardar comentario:', error);
+                alert('Hubo un error al guardar el comentario. Por favor intenta de nuevo.');
+            }
         });
         
         // Función para aplicar eventos a los versículos
@@ -1638,6 +1683,10 @@
         async function init() {
             console.log('Iniciando aplicación...');
             
+            // Establecer la versión inicial como Reina-Valera 1960
+            currentVersion = 'rv1960';
+            document.getElementById('version-selector').value = currentVersion;
+            
             // Cargar los versículos marcados, memorizados y comentarios desde localStorage
             loadBookmarkedVerses();
             loadMemorizedVerses();
@@ -1646,10 +1695,37 @@
             // Configurar eventos para mostrar/ocultar menús
             setupMenuBehavior();
             
-            // Cargar la biblia y preparar la interfaz
-            await loadBible(currentVersion);
-            setupBookSelector();
-            loadFromUrl();
+            try {
+                // Cargar la biblia de forma explícita
+                await loadBible(currentVersion);
+                
+                // Configurar el selector de libros
+                setupBookSelector();
+                
+                // Si no hay parámetros en la URL, cargar Génesis capítulo 1 por defecto
+                if (!window.location.search) {
+                    currentBook = 'Génesis';
+                    currentChapter = 1;
+                    currentVerse = 0;
+                    
+                    // Seleccionar Génesis en el selector
+                    if (document.getElementById('book-select')) {
+                        document.getElementById('book-select').value = currentBook;
+                    }
+                    
+                    // Cargar capítulo 1 directamente
+                    loadChapters();
+                    loadChapter();
+                    updateControls();
+                    updateURL();
+                } else {
+                    // Si hay parámetros en la URL, cargar según esos parámetros
+                    loadFromUrl();
+                }
+            } catch (error) {
+                console.error('Error al inicializar:', error);
+                document.getElementById('verses').innerHTML = `<div class="error">Error al inicializar: ${error.message}</div>`;
+            }
             
             console.log('Aplicación iniciada correctamente');
         }
