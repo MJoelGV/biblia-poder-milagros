@@ -2524,17 +2524,17 @@
         async function initializeApp() {
             try {
                 console.log("[Init] Iniciando carga de la Biblia...");
-                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
+                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia Reina-Valera 1960...</div>';
                 
                 // Obtener parámetros de la URL
                 const params = new URLSearchParams(window.location.search);
                 const urlVersion = params.get('version');
-                const urlBook = params.get('book');
-                const urlChapter = params.get('chapter');
-                const urlVerse = params.get('verse');
+                const urlBook = params.get('book') || 'Génesis'; // Valor por defecto si no hay libro
+                const urlChapter = parseInt(params.get('chapter')) || 1; // Valor por defecto: capítulo 1
+                const urlVerse = parseInt(params.get('verse')) || 1; // Valor por defecto: versículo 1
 
                 // Versión predeterminada: Reina Valera 1960
-                const versionToLoad = urlVersion || 'rvr1960';
+                const versionToLoad = 'rvr1960'; // Siempre cargar RVR1960 por defecto
                 
                 // Establecer la versión en el selector
                 const versionSelector = document.getElementById('version-selector');
@@ -2545,51 +2545,35 @@
                 console.log(`[Init] Cargando versión: ${versionToLoad}`);
                 
                 // Cargar el archivo XML de la Biblia
-                await loadBible(versionToLoad); // loadBible takes version name e.g. 'rvr1960'
+                await loadBible(versionToLoad);
 
-            // Verificar que el XML se cargó correctamente
-            if (!xmlDoc) {
-                console.error("[Init] ¡ERROR! El documento XML de la Biblia (xmlDoc) no se pudo cargar.");
-                document.getElementById('verses').innerHTML = '<div class="error">Error crítico: No se pudo cargar el archivo de la Biblia. Por favor, intente recargar la página.</div>';
-                return;
-            }
-            
-            console.log("[Init] ¡XML de la Biblia cargado correctamente!");
-            
-            console.log("[Init] Bible XML loaded. Setting up books and chapters.");
-            setupBookSelector(); // Populate book selector
-
-            // Determine book, chapter, verse (from URL or defaults)
-            if (urlBook) {
-                currentBook = urlBook;
-                currentChapter = urlChapter ? parseInt(urlChapter) : 1;
-                currentVerse = urlVerse ? parseInt(urlVerse) : 0;
-                console.log(`[Init] From URL: Book=${currentBook}, Ch=${currentChapter}, V=${currentVerse}`);
-            } else {
-                // Default to the first book in the XML, chapter 1, verse 0 (no specific verse highlight)
-                if (xmlDoc.getElementsByTagName('b').length > 0) {
-                    currentBook = xmlDoc.getElementsByTagName('b')[0].getAttribute('n');
-                } else {
-                    // Fallback if XML is empty or malformed
-                    currentBook = 'Génesis'; // Or handle error appropriately
-                    console.error("[Init] No books found in XML, defaulting to Génesis.");
+                // Verificar que el XML se cargó correctamente
+                if (!xmlDoc) {
+                    throw new Error("No se pudo cargar el documento XML de la Biblia");
                 }
-                currentChapter = 1;
-                currentVerse = 0;
-                console.log(`[Init] Default: Book=${currentBook}, Ch=${currentChapter}, V=${currentVerse}`);
-            }
-
-            // Actualizar selector de libros
-            const bookSelect = document.getElementById('book-select');
-            if (bookSelect) {
-                // Establecer el libro seleccionado
-                bookSelect.value = currentBook;
-                console.log(`[Init] Libro seleccionado: ${currentBook}`);
-            } else {
-                console.warn("[Init] ¡ADVERTENCIA! Elemento book-select no encontrado.");
-            }
-            
-            try {
+                
+                console.log("[Init] ¡XML de la Biblia cargado correctamente!");
+                
+                // Configurar libros y capítulos
+                setupBookSelector();
+                
+                // Establecer libro, capítulo y versículo
+                currentBook = urlBook;
+                currentChapter = urlChapter;
+                currentVerse = urlVerse;
+                
+                console.log(`[Init] Libro: ${currentBook}, Capítulo: ${currentChapter}, Versículo: ${currentVerse}`);
+                
+                // Actualizar selectores
+                const bookSelect = document.getElementById('book-select');
+                if (bookSelect) {
+                    bookSelect.value = currentBook;
+                    
+                    // Disparar evento change para cargar capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                }
+                
                 // Cargar capítulos y actualizar selector
                 await loadChapters(); 
                 console.log(`[Init] Capítulos cargados. Capítulo actual: ${currentChapter}`);
@@ -2607,9 +2591,14 @@
                 setupGlobalEventListeners();
                 
                 console.log("[Init] ¡Inicialización completa! La Biblia debería estar visible.");
+                
             } catch (error) {
                 console.error("[Init] Error durante la inicialización:", error);
-                document.getElementById('verses').innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+                document.getElementById('verses').innerHTML = 
+                    `<div class="error">
+                        <p>Error al cargar la Biblia: ${error.message}</p>
+                        <p>Por favor, recarga la página o verifica tu conexión a internet.</p>
+                    </div>`;
             }
         }
 
