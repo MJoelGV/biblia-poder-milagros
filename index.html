@@ -190,6 +190,7 @@
                 <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
                 <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
                 <a href="topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
+                <a href="#" id="share-button" class="nav-button" style="border-color: #ff9800;"><i class="fas fa-share-alt icon" style="color: #ff9800;"></i><span>Compartir</span></a>
             </div>
         </div>
     </div>
@@ -266,6 +267,45 @@
         document.addEventListener('click', e => {
             if (sideMenuIdx.classList.contains('active') && !sideMenuIdx.contains(e.target) && !sideMenuToggleBtnIdx.contains(e.target)) {
                 sideMenuIdx.classList.remove('active');
+            }
+        });
+        
+        // Funcionalidad de compartir
+        document.getElementById('share-button').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // Obtener la URL actual (para compartir la PWA)
+            const shareUrl = window.location.href.split('?')[0]; // Eliminar parámetros de consulta si los hay
+            
+            // Texto personalizado para compartir
+            const shareTitle = 'Biblia de Poder y Milagros';
+            const shareText = 'Quiero compartir contigo esta maravillosa Biblia de Poder y Milagros. ¡Descárgala y lleva la Palabra de Dios contigo a todas partes!';
+            
+            // Verificar si el navegador soporta la API Web Share
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                    console.log('¡Contenido compartido con éxito!');
+                } catch (error) {
+                    console.error('Error al compartir:', error);
+                    alert('No se pudo compartir. Por favor, intenta de nuevo más tarde.');
+                }
+            } else {
+                // Fallback para navegadores que no soportan Web Share API
+                // Mostrar un mensaje con la URL para copiar manualmente
+                alert('Tu navegador no soporta la función de compartir. Copia este enlace: ' + shareUrl);
+                
+                // Intentar copiar al portapapeles si es posible
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert('¡Enlace copiado al portapapeles!');
+                } catch (clipboardError) {
+                    console.error('No se pudo copiar al portapapeles:', clipboardError);
+                }
             }
         });
     </script>
