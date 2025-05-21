@@ -648,6 +648,133 @@
 
         /* Mostrar grid de capítulos cuando esté activo */
         .chapter-grid.active { display: flex; }
+        
+        /* Estilos para resultados de búsqueda */
+        .search-results {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            max-height: 80vh;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+            overflow-y: auto;
+            padding-bottom: 15px;
+        }
+        
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 101;
+        }
+        
+        .search-results-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-search {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        
+        #results-content {
+            padding: 10px 15px;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-reference {
+            font-weight: 500;
+            margin-bottom: 5px;
+            cursor: pointer;
+            color: #1a73e8;
+        }
+        
+        .result-reference:hover {
+            text-decoration: underline;
+        }
+        
+        .result-text {
+            line-height: 1.5;
+        }
+        
+        .search-highlight {
+            background-color: #ffeb3b;
+            color: black;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        
+        .search-input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        [data-theme="dark"] .search-results {
+            background-color: #333;
+            border-color: #444;
+        }
+        
+        [data-theme="dark"] .search-results-header {
+            background-color: #444;
+            border-color: #555;
+        }
+        
+        [data-theme="dark"] .result-item {
+            border-color: #444;
+        }
+        
+        [data-theme="dark"] .search-highlight {
+            background-color: #ffc107;
+            color: #333;
+        }
     </style>
     <!-- texto actualizado -->
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
@@ -678,7 +805,10 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
-            <!-- Funcionalidad de búsqueda temporalmente eliminada -->
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button">🔍</button>
+                <input id="search-input" class="search-input" placeholder="Buscar palabra en la Biblia" style="display: none;" />
+            </div>
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
@@ -689,7 +819,14 @@
         </div>
     </div> <!-- cierre .controls -->
 
-    <!-- Overlay de resultados de búsqueda temporalmente eliminado -->
+    <!-- Overlay de resultados de búsqueda -->
+    <div id="search-results" class="search-results" style="display: none;">
+        <div class="search-results-header">
+            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+            <button id="close-search" class="close-search">&times;</button>
+        </div>
+        <div id="results-content"></div>
+    </div>
 
     <!-- Menú contextual para versículos -->
     <div id="verse-menu" class="verse-menu">
@@ -1325,20 +1462,142 @@
         });
     </script>
     <script>
-        // Funcionalidad de búsqueda temporalmente eliminada
+        // Funcionalidad de búsqueda de palabras exactas
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const resultsContent = document.getElementById('results-content');
+        const closeSearchButton = document.getElementById('close-search');
+        const searchCount = document.getElementById('search-count');
+        
+        // Función para escapar caracteres especiales en expresiones regulares
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Toggle búsqueda al hacer clic en la lupa
+        searchButton.addEventListener('click', function() {
+            // Si el campo de búsqueda está oculto, mostrarlo primero
+            if (searchInput.style.display === 'none') {
+                searchInput.style.display = 'block';
+                searchInput.focus();
+                return;
+            }
+            
+            // Si el campo ya es visible y tiene contenido, ejecutar la búsqueda
+            const query = searchInput.value.trim();
+            if (query.length >= 2) {
+                searchExactWord(query);
+            } else if (query) {
+                alert('Por favor ingresa al menos 2 caracteres para buscar.');
+            }
+        });
+        
+        // Ejecutar búsqueda con Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query.length >= 2) {
+                    searchExactWord(query);
+                } else if (query) {
+                    alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                }
+            }
+        });
+        
+        // Cerrar resultados al hacer clic en X
+        closeSearchButton.addEventListener('click', function() {
+            searchResults.style.display = 'none';
+        });
+        
+        // Función para buscar palabra exacta en toda la Biblia
+        function searchExactWord(keyword) {
+            if (!keyword || keyword.length < 2) {
+                alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                return;
+            }
+            
+            resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
+            searchResults.style.display = 'block';
+            
+            // Preparar palabra para búsqueda exacta (expresión regular)
+            const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
+            let results = [];
+            let totalOccurrences = 0;
+            
+            // Buscar en todos los libros y capítulos
+            const books = xmlDoc.getElementsByTagName('b');
+            for (let b = 0; b < books.length; b++) {
+                const book = books[b];
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+                
+                for (let c = 0; c < chapters.length; c++) {
+                    const chapter = chapters[c];
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+                    
+                    for (let v = 0; v < verses.length; v++) {
+                        const verse = verses[v];
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+                        
+                        // Buscar palabras exactas
+                        const matches = verseText.match(searchRegex);
+                        if (matches) {
+                            // Resaltar la palabra buscada en el texto
+                            const highlightedText = verseText.replace(
+                                searchRegex, 
+                                '<span class="search-highlight">$&</span>'
+                            );
+                            
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: highlightedText,
+                                matchCount: matches.length
+                            });
+                            
+                            totalOccurrences += matches.length;
+                        }
+                    }
+                }
+            }
+            
+            // Mostrar resultados
+            if (results.length === 0) {
+                searchCount.textContent = '(0)';
+                resultsContent.innerHTML = `<div class="no-results">No se encontraron resultados para "${keyword}"</div>`;
+            } else {
+                searchCount.textContent = `(${results.length} versículos, ${totalOccurrences} ocurrencias)`;
+                
+                const html = results.map(result => {
+                    return `
+                        <div class="result-item">
+                            <div class="result-reference" onclick="loadReference('${result.book}', ${result.chapter}, ${result.verse})">
+                                <strong>${result.book} ${result.chapter}:${result.verse}</strong>
+                            </div>
+                            <div class="result-text">${result.text}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                resultsContent.innerHTML = html;
+            }
+        }
+        
+        // Función para cargar una referencia bíblica (libro, capítulo, versículo)
         function loadReference(book, chapter, verse) {
-            // Esta función se mantiene porque es utilizada por otras partes del código
             currentBook = book;
             currentChapter = parseInt(chapter);
             currentVerse = parseInt(verse);
             loadChapter();
             updateControls();
             updateURL();
-            // Cerrar cualquier menú abierto
-            const searchResults = document.getElementById('search-results');
-            if (searchResults) {
-                searchResults.style.display = 'none';
-            }
+            
+            // Cerrar la ventana de resultados
+            searchResults.style.display = 'none';
         }
     </script>
     <script>
