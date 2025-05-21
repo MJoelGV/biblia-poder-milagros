@@ -1237,14 +1237,37 @@
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
-                const url = `../biblia-files/${version}.xmm`; // Ajustado para subir un nivel desde docs/
-                console.log('[BIBLIA] Intentando cargar:', url);
-                
+                // Mostrar indicador de carga
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
                 
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
+                // Intentar múltiples ubicaciones posibles
+                const possiblePaths = [
+                    `../biblia-files/${version}.xmm`,           // Original: un nivel arriba desde docs/
+                    `./biblia-files/${version}.xmm`,           // En la misma carpeta que docs
+                    `../../biblia-files/${version}.xmm`,        // Dos niveles arriba
+                    `/biblia-files/${version}.xmm`,             // Desde la raíz del servidor
+                    `../../CascadeProjects/biblia-poder-milagros/biblia-files/${version}.xmm` // Ruta más específica
+                ];
+                
+                let response = null;
+                let url = '';
+                
+                for (const path of possiblePaths) {
+                    url = path;
+                    console.log('[BIBLIA] Intentando cargar:', url);
+                    try {
+                        response = await fetch(url);
+                        if (response.ok) {
+                            console.log(`[BIBLIA] ¡Encontrado en: ${url}!`);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`[BIBLIA] No se encontró en: ${url}`);
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    throw new Error('No se pudo encontrar la Biblia en ninguna ubicación conocida');
                 }
                 
                 const xmlText = await response.text();
@@ -1252,7 +1275,7 @@
                     throw new Error('El archivo de la Biblia está vacío');
                 }
                 
-                console.log(`XML cargado: ${xmlText.length} caracteres`);
+                console.log(`[BIBLIA] XML cargado: ${xmlText.length} caracteres`);
                 
                 // Parsear el XML
                 xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
@@ -2108,17 +2131,7 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
         
-        // Cerrar resultados al hacer clic en el botón de cerrar
-        closeSearchButton.addEventListener('click', function() {
-            searchResults.style.display = 'none';
-            document.getElementById('search-backdrop').style.display = 'none';
-        });
-        
-        // Cerrar resultados al hacer clic en el backdrop
-        document.getElementById('search-backdrop').addEventListener('click', function() {
-            searchResults.style.display = 'none';
-            this.style.display = 'none';
-        });
+        // Referencias a closeSearchButton y funcionalidad relacionada movida a setupGlobalEventListeners
         
         // Función para buscar palabra exacta en toda la Biblia
         function searchExactWord(keyword) {
