@@ -1240,35 +1240,21 @@
                 // Mostrar indicador de carga
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
                 
-                // Intentar múltiples ubicaciones posibles
-                const possiblePaths = [
-                    `../biblia-files/${version}.xmm`,           // Original: un nivel arriba desde docs/
-                    `./biblia-files/${version}.xmm`,           // En la misma carpeta que docs
-                    `../../biblia-files/${version}.xmm`,        // Dos niveles arriba
-                    `/biblia-files/${version}.xmm`,             // Desde la raíz del servidor
-                    `../../CascadeProjects/biblia-poder-milagros/biblia-files/${version}.xmm` // Ruta más específica
-                ];
+                // Ruta directa a los archivos de la Biblia (el find_by_name confirmó que están en docs/biblia-files/)
+                const url = `./biblia-files/${version}.xmm`;           // En la misma carpeta que docs
+                console.log('[BIBLIA] Intentando cargar:', url);
                 
-                let response = null;
-                let url = '';
-                
-                for (const path of possiblePaths) {
-                    url = path;
-                    console.log('[BIBLIA] Intentando cargar:', url);
-                    try {
-                        response = await fetch(url);
-                        if (response.ok) {
-                            console.log(`[BIBLIA] ¡Encontrado en: ${url}!`);
-                            break;
-                        }
-                    } catch (e) {
-                        console.log(`[BIBLIA] No se encontró en: ${url}`);
+                let response;
+                try {
+                    response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`No se pudo cargar el archivo: ${url} (HTTP ${response.status})`);
                     }
+                } catch (e) {
+                    console.error(`[BIBLIA] Error al cargar: ${url}`, e);
+                    throw e;
                 }
-                
-                if (!response || !response.ok) {
-                    throw new Error('No se pudo encontrar la Biblia en ninguna ubicación conocida');
-                }
+
                 
                 const xmlText = await response.text();
                 if (!xmlText || xmlText.trim().length === 0) {
@@ -2111,9 +2097,9 @@
             const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
             document.querySelectorAll('#verses .verse').forEach(v => {
                 const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-                if (bookmarks.includes(key)) v.classList.add('bookmarked'.trim());
-                if (comments[key]) v.classList.add('comment'.trim());
-                if (memorized.includes(key)) v.classList.add('memorized'.trim());
+                if (bookmarks.includes(key)) v.classList.add('bookmarked');
+                if (comments[key]) v.classList.add('comment');
+                if (memorized.includes(key)) v.classList.add('memorized');
             });
         }
         // Aplicar anotaciones y estados guardados al cargar la página (REDUNDANT & REMOVED)
@@ -2226,8 +2212,10 @@
             updateControls();
             updateURL();
             
-            // Cerrar la ventana de resultados
-            searchResults.style.display = 'none';
+            // Cerrar la ventana de resultados (si existe)
+            if (document.getElementById('search-results')) {
+                document.getElementById('search-results').style.display = 'none';
+            }
         }
     </script>
     <script>
@@ -2235,8 +2223,9 @@
         // Global declarations for verseContainer and verseMenu removed as they are now handled in setupGlobalEventListeners
         let activeVerseEl = null; // This global state variable remains
         document.addEventListener('click', e => {
-            if (!e.target.closest('#verse-menu')) {
-                verseMenu.style.display = 'none';
+            const menu = document.getElementById('verse-menu');
+            if (menu && !e.target.closest('#verse-menu')) {
+                menu.style.display = 'none';
             }
         });
         document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
