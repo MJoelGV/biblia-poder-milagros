@@ -948,6 +948,18 @@
                 option.textContent = book.getAttribute('n');
                 bookSelect.appendChild(option);
             });
+            
+            // Agregar el evento change para el selector de libros
+            bookSelect.addEventListener('change', function(e) {
+                if (e.target.value) {
+                    currentBook = e.target.value;
+                    currentChapter = 1; // Reiniciar a capítulo 1 al cambiar de libro
+                    currentVerse = 0; // Reiniciar versiculo seleccionado
+                    
+                    // Mostrar la cuadrícula de capítulos para seleccionar
+                    showChapterGrid();
+                }
+            });
         }
 
         // Función para cargar desde URL y carga por defecto del primer libro
@@ -1098,14 +1110,9 @@
     <script>
         // Bind botón 'Capítulo' inferior al grid principal
         document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
-        // Bind selector de libro para abrir grid de capítulos
-        document.getElementById('book-select').addEventListener('change', e => {
-            currentBook = e.target.value;
-            currentChapter = 1;
-            updateControls();
-            updateURL();
-            showChapterGrid();
-        });
+        
+        // Verificar que el botón de capítulo actual funcione correctamente
+        document.getElementById('current-chapter-button').addEventListener('click', showChapterGrid);
     </script>
     <script>
         // Populate verse-select with verses of current chapter
@@ -1238,14 +1245,19 @@
         
         // Ejecutar búsqueda con clic en botón
         searchButton.addEventListener('click', function() {
+            // Si el campo está oculto o vacío, mostrarlo y enfocarlo
+            if (searchInput.style.display === 'none' || getComputedStyle(searchInput).display === 'none' || searchInput.value.trim() === '') {
+                searchInput.style.display = 'block';
+                searchInput.focus();
+                return;
+            }
+            
+            // Si el campo ya es visible y tiene contenido, ejecutar la búsqueda
             const query = searchInput.value.trim();
             if (query.length >= 2) {
                 searchExactWord(query);
             } else if (query) {
-                searchInput.focus();
                 alert('Por favor ingresa al menos 2 caracteres para buscar.');
-            } else {
-                searchInput.focus();
             }
         });
         
