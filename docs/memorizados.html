@@ -9,8 +9,12 @@
         body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-color, #f9f9f9); color: #333; }
         .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
         .list { max-width: 800px; margin: 20px auto; padding: 0; list-style: none; }
-        .list-item { display: block; padding: 12px; background: white; margin-bottom: 8px; border-radius: 8px; text-decoration: none; color: var(--primary-color, #4CAF50); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .list-item:hover { background: #e8f5e9; }
+        .list-item { display: block; padding: 16px; background: white; margin-bottom: 16px; border-radius: 8px; text-decoration: none; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease; cursor: pointer; }
+        .list-item:hover { background: #f8fff8; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .verse-reference { font-weight: bold; color: var(--primary-color, #4CAF50); margin-bottom: 8px; font-size: 1.1em; }
+        .verse-text { line-height: 1.5; color: #333; }
+        .loading { text-align: center; padding: 20px; color: #777; }
+        .empty-message { text-align: center; padding: 20px; color: #777; font-style: italic; }
         .nav { text-align: center; margin-top: 10px; }
         .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
         /* Menú lateral */
@@ -48,20 +52,69 @@
     </div>
     <ul id="memorized-list" class="list"></ul>
     <script>
-        const list = JSON.parse(localStorage.getItem('memorized') || '[]');
+        // Cargar la Biblia y mostrar los versículos memorizados con su contenido
+        let xmlDoc = null;
         const container = document.getElementById('memorized-list');
-        if (!list.length) {
-            const li = document.createElement('li');
-            li.textContent = 'No tienes versículos memorizados.';
-            container.appendChild(li);
+        const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+        
+        // Mostrar mensaje de carga
+        if (!memorized.length) {
+            container.innerHTML = '<div class="empty-message">No tienes versículos memorizados.</div>';
         } else {
-            list.forEach(key => {
+            container.innerHTML = '<div class="loading">Cargando versículos...</div>';
+            loadBible();
+        }
+        
+        // Cargar la Biblia (usamos Reina-Valera 1960 por defecto)
+        async function loadBible() {
+            try {
+                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el archivo de la Biblia');
+                }
+                const xmlText = await response.text();
+                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                displayMemorizedVerses();
+            } catch (error) {
+                console.error('Error al cargar la Biblia:', error);
+                container.innerHTML = `<div class="empty-message">Error al cargar los versículos: ${error.message}</div>`;
+            }
+        }
+        
+        // Mostrar los versículos memorizados con su contenido
+        function displayMemorizedVerses() {
+            container.innerHTML = ''; // Limpiar el contenedor
+            
+            if (!memorized.length) {
+                container.innerHTML = '<div class="empty-message">No tienes versículos memorizados.</div>';
+                return;
+            }
+            
+            memorized.forEach(key => {
                 const [book, chapter, verse] = key.split('-');
-                const a = document.createElement('a');
-                a.href = `lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
-                a.className = 'list-item';
-                a.textContent = `${book} ${chapter}:${verse}`;
-                container.appendChild(a);
+                
+                // Buscar el versículo en la Biblia
+                const verseElement = xmlDoc.querySelector(`b[n="${book}"] c[n="${chapter}"] v[n="${verse}"]`);
+                let verseText = 'Versículo no encontrado';
+                
+                if (verseElement) {
+                    verseText = verseElement.textContent;
+                }
+                
+                // Crear el elemento del versículo
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <div class="verse-reference">${book} ${chapter}:${verse}</div>
+                    <div class="verse-text">${verseText}</div>
+                `;
+                
+                // Agregar evento de clic para ir a la página de lectura
+                div.addEventListener('click', function() {
+                    window.location.href = `lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
+                });
+                
+                container.appendChild(div);
             });
         }
     </script>

@@ -376,6 +376,11 @@
             
             // Limpiar el campo de búsqueda
             searchInput.value = '';
+            
+            // Cerrar automáticamente el menú de letras
+            alphabetNav.style.display = 'none';
+            document.getElementById('alphabet-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
         // Cargar el diccionario
