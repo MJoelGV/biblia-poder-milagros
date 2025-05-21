@@ -208,12 +208,16 @@
 
         .verse-text {
             font-size: var(--verse-font-size);
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
-        .navigation-bottom {
-            position: fixed;
-            bottom: 0;
+        /* Estilo para versículos marcados como favoritos */
+        .verse.bookmarked {
+            background-color: rgba(76, 175, 80, 0.1); /* Verde claro */
+            border-left: 4px solid #4CAF50;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
             left: 0;
             right: 0;
             background: var(--menu-bg);
@@ -633,6 +637,55 @@
             grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
             gap: 10px;
         }
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .search-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+        }
+        
+        [data-theme="dark"] .fullscreen-overlay {
+            background-color: #222;
+            color: #eee;
+        }
+        
+        [data-theme="dark"] .search-header {
+            background-color: #333;
+            border-color: #444;
+        }
         .outline-grid .grid-header {
             display: flex;
             justify-content: space-between;
@@ -746,6 +799,32 @@
             font-weight: bold;
         }
         
+        /* Estilos para el menú contextual */
+        .menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Estilos para versículos memorizados */
+        .verse.memorized {
+            background-color: rgba(33, 150, 243, 0.1); /* Azul claro */
+            border-left: 4px solid #2196F3;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
+        
+        /* Estilos para versículos con comentarios */
+        .verse.commented {
+            background-color: rgba(255, 193, 7, 0.1); /* Amarillo claro */
+            border-left: 4px solid #FFC107;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
+        
         .loading {
             text-align: center;
             padding: 20px;
@@ -844,24 +923,33 @@
         </div>
     </div> <!-- cierre .controls -->
 
-    <!-- Modal de resultados de búsqueda -->
-    <div id="search-backdrop" class="modal-backdrop" style="display: none;"></div>
-    <div id="search-results" class="modal search-modal" style="display: none;">
-        <h3>Resultados de búsqueda <span id="search-count"></span></h3>
-        <div id="results-content" class="results-container" style="height: 80%; overflow-y: auto;"></div>
-        <div class="modal-actions">
-            <button id="close-search">Cerrar</button>
+    <!-- Modal de resultados de búsqueda (pantalla completa) -->
+    <div id="search-results" class="fullscreen-overlay" style="display: none;">
+        <div class="search-header">
+            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+            <button id="close-search" class="close-button">&times;</button>
         </div>
+        <div id="results-content" class="results-container"></div>
     </div>
 
     <!-- Menú contextual para versículos -->
-    <div id="verse-menu" class="verse-menu">
-        <ul>
-            <li id="menu-toggle-bookmark">Marcar versículo</li>
-            <li id="menu-add-comment">Agregar comentario</li>
-            <li id="menu-memorize-verse">Memorizar versículo</li>
-            <li id="menu-copy-verse">Copiar versículo</li>
-        </ul>
+    <div id="verse-menu" style="display:none; position:absolute; z-index:1000; background:white; border:1px solid #ccc; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.2); padding:5px 0;">
+        <div id="menu-toggle-bookmark" class="menu-item">Marcar versículo</div>
+        <div id="menu-toggle-memorized" class="menu-item">Memorizar versículo</div>
+        <div id="menu-add-comment" class="menu-item">Agregar comentario</div>
+        <div id="menu-copy-verse" class="menu-item">Copiar versículo</div>
+    </div>
+    
+    <!-- Modal para agregar comentarios -->
+    <div id="comment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:2000;">
+        <div style="position:relative; background:white; margin:100px auto; padding:20px; width:90%; max-width:500px; border-radius:8px;">
+            <h3>Agregar comentario</h3>
+            <textarea id="comment-text" style="width:100%; height:150px; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button id="cancel-comment" style="padding:8px 15px; background:#f5f5f5; border:1px solid #ccc; border-radius:4px; cursor:pointer;">Cancelar</button>
+                <button id="save-comment" style="padding:8px 15px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">Guardar</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal de comentarios -->
@@ -1047,22 +1135,31 @@
                 html += Array.from(verses).map(verse => {
                     const verseNum = verse.getAttribute('n');
                     const isHighlighted = parseInt(verseNum) === currentVerse;
+                    const isBookmarked = isVerseBookmarked(currentBook, currentChapter, verseNum);
+                    const isMemorized = isVerseMemorized(currentBook, currentChapter, verseNum);
+                    const hasComment = hasVerseComment(currentBook, currentChapter, verseNum);
+                    
                     return `
-                        <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
+                        <div class="verse ${isHighlighted ? 'highlighted' : ''} ${isBookmarked ? 'bookmarked' : ''} ${isMemorized ? 'memorized' : ''} ${hasComment ? 'commented' : ''}" 
                              data-verse="${verseNum}"
+                             data-book="${currentBook}"
+                             data-chapter="${currentChapter}"
                              onclick="highlightVerse(this)">
                             <span class="verse-number">${verseNum}</span>
                             <span class="verse-text">${
                                 Array.from(verse.childNodes)
-                                    .filter(n => n.nodeType === Node.TEXT_NODE)
-                                    .map(n => n.textContent)
-                                    .join('').trim()
+                                .filter(node => node.nodeType === 3 || node.nodeName === 'w')
+                                .map(node => node.nodeType === 3 ? node.nodeValue.trim() : node.textContent.trim())
+                                .join('').trim()
                             }</span>
                         </div>
                     `;
                 }).join('');
 
                 versesContainer.innerHTML = html;
+                
+                // Aplicar menú contextual a todos los versículos recién cargados
+                applyVerseContextMenu();
 
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
@@ -1201,8 +1298,264 @@
             updateControls();
         }
 
+        // Variables para el menú contextual de versículos
+        let contextMenuVerse = null;
+        let memorizedVerses = [];
+        let verseComments = [];
+        
+        // Función para mostrar menú contextual al hacer clic derecho en un versículo
+        function showVerseMenu(verse, e) {
+            e.preventDefault();
+            const verseMenu = document.getElementById('verse-menu');
+            contextMenuVerse = verse;
+            
+            // Posicionar menú junto al cursor
+            verseMenu.style.top = e.pageY + 'px';
+            verseMenu.style.left = e.pageX + 'px';
+            verseMenu.style.display = 'block';
+            
+            // Actualizar texto del botón de marcar/desmarcar versículo
+            const book = verse.dataset.book;
+            const chapter = verse.dataset.chapter;
+            const verseNum = verse.dataset.verse;
+            
+            // Verificar estados actuales
+            const isBookmarked = isVerseBookmarked(book, chapter, verseNum);
+            const isMemorized = isVerseMemorized(book, chapter, verseNum);
+            const hasComment = hasVerseComment(book, chapter, verseNum);
+            
+            // Actualizar texto de los elementos del menú
+            document.getElementById('menu-toggle-bookmark').textContent = 
+                isBookmarked ? 'Desmarcar versículo' : 'Marcar versículo';
+                
+            document.getElementById('menu-toggle-memorized').textContent = 
+                isMemorized ? 'Quitar de memorizados' : 'Memorizar versículo';
+                
+            document.getElementById('menu-add-comment').textContent = 
+                hasComment ? 'Editar comentario' : 'Agregar comentario';
+        }
+        
+        // Cerrar menú contextual al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const verseMenu = document.getElementById('verse-menu');
+            if (verseMenu.style.display === 'block' && !verseMenu.contains(e.target)) {
+                verseMenu.style.display = 'none';
+            }
+        });
+        
+        // FUNCIONES PARA VERSÍCULOS MEMORIZADOS
+        // Cargar versículos memorizados desde localStorage
+        function loadMemorizedVerses() {
+            const savedMemorized = localStorage.getItem('memorizedVerses');
+            if (savedMemorized) {
+                try {
+                    memorizedVerses = JSON.parse(savedMemorized);
+                } catch (e) {
+                    console.error('Error al cargar versículos memorizados:', e);
+                    memorizedVerses = [];
+                }
+            }
+        }
+        
+        // Guardar versículos memorizados en localStorage
+        function saveMemorizedVerses() {
+            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
+        }
+        
+        // Verificar si un versículo está memorizado
+        function isVerseMemorized(book, chapter, verse) {
+            return memorizedVerses.some(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+        }
+        
+        // Marcar o desmarcar un versículo como memorizado
+        function toggleMemorized(book, chapter, verse) {
+            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+            if (!verseElement) return;
+            
+            // Buscar si el versículo ya está memorizado
+            const memorizedIndex = memorizedVerses.findIndex(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+            
+            if (memorizedIndex >= 0) {
+                // Si ya está memorizado, quitarlo
+                memorizedVerses.splice(memorizedIndex, 1);
+                verseElement.classList.remove('memorized');
+            } else {
+                // Si no está memorizado, añadirlo
+                memorizedVerses.push({
+                    book,
+                    chapter: parseInt(chapter),
+                    verse: parseInt(verse),
+                    text: verseElement.querySelector('.verse-text').textContent
+                });
+                verseElement.classList.add('memorized');
+            }
+            
+            // Guardar cambios en localStorage
+            saveMemorizedVerses();
+            return memorizedIndex < 0; // Devuelve true si ahora está memorizado, false si se ha desmarcado
+        }
+        
+        // FUNCIONES PARA COMENTARIOS DE VERSÍCULOS
+        // Cargar comentarios desde localStorage
+        function loadVerseComments() {
+            const savedComments = localStorage.getItem('verseComments');
+            if (savedComments) {
+                try {
+                    verseComments = JSON.parse(savedComments);
+                } catch (e) {
+                    console.error('Error al cargar comentarios:', e);
+                    verseComments = [];
+                }
+            }
+        }
+        
+        // Guardar comentarios en localStorage
+        function saveVerseComments() {
+            localStorage.setItem('verseComments', JSON.stringify(verseComments));
+        }
+        
+        // Verificar si un versículo tiene comentario
+        function hasVerseComment(book, chapter, verse) {
+            return verseComments.some(comment => 
+                comment.book === book && 
+                comment.chapter === parseInt(chapter) && 
+                comment.verse === parseInt(verse)
+            );
+        }
+        
+        // Obtener el comentario de un versículo
+        function getVerseComment(book, chapter, verse) {
+            const comment = verseComments.find(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+            return comment ? comment.text : '';
+        }
+        
+        // Guardar o actualizar comentario para un versículo
+        function saveComment(book, chapter, verse, commentText) {
+            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+            if (!verseElement) return;
+            
+            // Buscar si ya existe un comentario
+            const commentIndex = verseComments.findIndex(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+            
+            if (commentText.trim() === '') {
+                // Si el comentario está vacío y existe, eliminarlo
+                if (commentIndex >= 0) {
+                    verseComments.splice(commentIndex, 1);
+                    verseElement.classList.remove('commented');
+                }
+            } else {
+                // Guardar o actualizar comentario
+                if (commentIndex >= 0) {
+                    verseComments[commentIndex].text = commentText;
+                } else {
+                    verseComments.push({
+                        book,
+                        chapter: parseInt(chapter),
+                        verse: parseInt(verse),
+                        text: commentText
+                    });
+                    verseElement.classList.add('commented');
+                }
+            }
+            
+            // Guardar cambios en localStorage
+            saveVerseComments();
+        }
+        
+        // Manejar acciones del menú contextual
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                toggleBookmark(book, chapter, verse);
+                document.getElementById('verse-menu').style.display = 'none';
+            }
+        });
+        
+        // Manejar acción de memorizar versículo
+        document.getElementById('menu-toggle-memorized').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                toggleMemorized(book, chapter, verse);
+                document.getElementById('verse-menu').style.display = 'none';
+            }
+        });
+        
+        // Manejar acción de comentar versículo
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                // Cargar comentario existente si hay uno
+                const existingComment = getVerseComment(book, chapter, verse);
+                document.getElementById('comment-text').value = existingComment;
+                
+                // Mostrar modal de comentario
+                document.getElementById('comment-modal').style.display = 'block';
+                document.getElementById('verse-menu').style.display = 'none';
+                
+                // Guardar referencia al versículo actual para el guardado
+                document.getElementById('comment-text').dataset.book = book;
+                document.getElementById('comment-text').dataset.chapter = chapter;
+                document.getElementById('comment-text').dataset.verse = verse;
+            }
+        });
+        
+        // Botón cancelar comentario
+        document.getElementById('cancel-comment').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+        });
+        
+        // Botón guardar comentario
+        document.getElementById('save-comment').addEventListener('click', () => {
+            const commentText = document.getElementById('comment-text');
+            const book = commentText.dataset.book;
+            const chapter = commentText.dataset.chapter;
+            const verse = commentText.dataset.verse;
+            
+            saveComment(book, chapter, verse, commentText.value);
+            document.getElementById('comment-modal').style.display = 'none';
+        });
+        
+        // Aplicar evento de clic derecho a todos los versículos
+        function applyVerseContextMenu() {
+            document.querySelectorAll('.verse').forEach(verse => {
+                verse.addEventListener('contextmenu', (e) => {
+                    showVerseMenu(verse, e);
+                });
+            });
+        }
+        
         // Iniciar la aplicación
         async function init() {
+            // Cargar los versículos marcados, memorizados y comentarios desde localStorage
+            loadBookmarkedVerses();
+            loadMemorizedVerses();
+            loadVerseComments();
+            
             await loadBible(currentVersion);
             setupBookSelector();
             loadFromUrl();
@@ -1246,6 +1599,68 @@
         const extraControls = document.getElementById('extra-controls');
         if (menuToggle && extraControls) {
             menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        
+        // Array para almacenar los versículos marcados
+        let bookmarkedVerses = [];
+        
+        // Cargar versículos marcados desde localStorage al iniciar
+        function loadBookmarkedVerses() {
+            const savedBookmarks = localStorage.getItem('bookmarkedVerses');
+            if (savedBookmarks) {
+                try {
+                    bookmarkedVerses = JSON.parse(savedBookmarks);
+                } catch (e) {
+                    console.error('Error al cargar versículos marcados:', e);
+                    bookmarkedVerses = [];
+                }
+            }
+        }
+        
+        // Guardar versículos marcados en localStorage
+        function saveBookmarkedVerses() {
+            localStorage.setItem('bookmarkedVerses', JSON.stringify(bookmarkedVerses));
+        }
+        
+        // Verificar si un versículo está marcado
+        function isVerseBookmarked(book, chapter, verse) {
+            return bookmarkedVerses.some(bookmark => 
+                bookmark.book === book && 
+                bookmark.chapter === parseInt(chapter) && 
+                bookmark.verse === parseInt(verse)
+            );
+        }
+        
+        // Marcar o desmarcar un versículo
+        function toggleBookmark(book, chapter, verse) {
+            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+            if (!verseElement) return;
+            
+            // Buscar si el versículo ya está marcado
+            const bookmarkIndex = bookmarkedVerses.findIndex(bookmark => 
+                bookmark.book === book && 
+                bookmark.chapter === parseInt(chapter) && 
+                bookmark.verse === parseInt(verse)
+            );
+            
+            if (bookmarkIndex >= 0) {
+                // Si ya está marcado, quitarlo
+                bookmarkedVerses.splice(bookmarkIndex, 1);
+                verseElement.classList.remove('bookmarked');
+            } else {
+                // Si no está marcado, añadirlo
+                bookmarkedVerses.push({
+                    book,
+                    chapter: parseInt(chapter),
+                    verse: parseInt(verse),
+                    text: verseElement.querySelector('.verse-text').textContent
+                });
+                verseElement.classList.add('bookmarked');
+            }
+            
+            // Guardar cambios en localStorage
+            saveBookmarkedVerses();
+            return bookmarkIndex < 0; // Devuelve true si ahora está marcado, false si se ha desmarcado
         }
         
         // Función para resaltar un versículo al hacer clic en él
@@ -1551,9 +1966,8 @@
             }
             
             resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
-            // Mostrar el modal de resultados
-            document.getElementById('search-backdrop').style.display = 'block';
-            searchResults.style.display = 'block';
+            // Mostrar los resultados en pantalla completa
+            searchResults.style.display = 'flex';
             
             // Preparar palabra para búsqueda exacta (expresión regular)
             const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
