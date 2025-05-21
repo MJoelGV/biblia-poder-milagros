@@ -653,10 +653,11 @@
     <!-- Modal de comentarios -->
     <div id="comment-backdrop" class="modal-backdrop"></div>
     <div id="comment-modal" class="modal">
-        <h3>Comentario</h3>
+        <h3 id="comment-modal-title">Comentario</h3>
         <textarea id="modal-comment-input"></textarea>
         <div class="modal-actions">
             <button id="modal-save-btn">Guardar</button>
+            <button id="modal-delete-btn" style="background-color: #e74c3c; display: none;">Borrar</button>
             <button id="modal-cancel-btn">Cancelar</button>
         </div>
     </div>
@@ -1244,7 +1245,7 @@
                 resultsContent.innerHTML = '';
                 // Buscar en todo xmlDoc (toda la Biblia)
                 const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
-                const regex = new RegExp(escapeRegExp(query), 'gi');
+                const commentsObj = JSON.parse(localStorage.getItem('comments') || '{}');
                 const matches = verses.filter(v => v.textContent.toLowerCase().includes(query));
                 if (matches.length) {
                     matches.forEach(v => {
@@ -1290,6 +1291,17 @@
         verseContainer.addEventListener('dblclick', e => {
             activeVerseEl = e.target.closest('.verse');
             if (!activeVerseEl) return;
+            
+            // Verificar si ya existe un comentario para este versículo
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const hasComment = comments[key];
+            
+            // Cambiar el texto del menú según si ya hay comentario o no
+            document.getElementById('menu-add-comment').textContent = hasComment 
+                ? 'Ver/Editar comentario' 
+                : 'Agregar comentario';
+            
             const rect = activeVerseEl.getBoundingClientRect();
             verseMenu.style.display = 'block';
             verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
@@ -1315,6 +1327,19 @@
         });
         document.getElementById('menu-add-comment').addEventListener('click', () => {
             if (!activeVerseEl) return;
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const existingComment = comments[key];
+            
+            // Actualizar el título del modal según si es nuevo comentario o edición
+            document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+            
+            // Si ya existe un comentario, cargarlo en el textarea
+            document.getElementById('modal-comment-input').value = existingComment || '';
+            
+            // Mostrar u ocultar el botón de borrar según corresponda
+            document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
+            
             document.getElementById('comment-backdrop').style.display = 'block';
             document.getElementById('comment-modal').style.display = 'block';
             verseMenu.style.display = 'none';
@@ -1334,6 +1359,26 @@
             document.getElementById('modal-comment-input').value = '';
         });
         document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        
+        // Añadir manejador para el botón de borrar comentario
+        document.getElementById('modal-delete-btn').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            
+            // Eliminar el comentario del localStorage
+            delete comments[key];
+            localStorage.setItem('comments', JSON.stringify(comments));
+            
+            // Quitar la clase 'comment' del versículo
+            activeVerseEl.classList.remove('comment');
+            
+            // Cerrar el modal
             document.getElementById('comment-modal').style.display = 'none';
             document.getElementById('comment-backdrop').style.display = 'none';
             document.getElementById('modal-comment-input').value = '';
