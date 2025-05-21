@@ -649,12 +649,6 @@
         /* Mostrar grid de capítulos cuando esté activo */
         .chapter-grid.active { display: flex; }
     </style>
-    <script>
-        let strongsData = {};
-        fetch('strongs.json')
-          .then(res => res.json())
-          .then(data => { strongsData = data; });
-    </script>
     <!-- texto actualizado -->
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 </head>
@@ -684,10 +678,7 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
-            <div class="search-wrapper">
-                <button id="search-button" class="search-button">🔍</button>
-                <input id="search-input" class="search-input" placeholder="Buscar versículo" />
-            </div>
+            <!-- Funcionalidad de búsqueda temporalmente eliminada -->
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
@@ -698,14 +689,7 @@
         </div>
     </div> <!-- cierre .controls -->
 
-    <!-- Overlay de resultados de búsqueda -->
-    <div id="search-results" class="search-results">
-        <div class="search-results-header">
-            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
-            <button id="close-search" class="close-search">&times;</button>
-        </div>
-        <div id="results-content"></div>
-    </div>
+    <!-- Overlay de resultados de búsqueda temporalmente eliminado -->
 
     <!-- Menú contextual para versículos -->
     <div id="verse-menu" class="verse-menu">
@@ -741,12 +725,6 @@
         <button class="nav-button" id="prev-button">← Anterior</button>
         <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
         <button class="nav-button" id="next-button">Siguiente →</button>
-    </div>
-
-    <div id="strongs-backdrop" class="modal-backdrop"></div>
-    <div id="strongs-modal" class="modal">
-        <div id="strongs-content"></div>
-        <button id="strongs-close">Cerrar</button>
     </div>
 
     <script>
@@ -871,7 +849,14 @@
             if (!book) return;
 
             const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            
+            // Verificar si el elemento chapter-select existe antes de intentar modificarlo
             const chapterSelect = document.getElementById('chapter-select');
+            if (!chapterSelect) {
+                console.log('Elemento chapter-select no encontrado - se omite esta operación');
+                return;
+            }
+            
             chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
                 Array.from(chapters).map((_, index) => `
                     <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
@@ -1099,6 +1084,21 @@
         if (menuToggle && extraControls) {
             menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
         }
+        
+        // Función para resaltar un versículo al hacer clic en él
+        function highlightVerse(verseElement) {
+            // Eliminar la clase highlighted de todos los versículos
+            document.querySelectorAll('.verse.highlighted').forEach(el => el.classList.remove('highlighted'));
+            
+            // Añadir la clase highlighted al versículo actual
+            verseElement.classList.add('highlighted');
+            
+            // Actualizar el versículo actual
+            currentVerse = parseInt(verseElement.dataset.verse);
+            
+            // Actualizar la URL sin recargar la página
+            updateURL();
+        }
         // Toggle side menu
         const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
         const sideMenu = document.getElementById('side-menu');
@@ -1218,12 +1218,15 @@
             verseSelect.disabled = false;
         }
         // Handle verse selection
-        document.getElementById('verse-select').addEventListener('change', (e) => {
-            currentVerse = parseInt(e.target.value);
-            loadChapter();
-            updateControls();
-            updateURL();
-        });
+        const verseSelectElement = document.getElementById('verse-select');
+        if (verseSelectElement) {
+            verseSelectElement.addEventListener('change', (e) => {
+                currentVerse = parseInt(e.target.value);
+                loadChapter();
+                updateControls();
+                updateURL();
+            });
+        }
     </script>
     <script>
         // Obtiene los temas directamente del XML
@@ -1322,150 +1325,20 @@
         });
     </script>
     <script>
-        // Búsqueda de versículos en toda la Biblia con resaltado y conteo de términos exactos
-        const searchWrapper = document.querySelector('.search-wrapper');
-        const searchButton = document.getElementById('search-button');
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const resultsContent = document.getElementById('results-content');
-        const closeSearchButton = document.getElementById('close-search');
-        const searchCountSpan = document.getElementById('search-count');
-        
-        // Ejecutar búsqueda con clic en botón
-        searchButton.addEventListener('click', function() {
-            // Si el campo está oculto o vacío, mostrarlo y enfocarlo
-            if (searchInput.style.display === 'none' || getComputedStyle(searchInput).display === 'none' || searchInput.value.trim() === '') {
-                searchInput.style.display = 'block';
-                searchInput.focus();
-                return;
+        // Funcionalidad de búsqueda temporalmente eliminada
+        function loadReference(book, chapter, verse) {
+            // Esta función se mantiene porque es utilizada por otras partes del código
+            currentBook = book;
+            currentChapter = parseInt(chapter);
+            currentVerse = parseInt(verse);
+            loadChapter();
+            updateControls();
+            updateURL();
+            // Cerrar cualquier menú abierto
+            const searchResults = document.getElementById('search-results');
+            if (searchResults) {
+                searchResults.style.display = 'none';
             }
-            
-            // Si el campo ya es visible y tiene contenido, ejecutar la búsqueda
-            const query = searchInput.value.trim();
-            if (query.length >= 2) {
-                searchExactWord(query);
-            } else if (query) {
-                alert('Por favor ingresa al menos 2 caracteres para buscar.');
-            }
-        });
-        
-        // Ejecutar búsqueda con Enter
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query.length >= 2) {
-                    searchExactWord(query);
-                } else if (query) {
-                    alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                }
-            }
-        });
-        
-        // Cerrar resultados
-        closeSearchButton.addEventListener('click', function() {
-            searchResults.style.display = 'none';
-        });
-        
-        // Función de búsqueda de palabras exactas
-        function searchExactWord(keyword) {
-            if (!keyword || keyword.length < 2) {
-                alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                return;
-            }
-            
-            resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
-            searchResults.style.display = 'block';
-            
-            // Preparar palabra para búsqueda exacta (expresión regular)
-            const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
-            let results = [];
-            let totalOccurrences = 0;
-            
-            // Buscar en todos los libros y capítulos
-            const books = xmlDoc.getElementsByTagName('b');
-            for (let b = 0; b < books.length; b++) {
-                const book = books[b];
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-                
-                for (let c = 0; c < chapters.length; c++) {
-                    const chapter = chapters[c];
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-                    
-                    for (let v = 0; v < verses.length; v++) {
-                        const verse = verses[v];
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-                        
-                        // Buscar palabras exactas
-                        const matches = verseText.match(searchRegex);
-                        if (matches) {
-                            // Resaltar la palabra buscada en el texto
-                            const highlightedText = verseText.replace(
-                                searchRegex, 
-                                '<span class="search-highlight">$&</span>'
-                            );
-                            
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: highlightedText,
-                                count: matches.length
-                            });
-                            totalOccurrences += matches.length;
-                        }
-                    }
-                }
-            }
-            
-            // Mostrar resultados
-            if (results.length > 0) {
-                searchCountSpan.textContent = `(${totalOccurrences} ${totalOccurrences === 1 ? 'ocurrencia' : 'ocurrencias'} en ${results.length} ${results.length === 1 ? 'versículo' : 'versículos'})`;
-                
-                // Limpiar y reconfigurar el contenedor de resultados
-                searchResults.style.width = '100%';
-                searchResults.style.maxWidth = '100%';
-                searchResults.style.left = '0';
-                
-                // Generar HTML de resultados con estilo mejorado
-                resultsContent.innerHTML = '<div class="search-results-container">' + 
-                    results.map(result => `
-                    <div class="search-result-item" data-book="${result.book}" data-chapter="${result.chapter}" data-verse="${result.verse}">
-                        <div class="search-result-reference">${result.book} ${result.chapter}:${result.verse}</div>
-                        <div class="search-result-text">${result.text}</div>
-                    </div>
-                `).join('') + '</div>';
-                
-                // Agregar evento clic a los resultados
-                document.querySelectorAll('.search-result-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const book = this.dataset.book;
-                        const chapter = this.dataset.chapter;
-                        const verse = this.dataset.verse;
-                        
-                        // Navegar al versículo
-                        currentBook = book;
-                        currentChapter = parseInt(chapter);
-                        currentVerse = parseInt(verse);
-                        loadChapter();
-                        updateControls();
-                        updateURL();
-                        
-                        // Cerrar resultados
-                        searchResults.style.display = 'none';
-                    });
-                });
-            } else {
-                searchCountSpan.textContent = '(0 ocurrencias)';
-                resultsContent.innerHTML = '<div class="no-results">No se encontraron resultados para "' + keyword + '"</div>';
-            }
-        }
-        
-        // Función auxiliar para escapar caracteres especiales en expresiones regulares
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
     </script>
     <script>
