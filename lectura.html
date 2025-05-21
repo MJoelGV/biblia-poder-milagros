@@ -649,23 +649,30 @@
         /* Mostrar grid de capítulos cuando esté activo */
         .chapter-grid.active { display: flex; }
         
-        /* Estilos para resultados de búsqueda */
-        .search-results {
+        /* Estilos para resultados de búsqueda (pantalla completa) */
+        .fullscreen-results {
             position: fixed;
-            top: 60px;
+            top: 0;
             left: 0;
-            right: 0;
             width: 100%;
-            max-width: 100%;
-            max-height: 80vh;
-            background-color: white;
-            border-bottom: 1px solid #ddd;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1000;
+            height: 100%;
+            background-color: var(--bg-color, #fff);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .fullscreen-results {
+            background-color: var(--dark-bg-color, #222);
+            color: var(--dark-text-color, #eee);
+        }
+        
+        .results-container {
+            flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: 15px;
-            box-sizing: border-box;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
         }
         
         .search-results-header {
@@ -837,13 +844,14 @@
         </div>
     </div> <!-- cierre .controls -->
 
-    <!-- Overlay de resultados de búsqueda -->
-    <div id="search-results" class="search-results" style="display: none;">
-        <div class="search-results-header">
-            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
-            <button id="close-search" class="close-search">&times;</button>
+    <!-- Modal de resultados de búsqueda -->
+    <div id="search-backdrop" class="modal-backdrop" style="display: none;"></div>
+    <div id="search-results" class="modal search-modal" style="display: none;">
+        <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+        <div id="results-content" class="results-container" style="height: 80%; overflow-y: auto;"></div>
+        <div class="modal-actions">
+            <button id="close-search">Cerrar</button>
         </div>
-        <div id="results-content"></div>
     </div>
 
     <!-- Menú contextual para versículos -->
@@ -1523,9 +1531,16 @@
             }
         });
         
-        // Cerrar resultados al hacer clic en X
+        // Cerrar resultados al hacer clic en el botón de cerrar
         closeSearchButton.addEventListener('click', function() {
             searchResults.style.display = 'none';
+            document.getElementById('search-backdrop').style.display = 'none';
+        });
+        
+        // Cerrar resultados al hacer clic en el backdrop
+        document.getElementById('search-backdrop').addEventListener('click', function() {
+            searchResults.style.display = 'none';
+            this.style.display = 'none';
         });
         
         // Función para buscar palabra exacta en toda la Biblia
@@ -1536,6 +1551,8 @@
             }
             
             resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
+            // Mostrar el modal de resultados
+            document.getElementById('search-backdrop').style.display = 'block';
             searchResults.style.display = 'block';
             
             // Preparar palabra para búsqueda exacta (expresión regular)
