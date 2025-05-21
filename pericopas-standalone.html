@@ -394,7 +394,8 @@
                 if (pericope.verses) {
                     content += `<div class="reference">Versículos ${pericope.verses}</div>`;
                 }
-                if (pericope.content) {
+                // Mostrar el contenido solo si es diferente al título para evitar repeticiones
+                if (pericope.content && pericope.content !== pericope.title) {
                     content += `<div class="content">${pericope.content}</div>`;
                 }
                 
