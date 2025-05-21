@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perícopas Bíblicas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .pericope {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pericope:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-left-color: #9c27b0;
+        }
+        .reference {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .title {
+            color: #e74c3c;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .content {
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        select {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            background-color: white;
+            font-size: 16px;
+        }
+        .no-pericopes {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            select {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Estilos para el menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 1001;
+            color: #333;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .side-menu ul {
+            list-style: none;
+            padding: 20px;
+            margin: 0;
+        }
+        .side-menu ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .side-menu ul li:last-child {
+            border-bottom: none;
+        }
+        .side-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #2c3e50;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .side-menu-toggle:hover {
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 50%;
+        }
+        
+        /* Ajustar el layout para el botón de menú */
+        h1 {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='pericopas-standalone.html'">Perícopas Bíblicas</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+    
+    <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+    
+    <h1>Perícopas Bíblicas</h1>
+    
+    <div class="controls">
+        <div>
+            <label for="book-select">Libro:</label>
+            <select id="book-select">
+                <option value="">Selecciona un libro</option>
+            </select>
+        </div>
+        <div>
+            <label for="chapter-select">Capítulo:</label>
+            <select id="chapter-select" disabled>
+                <option value="">Selecciona un capítulo</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="pericopes-container">
+        <div class="loading">Cargando perícopas bíblicas...</div>
+    </div>
+
+    <script>
+        // Datos de los libros de la Biblia con sus abreviaturas y cantidad de capítulos
+        const BIBLE_BOOKS = [
+            { name: 'Génesis', abbr: 'GEN', chapters: 50 },
+            { name: 'Éxodo', abbr: 'EXO', chapters: 40 },
+            { name: 'Levítico', abbr: 'LEV', chapters: 27 },
+            { name: 'Números', abbr: 'NUM', chapters: 36 },
+            { name: 'Deuteronomio', abbr: 'DEU', chapters: 34 },
+            { name: 'Josué', abbr: 'JOS', chapters: 24 },
+            { name: 'Jueces', abbr: 'JDG', chapters: 21 },
+            { name: 'Rut', abbr: 'RUT', chapters: 4 },
+            { name: '1 Samuel', abbr: '1SA', chapters: 31 },
+            { name: '2 Samuel', abbr: '2SA', chapters: 24 },
+            { name: '1 Reyes', abbr: '1KI', chapters: 22 },
+            { name: '2 Reyes', abbr: '2KI', chapters: 25 },
+            { name: '1 Crónicas', abbr: '1CH', chapters: 29 },
+            { name: '2 Crónicas', abbr: '2CH', chapters: 36 },
+            { name: 'Esdras', abbr: 'EZR', chapters: 10 },
+            { name: 'Nehemías', abbr: 'NEH', chapters: 13 },
+            { name: 'Ester', abbr: 'EST', chapters: 10 },
+            { name: 'Job', abbr: 'JOB', chapters: 42 },
+            { name: 'Salmos', abbr: 'PSA', chapters: 150 },
+            { name: 'Proverbios', abbr: 'PRO', chapters: 31 },
+            { name: 'Eclesiastés', abbr: 'ECC', chapters: 12 },
+            { name: 'Cantares', abbr: 'SNG', chapters: 8 },
+            { name: 'Isaías', abbr: 'ISA', chapters: 66 },
+            { name: 'Jeremías', abbr: 'JER', chapters: 52 },
+            { name: 'Lamentaciones', abbr: 'LAM', chapters: 5 },
+            { name: 'Ezequiel', abbr: 'EZK', chapters: 48 },
+            { name: 'Daniel', abbr: 'DAN', chapters: 12 },
+            { name: 'Oseas', abbr: 'HOS', chapters: 14 },
+            { name: 'Joel', abbr: 'JOL', chapters: 3 },
+            { name: 'Amós', abbr: 'AMO', chapters: 9 },
+            { name: 'Abdías', abbr: 'OBA', chapters: 1 },
+            { name: 'Jonás', abbr: 'JON', chapters: 4 },
+            { name: 'Miqueas', abbr: 'MIC', chapters: 7 },
+            { name: 'Nahúm', abbr: 'NAM', chapters: 3 },
+            { name: 'Habacuc', abbr: 'HAB', chapters: 3 },
+            { name: 'Sofonías', abbr: 'ZEP', chapters: 3 },
+            { name: 'Hageo', abbr: 'HAG', chapters: 2 },
+            { name: 'Zacarías', abbr: 'ZEC', chapters: 14 },
+            { name: 'Malaquías', abbr: 'MAL', chapters: 4 },
+            { name: 'Mateo', abbr: 'MAT', chapters: 28 },
+            { name: 'Marcos', abbr: 'MRK', chapters: 16 },
+            { name: 'Lucas', abbr: 'LUK', chapters: 24 },
+            { name: 'Juan', abbr: 'JHN', chapters: 21 },
+            { name: 'Hechos', abbr: 'ACT', chapters: 28 },
+            { name: 'Romanos', abbr: 'ROM', chapters: 16 },
+            { name: '1 Corintios', abbr: '1CO', chapters: 16 },
+            { name: '2 Corintios', abbr: '2CO', chapters: 13 },
+            { name: 'Gálatas', abbr: 'GAL', chapters: 6 },
+            { name: 'Efesios', abbr: 'EPH', chapters: 6 },
+            { name: 'Filipenses', abbr: 'PHP', chapters: 4 },
+            { name: 'Colosenses', abbr: 'COL', chapters: 4 },
+            { name: '1 Tesalonicenses', abbr: '1TH', chapters: 5 },
+            { name: '2 Tesalonicenses', abbr: '2TH', chapters: 3 },
+            { name: '1 Timoteo', abbr: '1TI', chapters: 6 },
+            { name: '2 Timoteo', abbr: '2TI', chapters: 4 },
+            { name: 'Tito', abbr: 'TIT', chapters: 3 },
+            { name: 'Filemón', abbr: 'PHM', chapters: 1 },
+            { name: 'Hebreos', abbr: 'HEB', chapters: 13 },
+            { name: 'Santiago', abbr: 'JAS', chapters: 5 },
+            { name: '1 Pedro', abbr: '1PE', chapters: 5 },
+            { name: '2 Pedro', abbr: '2PE', chapters: 3 },
+            { name: '1 Juan', abbr: '1JN', chapters: 5 },
+            { name: '2 Juan', abbr: '2JN', chapters: 1 },
+            { name: '3 Juan', abbr: '3JN', chapters: 1 },
+            { name: 'Judas', abbr: 'JUD', chapters: 1 },
+            { name: 'Apocalipsis', abbr: 'REV', chapters: 22 }
+        ];
+
+        // Variables globales
+        let currentBook = '';
+        let currentChapter = '';
+
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar selectores
+            const bookSelect = document.getElementById('book-select');
+            const chapterSelect = document.getElementById('chapter-select');
+
+            // Llenar selector de libros
+            BIBLE_BOOKS.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.abbr;
+                option.textContent = book.name;
+                bookSelect.appendChild(option);
+            });
+
+            // Manejar cambio de libro
+            bookSelect.addEventListener('change', function() {
+                currentBook = this.value;
+                updateChapters();
+            });
+
+            // Manejar cambio de capítulo
+            chapterSelect.addEventListener('change', function() {
+                currentChapter = this.value;
+                if (currentBook && currentChapter) {
+                    loadPericopes(currentBook, currentChapter);
+                }
+            });
+
+            // Cargar los datos de las perícopas
+            loadPericopesData();
+        });
+
+        // Actualizar selector de capítulos según el libro seleccionado
+        function updateChapters() {
+            const bookSelect = document.getElementById('book-select');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            // Limpiar selector de capítulos
+            chapterSelect.innerHTML = '<option value="">Selecciona un capítulo</option>';
+            chapterSelect.disabled = true;
+            
+            const selectedBook = bookSelect.value;
+            if (!selectedBook) return;
+            
+            // Buscar el libro seleccionado
+            const book = BIBLE_BOOKS.find(b => b.abbr === selectedBook);
+            if (book) {
+                // Llenar con los capítulos del libro
+                for (let i = 1; i <= book.chapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Capítulo ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+                chapterSelect.disabled = false;
+            }
+        }
+
+        // Cargar los datos de las perícopas
+        function loadPericopesData() {
+            const container = document.getElementById('pericopes-container');
+            container.innerHTML = '<div class="loading">Cargando perícopas bíblicas...</div>';
+
+            // Si ya están cargados los datos, no hacer nada
+            if (window.PERICOPES_DATA) {
+                container.innerHTML = '<div class="no-pericopes">Selecciona un libro y un capítulo para ver las perícopas.</div>';
+                return;
+            }
+
+            // Cargar el archivo de datos
+            const script = document.createElement('script');
+            script.src = 'pericopas-datos-completo.js';
+            script.onload = function() {
+                container.innerHTML = '<div class="no-pericopes">Selecciona un libro y un capítulo para ver las perícopas.</div>';
+            };
+            script.onerror = function() {
+                container.innerHTML = '<div class="error">Error al cargar los datos de las perícopas. Asegúrate de que el archivo pericopas-datos-completo.js esté en la misma carpeta.</div>';
+            };
+            document.head.appendChild(script);
+        }
+
+        // Cargar y mostrar las perícopas para un libro y capítulo específicos
+        function loadPericopes(book, chapter) {
+            const container = document.getElementById('pericopes-container');
+            const key = `${book}-${chapter}`;
+            
+            // Verificar si los datos están disponibles
+            if (!window.PERICOPES_DATA) {
+                container.innerHTML = '<div class="error">Los datos de las perícopas no se han cargado correctamente.</div>';
+                return;
+            }
+            
+            const pericopes = window.PERICOPES_DATA[key];
+            
+            if (!pericopes || pericopes.length === 0) {
+                container.innerHTML = '<div class="no-pericopes">No hay perícopas disponibles para este capítulo.</div>';
+                return;
+            }
+            
+            // Mostrar las perícopas
+            container.innerHTML = '';
+            
+            // Encontrar el nombre del libro
+            const bookInfo = BIBLE_BOOKS.find(b => b.abbr === book);
+            const bookName = bookInfo ? bookInfo.name : book;
+            
+            const title = document.createElement('h2');
+            title.textContent = `${bookName} ${chapter}`;
+            container.appendChild(title);
+            
+            pericopes.forEach(pericope => {
+                const div = document.createElement('div');
+                div.className = 'pericope';
+                
+                // Extraer el primer versículo para la navegación
+                let firstVerse = 1;
+                if (pericope.verses) {
+                    // Si es un rango como "1-5", tomar el primer número
+                    const verseMatch = pericope.verses.match(/^(\d+)/);
+                    if (verseMatch) {
+                        firstVerse = parseInt(verseMatch[1]);
+                    }
+                }
+                
+                // Almacenar datos para navegación
+                div.dataset.book = book;
+                div.dataset.chapter = chapter;
+                div.dataset.verse = firstVerse;
+                
+                let content = '';
+                if (pericope.title) {
+                    content += `<div class="title">${pericope.title}</div>`;
+                }
+                if (pericope.verses) {
+                    content += `<div class="reference">Versículos ${pericope.verses}</div>`;
+                }
+                // Mostrar el contenido solo si es diferente al título para evitar repeticiones
+                if (pericope.content && pericope.content !== pericope.title) {
+                    content += `<div class="content">${pericope.content}</div>`;
+                }
+                
+                // Añadir pequeño indicador visual de que es clicable
+                content += `<div style="text-align: right; margin-top: 10px; color: #9c27b0; font-size: 0.8em;">
+                             <i>Clic para leer en la Biblia</i>
+                           </div>`;
+                
+                div.innerHTML = content;
+                
+                // Añadir evento de clic para navegar a la lectura
+                div.addEventListener('click', function() {
+                    const bookName = bookInfo.name;
+                    const chapterNum = chapter;
+                    const verseNum = this.dataset.verse;
+                    
+                    // Navegar a la página de lectura con los parámetros adecuados
+                    window.location.href = `lectura.html?book=${bookName}&chapter=${chapterNum}&verse=${verseNum}`;
+                });
+                
+                container.appendChild(div);
+            });
+        }
+    </script>
+    
+    <!-- Script para el menú lateral -->
+    <script>
+        // Manejo del menú lateral
+        document.getElementById('side-menu-toggle').addEventListener('click', function() {
+            document.getElementById('side-menu').classList.toggle('active');
+        });
+        
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(e) {
+            const sideMenu = document.getElementById('side-menu');
+            const sideMenuToggle = document.getElementById('side-menu-toggle');
+            
+            if (e.target !== sideMenu && 
+                !sideMenu.contains(e.target) && 
+                e.target !== sideMenuToggle) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

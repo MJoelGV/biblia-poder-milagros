@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblia de Poder y Milagros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <!-- PWA manifest and meta -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/pymicon.png">
+    <meta name="application-name" content="BibliaPYM">
+    <meta name="apple-mobile-web-app-title" content="BibliaPYM">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/pymicon.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80') center/cover;
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .proverb-card {
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .proverb-card p { color: white; }
+        .proverb-card .reference { color: white; }
+
+        .proverb-text {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .reference {
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Navegación con iconos en grid */
+        .navigation-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+            gap: 12px;
+            padding: 0 20px;
+        }
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 16px;
+            color: white;
+            text-decoration: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            transition: transform 0.2s ease;
+        }
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+        .nav-button .icon {
+            font-size: 2rem;
+            margin-bottom: 4px;
+            background: none;
+            box-shadow: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            color: white;
+        }
+        @media (max-width: 480px) {
+            body { overflow: auto; }
+            .hero { height: auto; padding: 40px 0; }
+            .hero h1 { font-size: 2.5em; margin-bottom: 20px; }
+            .navigation-buttons { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 10px; }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+            .navigation-buttons { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .navigation-buttons { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .proverb-card {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .navigation-buttons {
+                margin: 30px 20px;
+            }
+
+            .nav-button {
+                width: auto;
+                max-width: none;
+                padding: 6px 2px;
+            }
+        }
+
+        /* Menú lateral */
+        .side-menu {position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; color: #333;}
+        .side-menu.active {left: 0;}
+        .side-menu ul {list-style: none; padding: 20px; margin: 0;}
+        .side-menu ul li {padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer;}
+        .side-menu ul li:last-child {border-bottom: none;}
+        .side-menu-toggle {background: none; border: none; font-size: 24px; color: #fff; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px;}
+        .side-menu-toggle:hover {background-color: rgba(0,0,0,0.05); border-radius: 50%;}
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='pericopas-standalone.html'">Perícopas Bíblicas</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+    <div class="background"></div>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Biblia de Poder y Milagros</h1>
+            <a id="proverb-link" class="proverb-card" href="#">
+                <p id="proverb-text">Cargando proverbio del día...</p>
+                <p id="proverb-reference" class="reference"></p>
+            </a>
+            <div class="navigation-buttons">
+                <a href="lectura.html" id="read-more-link" class="nav-button"><i class="fas fa-bible icon"></i></a>
+                <a href="pericopas-standalone.html" class="nav-button" style="border-color: #9c27b0;"><i class="fas fa-book icon" style="color: #9c27b0;"></i><span>Perícopas</span></a>
+                <a href="audio.html" class="nav-button"><i class="fas fa-headphones icon"></i><span>Escuchar</span></a>
+                <a href="memorizados.html" class="nav-button"><i class="fas fa-graduation-cap icon"></i><span>Memorizados</span></a>
+                <a href="historias.html" class="nav-button"><i class="fas fa-book-open icon"></i><span>Historias</span></a>
+                <a href="diccionario.html" class="nav-button"><i class="fas fa-books icon"></i><span>Diccionario</span></a>
+                <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
+                <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
+                <a href="topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
+                <a href="#" id="share-button" class="nav-button" style="border-color: #ff9800;"><i class="fas fa-share-alt icon" style="color: #ff9800;"></i><span>Compartir</span></a>
+            </div>
+        </div>
+    </div>
+    <!-- Install button and SW registration -->
+    <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">descargar biblia de Poder y Milagros</button>
+    <script>
+        // Cargar versículo del día
+        async function loadDailyVerse() {
+            try {
+                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+                const response = await fetch(`${baseUrl}biblia-files/Reina-Valera-1960.xmm`);
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                const verses = xmlDoc.getElementsByTagName('v');
+                const total = verses.length;
+                // Selección aleatoria diaria, cacheada en localStorage
+                const todayDate = new Date().toISOString().slice(0,10);
+                let idx;
+                const storedDate = localStorage.getItem('dailyVerseDate');
+                const storedIdx = localStorage.getItem('dailyVerseIndex');
+                if (storedDate === todayDate && storedIdx !== null) {
+                    idx = parseInt(storedIdx, 10);
+                } else {
+                    idx = Math.floor(Math.random() * total);
+                    localStorage.setItem('dailyVerseDate', todayDate);
+                    localStorage.setItem('dailyVerseIndex', idx);
+                }
+                const verseEl = verses[idx];
+                const verseNum = verseEl.getAttribute('n');
+                const chapterEl = verseEl.parentNode;
+                const chapterNum = chapterEl.getAttribute('n');
+                const bookEl = chapterEl.parentNode;
+                const bookName = bookEl.getAttribute('n');
+                document.getElementById('proverb-text').textContent = verseEl.textContent;
+                document.getElementById('proverb-reference').textContent = `${bookName} ${chapterNum}:${verseNum}`;
+                const readUrl = `${baseUrl}lectura.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
+                const shareUrl = `${baseUrl}share.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
+                document.getElementById('read-more-link').href = readUrl;
+                document.getElementById('proverb-link').href = shareUrl;
+            } catch (error) {
+                console.error('Error al cargar el versículo del día:', error);
+                document.getElementById('proverb-text').textContent = 'Error al cargar el versículo del día';
+            }
+        }
+        // Cargar el versículo cuando la página esté lista
+        loadDailyVerse();
+    </script>
+    <script>
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('SW registered'))
+                .catch(console.error);
+        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Toggle side-menu
+        const sideMenuToggleBtnIdx = document.getElementById('side-menu-toggle');
+        const sideMenuIdx = document.getElementById('side-menu');
+        if (sideMenuToggleBtnIdx) {
+            sideMenuToggleBtnIdx.addEventListener('click', () => sideMenuIdx.classList.toggle('active'));
+        }
+        document.addEventListener('click', e => {
+            if (sideMenuIdx.classList.contains('active') && !sideMenuIdx.contains(e.target) && !sideMenuToggleBtnIdx.contains(e.target)) {
+                sideMenuIdx.classList.remove('active');
+            }
+        });
+        
+        // Funcionalidad de compartir
+        document.getElementById('share-button').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // Obtener la URL actual (para compartir la PWA)
+            const shareUrl = window.location.href.split('?')[0]; // Eliminar parámetros de consulta si los hay
+            
+            // Texto personalizado para compartir
+            const shareTitle = 'Biblia de Poder y Milagros';
+            const shareText = 'Quiero compartir contigo esta maravillosa Biblia de Poder y Milagros. ¡Descárgala y lleva la Palabra de Dios contigo a todas partes!';
+            
+            // Verificar si el navegador soporta la API Web Share
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                    console.log('¡Contenido compartido con éxito!');
+                } catch (error) {
+                    console.error('Error al compartir:', error);
+                    alert('No se pudo compartir. Por favor, intenta de nuevo más tarde.');
+                }
+            } else {
+                // Fallback para navegadores que no soportan Web Share API
+                // Mostrar un mensaje con la URL para copiar manualmente
+                alert('Tu navegador no soporta la función de compartir. Copia este enlace: ' + shareUrl);
+                
+                // Intentar copiar al portapapeles si es posible
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert('¡Enlace copiado al portapapeles!');
+                } catch (clipboardError) {
+                    console.error('No se pudo copiar al portapapeles:', clipboardError);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

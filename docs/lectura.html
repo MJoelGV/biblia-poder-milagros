@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<!-- Build timestamp: 2025-04-25T21:20:00Z -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lectura - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- corregido path para iOS icon -->
+    <link rel="apple-touch-icon" href="../icons/pymicon.png">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --verse-font-size: 1.1em;
+            --menu-bg: rgba(0, 0, 0, 0.6);
+            --menu-blur: blur(10px);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #121212;
+            --menu-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        .controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .controls.hidden {
+            transform: translateY(-100%);
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-icon:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .select-css {
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .select-css:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .select-css option {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 8px;
+        }
+
+        .search-wrapper { display: inline-flex; align-items: center; }
+        .search-wrapper .search-input { display: none; }
+        .search-wrapper.active .search-input { 
+            display: inline-block;
+            max-width: 180px;
+            opacity: 1;
+            margin-left: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .chapter-content {
+            max-width: 1200px;
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        .chapter-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0 30px 0;
+            padding: 10px;
+        }
+
+        .verse {
+            margin-bottom: 0.8em;
+            padding: 0.4em;
+            line-height: 1.6;
+            border-radius: 4px;
+            transition: background-color 1s ease;
+        }
+
+        .verse:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .verse.highlighted {
+            background-color: rgba(76, 175, 80, 0.15);
+        }
+        /* Dark mode: highlighted verse text black for readability */
+        [data-theme="dark"] .verse.highlighted {
+            color: #000;
+        }
+        .verse.bookmarked { background: #fffa8c; }
+        .verse.comment { border-left: 4px solid var(--primary-color); }
+        .verse.memorized { background: #c6f4d6; }
+        /* Dark mode: texto negro para bookmarked y memorized */
+        [data-theme="dark"] .verse.bookmarked,
+        [data-theme="dark"] .verse.memorized {
+            color: #000;
+        }
+
+        .verse-number {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 0.5em;
+            font-size: 0.9em;
+        }
+
+        .verse-text {
+            font-size: var(--verse-font-size);
+            line-height: 1.7;
+        }
+
+        /* Estilo para versículos marcados como favoritos */
+        .verse.bookmarked {
+            background-color: rgba(76, 175, 80, 0.1); /* Verde claro */
+            border-left: 4px solid #4CAF50;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
+
+        .navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 12px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .navigation-bottom.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #chapter-select {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .chapter-grid, .verse-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .chapter-grid.active, .verse-grid.active {
+            display: flex;
+        }
+        .chapter-grid .grid-content, .verse-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        /* Header for modal grids */
+        .chapter-grid .grid-header, .verse-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .close-grid {
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        /* Botón de título: línea única con indicador */
+        .chapter-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .chapter-btn:hover,
+        .chapter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chapter-btn::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-left: 8px;
+        }
+
+        .chapter-btn.active::after {
+            opacity: 1;
+        }
+
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        /* Botón cerrar resultados de búsqueda */
+        .search-results .close-search {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .search-results .close-search:hover {
+            color: var(--primary-color);
+        }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Modal para comentarios */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1300;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1301;
+            max-width: 90%; width: 300px;
+        }
+        .modal textarea {
+            width: 100%; height: 100px; resize: vertical;
+        }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+        }
+        .modal-actions button {
+            padding: 6px 12px;
+        }
+
+        /* Verso marcado y menú contextual */
+        .verse-menu {
+            display: none;
+            position: absolute;
+            background: var(--bg-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1200;
+            padding: 8px;
+        }
+        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
+        .verse-menu li {
+            padding: 8px; cursor: pointer;
+        }
+        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
+        /* Responsive: wrap controls and selectors on small screens */
+        @media (max-width: 768px) {
+            .top-row, .navigation {
+                flex-wrap: wrap;
+            }
+            /* Reduce spacing on mobile */
+            .top-row > *, .navigation > * {
+                margin: 3px 5px;
+            }
+            .navigation {
+                margin: 8px 0;
+            }
+            /* Allow selectors and input to shrink and limit width */
+            .select-css, .search-input {
+                max-width: 80px;
+                flex: 0 1 auto;
+            }
+        }
+        /* Responsive: menú más compacto en móviles */
+        @media (max-width: 600px) {
+            .controls { padding: 8px; }
+            .controls .home-icon,
+            .controls .theme-toggle {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                padding: 4px;
+            }
+            .selector-row {
+                padding: 8px;
+                top: 48px; /* altura de controls reducida */
+            }
+            #version-selector {
+                width: 180px;
+                min-width: 150px;
+            }
+            #book-select {
+                width: 120px;
+                min-width: 100px;
+            }
+        }
+        /* Extra controls (hidden por defecto) */
+        .extra-controls {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 20px;
+        }
+        .extra-controls.active {
+            display: flex;
+        }
+        /* Main menu toggle button */
+        .main-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-menu-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Menú lateral */
+        .search-results {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none;
+            width: 100%;
+            max-width: 100vw;
+            box-sizing: border-box;
+        }
+        
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 10px;
+        }
+        
+        .close-search {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        /* Estilos para los resultados de búsqueda */
+        .search-result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(76, 175, 80, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .search-result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .search-result-reference {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .search-highlight {
+            background-color: rgba(255, 193, 7, 0.5);
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 3px;
+            color: #000;
+            text-shadow: none;
+            box-shadow: 0 0 3px rgba(255, 193, 7, 0.3);
+        }
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: var(--bg-color);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 1001;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+        
+        /* Outline grid styling */
+        .outline-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .outline-grid.active {
+            display: flex;
+        }
+        .outline-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .search-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+        }
+        
+        [data-theme="dark"] .fullscreen-overlay {
+            background-color: #222;
+            color: #eee;
+        }
+        
+        [data-theme="dark"] .search-header {
+            background-color: #333;
+            border-color: #444;
+        }
+        .outline-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        /* Verse grid styling and hide dropdowns */
+        #chapter-select, #verse-select {
+            display: none !important;
+        }
+
+        /* Mostrar grid de capítulos cuando esté activo */
+        .chapter-grid.active { display: flex; }
+        
+        /* Estilos para resultados de búsqueda (pantalla completa) */
+        .fullscreen-results {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color, #fff);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .fullscreen-results {
+            background-color: var(--dark-bg-color, #222);
+            color: var(--dark-text-color, #eee);
+        }
+        
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 101;
+        }
+        
+        .search-results-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-search {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        
+        #results-content {
+            padding: 10px 15px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .result-reference {
+            font-weight: 500;
+            margin-bottom: 5px;
+            cursor: pointer;
+            color: #1a73e8;
+            display: block;
+            width: 100%;
+        }
+        
+        .result-reference:hover {
+            text-decoration: underline;
+        }
+        
+        .result-text {
+            line-height: 1.5;
+            width: 100%;
+            display: block;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        
+        .search-highlight {
+            background-color: #ffeb3b;
+            color: black;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+        
+        /* Estilos para el menú contextual */
+        .menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Estilos para versículos memorizados */
+        .verse.memorized {
+            background-color: rgba(33, 150, 243, 0.1); /* Azul claro */
+            border-left: 4px solid #2196F3;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
+        
+        /* Estilos para versículos con comentarios */
+        .verse.commented {
+            background-color: rgba(255, 193, 7, 0.1); /* Amarillo claro */
+            border-left: 4px solid #FFC107;
+            padding-left: 10px;
+            border-radius: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        
+        .search-input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        [data-theme="dark"] .search-results {
+            background-color: #333;
+            border-color: #444;
+        }
+        
+        [data-theme="dark"] .search-results-header {
+            background-color: #444;
+            border-color: #555;
+        }
+        
+        [data-theme="dark"] .result-item {
+            border-color: #444;
+        }
+        
+        [data-theme="dark"] .search-highlight {
+            background-color: #ffc107;
+            color: #333;
+        }
+    </style>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li id="chapter-menu-toggle">Capítulos</li>
+        </ul>
+    </div>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            <select id="version-selector" class="select-css">
+                <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
+                <option value="TLA">Traducción en Lenguaje Actual</option>
+                <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
+                <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
+                <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
+            </select>
+            <select id="book-select" class="select-css"></select>
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button">🔍</button>
+                <input id="search-input" class="search-input" placeholder="Buscar palabra en la Biblia" style="display: none;" />
+            </div>
+            <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
+        </div>
+        <div id="extra-controls" class="extra-controls">
+            <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+        </div>
+    </div> <!-- cierre .controls -->
+
+    <!-- Modal de resultados de búsqueda (pantalla completa) -->
+    <div id="search-results" class="fullscreen-overlay" style="display: none;">
+        <div class="search-header">
+            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+            <button id="close-search" class="close-button">&times;</button>
+        </div>
+        <div id="results-content" class="results-container"></div>
+    </div>
+
+    <!-- Menú contextual para versículos -->
+    <div id="verse-menu" style="display:none; position:absolute; z-index:1000; background:white; border:1px solid #ccc; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.2); padding:5px 0;">
+        <div id="menu-toggle-bookmark" class="menu-item">Marcar versículo</div>
+        <div id="menu-toggle-memorized" class="menu-item">Memorizar versículo</div>
+        <div id="menu-add-comment" class="menu-item">Agregar comentario</div>
+        <div id="menu-copy-verse" class="menu-item">Copiar versículo</div>
+    </div>
+    
+    <!-- Modal para agregar comentarios -->
+    <div id="comment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:2000;">
+        <div style="position:relative; background:white; margin:100px auto; padding:20px; width:90%; max-width:500px; border-radius:8px;">
+            <h3>Agregar comentario</h3>
+            <textarea id="comment-text" style="width:100%; height:150px; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button id="cancel-comment" style="padding:8px 15px; background:#f5f5f5; border:1px solid #ccc; border-radius:4px; cursor:pointer;">Cancelar</button>
+                <button id="save-comment" style="padding:8px 15px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de comentarios -->
+    <div id="comment-backdrop" class="modal-backdrop"></div>
+    <div id="comment-modal" class="modal">
+        <h3 id="comment-modal-title">Comentario</h3>
+        <textarea id="modal-comment-input"></textarea>
+        <div class="modal-actions">
+            <button id="modal-save-btn">Guardar</button>
+            <button id="modal-delete-btn" style="background-color: #e74c3c; display: none;">Borrar</button>
+            <button id="modal-cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="chapter-grid" id="chapter-grid"></div>
+    <div class="verse-grid" id="verse-grid"></div>
+    <div class="outline-grid" id="outline-grid"></div>
+    <!-- outline-grid removed temporarily until feature complete -->
+    <div class="chapter-content" id="chapter-content">
+        <div id="verses"></div>
+    </div> <!-- cierre .chapter-content -->
+
+    <div class="navigation-bottom" id="navigation-bottom">
+        <button class="nav-button" id="prev-button">← Anterior</button>
+        <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
+        <button class="nav-button" id="next-button">Siguiente →</button>
+    </div>
+
+    <script>
+        let xmlDoc = null;
+        let currentBook = '';
+        let currentChapter = 1;
+        let currentVerse = 0;
+        let currentVersion = 'Reina-Valera-1960';
+        const audioPlayer = null;
+        let playlist = [];
+        let trackIndex = 0;
+
+        // Controlar la visibilidad de los menús al hacer scroll
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        let lastTouchY = 0;
+        let touchStartY = 0;
+        let menuVisible = true;
+
+        // Cargar preferencia de tema SOLO UNA VEZ
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Función para manejar el scroll
+        function handleScroll() {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    const scrollingDown = currentScrollY > lastScrollY;
+                    
+                    // Solo cambiamos la visibilidad si el scroll es significativo
+                    if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                        menuVisible = !scrollingDown;
+                        document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                        document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        // Función para manejar el toque
+        function handleTouch(e) {
+            const currentY = e.touches[0].clientY;
+            
+            if (e.type === 'touchstart') {
+                touchStartY = currentY;
+                lastTouchY = currentY;
+                return;
+            }
+            
+            const deltaY = currentY - lastTouchY;
+            
+            // Solo cambiamos la visibilidad si el movimiento es significativo
+            if (Math.abs(deltaY) > 30) {
+                menuVisible = deltaY > 0;
+                document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+            }
+            
+            lastTouchY = currentY;
+        }
+
+        // Event listeners para scroll y touch
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        document.addEventListener('touchstart', handleTouch, { passive: true });
+        document.addEventListener('touchmove', handleTouch, { passive: true });
+
+        // Mostrar menús al tocar cerca de ellos
+        document.addEventListener('touchstart', (e) => {
+            const touchY = e.touches[0].clientY;
+            const windowHeight = window.innerHeight;
+            
+            // Si el toque está cerca del borde superior o inferior
+            if (touchY < 50 || touchY > windowHeight - 50) {
+                menuVisible = true;
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('navigation-bottom').classList.remove('hidden');
+            }
+        }, { passive: true });
+
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.getElementById('theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Event listeners para los botones de navegación
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentChapter > 1) {
+                currentChapter--;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+        document.getElementById('next-button').addEventListener('click', () => {
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            if (currentChapter < totalChapters) {
+                currentChapter++;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+
+        // Función para cargar capítulos
+        async function loadChapters() {
+            const book = document.getElementById('book-select').value;
+            if (!book) return;
+
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            
+            // Verificar si el elemento chapter-select existe antes de intentar modificarlo
+            const chapterSelect = document.getElementById('chapter-select');
+            if (!chapterSelect) {
+                console.log('Elemento chapter-select no encontrado - se omite esta operación');
+                return;
+            }
+            
+            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
+                Array.from(chapters).map((_, index) => `
+                    <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                        Capítulo ${index + 1}
+                    </option>
+                `).join('');
+        }
+
+        // Función para cargar capítulo
+        async function loadChapter() {
+            console.log(`Cargando ${currentBook} capítulo ${currentChapter}...`);
+            const versesContainer = document.getElementById('verses');
+            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+
+            try {
+                // Verificar si el documento XML está disponible
+                if (!xmlDoc) {
+                    throw new Error('La Biblia no ha sido cargada correctamente');
+                }
+                
+                // Buscar el capítulo solicitado
+                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapter) {
+                    throw new Error(`No se encontró el capítulo ${currentChapter} en ${currentBook}`);
+                }
+
+                let html = `
+                    <div class="chapter-title">
+                        ${currentBook} - Capítulo ${currentChapter}
+                    </div>
+                `;
+                
+                // Obtener todos los versículos del capítulo
+                const verses = chapter.getElementsByTagName('v');
+                console.log(`Encontrados ${verses.length} versículos`);
+                
+                if (verses.length === 0) {
+                    throw new Error('El capítulo no contiene versículos');
+                }
+                
+                // Iterar y construir el HTML de los versículos
+                html += Array.from(verses).map(verse => {
+                    const verseNum = verse.getAttribute('n');
+                    const isHighlighted = parseInt(verseNum) === currentVerse;
+                    const isBookmarked = isVerseBookmarked(currentBook, currentChapter, verseNum);
+                    const isMemorized = isVerseMemorized(currentBook, currentChapter, verseNum);
+                    const hasComment = hasVerseComment(currentBook, currentChapter, verseNum);
+                    
+                    // Extraer texto del versículo de forma segura
+                    let verseText = '';
+                    try {
+                        verseText = verse.textContent || 'Error al cargar el texto';
+                    } catch (e) {
+                        console.error('Error al extraer texto del versículo:', e);
+                        verseText = 'Error al cargar el texto';
+                    }
+                    
+                    // Construir HTML para el versículo
+                    return `
+                        <div class="verse ${isHighlighted ? 'highlighted' : ''} ${isBookmarked ? 'bookmarked' : ''} ${isMemorized ? 'memorized' : ''} ${hasComment ? 'commented' : ''}" 
+                             data-verse="${verseNum}"
+                             data-book="${currentBook}"
+                             data-chapter="${currentChapter}"
+                             onclick="highlightVerse(this)">
+                            <span class="verse-number">${verseNum}</span>
+                            <span class="verse-text">${verseText}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Actualizar el contenido del contenedor
+                versesContainer.innerHTML = html;
+                
+                // Aplicar menú contextual a todos los versículos recién cargados
+                applyVerseContextMenu();
+                
+                console.log('Capítulo cargado correctamente');
+
+                if (currentVerse > 0) {
+                    const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                    if (verseElement) {
+                        setTimeout(() => {
+                            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // difuminar highlight después de unos segundos
+                            setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
+                        }, 100);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading chapter:', error);
+                versesContainer.innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+            }
+        }
+
+        // Función para actualizar controles
+        function updateControls() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            
+            if (!currentBook) {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
+
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar texto del botón de capítulo
+            document.getElementById('current-chapter-button').textContent = currentChapter;
+        }
+
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
+
+        // Función para cargar la Biblia
+        async function loadBible(version) {
+            try {
+                // Mostrar indicador de carga
+                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
+                
+                // Solución directa - usar la misma ruta que funciona en share.html
+                // IMPORTANTE: La ruta absoluta funciona tanto en desarrollo local como en GitHub Pages
+                const url = `/biblia-poder-milagros/biblia-files/${version}.xmm`;
+                console.log('[BIBLIA] Intentando cargar directamente:', url);
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`No se pudo cargar el archivo: ${url} (HTTP ${response.status})`);
+                }
+                
+                console.log(`[BIBLIA] ¡Archivo cargado exitosamente desde: ${url}!`);
+                
+                const xmlText = await response.text();
+                if (!xmlText || xmlText.trim().length === 0) {
+                    throw new Error('El archivo de la Biblia está vacío');
+                }
+                
+                console.log(`[BIBLIA] XML cargado: ${xmlText.length} caracteres`);
+                
+                // Parsear el XML
+                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
+                // Verificar errores de parseo
+                const parseError = xmlDoc.querySelector('parsererror');
+                if (parseError) {
+                    throw new Error('Error al analizar el XML: ' + parseError.textContent);
+                }
+                
+                // Guardar la versión actual
+                currentVersion = version;
+                
+                console.log('[BIBLIA] Biblia cargada correctamente');
+                
+                // Si ya hay un libro seleccionado, cargar el capítulo
+                if (currentBook) {
+                    loadChapter();
+                }
+            } catch (error) {
+                console.error('[BIBLIA] Error loading Bible:', error);
+                document.getElementById('verses').innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
+            }
+        }
+
+        // Event listener para el selector de versiones
+        document.getElementById('version-selector').addEventListener('change', async (e) => {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Cargando versión...';
+            document.getElementById('verses').innerHTML = '';
+            document.getElementById('verses').appendChild(loadingDiv);
+            
+            await loadBible(e.target.value);
+            setupBookSelector();
+            if (currentBook) {
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
+            }
+        });
+
+        // Configurar selector de libros
+        function setupBookSelector() {
+            const books = xmlDoc.getElementsByTagName('b');
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+            
+            Array.from(books).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.getAttribute('n');
+                option.textContent = book.getAttribute('n');
+                bookSelect.appendChild(option);
+            });
+            
+            // Agregar el evento change para el selector de libros
+            bookSelect.addEventListener('change', function(e) {
+                if (e.target.value) {
+                    currentBook = e.target.value;
+                    currentChapter = 1; // Reiniciar a capítulo 1 al cambiar de libro
+                    currentVerse = 0; // Reiniciar versiculo seleccionado
+                    
+                    // Mostrar la cuadrícula de capítulos para seleccionar
+                    showChapterGrid();
+                }
+            });
+        }
+
+        // OLD loadFromUrl function - REMOVED AND REPLACED BY initializeApp
+        /* function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+            const verseParam = params.get('verse');
+
+            if (bookParam) {
+                currentBook = bookParam;
+                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+                currentVerse = verseParam ? parseInt(verseParam) : 0;
+            } else {
+                // Cargar primer libro por defecto
+                const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
+                currentBook = firstBookElem.getAttribute('n');
+                currentChapter = 1;
+                currentVerse = 0;
+            }
+
+            // Actualizar selector de libros y cargar capítulo
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
+        } */
+
+        // Variables para el menú contextual de versículos
+        let contextMenuVerse = null;
+        let memorizedVerses = [];
+        let verseComments = [];
+        
+        // Función para mostrar menú contextual al hacer clic derecho en un versículo
+        function showVerseMenu(verse, e) {
+            e.preventDefault();
+            const verseMenu = document.getElementById('verse-menu');
+            contextMenuVerse = verse;
+            
+            // Posicionar menú junto al cursor
+            verseMenu.style.top = e.pageY + 'px';
+            verseMenu.style.left = e.pageX + 'px';
+            verseMenu.style.display = 'block';
+            
+            // Actualizar texto del botón de marcar/desmarcar versículo
+            const book = verse.dataset.book;
+            const chapter = verse.dataset.chapter;
+            const verseNum = verse.dataset.verse;
+            
+            // Verificar estados actuales
+            const isBookmarked = isVerseBookmarked(book, chapter, verseNum);
+            const isMemorized = isVerseMemorized(book, chapter, verseNum);
+            const hasComment = hasVerseComment(book, chapter, verseNum);
+            
+            // Actualizar texto de los elementos del menú
+            document.getElementById('menu-toggle-bookmark').textContent = 
+                isBookmarked ? 'Desmarcar versículo' : 'Marcar versículo';
+                
+            document.getElementById('menu-toggle-memorized').textContent = 
+                isMemorized ? 'Quitar de memorizados' : 'Memorizar versículo';
+                
+            document.getElementById('menu-add-comment').textContent = 
+                hasComment ? 'Editar comentario' : 'Agregar comentario';
+        }
+        
+        // Cerrar menú contextual al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const verseMenu = document.getElementById('verse-menu');
+            if (verseMenu.style.display === 'block' && !verseMenu.contains(e.target)) {
+                verseMenu.style.display = 'none';
+            }
+        });
+        
+        // FUNCIONES PARA VERSÍCULOS MEMORIZADOS
+        // Cargar versículos memorizados desde localStorage
+        function loadMemorizedVerses() {
+            const savedMemorized = localStorage.getItem('memorizedVerses');
+            if (savedMemorized) {
+                try {
+                    memorizedVerses = JSON.parse(savedMemorized);
+                } catch (e) {
+                    console.error('Error al cargar versículos memorizados:', e);
+                    memorizedVerses = [];
+                }
+            }
+        }
+        
+        // Guardar versículos memorizados en localStorage
+        function saveMemorizedVerses() {
+            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
+        }
+        
+        // Verificar si un versículo está memorizado
+        function isVerseMemorized(book, chapter, verse) {
+            return memorizedVerses.some(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+        }
+        
+        // Marcar o desmarcar un versículo como memorizado
+        function toggleMemorized(book, chapter, verse) {
+            console.log(`Toggle memorizar: ${book} ${chapter}:${verse}`);
+            
+            try {
+                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+                if (!verseElement) {
+                    console.error('No se encontró el elemento del versículo para memorizar');
+                    return false;
+                }
+                
+                // Buscar si el versículo ya está memorizado
+                const memorizedIndex = memorizedVerses.findIndex(item => 
+                    item.book === book && 
+                    item.chapter === parseInt(chapter) && 
+                    item.verse === parseInt(verse)
+                );
+                
+                let isNowMemorized = false;
+                
+                if (memorizedIndex >= 0) {
+                    // Si ya está memorizado, quitarlo
+                    memorizedVerses.splice(memorizedIndex, 1);
+                    verseElement.classList.remove('memorized');
+                    console.log('Versículo desmarcado como memorizado');
+                } else {
+                    // Si no está memorizado, añadirlo
+                    memorizedVerses.push({
+                        book,
+                        chapter: parseInt(chapter),
+                        verse: parseInt(verse),
+                        text: verseElement.querySelector('.verse-text').textContent
+                    });
+                    verseElement.classList.add('memorized');
+                    isNowMemorized = true;
+                    console.log('Versículo marcado como memorizado');
+                }
+                
+                // Guardar cambios en localStorage
+                saveMemorizedVerses();
+                return isNowMemorized;
+            } catch (error) {
+                console.error('Error al marcar/desmarcar versículo como memorizado:', error);
+                return false;
+            }
+        }
+        
+        // FUNCIONES PARA COMENTARIOS DE VERSÍCULOS
+        // Cargar comentarios desde localStorage
+        function loadVerseComments() {
+            const savedComments = localStorage.getItem('verseComments');
+            if (savedComments) {
+                try {
+                    verseComments = JSON.parse(savedComments);
+                } catch (e) {
+                    console.error('Error al cargar comentarios:', e);
+                    verseComments = [];
+                }
+            }
+        }
+        
+        // Guardar comentarios en localStorage
+        function saveVerseComments() {
+            localStorage.setItem('verseComments', JSON.stringify(verseComments));
+        }
+        
+        // Verificar si un versículo tiene comentario
+        function hasVerseComment(book, chapter, verse) {
+            return verseComments.some(comment => 
+                comment.book === book && 
+                comment.chapter === parseInt(chapter) && 
+                comment.verse === parseInt(verse)
+            );
+        }
+        
+        // Obtener el comentario de un versículo
+        function getVerseComment(book, chapter, verse) {
+            const comment = verseComments.find(item => 
+                item.book === book && 
+                item.chapter === parseInt(chapter) && 
+                item.verse === parseInt(verse)
+            );
+            return comment ? comment.text : '';
+        }
+        
+        // Guardar o actualizar comentario para un versículo
+        function saveComment(book, chapter, verse, commentText) {
+            console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
+            
+            try {
+                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+                if (!verseElement) {
+                    console.error('No se encontró el elemento del versículo');
+                    return;
+                }
+                
+                // Buscar si ya existe un comentario
+                const commentIndex = verseComments.findIndex(item => 
+                    item.book === book && 
+                    item.chapter === parseInt(chapter) && 
+                    item.verse === parseInt(verse)
+                );
+                
+                if (commentText.trim() === '') {
+                    // Si el comentario está vacío y existe, eliminarlo
+                    if (commentIndex >= 0) {
+                        verseComments.splice(commentIndex, 1);
+                        verseElement.classList.remove('commented');
+                    }
+                } else {
+                    // Guardar o actualizar comentario
+                    if (commentIndex >= 0) {
+                        verseComments[commentIndex].text = commentText;
+                    } else {
+                        verseComments.push({
+                            book,
+                            chapter: parseInt(chapter),
+                            verse: parseInt(verse),
+                            text: commentText
+                        });
+                        verseElement.classList.add('commented');
+                    }
+                }
+                
+                // Guardar cambios en localStorage
+                saveVerseComments();
+                console.log('Comentario guardado correctamente');
+            } catch (error) {
+                console.error('Error al guardar comentario:', error);
+            }
+        }
+        
+        // Manejar acciones del menú contextual
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                toggleBookmark(book, chapter, verse);
+                document.getElementById('verse-menu').style.display = 'none';
+            }
+        });
+        
+        // Manejar acción de memorizar versículo
+        document.getElementById('menu-toggle-memorized').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                toggleMemorized(book, chapter, verse);
+                document.getElementById('verse-menu').style.display = 'none';
+            }
+        });
+        
+        // Manejar acción de comentar versículo
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (contextMenuVerse) {
+                const book = contextMenuVerse.dataset.book;
+                const chapter = contextMenuVerse.dataset.chapter;
+                const verse = contextMenuVerse.dataset.verse;
+                
+                // Cargar comentario existente si hay uno
+                const existingComment = getVerseComment(book, chapter, verse);
+                document.getElementById('comment-text').value = existingComment;
+                
+                // Mostrar modal de comentario
+                document.getElementById('comment-modal').style.display = 'block';
+                document.getElementById('verse-menu').style.display = 'none';
+                
+                // Guardar referencia al versículo actual para el guardado
+                document.getElementById('comment-text').dataset.book = book;
+                document.getElementById('comment-text').dataset.chapter = chapter;
+                document.getElementById('comment-text').dataset.verse = verse;
+            }
+        });
+        
+        // Botón cancelar comentario
+        document.getElementById('cancel-comment').addEventListener('click', function() {
+            console.log('Botón cancelar comentario clickeado');
+            document.getElementById('comment-modal').style.display = 'none';
+        });
+        
+        // Botón guardar comentario
+        document.getElementById('save-comment').addEventListener('click', function() {
+            console.log('Botón guardar comentario clickeado');
+            
+            try {
+                const commentText = document.getElementById('comment-text');
+                const book = commentText.dataset.book;
+                const chapter = commentText.dataset.chapter;
+                const verse = commentText.dataset.verse;
+                
+                if (!book || !chapter || !verse) {
+                    console.error('Faltan datos del versículo para guardar el comentario');
+                    return;
+                }
+                
+                console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
+                saveComment(book, chapter, verse, commentText.value);
+                
+                // Cerrar el modal explícitamente
+                const commentModal = document.getElementById('comment-modal');
+                commentModal.style.display = 'none';
+                
+                // Recargar el capítulo actual para reflejar los cambios
+                loadChapter();
+            } catch (error) {
+                console.error('Error al guardar comentario:', error);
+                alert('Hubo un error al guardar el comentario. Por favor intenta de nuevo.');
+            }
+        });
+        
+        // Función para aplicar eventos a los versículos
+        function applyVerseContextMenu() {
+            document.querySelectorAll('.verse').forEach(verse => {
+                // Eliminar eventos previos para evitar duplicados
+                verse.removeEventListener('contextmenu', handleContextMenu);
+                verse.removeEventListener('touchstart', handleTouchStart);
+                verse.removeEventListener('touchend', handleTouchEnd);
+                verse.removeEventListener('touchmove', handleTouchMove);
+                
+                // Clic derecho para computadoras
+                verse.addEventListener('contextmenu', handleContextMenu);
+                
+                // Mantener clic largo para móviles
+                verse.addEventListener('touchstart', handleTouchStart);
+                verse.addEventListener('touchend', handleTouchEnd);
+                verse.addEventListener('touchmove', handleTouchMove);
+            });
+        }
+        
+        // Variables para el clic largo
+        let longPressTimer;
+        
+        // Funciones para manejar eventos táctiles
+        function handleContextMenu(e) {
+            e.preventDefault();
+            showVerseMenu(this, e);
+        }
+        
+        function handleTouchStart(e) {
+            const verse = this;
+            longPressTimer = setTimeout(() => {
+                showVerseMenu(verse, e.touches[0]);
+            }, 500);
+        }
+        
+        function handleTouchEnd() {
+            clearTimeout(longPressTimer);
+        }
+        
+        function handleTouchMove() {
+            clearTimeout(longPressTimer);
+        }
+        
+        // Iniciar la aplicación (OLD - REMOVED)
+        /* async function init() {
+            console.log('Iniciando aplicación...');
+            
+            // Establecer la versión inicial como Reina-Valera 1960
+            currentVersion = 'rv1960';
+            document.getElementById('version-selector').value = currentVersion;
+            
+            // Cargar los versículos marcados, memorizados y comentarios desde localStorage
+            loadBookmarkedVerses();
+            loadMemorizedVerses();
+            loadVerseComments();
+            
+            // Configurar eventos para mostrar/ocultar menús
+            setupMenuBehavior();
+            
+            try {
+                // Cargar la biblia de forma explícita
+                await loadBible(currentVersion);
+                
+                // Configurar el selector de libros
+                setupBookSelector();
+                
+                // Si no hay parámetros en la URL, cargar Génesis capítulo 1 por defecto
+                if (!window.location.search) {
+                    currentBook = 'Génesis';
+                    currentChapter = 1;
+                    currentVerse = 0;
+                    
+                    // Seleccionar Génesis en el selector
+                    if (document.getElementById('book-select')) {
+                        document.getElementById('book-select').value = currentBook;
+                    }
+                    
+                    // Cargar capítulo 1 directamente
+                    loadChapters();
+                    loadChapter();
+                    updateControls();
+                    updateURL();
+                } else {
+                    // Si hay parámetros en la URL, cargar según esos parámetros
+                    loadFromUrl();
+                }
+            } catch (error) {
+                console.error('Error al inicializar:', error);
+                document.getElementById('verses').innerHTML = `<div class="error">Error al inicializar: ${error.message}</div>`;
+            }
+            
+            console.log('Aplicación iniciada correctamente');
+        } */
+        
+        // Configurar comportamiento de menús superior e inferior
+        function setupMenuBehavior() {
+            // Variables para controlar la visibilidad de los menús
+            let lastScrollTop = 0;
+            const controlsElement = document.getElementById('controls');
+            const navigationBottom = document.getElementById('navigation-bottom');
+            
+            // Función para manejar el scroll y mostrar/ocultar menús
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Si se desplaza hacia abajo, ocultar menús
+                if (scrollTop > lastScrollTop && scrollTop > 50) {
+                    controlsElement.classList.add('hidden');
+                    navigationBottom.classList.add('hidden');
+                } 
+                // Si se desplaza hacia arriba, mostrar menús
+                else if (scrollTop < lastScrollTop) {
+                    controlsElement.classList.remove('hidden');
+                    navigationBottom.classList.remove('hidden');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // Asegurar que ambos menús estén visibles al inicio
+            controlsElement.classList.remove('hidden');
+            navigationBottom.classList.remove('hidden');
+        }
+
+        // init(); // OLD - REMOVED
+
+        // Deshabilitado Service Worker para evitar caché en lectura.html
+        // if('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('service-worker.js');
+        // }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Load saved font size
+        const savedSize = localStorage.getItem('verseFontSize');
+        if (savedSize) document.documentElement.style.setProperty('--verse-font-size', savedSize + 'em');
+
+        // Adjust font size globally
+        function adjustFontSize(delta) {
+            const root = document.documentElement;
+            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size')) || 1.1;
+            const newSize = Math.min(Math.max(current + delta, 0.6), 3);
+            root.style.setProperty('--verse-font-size', newSize + 'em');
+            localStorage.setItem('verseFontSize', newSize);
+        }
+    </script>
+    <script>
+        // Toggle extra controls
+        const menuToggle = document.getElementById('main-menu-toggle');
+        const extraControls = document.getElementById('extra-controls');
+        if (menuToggle && extraControls) {
+            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        
+        // Array para almacenar los versículos marcados
+        let bookmarkedVerses = [];
+        
+        // Cargar versículos marcados desde localStorage al iniciar
+        function loadBookmarkedVerses() {
+            const savedBookmarks = localStorage.getItem('bookmarkedVerses');
+            if (savedBookmarks) {
+                try {
+                    bookmarkedVerses = JSON.parse(savedBookmarks);
+                } catch (e) {
+                    console.error('Error al cargar versículos marcados:', e);
+                    bookmarkedVerses = [];
+                }
+            }
+        }
+        
+        // Guardar versículos marcados en localStorage
+        function saveBookmarkedVerses() {
+            localStorage.setItem('bookmarkedVerses', JSON.stringify(bookmarkedVerses));
+        }
+        
+        // Verificar si un versículo está marcado
+        function isVerseBookmarked(book, chapter, verse) {
+            return bookmarkedVerses.some(bookmark => 
+                bookmark.book === book && 
+                bookmark.chapter === parseInt(chapter) && 
+                bookmark.verse === parseInt(verse)
+            );
+        }
+        
+        // Marcar o desmarcar un versículo
+        function toggleBookmark(book, chapter, verse) {
+            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
+            if (!verseElement) return;
+            
+            // Buscar si el versículo ya está marcado
+            const bookmarkIndex = bookmarkedVerses.findIndex(bookmark => 
+                bookmark.book === book && 
+                bookmark.chapter === parseInt(chapter) && 
+                bookmark.verse === parseInt(verse)
+            );
+            
+            if (bookmarkIndex >= 0) {
+                // Si ya está marcado, quitarlo
+                bookmarkedVerses.splice(bookmarkIndex, 1);
+                verseElement.classList.remove('bookmarked');
+            } else {
+                // Si no está marcado, añadirlo
+                bookmarkedVerses.push({
+                    book,
+                    chapter: parseInt(chapter),
+                    verse: parseInt(verse),
+                    text: verseElement.querySelector('.verse-text').textContent
+                });
+                verseElement.classList.add('bookmarked');
+            }
+            
+            // Guardar cambios en localStorage
+            saveBookmarkedVerses();
+            return bookmarkIndex < 0; // Devuelve true si ahora está marcado, false si se ha desmarcado
+        }
+        
+        // Función para resaltar un versículo al hacer clic en él
+        function highlightVerse(verseElement) {
+            // Eliminar la clase highlighted de todos los versículos
+            document.querySelectorAll('.verse.highlighted').forEach(el => el.classList.remove('highlighted'));
+            
+            // Añadir la clase highlighted al versículo actual
+            verseElement.classList.add('highlighted');
+            
+            // Actualizar el versículo actual
+            currentVerse = parseInt(verseElement.dataset.verse);
+            
+            // Actualizar la URL sin recargar la página
+            updateURL();
+        }
+        // Toggle side menu
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn && sideMenu) {
+            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        }
+        // Cerrar menú lateral al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+        // Agregar listener al item de capítulos
+        const chapterMenuToggle = document.getElementById('chapter-menu-toggle');
+        if (chapterMenuToggle) chapterMenuToggle.addEventListener('click', () => {
+            showChapterGrid();
+            sideMenu.classList.remove('active');
+        });
+    </script>
+    
+    <script>
+        // Chapter & verse grid selection
+        function showChapterGrid() {
+            const grid = document.getElementById('chapter-grid');
+            
+            try {
+                const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+                const chapterButtons = Array.from(chapters).map((_, i) =>
+                    `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
+                ).join('');
+                
+                grid.innerHTML = `<div class="grid-content">
+                    <div class="grid-header">
+                        <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
+                    </div>
+                    ${chapterButtons}
+                </div>`;
+                grid.classList.add('active');
+            } catch (error) {
+                console.error('Error al mostrar la cuadrícula de capítulos:', error);
+            }
+        }
+        function showVerseGrid() {
+            const grid = document.getElementById('verse-grid');
+            
+            try {
+                const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapterElement) {
+                    console.error('No se encontró el capítulo:', currentBook, currentChapter);
+                    return;
+                }
+                
+                const verses = chapterElement.getElementsByTagName('v');
+                const buttons = Array.from(verses)
+                    .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
+                    .join('');
+                    
+                grid.innerHTML = `<div class="grid-content">
+                    <div class="grid-header">
+                        <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
+                    </div>
+                    ${buttons}
+                </div>`;
+                grid.classList.add('active');
+            } catch (error) {
+                console.error('Error al mostrar la cuadrícula de versículos:', error);
+            }
+        }
+        // Handle chapter button click
+        document.getElementById('chapter-grid').addEventListener('click', e => {
+            const chap = e.target.dataset.chap;
+            if (!chap) return;
+            currentChapter = parseInt(chap, 10);
+            document.getElementById('chapter-grid').classList.remove('active');
+            loadChapter(); // Cargar el capítulo inmediatamente
+            updateControls();
+            updateURL();
+            // Ahora mostrar la cuadrícula de versículos
+            setTimeout(() => {
+                showVerseGrid();
+            }, 100);
+        });
+        // Handle verse button click
+        document.getElementById('verse-grid').addEventListener('click', e => {
+            if (!e.target.dataset.verse) return;
+            currentVerse = parseInt(e.target.dataset.verse);
+            document.getElementById('verse-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+        });
+        // Close modal grids
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('close-grid')) {
+                document.getElementById(e.target.dataset.target).classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        // Bind botón 'Capítulo' inferior al grid principal
+        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
+        
+        // Verificar que el botón de capítulo actual funcione correctamente
+        document.getElementById('current-chapter-button').addEventListener('click', showChapterGrid);
+    </script>
+    <script>
+        // Populate verse-select with verses of current chapter
+        function populateVerseSelect() {
+            const verseSelect = document.getElementById('verse-select');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            verseSelect.innerHTML = '<option value="" disabled selected>Selecciona un versículo</option>';
+            Array.from(verses).forEach(v => {
+                const num = v.getAttribute('n');
+                const opt = document.createElement('option');
+                opt.value = num;
+                opt.textContent = 'Versículo ' + num;
+                verseSelect.appendChild(opt);
+            });
+            verseSelect.disabled = false;
+        }
+        // Handle verse selection
+        const verseSelectElement = document.getElementById('verse-select');
+        if (verseSelectElement) {
+            verseSelectElement.addEventListener('change', (e) => {
+                currentVerse = parseInt(e.target.value);
+                loadChapter();
+                updateControls();
+                updateURL();
+            });
+        }
+    </script>
+    <!-- Listener setups below will be moved to setupGlobalEventListeners -->
+    <script>
+        // Obtiene los temas directamente del XML
+        function getOutlines(book, chapter) {
+            const nodes = xmlDoc.querySelectorAll(`b[n="${book}"] c[n="${chapter}"] o`);
+            return Array.from(nodes).map(o => ({
+                title: o.getAttribute('title'),
+                start: parseInt(o.getAttribute('start'), 10),
+                end: parseInt(o.getAttribute('end'), 10)
+            }));
+        }
+
+        // Muestra modal de temas
+        function showOutlineGrid() {
+            const grid = document.getElementById('outline-grid');
+            const outlines = getOutlines(currentBook, currentChapter);
+            const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
+            if (outlines.length === 0) {
+                grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
+            } else {
+                const buttons = outlines.map(o =>
+                    `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
+                ).join('');
+                grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            }
+            grid.classList.add('active');
+        }
+        // Maneja selección de tema
+        document.getElementById('outline-grid').addEventListener('click', e => {
+            if (!e.target.dataset.start) return;
+            const start = parseInt(e.target.dataset.start, 10);
+            currentVerse = start;
+            document.getElementById('outline-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+            setTimeout(() => {
+                const el = document.querySelector(`.verse[data-verse="${start}"]`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        });
+        // Listener Botón Temas
+        // MOVED: document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+    </script>
+    <script>
+        // Annotate strong numbers
+        function annotateStrongNumbers() {
+            const verseEls = document.querySelectorAll('.verse-text');
+            const wordMap = {};
+            for (const code in strongsData) {
+                const entry = strongsData[code];
+                wordMap[entry.word.toLowerCase()] = code;
+            }
+            verseEls.forEach(el => {
+                el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
+                    const code = wordMap[match.toLowerCase()];
+                    return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+                });
+            });
+        }
+        document.body.addEventListener('click', e => {
+            const sw = e.target.closest('.strong-word');
+            if (!sw) return;
+            const info = strongsData[sw.dataset.strong];
+            if (!info) return;
+            document.getElementById('strongs-content').innerHTML = '<strong>' + info.word + ' (' + sw.dataset.strong + ')</strong><br>' +
+                'Translit: ' + info.translit + '<br>' +
+                'Def: ' + info.meaning;
+            document.getElementById('strongs-backdrop').style.display = 'block';
+            document.getElementById('strongs-modal').style.display = 'block';
+        });
+        const origLoadChapter = window.loadChapter;
+        window.loadChapter = async function() {
+            await origLoadChapter();
+            annotateStrongNumbers();
+            applySavedStates();
+        };
+        // MOVED: document.getElementById('strongs-close').addEventListener('click', () => { ... }); // Listener for strongs-close was here
+        // Reaplicar marcas guardadas: marcados, comentarios y memorizados
+        function applySavedStates() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            document.querySelectorAll('#verses .verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bookmarks.includes(key)) v.classList.add('bookmarked');
+                if (comments[key]) v.classList.add('comment');
+                if (memorized.includes(key)) v.classList.add('memorized');
+            });
+        }
+        // Aplicar anotaciones y estados guardados al cargar la página (REDUNDANT & REMOVED)
+        /* window.addEventListener('load', () => {
+            annotateStrongNumbers();
+            applySavedStates();
+        }); */
+    </script>
+    <script>
+        // Funcionalidad de búsqueda de palabras exactas (Variables and Listeners are now primarily in setupGlobalEventListeners)
+        // Global declarations removed as they are now handled in setupGlobalEventListeners
+        
+        // Función para escapar caracteres especiales en expresiones regulares
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Referencias a closeSearchButton y funcionalidad relacionada movida a setupGlobalEventListeners
+        
+        // Función para buscar palabra exacta en toda la Biblia
+        function searchExactWord(keyword) {
+            if (!keyword || keyword.length < 2) {
+                alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                return;
+            }
+            
+            resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
+            // Mostrar los resultados en pantalla completa
+            searchResults.style.display = 'flex';
+            
+            // Preparar palabra para búsqueda exacta (expresión regular)
+            const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
+            let results = [];
+            let totalOccurrences = 0;
+            
+            // Buscar en todos los libros y capítulos
+            const books = xmlDoc.getElementsByTagName('b');
+            for (let b = 0; b < books.length; b++) {
+                const book = books[b];
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+                
+                for (let c = 0; c < chapters.length; c++) {
+                    const chapter = chapters[c];
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+                    
+                    for (let v = 0; v < verses.length; v++) {
+                        const verse = verses[v];
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+                        
+                        // Buscar palabras exactas
+                        const matches = verseText.match(searchRegex);
+                        if (matches) {
+                            // Resaltar la palabra buscada en el texto
+                            const highlightedText = verseText.replace(
+                                searchRegex, 
+                                '<span class="search-highlight">$&</span>'
+                            );
+                            
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: highlightedText,
+                                matchCount: matches.length
+                            });
+                            
+                            totalOccurrences += matches.length;
+                        }
+                    }
+                }
+            }
+            
+            // Mostrar resultados
+            if (results.length === 0) {
+                searchCount.textContent = '(0)';
+                resultsContent.innerHTML = `<div class="no-results">No se encontraron resultados para "${keyword}"</div>`;
+            } else {
+                searchCount.textContent = `(${results.length} versículos, ${totalOccurrences} ocurrencias)`;
+                
+                const html = results.map(result => {
+                    return `
+                        <div class="result-item">
+                            <div class="result-reference" onclick="loadReference('${result.book}', ${result.chapter}, ${result.verse})">
+                                <strong>${result.book} ${result.chapter}:${result.verse}</strong>
+                            </div>
+                            <div class="result-text">${result.text}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Forzar al contenedor a usar el ancho completo
+                searchResults.style.width = '100%';
+                searchResults.style.maxWidth = '100%';
+                searchResults.style.left = '0';
+                searchResults.style.right = '0';
+                
+                resultsContent.innerHTML = html;
+            }
+        }
+        
+        // Función para cargar una referencia bíblica (libro, capítulo, versículo)
+        function loadReference(book, chapter, verse) {
+            currentBook = book;
+            currentChapter = parseInt(chapter);
+            currentVerse = parseInt(verse);
+            loadChapter();
+            updateControls();
+            updateURL();
+            
+            // Cerrar la ventana de resultados (si existe)
+            if (document.getElementById('search-results')) {
+                document.getElementById('search-results').style.display = 'none';
+            }
+        }
+    </script>
+    <script>
+        // Menú contextual al hacer doble clic en versículo
+        // Global declarations for verseContainer and verseMenu removed as they are now handled in setupGlobalEventListeners
+        let activeVerseEl = null; // This global state variable remains
+        document.addEventListener('click', e => {
+            const menu = document.getElementById('verse-menu');
+            if (menu && !e.target.closest('#verse-menu')) {
+                menu.style.display = 'none';
+            }
+        });
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('bookmarked');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            if (activeVerseEl.classList.contains('bookmarked')) {
+                if (!bookmarks.includes(key)) bookmarks.push(key);
+            } else {
+                bookmarks = bookmarks.filter(k => k !== key);
+            }
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const existingComment = comments[key];
+            
+            // Actualizar el título del modal según si es nuevo comentario o edición
+            document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+            
+            // Si ya existe un comentario, cargarlo en el textarea
+            document.getElementById('modal-comment-input').value = existingComment || '';
+            
+            // Mostrar u ocultar el botón de borrar según corresponda
+            document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
+            
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            const comment = document.getElementById('modal-comment-input').value.trim();
+            if (comment) {
+                activeVerseEl.classList.add('comment');
+                activeVerseEl.dataset.comment = comment;
+                const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                comments[key] = comment;
+                localStorage.setItem('comments', JSON.stringify(comments));
+            }
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        
+        // Añadir manejador para el botón de borrar comentario
+        document.getElementById('modal-delete-btn').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            
+            // Eliminar el comentario del localStorage
+            delete comments[key];
+            localStorage.setItem('comments', JSON.stringify(comments));
+            
+            // Quitar la clase 'comment' del versículo
+            activeVerseEl.classList.remove('comment');
+            
+            // Cerrar el modal
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        /*
+        // MOVED: document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('memorized');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            if (activeVerseEl.classList.contains('memorized')) {
+                if (!memorized.includes(key)) memorized.push(key);
+            } else {
+                memorized = memorized.filter(k => k !== key);
+            }
+            localStorage.setItem('memorized', JSON.stringify(memorized));
+            verseMenu.style.display = 'none';
+        });
+        */
+        // END OF MOVED VERSE MENU LISTENERS
+        // The following function was previously block-commented for debugging
+        function setupGlobalEventListeners() {
+            console.log('[Init] Setting up global event listeners...');
+
+            // Listener Botón Temas & Outline Grid (original lines 2034-2046) - COMMENTED OUT FOR DEBUGGING LINT
+            /* if (document.getElementById('outline-button')) {
+                document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+            }
+            if (document.getElementById('outline-grid')) {
+                 document.getElementById('outline-grid').addEventListener('click', e => {
+                    if (!e.target.dataset.start) return;
+                    const start = parseInt(e.target.dataset.start, 10);
+                    currentVerse = start;
+                    document.getElementById('outline-grid').classList.remove('active');
+                    loadChapter(); updateControls(); updateURL();
+                    setTimeout(() => {
+                        const el = document.querySelector(`.verse[data-verse="${start}"]`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                });
+            } */
+
+            // Listener Strong's Modal Close (original line 2075)
+            if (document.getElementById('strongs-close')) {
+                document.getElementById('strongs-close').addEventListener('click', () => {
+                    if (document.getElementById('strongs-backdrop')) document.getElementById('strongs-backdrop').style.display = 'none';
+                    if (document.getElementById('strongs-modal')) document.getElementById('strongs-modal').style.display = 'none';
+                });
+            }
+
+            // Funcionalidad de búsqueda de palabras exactas (original lines 2105-2157)
+            const searchButton = document.getElementById('search-button');
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            // const resultsContent = document.getElementById('results-content'); // Defined globally for searchExactWord
+            const closeSearchButton = document.getElementById('close-search');
+            // const searchCount = document.getElementById('search-count'); // Defined globally for searchExactWord
+
+            if (searchButton) {
+                searchButton.addEventListener('click', function() {
+                    if (searchInput.style.display === 'none') {
+                        searchInput.style.display = 'block';
+                        searchInput.focus();
+                        return;
+                    }
+                    const query = searchInput.value.trim();
+                    if (query.length >= 2) {
+                        searchExactWord(query);
+                    } else if (query) {
+                        alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                    }
+                });
+            }
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const query = this.value.trim();
+                        if (query.length >= 2) {
+                            searchExactWord(query);
+                        } else if (query) {
+                            alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                        }
+                    }
+                });
+            }
+            if (closeSearchButton) {
+                closeSearchButton.addEventListener('click', function() {
+                    if(searchResults) searchResults.style.display = 'none';
+                    if(document.getElementById('search-backdrop')) document.getElementById('search-backdrop').style.display = 'none';
+                });
+            }
+            if (document.getElementById('search-backdrop')) {
+                document.getElementById('search-backdrop').addEventListener('click', function() {
+                    if(searchResults) searchResults.style.display = 'none';
+                    this.style.display = 'none';
+                });
+            }
+
+            // Menú contextual al hacer doble clic en versículo (original lines 2258-2368)
+            const verseContainer = document.getElementById('verses');
+            const verseMenu = document.getElementById('verse-menu');
+            // activeVerseEl is a global variable
+            if (verseContainer) {
+                verseContainer.addEventListener('dblclick', e => {
+                    activeVerseEl = e.target.closest('.verse');
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    const hasComment = comments[key];
+                    if(document.getElementById('menu-add-comment')) {
+                       document.getElementById('menu-add-comment').textContent = hasComment ? 'Ver/Editar comentario' : 'Agregar comentario';
+                    }
+                    const rect = activeVerseEl.getBoundingClientRect();
+                    verseMenu.style.display = 'block';
+                    verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
+                    verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
+                });
+            }
+            // The document click listener for closing the menu is fine globally
+            if (document.getElementById('menu-toggle-bookmark')) {
+                document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    activeVerseEl.classList.toggle('bookmarked');
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                    if (activeVerseEl.classList.contains('bookmarked')) {
+                        if (!bookmarks.includes(key)) bookmarks.push(key);
+                    } else {
+                        bookmarks = bookmarks.filter(k => k !== key);
+                    }
+                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('menu-add-comment')) {
+                document.getElementById('menu-add-comment').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    const existingComment = comments[key];
+                    if(document.getElementById('comment-modal-title')) document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = existingComment || '';
+                    if(document.getElementById('modal-delete-btn')) document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'block';
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'block';
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('modal-save-btn')) {
+                document.getElementById('modal-save-btn').addEventListener('click', () => {
+                    const comment = document.getElementById('modal-comment-input').value.trim();
+                    if (comment && activeVerseEl) {
+                        activeVerseEl.classList.add('comment');
+                        activeVerseEl.dataset.comment = comment;
+                        const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                        const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                        comments[key] = comment;
+                        localStorage.setItem('comments', JSON.stringify(comments));
+                    }
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('modal-cancel-btn')) {
+                document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('modal-delete-btn')) {
+                document.getElementById('modal-delete-btn').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                    delete comments[key];
+                    localStorage.setItem('comments', JSON.stringify(comments));
+                    activeVerseEl.classList.remove('comment');
+                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
+                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
+                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
+                });
+            }
+            if (document.getElementById('menu-memorize-verse')) {
+                 document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    activeVerseEl.classList.toggle('memorized');
+                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                    let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+                    if (activeVerseEl.classList.contains('memorized')) {
+                        if (!memorized.includes(key)) memorized.push(key);
+                    } else {
+                        memorized = memorized.filter(k => k !== key);
+                    }
+                    localStorage.setItem('memorized', JSON.stringify(memorized));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+             // Event listeners for menu-copy-verse and menu-share-verse would go here if found/needed
+            if (document.getElementById('menu-copy-verse')) {
+                document.getElementById('menu-copy-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const text = activeVerseEl.querySelector('.verse-text').textContent;
+                    navigator.clipboard.writeText(`${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse} - ${text}`)
+                        .then(() => alert('Versículo copiado!'))
+                        .catch(err => console.error('Error al copiar:', err));
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+            if (document.getElementById('menu-share-verse')) {
+                document.getElementById('menu-share-verse').addEventListener('click', () => {
+                    if (!activeVerseEl) return;
+                    const text = activeVerseEl.querySelector('.verse-text').textContent;
+                    const shareData = {
+                        title: `Versículo de la Biblia: ${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse}`,
+                        text: `${text} (${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse})`,
+                        url: window.location.href // Puede ser más específico si se desea
+                    };
+                    if (navigator.share) {
+                        navigator.share(shareData).catch(err => console.error('Error al compartir:', err));
+                    }
+                    if(verseMenu) verseMenu.style.display = 'none';
+                });
+            }
+
+            console.log('[Init] Global event listeners set up.');
+        } // End of function that was previously block-commented for debugging
+
+        // Function to initialize the page and load content based on URL or defaults
+        async function initializeApp() {
+            try {
+                console.log("[Init] Iniciando carga de la Biblia...");
+                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia Reina-Valera 1960...</div>';
+                
+                // Obtener parámetros de la URL
+                const params = new URLSearchParams(window.location.search);
+                const urlVersion = params.get('version');
+                const urlBook = params.get('book') || 'Génesis'; // Valor por defecto si no hay libro
+                const urlChapter = parseInt(params.get('chapter')) || 1; // Valor por defecto: capítulo 1
+                const urlVerse = parseInt(params.get('verse')) || 1; // Valor por defecto: versículo 1
+
+                // Versión predeterminada: Reina Valera 1960
+                const versionToLoad = 'rvr1960'; // Siempre cargar RVR1960 por defecto
+                
+                // Establecer la versión en el selector
+                const versionSelector = document.getElementById('version-selector');
+                if (versionSelector) {
+                    versionSelector.value = versionToLoad;
+                }
+
+                console.log(`[Init] Cargando versión: ${versionToLoad}`);
+                
+                // Cargar el archivo XML de la Biblia
+                await loadBible(versionToLoad);
+
+                // Verificar que el XML se cargó correctamente
+                if (!xmlDoc) {
+                    throw new Error("No se pudo cargar el documento XML de la Biblia");
+                }
+                
+                console.log("[Init] ¡XML de la Biblia cargado correctamente!");
+                
+                // Configurar libros y capítulos
+                setupBookSelector();
+                
+                // Establecer libro, capítulo y versículo
+                currentBook = urlBook;
+                currentChapter = urlChapter;
+                currentVerse = urlVerse;
+                
+                console.log(`[Init] Libro: ${currentBook}, Capítulo: ${currentChapter}, Versículo: ${currentVerse}`);
+                
+                // Actualizar selectores
+                const bookSelect = document.getElementById('book-select');
+                if (bookSelect) {
+                    bookSelect.value = currentBook;
+                    
+                    // Disparar evento change para cargar capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                }
+                
+                // Cargar capítulos y actualizar selector
+                await loadChapters(); 
+                console.log(`[Init] Capítulos cargados. Capítulo actual: ${currentChapter}`);
+                
+                // Cargar el contenido del capítulo actual
+                await loadChapter();  
+                console.log(`[Init] Contenido del capítulo cargado exitosamente.`);
+                
+                // Actualizar navegación y URL
+                updateControls(); 
+                updateURL();      
+                
+                // Configurar comportamientos
+                setupMenuBehavior();
+                setupGlobalEventListeners();
+                
+                console.log("[Init] ¡Inicialización completa! La Biblia debería estar visible.");
+                
+            } catch (error) {
+                console.error("[Init] Error durante la inicialización:", error);
+                document.getElementById('verses').innerHTML = 
+                    `<div class="error">
+                        <p>Error al cargar la Biblia: ${error.message}</p>
+                        <p>Por favor, recarga la página o verifica tu conexión a internet.</p>
+                    </div>`;
+            }
+        }
+
+        // Event listener for when the DOM is fully loaded
+        window.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+</body>
+</html>

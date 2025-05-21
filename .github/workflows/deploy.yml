@@ -1,0 +1,23 @@
+name: Deploy to GitHub Pages
+permissions:
+  contents: write  # allow actions to push code
+  pages: write     # allow actions to publish Pages
+  id-token: write  # for any OIDC needs
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # ensure token is available for push
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs
+          publish_branch: gh-pages
