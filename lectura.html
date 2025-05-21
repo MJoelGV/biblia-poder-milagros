@@ -1146,12 +1146,7 @@
                              data-chapter="${currentChapter}"
                              onclick="highlightVerse(this)">
                             <span class="verse-number">${verseNum}</span>
-                            <span class="verse-text">${
-                                Array.from(verse.childNodes)
-                                .filter(node => node.nodeType === 3 || node.nodeName === 'w')
-                                .map(node => node.nodeType === 3 ? node.nodeValue.trim() : node.textContent.trim())
-                                .join('').trim()
-                            }</span>
+                            <span class="verse-text">${verse.textContent}</span>
                         </div>
                     `;
                 }).join('');
@@ -1540,11 +1535,33 @@
             document.getElementById('comment-modal').style.display = 'none';
         });
         
-        // Aplicar evento de clic derecho a todos los versículos
+        // Variables para detectar doble clic/toque
+        let lastClickTime = 0;
+        let lastClickedVerse = null;
+        
+        // Aplicar eventos a los versículos (doble clic y clic derecho)
         function applyVerseContextMenu() {
             document.querySelectorAll('.verse').forEach(verse => {
+                // Mantener clic derecho para computadoras
                 verse.addEventListener('contextmenu', (e) => {
                     showVerseMenu(verse, e);
+                });
+                
+                // Agregar soporte para doble clic/toque para móviles
+                verse.addEventListener('click', (e) => {
+                    const currentTime = new Date().getTime();
+                    const clickTimeDiff = currentTime - lastClickTime;
+                    
+                    // Si es doble clic (menos de 300ms entre clics en el mismo verso)
+                    if (clickTimeDiff < 300 && verse === lastClickedVerse) {
+                        // Es un doble clic, mostrar menú
+                        e.preventDefault(); // Prevenir highlight del verso
+                        showVerseMenu(verse, e);
+                    } else {
+                        // Es un clic simple, actualizar referencia para el próximo clic
+                        lastClickTime = currentTime;
+                        lastClickedVerse = verse;
+                    }
                 });
             });
         }
