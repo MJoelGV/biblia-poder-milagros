@@ -1237,7 +1237,7 @@
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
-                const url = `biblia-files/${version}.xmm`;
+                const url = `../biblia-files/${version}.xmm`; // Ajustado para subir un nivel desde docs/
                 console.log('[BIBLIA] Intentando cargar:', url);
                 
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
