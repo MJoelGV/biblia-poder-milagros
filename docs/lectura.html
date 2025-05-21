@@ -524,6 +524,7 @@
             z-index: 2000;
             display: none;
             width: 100%;
+            max-width: 100vw;
             box-sizing: border-box;
         }
         
@@ -1423,12 +1424,19 @@
             if (results.length > 0) {
                 searchCountSpan.textContent = `(${totalOccurrences} ${totalOccurrences === 1 ? 'ocurrencia' : 'ocurrencias'} en ${results.length} ${results.length === 1 ? 'versículo' : 'versículos'})`;
                 
-                resultsContent.innerHTML = results.map(result => `
+                // Limpiar y reconfigurar el contenedor de resultados
+                searchResults.style.width = '100%';
+                searchResults.style.maxWidth = '100%';
+                searchResults.style.left = '0';
+                
+                // Generar HTML de resultados con estilo mejorado
+                resultsContent.innerHTML = '<div class="search-results-container">' + 
+                    results.map(result => `
                     <div class="search-result-item" data-book="${result.book}" data-chapter="${result.chapter}" data-verse="${result.verse}">
                         <div class="search-result-reference">${result.book} ${result.chapter}:${result.verse}</div>
                         <div class="search-result-text">${result.text}</div>
                     </div>
-                `).join('');
+                `).join('') + '</div>';
                 
                 // Agregar evento clic a los resultados
                 document.querySelectorAll('.search-result-item').forEach(item => {
