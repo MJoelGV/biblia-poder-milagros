@@ -636,7 +636,10 @@
 
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
-        <button id="close-search" class="close-search">&times;</button>
+        <div class="search-results-header">
+            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+            <button id="close-search" class="close-search">&times;</button>
+        </div>
         <div id="results-content"></div>
     </div>
 
@@ -1039,7 +1042,7 @@
             sideMenu.classList.remove('active');
         });
     </script>
-    <script>
+        
         // Chapter & verse grid selection
         function showChapterGrid() {
             const grid = document.getElementById('chapter-grid');
@@ -1224,64 +1227,139 @@
         });
     </script>
     <script>
-        // Búsqueda de versículos en toda la Biblia y resaltado de término
+        // Búsqueda de versículos en toda la Biblia con resaltado y conteo de términos exactos
         const searchWrapper = document.querySelector('.search-wrapper');
         const searchButton = document.getElementById('search-button');
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
         const resultsContent = document.getElementById('results-content');
-        const closeSearchBtn = document.getElementById('close-search');
-        // Escapar texto para RegExp
-        function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\\]\\]/g, '\\\\$&'); }
-        searchButton.addEventListener('click', () => {
-            searchWrapper.classList.toggle('active');
-            if (searchWrapper.classList.contains('active')) searchInput.focus();
+        const closeSearchButton = document.getElementById('close-search');
+        const searchCountSpan = document.getElementById('search-count');
+        
+        // Ejecutar búsqueda con clic en botón
+        searchButton.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (query.length >= 2) {
+                searchExactWord(query);
+            } else if (query) {
+                searchInput.focus();
+                alert('Por favor ingresa al menos 2 caracteres para buscar.');
+            } else {
+                searchInput.focus();
+            }
         });
-        searchInput.addEventListener('keydown', e => {
+        
+        // Ejecutar búsqueda con Enter
+        searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                const rawQuery = searchInput.value.trim();
-                if (!rawQuery) return;
-                const query = rawQuery.toLowerCase();
-                resultsContent.innerHTML = '';
-                // Buscar en todo xmlDoc (toda la Biblia)
-                const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
-                const commentsObj = JSON.parse(localStorage.getItem('comments') || '{}');
-                const matches = verses.filter(v => v.textContent.toLowerCase().includes(query));
-                if (matches.length) {
-                    matches.forEach(v => {
-                        const verseNum = v.getAttribute('n');
-                        const chapterNum = v.parentNode.getAttribute('n');
-                        const bookName = v.parentNode.parentNode.getAttribute('n');
-                        const text = v.textContent;
-                        // Resaltar término
-                        const highlighted = text.replace(regex, match => `<mark>${match}</mark>`);
-                        const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.innerHTML = `<div class="result-book">${bookName} ${chapterNum}:${verseNum}</div><div class="result-text">${highlighted}</div>`;
-                        item.addEventListener('click', () => {
-                            searchResults.classList.remove('active');
-                            // Navegar a capítulo y versículo
-                            currentBook = bookName;
-                            currentChapter = parseInt(chapterNum);
-                            currentVerse = parseInt(verseNum);
-                            document.getElementById('book-select').value = currentBook;
-                            loadChapters(); loadChapter(); updateControls(); updateURL();
-                            setTimeout(() => {
-                                const el = document.querySelector(`.verse[data-verse="${currentVerse}"]`);
-                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 100);
-                        });
-                        resultsContent.appendChild(item);
-                    });
-                    searchResults.classList.add('active');
-                } else {
-                    alert('No se encontraron resultados');
+                const query = this.value.trim();
+                if (query.length >= 2) {
+                    searchExactWord(query);
+                } else if (query) {
+                    alert('Por favor ingresa al menos 2 caracteres para buscar.');
                 }
             }
         });
-        closeSearchBtn.addEventListener('click', () => {
-            searchResults.classList.remove('active');
+        
+        // Cerrar resultados
+        closeSearchButton.addEventListener('click', function() {
+            searchResults.style.display = 'none';
         });
+        
+        // Función de búsqueda de palabras exactas
+        function searchExactWord(keyword) {
+            if (!keyword || keyword.length < 2) {
+                alert('Por favor ingresa al menos 2 caracteres para buscar.');
+                return;
+            }
+            
+            resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
+            searchResults.style.display = 'block';
+            
+            // Preparar palabra para búsqueda exacta (expresión regular)
+            const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
+            let results = [];
+            let totalOccurrences = 0;
+            
+            // Buscar en todos los libros y capítulos
+            const books = xmlDoc.getElementsByTagName('b');
+            for (let b = 0; b < books.length; b++) {
+                const book = books[b];
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+                
+                for (let c = 0; c < chapters.length; c++) {
+                    const chapter = chapters[c];
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+                    
+                    for (let v = 0; v < verses.length; v++) {
+                        const verse = verses[v];
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+                        
+                        // Buscar palabras exactas
+                        const matches = verseText.match(searchRegex);
+                        if (matches) {
+                            totalOccurrences += matches.length;
+                            
+                            // Destacar la palabra buscada en el texto
+                            const highlightedText = verseText.replace(searchRegex, match => 
+                                `<span class="search-highlight">${match}</span>`
+                            );
+                            
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: highlightedText,
+                                occurrences: matches.length
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Mostrar resultados
+            if (results.length > 0) {
+                searchCountSpan.textContent = `(${totalOccurrences} ${totalOccurrences === 1 ? 'ocurrencia' : 'ocurrencias'} en ${results.length} ${results.length === 1 ? 'versículo' : 'versículos'})`;
+                
+                resultsContent.innerHTML = results.map(result => `
+                    <div class="search-result-item" data-book="${result.book}" data-chapter="${result.chapter}" data-verse="${result.verse}">
+                        <div class="search-result-reference">${result.book} ${result.chapter}:${result.verse}</div>
+                        <div class="search-result-text">${result.text}</div>
+                    </div>
+                `).join('');
+                
+                // Agregar evento clic a los resultados
+                document.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const book = this.dataset.book;
+                        const chapter = this.dataset.chapter;
+                        const verse = this.dataset.verse;
+                        
+                        // Navegar al versículo
+                        currentBook = book;
+                        currentChapter = parseInt(chapter);
+                        currentVerse = parseInt(verse);
+                        loadChapter();
+                        updateControls();
+                        updateURL();
+                        
+                        // Cerrar resultados
+                        searchResults.style.display = 'none';
+                    });
+                });
+            } else {
+                searchCountSpan.textContent = '(0 ocurrencias)';
+                resultsContent.innerHTML = '<div class="no-results">No se encontraron resultados para "' + keyword + '"</div>';
+            }
+        }
+        
+        // Función auxiliar para escapar caracteres especiales en expresiones regulares
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
     </script>
     <script>
         // Menú contextual al hacer doble clic en versículo
