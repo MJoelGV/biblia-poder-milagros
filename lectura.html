@@ -512,6 +512,50 @@
         }
 
         /* Menú lateral */
+        .search-results {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none;
+        }
+        
+        /* Estilos para los resultados de búsqueda */
+        .search-result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(76, 175, 80, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .search-result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .search-result-reference {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .search-highlight {
+            background-color: rgba(255, 193, 7, 0.5);
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 3px;
+            color: #000;
+            text-shadow: none;
+            box-shadow: 0 0 3px rgba(255, 193, 7, 0.3);
+        }
         .side-menu {
             position: fixed;
             top: 0;
@@ -1054,35 +1098,54 @@
             sideMenu.classList.remove('active');
         });
     </script>
-        
+    
+    <script>
         // Chapter & verse grid selection
         function showChapterGrid() {
             const grid = document.getElementById('chapter-grid');
-            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
-            const chapterButtons = Array.from(chapters).map((_, i) =>
-                `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
-            ).join('');
-            grid.innerHTML = `<div class="grid-content">
-                <div class="grid-header">
-                    <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
-                </div>
-                ${chapterButtons}
-            </div>`;
-            grid.classList.add('active');
+            
+            try {
+                const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+                const chapterButtons = Array.from(chapters).map((_, i) =>
+                    `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
+                ).join('');
+                
+                grid.innerHTML = `<div class="grid-content">
+                    <div class="grid-header">
+                        <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
+                    </div>
+                    ${chapterButtons}
+                </div>`;
+                grid.classList.add('active');
+            } catch (error) {
+                console.error('Error al mostrar la cuadrícula de capítulos:', error);
+            }
         }
         function showVerseGrid() {
             const grid = document.getElementById('verse-grid');
-            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
-            const buttons = Array.from(verses)
-                .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
-                .join('');
-            grid.innerHTML = `<div class="grid-content">
-                <div class="grid-header">
-                    <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
-                </div>
-                ${buttons}
-            </div>`;
-            grid.classList.add('active');
+            
+            try {
+                const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapterElement) {
+                    console.error('No se encontró el capítulo:', currentBook, currentChapter);
+                    return;
+                }
+                
+                const verses = chapterElement.getElementsByTagName('v');
+                const buttons = Array.from(verses)
+                    .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
+                    .join('');
+                    
+                grid.innerHTML = `<div class="grid-content">
+                    <div class="grid-header">
+                        <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
+                    </div>
+                    ${buttons}
+                </div>`;
+                grid.classList.add('active');
+            } catch (error) {
+                console.error('Error al mostrar la cuadrícula de versículos:', error);
+            }
         }
         // Handle chapter button click
         document.getElementById('chapter-grid').addEventListener('click', e => {
@@ -1090,8 +1153,13 @@
             if (!chap) return;
             currentChapter = parseInt(chap, 10);
             document.getElementById('chapter-grid').classList.remove('active');
+            loadChapter(); // Cargar el capítulo inmediatamente
             updateControls();
-            showVerseGrid();
+            updateURL();
+            // Ahora mostrar la cuadrícula de versículos
+            setTimeout(() => {
+                showVerseGrid();
+            }, 100);
         });
         // Handle verse button click
         document.getElementById('verse-grid').addEventListener('click', e => {
@@ -1313,11 +1381,10 @@
                         // Buscar palabras exactas
                         const matches = verseText.match(searchRegex);
                         if (matches) {
-                            totalOccurrences += matches.length;
-                            
-                            // Destacar la palabra buscada en el texto
-                            const highlightedText = verseText.replace(searchRegex, match => 
-                                `<span class="search-highlight">${match}</span>`
+                            // Resaltar la palabra buscada en el texto
+                            const highlightedText = verseText.replace(
+                                searchRegex, 
+                                '<span class="search-highlight">$&</span>'
                             );
                             
                             results.push({
@@ -1325,8 +1392,9 @@
                                 chapter: chapterNum,
                                 verse: verseNum,
                                 text: highlightedText,
-                                occurrences: matches.length
+                                count: matches.length
                             });
+                            totalOccurrences += matches.length;
                         }
                     }
                 }
