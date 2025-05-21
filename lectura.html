@@ -2546,25 +2546,39 @@
 
         // Function to initialize the page and load content based on URL or defaults
         async function initializeApp() {
-            const params = new URLSearchParams(window.location.search);
-            const urlVersion = params.get('version');
-            const urlBook = params.get('book');
-            const urlChapter = params.get('chapter');
-            const urlVerse = params.get('verse');
+            try {
+                console.log("[Init] Iniciando carga de la Biblia...");
+                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
+                
+                // Obtener parámetros de la URL
+                const params = new URLSearchParams(window.location.search);
+                const urlVersion = params.get('version');
+                const urlBook = params.get('book');
+                const urlChapter = params.get('chapter');
+                const urlVerse = params.get('verse');
 
-            // Determine version to load (from URL or default to 'rvr1960')
-            const versionToLoad = urlVersion || 'rvr1960';
-            document.getElementById('version-selector').value = versionToLoad;
+                // Versión predeterminada: Reina Valera 1960
+                const versionToLoad = urlVersion || 'rvr1960';
+                
+                // Establecer la versión en el selector
+                const versionSelector = document.getElementById('version-selector');
+                if (versionSelector) {
+                    versionSelector.value = versionToLoad;
+                }
 
-            console.log(`[Init] Loading version: ${versionToLoad}`);
-            await loadBible(versionToLoad); // loadBible takes version name e.g. 'rvr1960'
+                console.log(`[Init] Cargando versión: ${versionToLoad}`);
+                
+                // Cargar el archivo XML de la Biblia
+                await loadBible(versionToLoad); // loadBible takes version name e.g. 'rvr1960'
 
-            // Ensure xmlDoc is loaded
+            // Verificar que el XML se cargó correctamente
             if (!xmlDoc) {
-                console.error("[Init] Bible XML document (xmlDoc) not loaded. Cannot proceed.");
-                document.getElementById('verses').innerHTML = '<div class="error">Error crítico: No se pudo cargar el archivo de la Biblia.</div>';
+                console.error("[Init] ¡ERROR! El documento XML de la Biblia (xmlDoc) no se pudo cargar.");
+                document.getElementById('verses').innerHTML = '<div class="error">Error crítico: No se pudo cargar el archivo de la Biblia. Por favor, intente recargar la página.</div>';
                 return;
             }
+            
+            console.log("[Init] ¡XML de la Biblia cargado correctamente!");
             
             console.log("[Init] Bible XML loaded. Setting up books and chapters.");
             setupBookSelector(); // Populate book selector
@@ -2589,23 +2603,38 @@
                 console.log(`[Init] Default: Book=${currentBook}, Ch=${currentChapter}, V=${currentVerse}`);
             }
 
-            // Update UI selectors
+            // Actualizar selector de libros
             const bookSelect = document.getElementById('book-select');
-            if (bookSelect) { // Check if book-select exists
-                 bookSelect.value = currentBook;
+            if (bookSelect) {
+                // Establecer el libro seleccionado
+                bookSelect.value = currentBook;
+                console.log(`[Init] Libro seleccionado: ${currentBook}`);
             } else {
-                console.warn("[Init] book-select element not found.");
+                console.warn("[Init] ¡ADVERTENCIA! Elemento book-select no encontrado.");
             }
             
-            await loadChapters(); // Populate chapter selector (if present and used) and ensure currentChapter is valid
-            await loadChapter();  // Load the actual chapter content
-            
-            updateControls(); // Update navigation buttons (prev/next)
-            updateURL();      // Ensure URL reflects the loaded state (especially if defaults were used)
-            
-            console.log("[Init] Page initialization complete.");
-            setupMenuBehavior(); // Call menu behavior setup after app is initialized
-            setupGlobalEventListeners(); // Call setup for all other global event listeners
+            try {
+                // Cargar capítulos y actualizar selector
+                await loadChapters(); 
+                console.log(`[Init] Capítulos cargados. Capítulo actual: ${currentChapter}`);
+                
+                // Cargar el contenido del capítulo actual
+                await loadChapter();  
+                console.log(`[Init] Contenido del capítulo cargado exitosamente.`);
+                
+                // Actualizar navegación y URL
+                updateControls(); 
+                updateURL();      
+                
+                // Configurar comportamientos
+                setupMenuBehavior();
+                setupGlobalEventListeners();
+                
+                console.log("[Init] ¡Inicialización completa! La Biblia debería estar visible.");
+            } catch (error) {
+                console.error("[Init] Error durante la inicialización:", error);
+                document.getElementById('verses').innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+            }
         }
 
         // Event listener for when the DOM is fully loaded
