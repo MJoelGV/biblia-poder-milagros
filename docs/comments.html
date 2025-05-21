@@ -8,8 +8,10 @@
     <style>
         body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-color, #f9f9f9); color: #333; }
         .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
-        .comment { max-width: 800px; margin: 20px auto; background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .comment-header { font-weight: bold; margin-bottom: 8px; color: var(--primary-color, #4CAF50);}    
+        .comment { max-width: 800px; margin: 20px auto; background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s ease; }
+        .comment:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .comment-header { font-weight: bold; margin-bottom: 8px; color: var(--primary-color, #4CAF50); }
+        .comment-link { text-align: right; margin-top: 10px; font-size: 0.8em; color: #9c27b0; font-style: italic; }    
         .nav { text-align: center; margin-top: 10px; }
         .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
         /* Menú lateral */
@@ -55,13 +57,32 @@
                 const [book, chapter, verse] = key.split('-');
                 const div = document.createElement('div');
                 div.className = 'comment';
+                
+                // Almacenar los datos del versículo para la navegación
+                div.dataset.book = book;
+                div.dataset.chapter = chapter;
+                div.dataset.verse = verse;
+                
                 const header = document.createElement('div');
                 header.className = 'comment-header';
                 header.textContent = `${book} ${chapter}:${verse}`;
+                
                 const text = document.createElement('div');
                 text.textContent = comments[key];
+                
+                const linkHint = document.createElement('div');
+                linkHint.className = 'comment-link';
+                linkHint.textContent = 'Clic para ir al versículo';
+                
                 div.appendChild(header);
                 div.appendChild(text);
+                div.appendChild(linkHint);
+                
+                // Añadir evento de clic para navegar al versículo
+                div.addEventListener('click', function() {
+                    window.location.href = `lectura.html?book=${this.dataset.book}&chapter=${this.dataset.chapter}&verse=${this.dataset.verse}`;
+                });
+                
                 container.appendChild(div);
             });
         }
