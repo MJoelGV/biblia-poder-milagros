@@ -896,21 +896,39 @@
         async function loadBible(version) {
             try {
                 const url = `biblia-files/${version}.xmm`;
-                console.log('[BIBLIA] Intentando cargar:', url);
+                console.log('[BIBLIA] Intentando cargar directamente:', url);
                 const response = await fetch(url);
+                
                 if (!response.ok) {
-                    throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
+                    // Si falla, intentar con la ruta completa
+                    const fullUrl = window.location.href.replace(/\/lectura\.html.*$/, '') + '/biblia-files/' + version + '.xmm';
+                    console.log('[BIBLIA] Intentando con ruta completa:', fullUrl);
+                    const fullResponse = await fetch(fullUrl);
+                    
+                    if (!fullResponse.ok) {
+                        throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')' + 
+                                      ' ni ' + fullUrl + ' (HTTP ' + fullResponse.status + ')');
+                    }
+                    
+                    const xmlText = await fullResponse.text();
+                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                } else {
+                    const xmlText = await response.text();
+                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
                 }
-                const xmlText = await response.text();
-                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
                 currentVersion = version;
                 
-                if (currentBook) {
-                    loadChapter();
+                // Actualizar el selector de versiones
+                const versionSelect = document.getElementById('version-selector');
+                if (versionSelect) {
+                    versionSelect.value = version;
                 }
+                
+                return true;
             } catch (error) {
                 console.error('[BIBLIA] Error loading Bible:', error);
-                document.getElementById('verses').innerHTML = `<div class="error">Error al cargar la Biblia: ${error.message}</div>`;
+                throw new Error('No se pudo cargar el documento XML de la Biblia');
             }
         }
 
@@ -975,9 +993,21 @@
 
         // Iniciar la aplicación
         async function init() {
-            await loadBible(currentVersion);
-            setupBookSelector();
-            loadFromUrl();
+            try {
+                console.log('[Init] Iniciando carga de la Biblia...');
+                console.log(`[Init] Cargando versión: ${currentVersion}`);
+                await loadBible(currentVersion);
+                setupBookSelector();
+                loadFromUrl();
+                console.log('[Init] Aplicación inicializada correctamente');
+            } catch (error) {
+                console.error('[Init] Error durante la inicialización:', error);
+                document.getElementById('verses').innerHTML = `
+                    <div class="error">
+                        <p>Error al cargar la Biblia. Por favor, recarga la página.</p>
+                        <p>${error.message}</p>
+                    </div>`;
+            }
         }
 
         init();
