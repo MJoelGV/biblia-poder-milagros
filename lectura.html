@@ -895,7 +895,7 @@
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
-                const url = `docs/biblia-files/${version}.xmm`;
+                const url = `biblia-files/${version}.xmm`;
                 console.log('[BIBLIA] Intentando cargar:', url);
                 const response = await fetch(url);
                 if (!response.ok) {
