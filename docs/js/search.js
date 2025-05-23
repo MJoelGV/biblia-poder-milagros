@@ -49,8 +49,13 @@ function initSearch() {
     
     // Cerrar resultados de búsqueda
     if (closeSearch && searchResultsContainer) {
-        closeSearch.addEventListener('click', () => {
+        closeSearch.addEventListener('click', (e) => {
+            e.stopPropagation();
             searchResultsContainer.classList.remove('active');
+            // Esperar a que termine la animación antes de ocultar el contenedor
+            setTimeout(() => {
+                searchResultsContainer.style.display = 'none';
+            }, 300);
             if (searchInput) searchInput.value = '';
         });
     }
@@ -58,10 +63,15 @@ function initSearch() {
     // Cerrar al hacer clic fuera
     document.addEventListener('click', (e) => {
         if (searchResultsContainer && 
+            searchResultsContainer.classList.contains('active') &&
             !searchResultsContainer.contains(e.target) && 
             e.target !== searchInput && 
             e.target !== searchButton) {
             searchResultsContainer.classList.remove('active');
+            // Esperar a que termine la animación antes de ocultar el contenedor
+            setTimeout(() => {
+                searchResultsContainer.style.display = 'none';
+            }, 300);
         }
     });
 }
@@ -98,7 +108,10 @@ async function performSearch(term) {
             </div>`;
         
         // Mostrar el contenedor de resultados
-        searchResultsContainer.classList.add('active');
+        searchResultsContainer.style.display = 'block';
+        setTimeout(() => {
+            searchResultsContainer.classList.add('active');
+        }, 10);
     }
     
     try {
@@ -263,6 +276,11 @@ function navigateToVerse(book, chapter, verse) {
 
 // Inicializar la búsqueda cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
+    // Asegurarse de que el contenedor de resultados esté oculto al cargar la página
+    if (searchResultsContainer) {
+        searchResultsContainer.style.display = 'none';
+    }
+    
     initSearch();
 });
 
