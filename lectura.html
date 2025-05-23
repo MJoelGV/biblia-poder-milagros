@@ -534,23 +534,65 @@
             width: 100%;
             max-width: 100vw;
             box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .search-results.active {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .search-results-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            z-index: 10;
+            padding-top: 10px;
+            margin-top: -10px;
+        }
+        
+        .search-results-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .close-search {
-            background: none;
+            background: rgba(0, 0, 0, 0.1);
             border: none;
-            font-size: 24px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+        
+        .close-search:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        [data-theme="dark"] .close-search {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .close-search:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
         
         /* Estilos para los resultados de búsqueda */
@@ -584,6 +626,29 @@
             text-shadow: none;
             box-shadow: 0 0 3px rgba(255, 193, 7, 0.3);
         }
+        .highlighted {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlighted:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 235, 59, 0.3);
+            border-radius: 3px;
+            z-index: -1;
+            animation: highlight-fade 2s ease-out forwards;
+        }
+        
+        @keyframes highlight-fade {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+        
         .side-menu {
             position: fixed;
             top: 0;
@@ -649,38 +714,6 @@
             height: 100%;
             background-color: #fff;
             z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .search-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .search-header h3 {
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .results-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 15px;
-        }
-        
         [data-theme="dark"] .fullscreen-overlay {
             background-color: #222;
             color: #eee;
@@ -842,6 +875,58 @@
             font-style: italic;
         }
         
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .search-input {
+            padding: 8px 15px 8px 35px;
+            border: 1px solid var(--border-color, #ddd);
+            border-radius: 20px;
+            width: 200px;
+            font-size: 14px;
+            background-color: var(--bg-color, #fff);
+            color: var(--text-color, #333);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23777' viewBox='0 0 16 16'%3e%3cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            background-size: 16px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color, #4CAF50);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            width: 250px;
+        }
+        
+        .search-button {
+            background: var(--primary-color, #4CAF50);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .search-button:hover {
+            background: var(--primary-hover, #45a049);
+            transform: scale(1.05);
+        }
+        
         .search-wrapper {
             position: relative;
             display: flex;
@@ -883,6 +968,468 @@
             background-color: #ffc107;
             color: #333;
         }
+
+        /* Estilos para el contenedor de búsqueda */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 5px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-button:hover {
+            color: var(--primary-color);
+        }
+
+        /* Estilos para el contenedor de resultados */
+        .search-results-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-results-container.active {
+            display: block;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-results-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-search {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-search:hover {
+            color: #333;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 16px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .result-item {
+            background-color: var(--card-bg-dark);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .result-item:hover {
+            background-color: var(--hover-color);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] .result-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-reference {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .result-text {
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .search-highlight {
+            background-color: #fff9c4;
+            color: #000;
+            padding: 0 2px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        [data-theme="dark"] .search-highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        /* Efecto de resaltado al hacer hover en los resultados */
+        .preview-highlight {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .preview-highlight:after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -4px;
+            right: -4px;
+            bottom: -2px;
+            background: rgba(255, 235, 59, 0.4);
+            border-radius: 4px;
+            z-index: -1;
+            animation: preview-pulse 1.5s infinite;
+        }
+        
+        @keyframes preview-pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.7; }
+            100% { opacity: 0.4; }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .verse-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .verse-reference {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95em;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .verse-reference:before {
+            content: '📖';
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .match-count {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+            font-size: 0.8em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        [data-theme="dark"] .match-count {
+            color: var(--text-color);
+            font-size: 0.95em;
+        }
+        
+        .search-highlight {
+            background-color: #FFEB3B;
+            color: #000;
+            padding: 0 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+        }
+        
+        .no-results svg {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            opacity: 0.7;
+        }
+        
+        .close-search {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 22px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s ease;
+        }
+        
+        .close-search:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        /* Estilos para el modo oscuro */
+        [data-theme="dark"] .search-results {
+            background: rgba(0, 0, 0, 0.97);
+        }
+        
+        [data-theme="dark"] .search-results-content {
+            background: #1e1e1e;
+            border: 1px solid #333;
+        }
+        
+        [data-theme="dark"] .search-highlight {
+            background-color: #ffd700;
+            color: #000;
+        }
+        
+        [data-theme="dark"] .result-item {
+            background: #252525;
+            border-color: #333;
+        }
+        
+        [data-theme="dark"] .result-item:hover {
+            background: #2d2d2d;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loading p {
+            margin-top: 16px;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .search-summary {
+            margin: 0 0 25px 0;
+            padding: 16px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            color: var(--text-color);
+            font-size: 0.95em;
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .search-summary {
+            background-color: var(--card-bg-dark);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-summary p {
+            margin: 0 0 8px 0;
+            line-height: 1.5;
+        }
+        
+        .search-summary .search-term {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .no-results svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+            color: var(--primary-color);
+        }
+        
+        .no-results p {
+            margin: 8px 0;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+        
+        .no-results .search-term {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 12px;
+            word-break: break-word;
+        }
+        
+        /* Estilos para el contenedor de resultados de búsqueda */
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-results-header h3 {
+            margin: 0;
+            color: var(--text-color);
+        }
+        
+        .close-search {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .search-results-content {
+            margin-top: 20px;
+        }
+        
+        /* Estilos para el campo de búsqueda */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+        
+        #search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px 0 0 20px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #search-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .search-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 20px 20px 0;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .search-button:hover {
+            background-color: #45a049;
+        }
     </style>
     <!-- texto actualizado -->
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
@@ -899,12 +1446,15 @@
             <li onclick="window.location.href='diccionario.html'">Diccionario</li>
             <li onclick="window.location.href='bookmarks.html'">Marcados</li>
             <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li id="chapter-menu-toggle">Capítulos</li>
         </ul>
     </div>
+    
+    <!-- Controles superiores -->
     <div class="controls" id="controls">
         <div class="top-row">
             <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            
+            <!-- Selector de versión -->
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -912,28 +1462,38 @@
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
+            
+            <!-- Selector de libro -->
             <select id="book-select" class="select-css"></select>
-            <div class="search-wrapper">
+            
+            <!-- Campo de búsqueda -->
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Buscar en la Biblia...">
                 <button id="search-button" class="search-button">🔍</button>
-                <input id="search-input" class="search-input" placeholder="Buscar palabra en la Biblia" style="display: none;" />
             </div>
+            
+            <!-- Botón de menú principal -->
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
+        
+        <!-- Controles adicionales -->
         <div id="extra-controls" class="extra-controls">
-            <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
+            <a href="index.html" class="home-icon">🏠</a>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
-            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+            <button id="decrease-font" class="font-control" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="font-control" onclick="adjustFontSize(0.1)">A+</button>
         </div>
     </div> <!-- cierre .controls -->
 
     <!-- Modal de resultados de búsqueda (pantalla completa) -->
-    <div id="search-results" class="fullscreen-overlay" style="display: none;">
-        <div class="search-header">
-            <h3>Resultados de búsqueda <span id="search-count"></span></h3>
-            <button id="close-search" class="close-button">&times;</button>
+    <div id="search-results" class="search-results">
+        <div class="search-results-content">
+            <div class="search-header">
+                <h3>Resultados de búsqueda <span id="search-count"></span></h3>
+                <button id="close-search" class="close-search">&times;</button>
+            </div>
+            <div id="search-results-content" class="results-container"></div>
         </div>
-        <div id="results-content" class="results-container"></div>
     </div>
 
     <!-- Menú contextual para versículos -->
@@ -980,6 +1540,17 @@
         <button class="nav-button" id="prev-button">← Anterior</button>
         <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
         <button class="nav-button" id="next-button">Siguiente →</button>
+    </div>
+
+    <!-- Contenedor de resultados de búsqueda -->
+    <div id="search-results" class="search-results-container">
+        <div class="search-results-header">
+            <h3>Resultados de búsqueda</h3>
+            <button class="close-search">&times;</button>
+        </div>
+        <div id="search-results-content">
+            <!-- Los resultados se mostrarán aquí -->
+        </div>
     </div>
 
     <script>
@@ -1123,86 +1694,90 @@
         // Función para cargar capítulo
         async function loadChapter() {
             console.log(`Cargando ${currentBook} capítulo ${currentChapter}...`);
-            const versesContainer = document.getElementById('verses');
-            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
-
+            
             try {
-                // Verificar si el documento XML está disponible
-                if (!xmlDoc) {
-                    throw new Error('La Biblia no ha sido cargada correctamente');
+                // Buscar el capítulo en el XML
+                const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapterElement) {
+                    throw new Error(`No se encontró el capítulo ${currentChapter} de ${currentBook}`);
                 }
-                
-                // Buscar el capítulo solicitado
-                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-                if (!chapter) {
-                    throw new Error(`No se encontró el capítulo ${currentChapter} en ${currentBook}`);
-                }
-
-                let html = `
-                    <div class="chapter-title">
-                        ${currentBook} - Capítulo ${currentChapter}
-                    </div>
-                `;
                 
                 // Obtener todos los versículos del capítulo
-                const verses = chapter.getElementsByTagName('v');
+                const verses = chapterElement.getElementsByTagName('v');
                 console.log(`Encontrados ${verses.length} versículos`);
                 
-                if (verses.length === 0) {
-                    throw new Error('El capítulo no contiene versículos');
-                }
+                // Crear el HTML de los versículos con estilos mejorados
+                let versesHTML = `
+                    <div class="chapter-header">
+                        <h2>${currentBook} ${currentChapter}</h2>
+                    </div>
+                    <div class="verses-container">
+                `;
                 
-                // Iterar y construir el HTML de los versículos
-                html += Array.from(verses).map(verse => {
-                    const verseNum = verse.getAttribute('n');
-                    const isHighlighted = parseInt(verseNum) === currentVerse;
-                    const isBookmarked = isVerseBookmarked(currentBook, currentChapter, verseNum);
-                    const isMemorized = isVerseMemorized(currentBook, currentChapter, verseNum);
-                    const hasComment = hasVerseComment(currentBook, currentChapter, verseNum);
+                // Generar HTML para cada versículo
+                for (let i = 0; i < verses.length; i++) {
+                    const verse = verses[i];
+                    const verseNumber = verse.getAttribute('n');
+                    const verseText = verse.textContent;
                     
-                    // Extraer texto del versículo de forma segura
-                    let verseText = '';
-                    try {
-                        verseText = verse.textContent || 'Error al cargar el texto';
-                    } catch (e) {
-                        console.error('Error al extraer texto del versículo:', e);
-                        verseText = 'Error al cargar el texto';
-                    }
-                    
-                    // Construir HTML para el versículo
-                    return `
-                        <div class="verse ${isHighlighted ? 'highlighted' : ''} ${isBookmarked ? 'bookmarked' : ''} ${isMemorized ? 'memorized' : ''} ${hasComment ? 'commented' : ''}" 
-                             data-verse="${verseNum}"
-                             data-book="${currentBook}"
-                             data-chapter="${currentChapter}"
-                             onclick="highlightVerse(this)">
-                            <span class="verse-number">${verseNum}</span>
+                    versesHTML += `
+                        <div class="verse" data-verse="${verseNumber}">
+                            <span class="verse-number">${verseNumber}</span>
                             <span class="verse-text">${verseText}</span>
                         </div>
                     `;
-                }).join('');
-
-                // Actualizar el contenido del contenedor
-                versesContainer.innerHTML = html;
+                }
                 
-                // Aplicar menú contextual a todos los versículos recién cargados
-                applyVerseContextMenu();
+                // Cerrar el contenedor de versículos
+                versesHTML += '</div>';
+                
+                // Obtener referencia al contenedor
+                const versesContainer = document.getElementById('verses');
+                if (!versesContainer) {
+                    throw new Error('No se encontró el contenedor de versículos');
+                }
+                
+                // Aplicar estilos y contenido
+                versesContainer.style.opacity = '1';
+                versesContainer.style.visibility = 'visible';
+                versesContainer.style.minHeight = '100vh';
+                versesContainer.innerHTML = versesHTML;
+                
+                // Forzar repintado
+                void versesContainer.offsetHeight;
+                
+                // Aplicar menú contextual a todos los versículos
+                if (typeof applyVerseContextMenu === 'function') {
+                    applyVerseContextMenu();
+                }
                 
                 console.log('Capítulo cargado correctamente');
 
+                // Resaltar versículo actual si es necesario
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
                     if (verseElement) {
                         setTimeout(() => {
                             verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // difuminar highlight después de unos segundos
+                            // Quitar resaltado después de 3 segundos
                             setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
                         }, 100);
                     }
                 }
+                
             } catch (error) {
-                console.error('Error loading chapter:', error);
-                versesContainer.innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+                console.error('Error al cargar el capítulo:', error);
+                const errorHTML = `
+                    <div class="error" style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px;">
+                        <h3>Error al cargar el capítulo</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                
+                const container = document.getElementById('verses') || document.body;
+                container.innerHTML = errorHTML;
+                container.style.opacity = '1';
+                container.style.visibility = 'visible';
             }
         }
 
@@ -1240,9 +1815,8 @@
                 // Mostrar indicador de carga
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
                 
-                // Solución directa - usar la misma ruta que funciona en share.html
-                // IMPORTANTE: La ruta absoluta funciona tanto en desarrollo local como en GitHub Pages
-                const url = `/biblia-poder-milagros/biblia-files/${version}.xmm`;
+                // Usar ruta relativa para desarrollo local
+                const url = `biblia-files/${version}.xmm`;
                 console.log('[BIBLIA] Intentando cargar directamente:', url);
                 
                 const response = await fetch(url);
@@ -1352,6 +1926,7 @@
             loadChapters();
             loadChapter();
             updateControls();
+            updateURL();
         } */
 
         // Variables para el menú contextual de versículos
@@ -1798,406 +2373,47 @@
         }
     </script>
     <script>
+        // Deshabilitar service worker temporalmente
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (const registration of registrations) {
+                    registration.unregister();
+                    console.log('ServiceWorker unregistered');
+                }
+            });
+        }
+
         // Toggle extra controls
         const menuToggle = document.getElementById('main-menu-toggle');
         const extraControls = document.getElementById('extra-controls');
         if (menuToggle && extraControls) {
-            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                extraControls.classList.toggle('active');
+            });
         }
         
-        // Array para almacenar los versículos marcados
-        let bookmarkedVerses = [];
-        
-        // Cargar versículos marcados desde localStorage al iniciar
-        function loadBookmarkedVerses() {
-            const savedBookmarks = localStorage.getItem('bookmarkedVerses');
-            if (savedBookmarks) {
-                try {
-                    bookmarkedVerses = JSON.parse(savedBookmarks);
-                } catch (e) {
-                    console.error('Error al cargar versículos marcados:', e);
-                    bookmarkedVerses = [];
-                }
-            }
-        }
-        
-        // Guardar versículos marcados en localStorage
-        function saveBookmarkedVerses() {
-            localStorage.setItem('bookmarkedVerses', JSON.stringify(bookmarkedVerses));
-        }
-        
-        // Verificar si un versículo está marcado
-        function isVerseBookmarked(book, chapter, verse) {
-            return bookmarkedVerses.some(bookmark => 
-                bookmark.book === book && 
-                bookmark.chapter === parseInt(chapter) && 
-                bookmark.verse === parseInt(verse)
-            );
-        }
-        
-        // Marcar o desmarcar un versículo
-        function toggleBookmark(book, chapter, verse) {
-            const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
-            if (!verseElement) return;
-            
-            // Buscar si el versículo ya está marcado
-            const bookmarkIndex = bookmarkedVerses.findIndex(bookmark => 
-                bookmark.book === book && 
-                bookmark.chapter === parseInt(chapter) && 
-                bookmark.verse === parseInt(verse)
-            );
-            
-            if (bookmarkIndex >= 0) {
-                // Si ya está marcado, quitarlo
-                bookmarkedVerses.splice(bookmarkIndex, 1);
-                verseElement.classList.remove('bookmarked');
-            } else {
-                // Si no está marcado, añadirlo
-                bookmarkedVerses.push({
-                    book,
-                    chapter: parseInt(chapter),
-                    verse: parseInt(verse),
-                    text: verseElement.querySelector('.verse-text').textContent
-                });
-                verseElement.classList.add('bookmarked');
-            }
-            
-            // Guardar cambios en localStorage
-            saveBookmarkedVerses();
-            return bookmarkIndex < 0; // Devuelve true si ahora está marcado, false si se ha desmarcado
-        }
-        
-        // Función para resaltar un versículo al hacer clic en él
-        function highlightVerse(verseElement) {
-            // Eliminar la clase highlighted de todos los versículos
-            document.querySelectorAll('.verse.highlighted').forEach(el => el.classList.remove('highlighted'));
-            
-            // Añadir la clase highlighted al versículo actual
-            verseElement.classList.add('highlighted');
-            
-            // Actualizar el versículo actual
-            currentVerse = parseInt(verseElement.dataset.verse);
-            
-            // Actualizar la URL sin recargar la página
-            updateURL();
-        }
-        // Toggle side menu
-        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
-        const sideMenu = document.getElementById('side-menu');
-        if (sideMenuToggleBtn && sideMenu) {
-            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
-        }
-        // Cerrar menú lateral al hacer clic fuera
+        // Cerrar menú de controles al hacer clic fuera
         document.addEventListener('click', (e) => {
-            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
-                sideMenu.classList.remove('active');
+            if (extraControls && extraControls.classList.contains('active') && 
+                !extraControls.contains(e.target) && 
+                e.target !== menuToggle) {
+                extraControls.classList.remove('active');
             }
         });
-        // Agregar listener al item de capítulos
-        const chapterMenuToggle = document.getElementById('chapter-menu-toggle');
-        if (chapterMenuToggle) chapterMenuToggle.addEventListener('click', () => {
-            showChapterGrid();
-            sideMenu.classList.remove('active');
-        });
-    </script>
-    
-    <script>
-        // Chapter & verse grid selection
-        function showChapterGrid() {
-            const grid = document.getElementById('chapter-grid');
-            
-            try {
-                const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
-                const chapterButtons = Array.from(chapters).map((_, i) =>
-                    `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
-                ).join('');
-                
-                grid.innerHTML = `<div class="grid-content">
-                    <div class="grid-header">
-                        <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
-                    </div>
-                    ${chapterButtons}
-                </div>`;
-                grid.classList.add('active');
-            } catch (error) {
-                console.error('Error al mostrar la cuadrícula de capítulos:', error);
-            }
-        }
-        function showVerseGrid() {
-            const grid = document.getElementById('verse-grid');
-            
-            try {
-                const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-                if (!chapterElement) {
-                    console.error('No se encontró el capítulo:', currentBook, currentChapter);
-                    return;
-                }
-                
-                const verses = chapterElement.getElementsByTagName('v');
-                const buttons = Array.from(verses)
-                    .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
-                    .join('');
-                    
-                grid.innerHTML = `<div class="grid-content">
-                    <div class="grid-header">
-                        <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
-                    </div>
-                    ${buttons}
-                </div>`;
-                grid.classList.add('active');
-            } catch (error) {
-                console.error('Error al mostrar la cuadrícula de versículos:', error);
-            }
-        }
-        // Handle chapter button click
-        document.getElementById('chapter-grid').addEventListener('click', e => {
-            const chap = e.target.dataset.chap;
-            if (!chap) return;
-            currentChapter = parseInt(chap, 10);
-            document.getElementById('chapter-grid').classList.remove('active');
-            loadChapter(); // Cargar el capítulo inmediatamente
-            updateControls();
-            updateURL();
-            // Ahora mostrar la cuadrícula de versículos
-            setTimeout(() => {
-                showVerseGrid();
-            }, 100);
-        });
-        // Handle verse button click
-        document.getElementById('verse-grid').addEventListener('click', e => {
-            if (!e.target.dataset.verse) return;
-            currentVerse = parseInt(e.target.dataset.verse);
-            document.getElementById('verse-grid').classList.remove('active');
-            loadChapter(); updateControls(); updateURL();
-        });
-        // Close modal grids
-        document.addEventListener('click', e => {
-            if (e.target.classList.contains('close-grid')) {
-                document.getElementById(e.target.dataset.target).classList.remove('active');
-            }
-        });
-    </script>
-    <script>
-        // Bind botón 'Capítulo' inferior al grid principal
-        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
         
-        // Verificar que el botón de capítulo actual funcione correctamente
-        document.getElementById('current-chapter-button').addEventListener('click', showChapterGrid);
-    </script>
-    <script>
-        // Populate verse-select with verses of current chapter
-        function populateVerseSelect() {
-            const verseSelect = document.getElementById('verse-select');
-            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
-            verseSelect.innerHTML = '<option value="" disabled selected>Selecciona un versículo</option>';
-            Array.from(verses).forEach(v => {
-                const num = v.getAttribute('n');
-                const opt = document.createElement('option');
-                opt.value = num;
-                opt.textContent = 'Versículo ' + num;
-                verseSelect.appendChild(opt);
-            });
-            verseSelect.disabled = false;
-        }
-        // Handle verse selection
-        const verseSelectElement = document.getElementById('verse-select');
-        if (verseSelectElement) {
-            verseSelectElement.addEventListener('change', (e) => {
-                currentVerse = parseInt(e.target.value);
-                loadChapter();
-                updateControls();
-                updateURL();
-            });
-        }
-    </script>
-    <!-- Listener setups below will be moved to setupGlobalEventListeners -->
-    <script>
-        // Obtiene los temas directamente del XML
-        function getOutlines(book, chapter) {
-            const nodes = xmlDoc.querySelectorAll(`b[n="${book}"] c[n="${chapter}"] o`);
-            return Array.from(nodes).map(o => ({
-                title: o.getAttribute('title'),
-                start: parseInt(o.getAttribute('start'), 10),
-                end: parseInt(o.getAttribute('end'), 10)
-            }));
-        }
-
-        // Muestra modal de temas
-        function showOutlineGrid() {
-            const grid = document.getElementById('outline-grid');
-            const outlines = getOutlines(currentBook, currentChapter);
-            const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
-            if (outlines.length === 0) {
-                grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
-            } else {
-                const buttons = outlines.map(o =>
-                    `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
-                ).join('');
-                grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+        // Variables globales para la búsqueda
+        // Las variables de búsqueda ahora están en search.js
+        // Inicializar la búsqueda cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar la funcionalidad de búsqueda
+            if (typeof initSearch === 'function') {
+                initSearch();
             }
-            grid.classList.add('active');
-        }
-        // Maneja selección de tema
-        document.getElementById('outline-grid').addEventListener('click', e => {
-            if (!e.target.dataset.start) return;
-            const start = parseInt(e.target.dataset.start, 10);
-            currentVerse = start;
-            document.getElementById('outline-grid').classList.remove('active');
-            loadChapter(); updateControls(); updateURL();
-            setTimeout(() => {
-                const el = document.querySelector(`.verse[data-verse="${start}"]`);
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+            
+            // Seleccionar el libro actual en el selector
+            const bookSelect = document.getElementById('book-select');
         });
-        // Listener Botón Temas
-        // MOVED: document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
-    </script>
-    <script>
-        // Annotate strong numbers
-        function annotateStrongNumbers() {
-            const verseEls = document.querySelectorAll('.verse-text');
-            const wordMap = {};
-            for (const code in strongsData) {
-                const entry = strongsData[code];
-                wordMap[entry.word.toLowerCase()] = code;
-            }
-            verseEls.forEach(el => {
-                el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
-                    const code = wordMap[match.toLowerCase()];
-                    return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
-                });
-            });
-        }
-        document.body.addEventListener('click', e => {
-            const sw = e.target.closest('.strong-word');
-            if (!sw) return;
-            const info = strongsData[sw.dataset.strong];
-            if (!info) return;
-            document.getElementById('strongs-content').innerHTML = '<strong>' + info.word + ' (' + sw.dataset.strong + ')</strong><br>' +
-                'Translit: ' + info.translit + '<br>' +
-                'Def: ' + info.meaning;
-            document.getElementById('strongs-backdrop').style.display = 'block';
-            document.getElementById('strongs-modal').style.display = 'block';
-        });
-        const origLoadChapter = window.loadChapter;
-        window.loadChapter = async function() {
-            await origLoadChapter();
-            annotateStrongNumbers();
-            applySavedStates();
-        };
-        // MOVED: document.getElementById('strongs-close').addEventListener('click', () => { ... }); // Listener for strongs-close was here
-        // Reaplicar marcas guardadas: marcados, comentarios y memorizados
-        function applySavedStates() {
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-            const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
-            document.querySelectorAll('#verses .verse').forEach(v => {
-                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
-                if (bookmarks.includes(key)) v.classList.add('bookmarked');
-                if (comments[key]) v.classList.add('comment');
-                if (memorized.includes(key)) v.classList.add('memorized');
-            });
-        }
-        // Aplicar anotaciones y estados guardados al cargar la página (REDUNDANT & REMOVED)
-        /* window.addEventListener('load', () => {
-            annotateStrongNumbers();
-            applySavedStates();
-        }); */
-    </script>
-    <script>
-        // Funcionalidad de búsqueda de palabras exactas (Variables and Listeners are now primarily in setupGlobalEventListeners)
-        // Global declarations removed as they are now handled in setupGlobalEventListeners
-        
-        // Función para escapar caracteres especiales en expresiones regulares
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-        
-        // Referencias a closeSearchButton y funcionalidad relacionada movida a setupGlobalEventListeners
-        
-        // Función para buscar palabra exacta en toda la Biblia
-        function searchExactWord(keyword) {
-            if (!keyword || keyword.length < 2) {
-                alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                return;
-            }
-            
-            resultsContent.innerHTML = '<div class="loading">Buscando...</div>';
-            // Mostrar los resultados en pantalla completa
-            searchResults.style.display = 'flex';
-            
-            // Preparar palabra para búsqueda exacta (expresión regular)
-            const searchRegex = new RegExp('\\b' + escapeRegExp(keyword) + '\\b', 'gi');
-            let results = [];
-            let totalOccurrences = 0;
-            
-            // Buscar en todos los libros y capítulos
-            const books = xmlDoc.getElementsByTagName('b');
-            for (let b = 0; b < books.length; b++) {
-                const book = books[b];
-                const bookName = book.getAttribute('n');
-                const chapters = book.getElementsByTagName('c');
-                
-                for (let c = 0; c < chapters.length; c++) {
-                    const chapter = chapters[c];
-                    const chapterNum = chapter.getAttribute('n');
-                    const verses = chapter.getElementsByTagName('v');
-                    
-                    for (let v = 0; v < verses.length; v++) {
-                        const verse = verses[v];
-                        const verseNum = verse.getAttribute('n');
-                        const verseText = verse.textContent;
-                        
-                        // Buscar palabras exactas
-                        const matches = verseText.match(searchRegex);
-                        if (matches) {
-                            // Resaltar la palabra buscada en el texto
-                            const highlightedText = verseText.replace(
-                                searchRegex, 
-                                '<span class="search-highlight">$&</span>'
-                            );
-                            
-                            results.push({
-                                book: bookName,
-                                chapter: chapterNum,
-                                verse: verseNum,
-                                text: highlightedText,
-                                matchCount: matches.length
-                            });
-                            
-                            totalOccurrences += matches.length;
-                        }
-                    }
-                }
-            }
-            
-            // Mostrar resultados
-            if (results.length === 0) {
-                searchCount.textContent = '(0)';
-                resultsContent.innerHTML = `<div class="no-results">No se encontraron resultados para "${keyword}"</div>`;
-            } else {
-                searchCount.textContent = `(${results.length} versículos, ${totalOccurrences} ocurrencias)`;
-                
-                const html = results.map(result => {
-                    return `
-                        <div class="result-item">
-                            <div class="result-reference" onclick="loadReference('${result.book}', ${result.chapter}, ${result.verse})">
-                                <strong>${result.book} ${result.chapter}:${result.verse}</strong>
-                            </div>
-                            <div class="result-text">${result.text}</div>
-                        </div>
-                    `;
-                }).join('');
-                
-                // Forzar al contenedor a usar el ancho completo
-                searchResults.style.width = '100%';
-                searchResults.style.maxWidth = '100%';
-                searchResults.style.left = '0';
-                searchResults.style.right = '0';
-                
-                resultsContent.innerHTML = html;
-            }
-        }
         
         // Función para cargar una referencia bíblica (libro, capítulo, versículo)
         function loadReference(book, chapter, verse) {
@@ -2526,21 +2742,32 @@
                 console.log("[Init] Iniciando carga de la Biblia...");
                 document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia Reina-Valera 1960...</div>';
                 
-                // Obtener parámetros de la URL
+                // Obtener parámetros de la URL o usar valores por defecto
                 const params = new URLSearchParams(window.location.search);
-                const urlVersion = params.get('version');
-                const urlBook = params.get('book') || 'Génesis'; // Valor por defecto si no hay libro
-                const urlChapter = parseInt(params.get('chapter')) || 1; // Valor por defecto: capítulo 1
-                const urlVerse = parseInt(params.get('verse')) || 1; // Valor por defecto: versículo 1
+                const urlBook = 'Génesis'; // Siempre cargar Génesis por defecto
+                const urlChapter = 1; // Siempre cargar capítulo 1 por defecto
+                const urlVerse = 1; // Siempre cargar versículo 1 por defecto
+                
+                // Actualizar la URL sin recargar la página
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('book', urlBook);
+                newUrl.searchParams.set('chapter', urlChapter);
+                newUrl.searchParams.set('verse', urlVerse);
+                window.history.replaceState({}, '', newUrl);
 
                 // Versión predeterminada: Reina Valera 1960
-                const versionToLoad = 'rvr1960'; // Siempre cargar RVR1960 por defecto
+                const versionToLoad = 'Reina-Valera-1960';
                 
                 // Establecer la versión en el selector
                 const versionSelector = document.getElementById('version-selector');
                 if (versionSelector) {
                     versionSelector.value = versionToLoad;
                 }
+                
+                // Actualizar variables globales
+                currentBook = urlBook;
+                currentChapter = urlChapter;
+                currentVerse = urlVerse;
 
                 console.log(`[Init] Cargando versión: ${versionToLoad}`);
                 
@@ -2554,37 +2781,33 @@
                 
                 console.log("[Init] ¡XML de la Biblia cargado correctamente!");
                 
-                // Configurar libros y capítulos
+                // Configurar selector de libros
                 setupBookSelector();
-                
-                // Establecer libro, capítulo y versículo
-                currentBook = urlBook;
-                currentChapter = urlChapter;
-                currentVerse = urlVerse;
-                
-                console.log(`[Init] Libro: ${currentBook}, Capítulo: ${currentChapter}, Versículo: ${currentVerse}`);
                 
                 // Actualizar selectores
                 const bookSelect = document.getElementById('book-select');
                 if (bookSelect) {
                     bookSelect.value = currentBook;
                     
-                    // Disparar evento change para cargar capítulos
-                    const event = new Event('change');
-                    bookSelect.dispatchEvent(event);
+                    // Cargar capítulos
+                    await loadChapters();
+                    
+                    // Actualizar el selector de capítulos
+                    const chapterSelect = document.getElementById('chapter-select');
+                    if (chapterSelect) {
+                        chapterSelect.value = currentChapter;
+                    }
                 }
                 
-                // Cargar capítulos y actualizar selector
-                await loadChapters(); 
-                console.log(`[Init] Capítulos cargados. Capítulo actual: ${currentChapter}`);
+                console.log(`[Init] Libro: ${currentBook}, Capítulo: ${currentChapter}, Versículo: ${currentVerse}`);
                 
                 // Cargar el contenido del capítulo actual
-                await loadChapter();  
+                await loadChapter();
                 console.log(`[Init] Contenido del capítulo cargado exitosamente.`);
                 
                 // Actualizar navegación y URL
-                updateControls(); 
-                updateURL();      
+                updateControls();
+                updateURL();
                 
                 // Configurar comportamientos
                 setupMenuBehavior();
@@ -2594,17 +2817,62 @@
                 
             } catch (error) {
                 console.error("[Init] Error durante la inicialización:", error);
-                document.getElementById('verses').innerHTML = 
-                    `<div class="error">
-                        <p>Error al cargar la Biblia: ${error.message}</p>
+                const errorContainer = document.getElementById('verses') || document.body;
+                errorContainer.innerHTML = 
+                    `<div class="error" style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px;">
+                        <h3>Error al cargar la Biblia</h3>
+                        <p>${error.message}</p>
                         <p>Por favor, recarga la página o verifica tu conexión a internet.</p>
                     </div>`;
+                errorContainer.style.opacity = '1';
+                errorContainer.style.visibility = 'visible';
             }
         }
 
-        // Event listener for when the DOM is fully loaded
-        window.addEventListener('DOMContentLoaded', initializeApp);
+        // Inicializar la aplicación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            initSearch(); // Inicializar la funcionalidad de búsqueda
+        });
 
+    </script>
+
+    <!-- Contenedor para resultados de búsqueda -->
+    <div id="search-results" class="search-results">
+        <div class="search-results-header">
+            <h3>Resultados de búsqueda</h3>
+            <button class="close-search">&times;</button>
+        </div>
+        <div id="search-results-content" class="search-results-content">
+            <!-- Los resultados se cargarán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Script para la funcionalidad de búsqueda -->
+    <script src="js/search.js"></script>
+    
+    <!-- Script para el menú lateral -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+            const sideMenu = document.getElementById('side-menu');
+            
+            if (sideMenuToggleBtn && sideMenu) {
+                sideMenuToggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sideMenu.classList.toggle('active');
+                });
+                
+                // Cerrar el menú al hacer clic fuera de él
+                document.addEventListener('click', (e) => {
+                    if (sideMenu.classList.contains('active') && 
+                        !sideMenu.contains(e.target) && 
+                        !sideMenuToggleBtn.contains(e.target)) {
+                        sideMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
