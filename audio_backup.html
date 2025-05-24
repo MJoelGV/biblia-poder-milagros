@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escuchar Biblia - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/pymicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Reset y estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar .logo {
+            color: white !important;
+            font-size: 20px;
+        }
+        
+        .nav-links a {
+            color: #ecf0f1 !important;
+            font-size: 15px;
+        }
+        
+        .nav-links a:hover {
+            color: #3498db !important;
+        }
+        
+        .nav-links a.active {
+            color: #2ecc71 !important;
+            font-weight: 600;
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 100px 20px 40px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* Tarjeta del reproductor */
+        .player-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .audio-cover {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            overflow: hidden;
+            border: 8px solid #f8f9fa;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            background: linear-gradient(45deg, #f6f8f9 0%, #e9ebee 100%);
+            position: relative;
+        }
+        
+        .audio-cover i {
+            font-size: 60px;
+            color: #bdc3c7;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .audio-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .audio-cover:hover {
+            transform: scale(1.03);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .audio-cover:hover img {
+            transform: scale(1.05);
+        }
+
+        .audio-cover:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .audio-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Información de la canción */
+        .book-selector {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            color: #2c3e50;
+            background-color: #fff;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* Estilos para móviles */
+        @media (max-width: 480px) {
+            .book-selector {
+                flex-direction: column;
+            }
+            
+            .form-select {
+                width: 100%;
+            }
+        }
+
+        .song-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .song-artist {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+
+        /* Controles del reproductor */
+        .player-controls {
+            margin-bottom: 25px;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0 5px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+
+        .player-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .player-button {
+            background: #fff;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            outline: none;
+        }
+        
+        #play-button, #pause-button {
+            width: 60px;
+            height: 60px;
+            font-size: 22px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            margin: 0 10px;
+        }
+        
+        #play-button, #pause-button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: #2ecc71;
+        }
+
+        .player-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .player-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Barra de progreso */
+        .progress-container {
+            width: 100%;
+            margin: 25px 0;
+        }
+
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f2f5;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: #2ecc71;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+        
+        .progress::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #2ecc71;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .progress-bar:hover .progress::after {
+            opacity: 1;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #95a5a6;
+            font-weight: 500;
+        }
+        
+        .seek-slider {
+            width: 100%;
+            margin: 15px 0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            height: 5px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+
+        .seek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .seek-slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        .side-menu-toggle:hover { background-color: rgba(255,255,255,0.1); border-radius: 50%; }
+    </style>
+</head>
+<body class="audio-page">
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'" class="active">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='temas.html'">Temas</li>
+        </ul>
+    </div>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            <div class="nav-title">Escuchar Biblia</div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Tarjeta del reproductor -->
+            <div class="player-card">
+                <!-- Portada del audio -->
+                <div class="audio-cover" id="audio-cover">
+                    <img id="cover-image" src="" alt="Portada del audio" style="display: none;">
+                    <i class="fas fa-music"></i>
+                </div>
+                
+                <!-- Información de la canción -->
+                <div class="song-info">
+                    <h2 class="song-title" id="now-playing">Selecciona un libro y capítulo</h2>
+                    <p class="song-artist">Biblia Reina Valera 1960</p>
+                </div>
+                
+                <!-- Barra de progreso -->
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <div class="time-info">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+                
+                <!-- Controles del reproductor -->
+                <div class="player-controls">
+                    <div class="player-buttons">
+                        <button id="prev-button" class="player-button" title="Capítulo anterior">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button id="play-button" class="player-button" title="Reproducir">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="pause-button" class="player-button" title="Pausar" style="display: none;">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button id="stop-button" class="player-button" title="Detener">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button id="next-button" class="player-button" title="Siguiente capítulo">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Selectores de libro y capítulo -->
+                <div class="book-selector">
+                    <select id="book-select" class="form-select">
+                        <option value="">Selecciona un libro</option>
+                    </select>
+                    
+                    <select id="chapter-select" class="form-select" disabled>
+                        <option value="">Capítulo</option>
+                    </select>
+                </div>
+                
+                <!-- Elemento de audio -->
+                <audio id="audio-player"></audio>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Pie de página -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Biblia de Poder y Milagros. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <script>
+        // Variables globales para el seguimiento del estado
+        let currentBook = null;
+        let currentChapter = null;
+        let manifestData = [];
+        let currentBookName = '';
+        
+        // Mapa de códigos a nombres completos global
+        const bookDisplayNames = {
+            'genesis': 'Génesis', 'exodus': 'Éxodo', 'lev': 'Levítico', 'num': 'Números', 'deu': 'Deuteronomio',
+            'joshua': 'Josué', 'judges': 'Jueces', 'ruth': 'Rut', '1sam': '1 Samuel', '2sam': '2 Samuel',
+            '1kin': '1 Reyes', '2kin': '2 Reyes', '1chron': '1 Crónicas', '2chron': '2 Crónicas',
+            'ezra': 'Esdras', 'nehemiah': 'Nehemías', 'esther': 'Ester', 'job': 'Job', 'psalm': 'Salmos',
+            'proverbs': 'Proverbios', 'ecc': 'Eclesiastés', 'song': 'Cantares', 'isaiah': 'Isaías', 'jere': 'Jeremías',
+            'lam': 'Lamentaciones', 'ezek': 'Ezequiel', 'dan': 'Daniel', 'hosea': 'Oseas', 'joel': 'Joel', 'amos': 'Amós',
+            'oba': 'Abdías', 'jonah': 'Jonás', 'micah': 'Miqueas', 'nahum': 'Nahúm', 'habak': 'Habacuc', 'zeph': 'Sofonías',
+            'haggai': 'Hageo', 'zech': 'Zacarías', 'mal': 'Malaquías', 'matt': 'Mateo', 'mark': 'Marcos', 'luke': 'Lucas',
+            'john': 'Juan', 'acts': 'Hechos', 'romans': 'Romanos', '1cor': '1 Corintios', '2cor': '2 Corintios', 'gal': 'Gálatas',
+            'eph': 'Efesios', 'phil': 'Filipenses', 'col': 'Colosenses', '1the': '1 Tesalonicenses', '2the': '2 Tesalonicenses',
+            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'tit': 'Tito', 'philem': 'Filemón', 'heb': 'Hebreos', 'jam': 'Santiago',
+            '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan', 'jude': 'Judas', 'rev': 'Apocalipsis'
+        };
+        // Mapa de metadatos de libros para descripción (autor, fecha, tema, descripción, temas clave)
+        const bookMeta = {
+            'genesis': {
+                author: 'Moisés',
+                date: '1445-1405 a.C.',
+                theme: 'Los orígenes y el pacto de Dios',
+                description: 'El libro del Génesis narra la creación del mundo, la caída del hombre, el diluvio universal y las historias de los patriarcas Abraham, Isaac y Jacob. Establece los fundamentos de la relación entre Dios y la humanidad.',
+                keyTopics: ['La Creación', 'El Diluvio', 'Abraham y el Pacto', 'José en Egipto']
+            },
+            'tit': {
+                author: 'Pablo',
+                date: 'c. 63-65 d.C.',
+                theme: 'Organización de la Iglesia y Conducta Cristiana',
+                description: 'La carta a Tito contiene instrucciones pastorales para el liderazgo de la iglesia en Creta y la conducta de los creyentes.',
+                keyTopics: ['Liderazgo Pastoral', 'Carácter Cristiano', 'Vida en Comunidad']
+            }
+        };
+        const audioPlayer = document.getElementById('audio-player');
+        console.log('Audio page script loaded');
+        // Get book <select>
+        const bookSelect = document.getElementById('book-select');
+        const chapterSelect = document.getElementById('chapter-select');
+        
+        // Orden canónico de los libros
+        const bibleOrder = Object.keys(bookDisplayNames);
+
+        // Función para cargar la lista de libros en el selector
+        function loadBooks() {
+            try {
+                const bookSelect = document.getElementById('book-select');
+                if (!bookSelect) return;
+                
+                // Limpiar opciones existentes
+                bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+                
+                // Obtener la lista de libros del mapa bookDisplayNames
+                const books = Object.entries(bookDisplayNames).map(([id, name]) => ({
+                    id,
+                    name
+                })).sort((a, b) => {
+                    // Ordenar los libros según el orden canónico
+                    const bookOrder = Object.keys(bookDisplayNames);
+                    return bookOrder.indexOf(a.id) - bookOrder.indexOf(b.id);
+                });
+                
+                // Agregar opciones al selector de libros
+                books.forEach(book => {
+                    const option = document.createElement('option');
+                    option.value = book.id;
+                    option.textContent = book.name;
+                    bookSelect.appendChild(option);
+                });
+                
+                // Configurar evento para cargar capítulos cuando se seleccione un libro
+                bookSelect.addEventListener('change', function handleBookSelect() {
+                    try {
+                        const selectedBook = this.value;
+                        const chapterSelect = document.getElementById('chapter-select');
+                        
+                        if (selectedBook && chapterSelect) {
+                            loadChapters(selectedBook, chapterSelect);
+                            chapterSelect.disabled = false;
+                            
+                            // Cargar el último capítulo escuchado si existe
+                            const lastBook = localStorage.getItem('audio-last-book');
+                            const lastFile = localStorage.getItem('audio-last-file');
+                            const autoPlayEnabled = localStorage.getItem('audio-autoplay') !== 'false';
+                            
+                            if (lastBook && lastFile && autoPlayEnabled && lastBook === bookSelect.value) {
+                                // Esperar un momento para que se carguen los capítulos
+                                setTimeout(() => {
+                                    try {
+                                        const chapterSelect = document.getElementById('chapter-select');
+                                        if (chapterSelect) {
+                                            chapterSelect.value = lastFile;
+                                            const chapterNum = getChapterNum(lastFile);
+                                            playChapter(lastBook, chapterNum);
+                                        }
+                                    } catch (error) {
+                                        console.error('Error al cargar el capítulo guardado:', error);
+                                    }
+                                }, 500);
+                            }
+                        } else if (chapterSelect) {
+                            chapterSelect.disabled = true;
+                            chapterSelect.innerHTML = '<option value="">Selecciona un capítulo</option>';
+                        }
+                    } catch (error) {
+                        console.error('Error en handleBookSelect:', error);
+                    }
+                });
+            }
+            
+            // Configurar evento para el selector de capítulos
+            const chapterSelect = document.getElementById('chapter-select');
+            if (chapterSelect) {
+                chapterSelect.addEventListener('change', function handleChapterSelect() {
+                    try {
+                        const selectedChapter = this.value;
+                        const selectedBook = bookSelect.value;
+                        
+                        if (selectedBook && selectedChapter) {
+                            try {
+                                // Guardar la selección actual
+                                localStorage.setItem('audio-last-book', selectedBook);
+                                localStorage.setItem('audio-last-file', `${selectedBook}_${String(selectedChapter).padStart(3, '0')}.mp3`);
+                                
+                                // Actualizar la lista de reproducción y reproducir
+                                updatePlaylist(selectedBook);
+                            } catch (error) {
+                                console.error('Error al actualizar la lista de reproducción:', error);
+                            }
+                            playChapter(selectedBook, selectedChapter);
+                        }
+                    } catch (error) {
+                        console.error('Error al cambiar de capítulo:', error);
+                        const nowPlaying = document.getElementById('now-playing');
+                        if (nowPlaying) {
+                            nowPlaying.textContent = 'Error al cargar el capítulo';
+                        }
+                        updatePlayPauseButton(false);
+                    }
+                });
+            }
+        }
+
+        // Función para actualizar la lista de reproducción
+        function updatePlaylist(book) {
+            try {
+                if (!book && !bookSelect) {
+                    console.error('No se pudo actualizar la lista de reproducción: bookSelect no está definido');
+                    return;
+                }
+                
+                // Actualizar la lista de reproducción
+                const currentBook = book || bookSelect.value;
+                
+                // Verificar que exista manifestData
+                if (!Array.isArray(manifestData)) {
+                    console.error('manifestData no es un array o no está definido');
+                    return;
+                }
+                
+                // Filtrar y ordenar los capítulos del libro actual
+                playlist = manifestData
+                    .filter(item => {
+                        try {
+                            if (!item || !item.file) return false;
+                            const filePrefix = item.file.split(/[-_]/)[0];
+                            return filePrefix === currentBook;
+                        } catch (error) {
+                            console.error('Error al filtrar capítulos:', error);
+                            return false;
+                        }
+                    })
+                    .sort((a, b) => {
+                        try {
+                            const aNum = getChapterNum(a.file);
+                            const bNum = getChapterNum(b.file);
+                            return aNum - bNum;
+                        } catch (error) {
+                            console.error('Error al ordenar capítulos:', error);
+                            return 0;
+                        }
+                    })
+                    .map(item => {
+                        try {
+                            const isLocal = window.location.href.startsWith('file://');
+                            const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+                            return basePath + item.file;
+                        } catch (error) {
+                            console.error('Error al mapear rutas de audio:', error);
+                            return null;
+                        }
+                    })
+                    .filter(Boolean); // Eliminar valores nulos del mapeo
+                
+                // Establecer el índice del track actual si se proporciona un archivo
+                if (currentFile) {
+                    try {
+                        trackIndex = playlist.findIndex(url => url && url.endsWith(currentFile));
+                    } catch (error) {
+                        console.error('Error al encontrar el índice del track actual:', error);
+                        trackIndex = 0;
+                    }
+                }
+                
+                console.log('Lista de reproducción actualizada:', {
+                    currentBook,
+                    trackCount: playlist.length,
+                    currentTrackIndex: trackIndex,
+                    currentFile: currentFile || 'Ningún archivo seleccionado'
+                });
+                
+            } catch (error) {
+                console.error('Error en updatePlaylist:', error);
+                playlist = [];
+                trackIndex = 0;
+            }
+            
+            return playlist;
+        }
+        
+        // Función para reproducir un capítulo específico
+        async function playChapter(book, chapter) {
+            try {
+                const file = `${book}_${String(chapter).padStart(3, '0')}.mp3`;
+                const isLocal = window.location.href.startsWith('file://');
+                const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+                const audioUrl = basePath + file;
+                
+                console.log('Preparando para reproducir capítulo:', audioUrl);
+                
+                // Actualizar el archivo actual
+                currentFile = file;
+                currentBook = book;
+                
+                // Actualizar la lista de reproducción
+                updatePlaylist(book, file);
+                
+                // Obtener el nombre del libro actual
+                const currentBookName = bookDisplayNames[book] || book;
+                const chapterNum = getChapterNum(file);
+                
+                // Actualizar la interfaz de usuario
+                const nowPlayingElement = document.getElementById('now-playing');
+                if (nowPlayingElement) {
+                    nowPlayingElement.textContent = `Cargando: ${currentBookName} ${chapterNum}`;
+                }
+                
+                // Actualizar el título de la página para mostrar el capítulo actual
+                document.title = `${currentBookName} ${chapterNum} - Biblia de Poder y Milagros`;
+                
+                // Cargar el audio primero
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.load();
+                    
+                    try {
+                        // Esperar a que el audio esté listo para reproducir
+                        await new Promise((resolve) => {
+                            const onCanPlay = () => {
+                                audioPlayer.removeEventListener('canplay', onCanPlay);
+                                resolve();
+                            };
+                            audioPlayer.addEventListener('canplay', onCanPlay, { once: true });
+                            
+                            // Timeout en caso de que el audio no se cargue
+                            setTimeout(() => {
+                                audioPlayer.removeEventListener('canplay', onCanPlay);
+                                resolve(); // Continuar de todos modos
+                            }, 3000);
+                        });
+                        
+                        // Iniciar la reproducción
+                        console.log('Iniciando reproducción de:', audioUrl);
+                        await audioPlayer.play();
+                        
+                        // Actualizar la interfaz con el estado de reproducción
+                        if (nowPlayingElement) {
+                            nowPlayingElement.textContent = `Escuchando: ${currentBookName} ${chapterNum}`;
+                        }
+                        document.title = `${currentBookName} ${chapterNum} - Biblia de Poder y Milagros`;
+                        updatePlayPauseButton(true);
+                        
+                        console.log('Reproducción iniciada correctamente');
+                    } catch (error) {
+                        console.error('Error al reproducir el audio:', error);
+                        if (nowPlayingElement) {
+                            nowPlayingElement.textContent = 'Error al reproducir el audio';
+                        }
+                        updatePlayPauseButton(false);
+                    }
+                } else {
+                    console.error('El reproductor de audio no está disponible');
+                    if (nowPlayingElement) {
+                        nowPlayingElement.textContent = 'Error: Reproductor no disponible';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al reproducir el capítulo:', error);
+                const nowPlaying = document.getElementById('now-playing');
+                if (nowPlaying) {
+                    nowPlaying.textContent = 'Error al reproducir el capítulo';
+                }
+                updatePlayPauseButton(false);
+            }
+        };
+                        
+                        // Auto-load last listened book and chapter
+                        const lastBook = localStorage.getItem('audio-last-book');
+                        const lastFile = localStorage.getItem('audio-last-file');
+                        const autoPlayEnabled = localStorage.getItem('audio-autoplay') !== 'false';
+                        
+                        if (lastBook && lastFile && autoPlayEnabled) {
+                            const bookSelect = document.getElementById('book');
+                            const chapterSelect = document.getElementById('chapter');
+                            
+                            if (bookSelect && chapterSelect) {
+                                bookSelect.value = lastBook;
+                                loadChapters(lastBook);
+                                
+                                // Esperar un momento para que se carguen los capítulos
+                                setTimeout(() => {
+                                    try {
+                                        const chapterSelect = document.getElementById('chapter-select');
+                                        if (chapterSelect) {
+                                            chapterSelect.value = lastFile;
+                                            const chapterNum = getChapterNum(lastFile);
+                                            playChapter(lastBook, chapterNum);
+                                        }
+                                    } catch (error) {
+                                        console.error('Error al cargar el capítulo guardado:', error);
+                                    }
+                                }, 500);
+                            }
+                        } else if (chapterSelect) {
+                            chapterSelect.disabled = true;
+                            chapterSelect.innerHTML = '<option value="">Selecciona un capítulo</option>';
+                        }
+                    } catch (error) {
+                        console.error('Error en handleBookSelect:', error);
+                    }
+                });
+            } catch (error) {
+                console.error('Error al cargar los libros:', error);
+            }
+        }
+        
+        // Función para activar/desactivar controles
+        function updateControls(enabled = true) {
+            const nextBtn = document.querySelector('.next-btn');
+            const prevBtn = document.querySelector('.prev-btn');
+            if (nextBtn) nextBtn.disabled = !enabled;
+            if (prevBtn) prevBtn.disabled = !enabled;
+        }
+
+        // Función para cargar y reproducir un capítulo
+        const loadAndPlayChapter = (file, code) => {
+                    if (!file || !code) {
+                        updateControls(false);
+                        return;
+                    }
+                    
+                    // Extraer el número del capítulo del nombre del archivo (ej: '1chron_01.mp3' -> '1')
+                    const match = file.match(/(\d+)\.mp3$/);
+                    const num = match ? match[1] : '1';  // Usar '1' como valor por defecto
+                    // Usar la ruta correcta a los archivos de audio
+                    const audioUrl = `https://raw.githubusercontent.com/MJoelGV/biblia-poder-milagros/main/docs/audio/${file}`;
+                    playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                    
+                    // Activar controles
+                    updateControls(true);
+                    
+                    if (autoPlayEnabled) {
+                        const audioPlayer = document.getElementById('audio-player');
+                        audioPlayer.play().catch(error => {
+                            console.log('Error al reproducir automáticamente:', error);
+                        });
+                    }
+                };
+
+                // Configurar evento de cambio de capítulo
+                chapterSelect.onchange = e => {
+                    const file = e.target.value;
+                    if (!file) return;
+                    
+                    const code = bookSelect.value;
+                    localStorage.setItem('audio-last-book', code);
+                    localStorage.setItem('audio-last-file', file);
+                    
+                    console.log('Reproduciendo:', file, 'code:', code);
+                    loadAndPlayChapter(file, code);
+                };
+
+                // Cargar último capítulo escuchado si existe
+                if (lastBook && codes.includes(lastBook)) {
+                    bookSelect.value = lastBook;
+                    // Disparar evento change para cargar los capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                    
+                    // Esperar a que se carguen las opciones del select
+                    setTimeout(() => {
+                        if (lastFile) {
+                            const optValues = Array.from(chapterSelect.options).map(o => o.value);
+                            if (optValues.includes(lastFile)) {
+                                chapterSelect.value = lastFile;
+                                // Activar controles inmediatamente
+                                updateControls(true);
+                                // Disparar evento change para reproducir
+                                const changeEvent = new Event('change');
+                                chapterSelect.dispatchEvent(changeEvent);
+                            } else {
+                                // Si no hay archivo válido, desactivar controles
+                                updateControls(false);
+                            }
+                        } else {
+                            updateControls(false);
+                        }
+                    }, 100);
+                } else {
+                    // Si no hay libro guardado, desactivar controles
+                    updateControls(false);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        
+        // Inicializar el reproductor cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Código de inicialización aquí
+                console.log('Reproductor de audio inicializado');
+            } catch (error) {
+                console.error('Error al inicializar el reproductor:', error);
+            }
+        });
+
+        // Reproducción de libro (solo MP3)
+        function playBook(bookName, bookNode) {
+            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
+            document.getElementById('player-controls').style.display = 'flex';
+            const chapters = Array.from(bookNode.getElementsByTagName('c'));
+            const playlist = chapters.map(c => {
+                const chap = c.getAttribute('n');
+                return `/audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+            });
+            trackIndex = 0;
+            audioPlayer.style.display = '';
+            audioPlayer.src = playlist[trackIndex];
+            audioPlayer.play().catch(err => console.error('Error MP3:', err));
+            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+        }
+
+        function playCustom(name, src) {
+            console.log('playCustom - Iniciando con src:', src);
+            
+            // Mostrar mensaje de carga
+            const nowPlaying = document.getElementById('now-playing');
+            nowPlaying.textContent = `Cargando ${name}...`;
+            
+            // Extraer el código del libro del nombre del archivo
+            const fileName = src.split('/').pop();
+            const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            
+            // Verificar si el código es válido
+            if (!code) {
+                const errorMsg = 'No se pudo determinar el código del libro para: ' + src;
+                console.error(errorMsg);
+                nowPlaying.textContent = 'Error: ' + errorMsg;
+                return;
+            }
+            
+            // Verificar que exista manifestData
+            if (!manifestData || !Array.isArray(manifestData)) {
+                const errorMsg = 'No se han cargado los datos de la Biblia. Por favor, recarga la página.';
+                console.error(errorMsg);
+                nowPlaying.textContent = errorMsg;
+                return;
+            }
+            
+            console.log('Buscando capítulos para el libro:', code);
+            
+            // Filtrar y ordenar capítulos
+            const chapters = manifestData
+                .filter(item => item && item.file && item.file.startsWith(code + '_'))
+                .sort((a,b) => {
+                    const aNum = parseInt((a.file.match(/\d+/) || ['0'])[0]) || 0;
+                    const bNum = parseInt((b.file.match(/\d+/) || ['0'])[0]) || 0;
+                    return aNum - bNum;
+                });
+            
+            console.log(`Encontrados ${chapters.length} capítulos para ${code}`);
+            
+            if (chapters.length === 0) {
+                const errorMsg = `No se encontraron capítulos para el libro: ${code}`;
+                console.error(errorMsg);
+                nowPlaying.textContent = 'Error: ' + errorMsg;
+                return;
+            }
+            
+            // Determinar la ruta base según el entorno
+            const isLocal = window.location.href.startsWith('file://');
+            const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+            
+            console.log('Ruta base para audios:', basePath);
+            
+            // Crear la lista de reproducción con las rutas completas
+            playlist = chapters.map(item => {
+                const path = basePath + item.file;
+                console.log('Añadiendo a la lista de reproducción:', path);
+                return path;
+            });
+            
+            // Encontrar el índice del capítulo actual en la lista de reproducción
+            const currentFile = fileName.includes('/') ? fileName.split('/').pop() : fileName;
+            trackIndex = playlist.findIndex(url => url.endsWith('/' + currentFile) || url.endsWith(currentFile));
+            
+            console.log(`Capítulo actual: ${currentFile}, Índice: ${trackIndex}`);
+            
+            if (trackIndex === -1) {
+                console.warn('No se encontró el capítulo en la lista, usando el primero');
+                trackIndex = 0; // Usar el primer capítulo si no se encuentra
+            }
+            
+            // Mostrar y reproducir en cadena
+            const nowPlayingEl = document.getElementById('now-playing');
+            const playerControlsEl = document.getElementById('player-controls');
+            
+            if (nowPlayingEl) nowPlayingEl.textContent = 'Cargando ' + name + '...';
+            if (playerControlsEl) playerControlsEl.style.display = 'flex';
+            if (audioPlayer) audioPlayer.style.display = 'block';
+            
+            // Cargar el audio
+            const audioUrl = playlist[trackIndex];
+            console.log('Intentando reproducir:', audioUrl);
+            
+            if (!audioUrl) {
+                console.error('No se pudo obtener la URL del audio');
+                if (nowPlayingEl) nowPlayingEl.textContent = 'Error: No se pudo cargar el audio';
+                return;
+            }
+            
+            try {
+                // Forzar precarga del audio
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.load();
+                }
+                
+                // Actualizar botones de reproducción
+                const playBtn = document.getElementById('play-button');
+                const pauseBtn = document.getElementById('pause-button');
+                
+                if (playBtn) playBtn.style.display = 'inline-block';
+                if (pauseBtn) pauseBtn.style.display = 'none';
+                
+                // Mostrar mensaje para el usuario
+                if (nowPlayingEl) {
+                    nowPlayingEl.textContent = 'Haz clic en el botón de reproducción para escuchar ' + name;
+                }
+                
+                // Habilitar controles
+                if (playBtn) playBtn.disabled = false;
+                if (pauseBtn) pauseBtn.disabled = false;
+                
+                console.log('Reproductor listo para reproducir:', audioUrl);
+            } catch (error) {
+                console.error('Error al cargar el audio:', error);
+                if (nowPlayingEl) nowPlayingEl.textContent = 'Error al cargar el audio: ' + error.message;
+            }
+        }
+
+        // Función para reproducir track y actualizar indicador
+        function playTrack(index) {
+            try {
+                console.log('playTrack called with index:', index);
+                if (!playlist || !playlist.length) {
+                    console.error('Playlist is empty or not defined');
+                    return;
+                }
+                
+                const src = playlist[index];
+                if (!src) {
+                    console.error('No source found at index', index);
+                    return;
+                }
+                
+                console.log('Setting audio source to:', src);
+                audioPlayer.src = src;
+                
+                // Actualizar la interfaz de usuario
+                const playPauseBtn = document.getElementById('play-pause');
+                if (playPauseBtn) {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    playPauseBtn.setAttribute('title', 'Pausar');
+                }
+                
+                // Extraer información del archivo para mostrar
+                const fileName = src.split('/').pop().replace('.mp3','');
+                const parts = fileName.includes('-') ? fileName.split('-') : fileName.split('_');
+                if (parts.length >= 1) {
+                    const code = parts[0];
+                    const chap = parts[1] || '';
+                    document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code] || code} ${chap}`;
+                }
+                
+                // Reproducir automáticamente
+                return audioPlayer.play()
+                    .then(() => {
+                        console.log('Playback started successfully');
+                        trackIndex = index; // Actualizar el índice del track actual
+                        updatePlayPauseButton(true);
+                    })
+                    .catch(error => {
+                        console.error('Error playing audio:', error);
+                        updatePlayPauseButton(false);
+                        throw error; // Propagar el error para manejarlo en el llamador
+                    });
+                    
+            } catch (error) {
+                console.error('Error in playTrack:', error);
+                updatePlayPauseButton(false);
+                throw error; // Propagar el error
+            }
+        }
+
+        // Controles de navegación
+        const prevBtn = document.getElementById('prev-reading');
+        const nextBtn = document.getElementById('next-reading');
+        const stopBtn = document.getElementById('stop-button');
+        const playBtn = document.getElementById('play-button');
+        const pauseBtn = document.getElementById('pause-button');
+        
+        // Asegurarse de que audioPlayer esté definido
+        if (!audioPlayer) {
+            console.error('No se pudo encontrar el elemento de audio');
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (trackIndex > 0) { 
+                    trackIndex--; 
+                    playTrack(trackIndex); 
+                }
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (trackIndex < playlist.length - 1) { 
+                    trackIndex++; 
+                    playTrack(trackIndex); 
+                }
+            });
+        }
+        
+        // Función para detener la reproducción
+        function stopPlayback() {
+            if (!audioPlayer) return;
+            
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            updatePlayPauseButton(false);
+            
+            // Actualizar la interfaz
+            const currentTime = document.getElementById('current-time');
+            const seekSlider = document.getElementById('seek-slider');
+            
+            if (currentTime) currentTime.textContent = '0:00';
+            if (seekSlider) seekSlider.value = 0;
+            
+            // Actualizar el título del botón de play/pause
+            if (playPauseBtn) {
+                playPauseBtn.setAttribute('title', 'Reproducir');
+            }
+        }
+        
+        // Configurar los manejadores de eventos de los botones
+        if (playBtn) {
+            playBtn.addEventListener('click', handlePlayClick);
+        }
+        
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', handlePauseClick);
+        }
+        
+        if (stopBtn) {
+            stopBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopPlayback();
+                
+                // Deshabilitar el botón de stop después de detener
+                stopBtn.disabled = true;
+            });
+            
+            // Asegurarse de que el botón de stop esté deshabilitado inicialmente
+            stopBtn.disabled = true;
+        }
+        // MP3 cambia track
+        audioPlayer.addEventListener('ended', () => {
+            if (trackIndex < playlist.length - 1) {
+                trackIndex++;
+                playTrack(trackIndex);
+            }
+        });
+        // Función para actualizar el estado de los botones
+        function updatePlayPauseButton(isPlaying) {
+            if (!playBtn || !pauseBtn || !stopBtn) return;
+            
+            if (isPlaying) {
+                // Mostrar botón de pausa y ocultar el de play
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-flex';
+                stopBtn.disabled = false;
+            } else {
+                // Mostrar botón de play y ocultar el de pausa
+                playBtn.style.display = 'inline-flex';
+                pauseBtn.style.display = 'none';
+            }
+        }
+        
+        // Inicializar el estado del botón
+        updatePlayPauseButton(false);
+        
+
+        
+        // Función para manejar el clic en el botón Play
+        function handlePlayClick(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            console.log('Play clicked. Current state - paused:', audioPlayer.paused, 
+                       'ended:', audioPlayer.ended, 
+                       'src:', audioPlayer.src);
+            
+            // Si no hay fuente, no hacer nada
+            if (!audioPlayer.src) {
+                console.log('No hay fuente de audio cargada');
+                return;
+            }
+            
+            console.log('Iniciando reproducción...');
+            
+            // Actualizar el botón inmediatamente para mejor respuesta
+            updatePlayPauseButton(true);
+            
+            const playPromise = audioPlayer.play();
+            
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log('Reproducción iniciada exitosamente');
+                    })
+                    .catch(error => {
+                        console.error('Error al reproducir:', error);
+                        // Revertir el estado del botón si hay un error
+                        updatePlayPauseButton(false);
+                        // Mostrar mensaje de error al usuario
+                        const nowPlaying = document.getElementById('now-playing');
+                        if (nowPlaying) {
+                            nowPlaying.textContent = 'Error al reproducir el audio';
+                        }
+                    });
+            }
+        }
+        
+        // Función para manejar el clic en el botón Pause
+        function handlePauseClick(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            console.log('Pausando reproducción...');
+            
+            // Actualizar el botón inmediatamente para mejor respuesta
+            updatePlayPauseButton(false);
+            audioPlayer.pause();
+        }
+        
+        // Función para inicializar los manejadores de eventos del reproductor
+        function initializePlayerEventHandlers() {
+            console.log('Inicializando manejadores de eventos del reproductor...');
+            
+            // Obtener referencias a los botones
+            const playBtn = document.getElementById('play-button');
+            const pauseBtn = document.getElementById('pause-button');
+            
+            if (!playBtn || !pauseBtn || !audioPlayer) {
+                console.error('Error: No se pudieron encontrar los controles del reproductor de audio');
+                return;
+            }
+            
+            // Limpiar manejadores de eventos previos para evitar duplicados
+            playBtn.removeEventListener('click', handlePlayClick);
+            pauseBtn.removeEventListener('click', handlePauseClick);
+            
+            // Configurar los manejadores de clic para los botones
+            playBtn.addEventListener('click', handlePlayClick);
+            pauseBtn.addEventListener('click', handlePauseClick);
+            
+            // Configurar manejadores de eventos del reproductor de audio
+            const events = ['play', 'playing', 'pause', 'ended', 'error', 'waiting'];
+            events.forEach(event => {
+                audioPlayer.removeEventListener(event, handlePlayerStateChange);
+                audioPlayer.addEventListener(event, handlePlayerStateChange);
+            });
+            
+            console.log('Manejadores de eventos del reproductor inicializados correctamente');
+        }
+        
+        // Función para manejar cambios de estado del reproductor
+        function handlePlayerStateChange(event) {
+            console.log(`Evento del reproductor: ${event.type}`, {
+                paused: audioPlayer.paused,
+                ended: audioPlayer.ended,
+                currentTime: audioPlayer.currentTime,
+                duration: audioPlayer.duration,
+                readyState: audioPlayer.readyState
+            });
+            
+            switch (event.type) {
+                case 'playing':
+                    updatePlayPauseButton(true);
+                    break;
+                    
+                case 'play':
+                    // No actualizamos el botón aquí para evitar parpadeo
+                    // El evento 'playing' se encargará de la actualización
+                    break;
+                    
+                case 'pause':
+                    // Solo actualizar si no es por el final del audio
+                    if (!audioPlayer.ended) {
+                        updatePlayPauseButton(false);
+                    }
+                    break;
+                    
+                case 'ended':
+                    updatePlayPauseButton(false);
+                    // Si hay más pistas, reproducir la siguiente
+                    if (trackIndex < playlist.length - 1) {
+                        trackIndex++;
+                        playTrack(trackIndex);
+                    }
+                    break;
+                    
+                case 'error':
+                    console.error('Error en el reproductor de audio:', audioPlayer.error);
+                    updatePlayPauseButton(false);
+                    // Mostrar mensaje de error al usuario
+                    const nowPlaying = document.getElementById('now-playing');
+                    if (nowPlaying) {
+                        nowPlaying.textContent = 'Error al reproducir el audio';
+                    }
+                    break;
+                    
+                case 'waiting':
+                    console.log('El reproductor está cargando datos...');
+                    break;
+            }
+        }
+        
+        // Inicializar los manejadores de eventos
+        initializePlayerEventHandlers();
+        
+        // Inicializar la aplicación cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar la lista de libros
+            loadBooks();
+            
+            // Inicializar controles del reproductor
+            initializePlayerEventHandlers();
+        });
+        
+        // Configurar controles de la barra de progreso
+        const seekSlider = document.getElementById('seek-slider');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        
+        // Iniciar carga de libros
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBooks().catch(error => {
+                console.error('Error al cargar libros:', error);
+                const nowPlaying = document.getElementById('now-playing');
+                if (nowPlaying) {
+                    nowPlaying.textContent = 'Error al cargar los libros. Por favor, recarga la página.';
+                }
+            });
+        });
+        function formatTime(sec) {
+            const m = Math.floor(sec/60);
+            const s = String(Math.floor(sec%60)).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            seekSlider.max = audioPlayer.duration;
+            durationEl.textContent = formatTime(audioPlayer.duration);
+            // Ruta base relativa para los audios
+            const AUDIO_BASE_PATH = './audio/';
+            // Restore saved position
+            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+            const saved = localStorage.getItem(key);
+            if (saved) audioPlayer.currentTime = parseFloat(saved);
+        });
+        audioPlayer.addEventListener('timeupdate', () => {
+            seekSlider.value = audioPlayer.currentTime;
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            // Save current position
+            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+            localStorage.setItem(key, audioPlayer.currentTime);
+        });
+        seekSlider.oninput = () => {
+            audioPlayer.currentTime = seekSlider.value;
+        };
+        // Función para actualizar la URL de compartir
+        function updateShareUrl() {
+            if (!currentBook || !currentChapter) return;
+            
+            const url = new URL(window.location.href.split('?')[0]);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            
+            // Actualizar el botón de compartir si existe
+            const shareButton = document.getElementById('share-button');
+            if (shareButton) {
+                shareButton.onclick = () => {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: document.title,
+                            text: `Escucha ${currentBook} capítulo ${currentChapter} en Biblia de Poder y Milagros`,
+                            url: url.toString()
+                        }).catch(err => {
+                            console.error('Error al compartir:', err);
+                            copyToClipboard(url.toString());
+                        });
+                    } else {
+                        copyToClipboard(url.toString());
+                    }
+                };
+            }
+            
+            // Actualizar la URL en la barra de direcciones sin recargar la página
+            window.history.replaceState({}, '', url);
+        }
+        
+        // Función para copiar al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const nowPlaying = document.getElementById('now-playing');
+                if (nowPlaying) {
+                    const originalText = nowPlaying.textContent;
+                    nowPlaying.textContent = '¡Enlace copiado al portapapeles!';
+                    setTimeout(() => {
+                        nowPlaying.textContent = originalText;
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Error al copiar al portapapeles:', err);
+                // Fallback para navegadores antiguos
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                const nowPlaying = document.getElementById('now-playing');
+                if (nowPlaying) {
+                    const originalText = nowPlaying.textContent;
+                    nowPlaying.textContent = '¡Enlace copiado al portapapeles!';
+                    setTimeout(() => {
+                        nowPlaying.textContent = originalText;
+                    }, 2000);
+                }
+            });
+        }
+        
+        // Función para actualizar la información de lo que se está reproduciendo
+        function updateNowPlaying(bookName, chapterName) {
+            const nowPlaying = document.getElementById('now-playing');
+            if (nowPlaying) {
+                nowPlaying.textContent = `Reproduciendo: ${bookName} - ${chapterName}`;
+            }
+            
+            // Actualizar el título de la página
+            document.title = `${bookName} - ${chapterName} | Biblia de Poder y Milagros`;
+            
+            // Actualizar la URL para compartir
+            updateShareUrl();
+        }
+        
+        // Función para extraer el número de capítulo del nombre del archivo
+        function getChapterNum(filename, returnString = false) {
+            const match = filename.match(/(\d+)(?:\.mp3)?$/);
+            if (!match) return returnString ? '?' : 0;
+            return returnString ? match[1] : parseInt(match[1], 10);
+        }
+        
+        // Mapa de libros con su cantidad de capítulos
+        const bookChapters = {
+            'genesis': 50, 'exodus': 40, 'lev': 27, 'num': 36, 'deu': 34,
+            'joshua': 24, 'judges': 21, 'ruth': 4, '1sam': 31, '2sam': 24,
+            '1kin': 22, '2kin': 25, '1chron': 29, '2chron': 36,
+            'ezra': 10, 'nehemiah': 13, 'esther': 10, 'job': 42, 'psalm': 150,
+            'proverbs': 31, 'ecc': 12, 'song': 8, 'isaiah': 66, 'jere': 52,
+            'lam': 5, 'ezek': 48, 'dan': 12, 'hosea': 14, 'joel': 3, 'amos': 9,
+            'oba': 1, 'jonah': 4, 'micah': 7, 'nahum': 3, 'habak': 3, 'zeph': 3,
+            'haggai': 2, 'zech': 14, 'mal': 4, 'matt': 28, 'mark': 16, 'luke': 24,
+            'john': 21, 'acts': 28, 'romans': 16, '1cor': 16, '2cor': 13, 'gal': 6,
+            'eph': 6, 'phil': 4, 'col': 4, '1the': 5, '2the': 3,
+            '1tim': 6, '2tim': 4, 'tit': 3, 'philem': 1, 'heb': 13, 'jam': 5,
+            '1pet': 5, '2pet': 3, '1john': 5, '2john': 1, '3john': 1, 'jude': 1,
+            'rev': 22
+        };
+
+        // Funciones para cargar capítulos
+        function loadChapters(bookName, chapterSelect) {
+            if (!chapterSelect) return;
+            
+            chapterSelect.innerHTML = '<option value="">Cargando capítulos...</option>';
+            
+            // Usar setTimeout para no bloquear la interfaz
+            setTimeout(() => {
+                const numChapters = bookChapters[bookName.toLowerCase()] || 50; // Usar 50 como valor por defecto si no se encuentra el libro
+                chapterSelect.innerHTML = '<option value="">Selecciona un capítulo</option>';
+                
+                // Crear opciones para cada capítulo
+                for (let i = 1; i <= numChapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Capítulo ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+            }, 100);
+        }
+        
+        // Mapa de códigos de libros a formato de archivo
+        const bookFileNames = {
+            'genesis': 'gen', 'exodus': 'exod', 'lev': 'lev', 'num': 'num', 'deu': 'deut',
+            'joshua': 'josh', 'judges': 'judg', 'ruth': 'ruth', '1sam': '1sam', '2sam': '2sam',
+            '1kin': '1kgs', '2kin': '2kgs', '1chron': '1chron', '2chron': '2chron',
+            'ezra': 'ezra', 'nehemiah': 'neh', 'esther': 'esth', 'job': 'job', 'psalm': 'psa',
+            'proverbs': 'prov', 'ecc': 'eccl', 'song': 'song', 'isaiah': 'isa', 'jere': 'jer',
+            'lam': 'lam', 'ezek': 'ezek', 'dan': 'dan', 'hosea': 'hos', 'joel': 'joel', 'amos': 'amos',
+            'oba': 'obad', 'jonah': 'jonah', 'micah': 'mic', 'nahum': 'nah', 'habak': 'hab', 'zeph': 'zeph',
+            'haggai': 'hag', 'zech': 'zech', 'mal': 'mal', 'matt': 'matt', 'mark': 'mark', 'luke': 'luke',
+            'john': 'john', 'acts': 'acts', 'romans': 'rom', '1cor': '1cor', '2cor': '2cor', 'gal': 'gal',
+            'eph': 'eph', 'phil': 'phil', 'col': 'col', '1the': '1thess', '2the': '2thess',
+            '1tim': '1tim', '2tim': '2tim', 'tit': 'titus', 'philem': 'phlm', 'heb': 'heb', 'jam': 'james',
+            '1pet': '1pet', '2pet': '2pet', '1john': '1john', '2john': '2john', '3john': '3john', 'jude': 'jude',
+            'rev': 'rev'
+        };
+
+        // Función para reproducir un capítulo específico
+        function playChapter(bookName, chapter) {
+            console.log(`Reproduciendo ${bookName} capítulo ${chapter}`);
+            updateNowPlaying(bookName, `Capítulo ${chapter}`);
+            
+            // Detener la reproducción actual si hay alguna
+            stopPlayback();
+            
+            // Obtener el nombre de archivo del libro
+            const bookCode = bookFileNames[bookName.toLowerCase()] || bookName.toLowerCase();
+            
+            // Construir la ruta del archivo de audio en el formato correcto (ej: 1chron_01.mp3)
+            const formattedChapter = String(chapter).padStart(2, '0');
+            const audioPath = `audio/${bookCode}_${formattedChapter}.mp3`;
+            
+            // Obtener el elemento de audio
+            const audioPlayer = document.getElementById('audio-player');
+            
+            // Configurar la fuente de audio
+            audioPlayer.src = audioPath;
+            
+            // Actualizar la interfaz
+            document.getElementById('play-button').style.display = 'none';
+            document.getElementById('pause-button').style.display = 'inline-flex';
+            
+            // Intentar reproducir
+            const playPromise = audioPlayer.play();
+            
+            // Manejar cualquier error de reproducción
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Error al reproducir el audio:', error);
+                    // Mostrar mensaje de error al usuario
+                    const nowPlaying = document.getElementById('now-playing');
+                    nowPlaying.textContent = `Error al cargar ${bookName} capítulo ${chapter}`;
+                    nowPlaying.style.color = '#e74c3c';
+                });
+            }
+            
+            // Actualizar la interfaz cuando el audio esté listo
+            audioPlayer.onloadedmetadata = function() {
+                console.log('Duración del audio:', audioPlayer.duration);
+                // Aquí podrías actualizar la duración en la interfaz si lo deseas
+            };
+            
+            // Manejar errores de carga
+            audioPlayer.onerror = function() {
+                console.error('Error al cargar el archivo de audio');
+                const nowPlaying = document.getElementById('now-playing');
+                nowPlaying.textContent = `No se pudo cargar ${bookName} capítulo ${chapter}`;
+                nowPlaying.style.color = '#e74c3c';
+            };
+        }
+        
+        // Iniciar lista y reproducción
+        let playlist = [];
+        let trackIndex = 0;
+        
+        // Asegurarse de que el audio se detenga al cerrar la pestaña
+        window.addEventListener('beforeunload', () => {
+            const audioPlayer = document.getElementById('audio-player');
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.src = '';
+            }
+        });
+        let currentBookNode;
+        
+        // Precargar manifest y configurar evento de interacción
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM cargado, iniciando carga de libros...');
+            try {
+                await loadBooks();
+                console.log('Libros cargados correctamente');
+                
+                // Configurar controles de audio después de cargar los libros
+                const lastBook = localStorage.getItem('audio-last-book');
+                if (lastBook) {
+                    bookSelect.value = lastBook;
+                    // Disparar el evento change para cargar los capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                }
+            } catch (error) {
+                console.error('Error al cargar los libros:', error);
+                const nowPlaying = document.getElementById('now-playing');
+                if (nowPlaying) {
+                    nowPlaying.textContent = 'Error al cargar la lista de libros. Por favor, recarga la página.';
+                }
+            }
+        });
+    </script>
+    <script>
+        const menuBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (menuBtn) menuBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

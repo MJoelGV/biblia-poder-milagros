@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblia en Audio - Versión Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .player-controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Biblia en Audio</h1>
+    
+    <div class="container">
+        <div>
+            <select id="book-select">
+                <option value="">Selecciona un libro</option>
+            </select>
+            
+            <select id="chapter-select" disabled>
+                <option value="">Capítulo</option>
+            </select>
+        </div>
+        
+        <div id="now-playing" style="margin: 20px 0; font-size: 18px;"></div>
+        
+        <div class="player-controls">
+            <button id="play-button">Reproducir</button>
+            <button id="stop-button">Detener</button>
+        </div>
+        
+        <audio id="audio-player"></audio>
+    </div>
+
+    <script>
+        // Datos de los libros de la Biblia
+        const books = [
+            { id: 'gen', name: 'Génesis', chapters: 50 },
+            { id: 'exo', name: 'Éxodo', chapters: 40 },
+            { id: 'lev', name: 'Levítico', chapters: 27 },
+            { id: 'num', name: 'Números', chapters: 36 },
+            { id: 'deu', name: 'Deuteronomio', chapters: 34 },
+            { id: 'jos', name: 'Josué', chapters: 24 },
+            { id: 'jdg', name: 'Jueces', chapters: 21 },
+            { id: 'rut', name: 'Rut', chapters: 4 },
+            { id: '1sa', name: '1 Samuel', chapters: 31 },
+            { id: '2sa', name: '2 Samuel', chapters: 24 },
+            { id: '1ki', name: '1 Reyes', chapters: 22 },
+            { id: '2ki', name: '2 Reyes', chapters: 25 },
+            { id: '1ch', name: '1 Crónicas', chapters: 29 },
+            { id: '2ch', name: '2 Crónicas', chapters: 36 },
+            { id: 'ezr', name: 'Esdras', chapters: 10 },
+            { id: 'neh', name: 'Nehemías', chapters: 13 },
+            { id: 'est', name: 'Ester', chapters: 10 },
+            { id: 'job', name: 'Job', chapters: 42 },
+            { id: 'psa', name: 'Salmos', chapters: 150 },
+            { id: 'pro', name: 'Proverbios', chapters: 31 },
+            { id: 'ecc', name: 'Eclesiastés', chapters: 12 },
+            { id: 'sng', name: 'Cantares', chapters: 8 },
+            { id: 'isa', name: 'Isaías', chapters: 66 },
+            { id: 'jer', name: 'Jeremías', chapters: 52 },
+            { id: 'lam', name: 'Lamentaciones', chapters: 5 },
+            { id: 'ezk', name: 'Ezequiel', chapters: 48 },
+            { id: 'dan', name: 'Daniel', chapters: 12 },
+            { id: 'hos', name: 'Oseas', chapters: 14 },
+            { id: 'jol', name: 'Joel', chapters: 3 },
+            { id: 'amo', name: 'Amós', chapters: 9 },
+            { id: 'oba', name: 'Abdías', chapters: 1 },
+            { id: 'jon', name: 'Jonás', chapters: 4 },
+            { id: 'mic', name: 'Miqueas', chapters: 7 },
+            { id: 'nam', name: 'Nahúm', chapters: 3 },
+            { id: 'hab', name: 'Habacuc', chapters: 3 },
+            { id: 'zep', name: 'Sofonías', chapters: 3 },
+            { id: 'hag', name: 'Hageo', chapters: 2 },
+            { id: 'zec', name: 'Zacarías', chapters: 14 },
+            { id: 'mal', name: 'Malaquías', chapters: 4 },
+            { id: 'mat', name: 'Mateo', chapters: 28 },
+            { id: 'mrk', name: 'Marcos', chapters: 16 },
+            { id: 'luk', name: 'Lucas', chapters: 24 },
+            { id: 'jhn', name: 'Juan', chapters: 21 },
+            { id: 'act', name: 'Hechos', chapters: 28 },
+            { id: 'rom', name: 'Romanos', chapters: 16 },
+            { id: '1co', name: '1 Corintios', chapters: 16 },
+            { id: '2co', name: '2 Corintios', chapters: 13 },
+            { id: 'gal', name: 'Gálatas', chapters: 6 },
+            { id: 'eph', name: 'Efesios', chapters: 6 },
+            { id: 'php', name: 'Filipenses', chapters: 4 },
+            { id: 'col', name: 'Colosenses', chapters: 4 },
+            { id: '1th', name: '1 Tesalonicenses', chapters: 5 },
+            { id: '2th', name: '2 Tesalonicenses', chapters: 3 },
+            { id: '1ti', name: '1 Timoteo', chapters: 6 },
+            { id: '2ti', name: '2 Timoteo', chapters: 4 },
+            { id: 'tit', name: 'Tito', chapters: 3 },
+            { id: 'phm', name: 'Filemón', chapters: 1 },
+            { id: 'heb', name: 'Hebreos', chapters: 13 },
+            { id: 'jas', name: 'Santiago', chapters: 5 },
+            { id: '1pe', name: '1 Pedro', chapters: 5 },
+            { id: '2pe', name: '2 Pedro', chapters: 3 },
+            { id: '1jn', name: '1 Juan', chapters: 5 },
+            { id: '2jn', name: '2 Juan', chapters: 1 },
+            { id: '3jn', name: '3 Juan', chapters: 1 },
+            { id: 'jud', name: 'Judas', chapters: 1 },
+            { id: 'rev', name: 'Apocalipsis', chapters: 22 }
+        ];
+
+        // Elementos del DOM
+        const bookSelect = document.getElementById('book-select');
+        const chapterSelect = document.getElementById('chapter-select');
+        const playButton = document.getElementById('play-button');
+        const stopButton = document.getElementById('stop-button');
+        const audioPlayer = document.getElementById('audio-player');
+        const nowPlaying = document.getElementById('now-playing');
+
+        // Cargar libros en el selector
+        function loadBooks() {
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = book.name;
+                bookSelect.appendChild(option);
+            });
+        }
+
+        // Cargar capítulos cuando se selecciona un libro
+        bookSelect.addEventListener('change', () => {
+            const selectedBookId = bookSelect.value;
+            const selectedBook = books.find(book => book.id === selectedBookId);
+            
+            // Limpiar selector de capítulos
+            chapterSelect.innerHTML = '<option value="">Capítulo</option>';
+            chapterSelect.disabled = !selectedBook;
+            
+            if (selectedBook) {
+                // Agregar opciones de capítulos
+                for (let i = 1; i <= selectedBook.chapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Capítulo ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+            }
+        });
+
+        // Reproducir el capítulo seleccionado
+        playButton.addEventListener('click', () => {
+            const bookId = bookSelect.value;
+            const chapter = chapterSelect.value;
+            
+            if (!bookId || !chapter) {
+                alert('Por favor selecciona un libro y un capítulo');
+                return;
+            }
+            
+            const book = books.find(b => b.id === bookId);
+            const audioUrl = `https://www.wordproject.org/bibles/audio/01_nt_wm/${bookId}_c${chapter.padStart(3, '0')}_bible_wm.mp3`;
+            
+            nowPlaying.textContent = `Reproduciendo: ${book.name} Capítulo ${chapter}`;
+            audioPlayer.src = audioUrl;
+            audioPlayer.play().catch(error => {
+                console.error('Error al reproducir el audio:', error);
+                nowPlaying.textContent = 'Error al cargar el audio. Intenta con otro capítulo.';
+            });
+        });
+
+        // Detener la reproducción
+        stopButton.addEventListener('click', () => {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            nowPlaying.textContent = 'Reproducción detenida';
+        });
+
+        // Cargar los libros al iniciar
+        loadBooks();
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+/* Estilos generales */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Encabezado */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: 20px;
+}
+
+/* Botones */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Selectores */
+select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background-color: #222;
+    color: #fff;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+/* Controles del reproductor */
+#player-controls {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+#now-playing {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #4CAF50;
+}
+
+/* Barra de progreso */
+#seek-slider {
+    width: 100%;
+    margin: 15px 0;
+}
+
+/* Tiempo de reproducción */
+.time-display {
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Botones de control */
+.player-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.player-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.player-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Menú lateral */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #1e1e1e;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.side-menu li {
+    padding: 10px 0;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.side-menu li:hover {
+    color: #4CAF50;
+}
+
+/* Botón de menú */
+#side-menu-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+}
+
+/* Selector de libro y capítulo */
+.book-selector, .chapter-selector {
+    margin: 10px 0;
+}
+
+.book-selector select, .chapter-selector select {
+    width: 100%;
+    margin: 5px 0;
+}
+
+/* Estilos para móviles */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .player-buttons {
+        gap: 10px;
+    }
+    
+    .player-button {
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+    }
+}
