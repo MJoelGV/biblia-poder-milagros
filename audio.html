@@ -126,7 +126,7 @@
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
             try {
-                const res = await fetch('audio/manifest.json');
+                const res = await fetch('/audio/manifest.json');
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
                 // Store manifest globally
@@ -161,14 +161,14 @@
                     if (chapters.length > 0) {
                         const first = chapters[0];
                         const num = first.file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${first.file}`);
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `/audio/${first.file}`);
                     }
                     chapterSelect.onchange = e => {
                         const file = e.target.value;
                         localStorage.setItem('audio-last-book', code);
                         localStorage.setItem('audio-last-file', file);
                         const num = file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${file}`);
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `/audio/${file}`);
                     };
                 };
                 // Auto-load last listened book and chapter
@@ -197,7 +197,7 @@
             const chapters = Array.from(bookNode.getElementsByTagName('c'));
             const playlist = chapters.map(c => {
                 const chap = c.getAttribute('n');
-                return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+                return `/audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
             });
             trackIndex = 0;
             audioPlayer.style.display = '';
@@ -214,7 +214,7 @@
             const chapters = manifestData
                 .filter(item => item.file.startsWith(code + '_'))
                 .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-            playlist = chapters.map(item => `audio/${item.file}`);
+            playlist = chapters.map(item => `/audio/${item.file}`);
             trackIndex = playlist.indexOf(src);
             // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
@@ -282,6 +282,8 @@
         audioPlayer.addEventListener('loadedmetadata', () => {
             seekSlider.max = audioPlayer.duration;
             durationEl.textContent = formatTime(audioPlayer.duration);
+            // Ruta base para los audios en GitHub Pages
+            const AUDIO_BASE_PATH = 'https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/';
             // Restore saved position
             const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
             const saved = localStorage.getItem(key);
