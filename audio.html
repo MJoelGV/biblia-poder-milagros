@@ -286,18 +286,43 @@
             // Construir playlist completo del libro
             const fileName = src.split('/').pop();
             const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            
+            // Filtrar y ordenar capítulos
             const chapters = manifestData
-                .filter(item => item.file.startsWith(code + '_'))
-                .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-            playlist = chapters.map(item => `/audio/${item.file}`);
-            trackIndex = playlist.indexOf(src);
+                .filter(item => item.file && item.file.startsWith(code + '_'))
+                .sort((a,b) => {
+                    const aNum = parseInt((a.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
+                    const bNum = parseInt((b.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
+                    return aNum - bNum;
+                });
+            
+            // Usar la ruta base correcta para los audios
+            playlist = chapters.map(item => `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${item.file}`);
+            trackIndex = playlist.indexOf(src) >= 0 ? playlist.indexOf(src) : 0;
+            
             // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
             document.getElementById('player-controls').style.display = 'flex';
             audioPlayer.style.display = 'block';
-            audioPlayer.src = playlist[trackIndex];
-            audioPlayer.play().catch(err => console.error('Error MP3:', err));
-            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            // Cargar el audio
+            const audioUrl = playlist[trackIndex];
+            console.log('Intentando reproducir:', audioUrl);
+            
+            // Forzar precarga del audio
+            audioPlayer.pause();
+            audioPlayer.src = audioUrl;
+            audioPlayer.load();
+            
+            // Actualizar botón de reproducción
+            const playPauseBtn = document.getElementById('play-pause');
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            
+            // Mostrar mensaje para el usuario
+            document.getElementById('now-playing').textContent = 'Haz clic en el botón de reproducción para escuchar';
+            
+            // Habilitar controles
+            playPauseBtn.disabled = false;
         }
 
         // Función para reproducir track y actualizar indicador
@@ -376,7 +401,32 @@
         };
         // Iniciar lista y reproducción
         let manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
-        loadBooks();
+        
+        // Precargar manifest y configurar evento de interacción
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar el manifest
+            loadBooks();
+            
+            // Agregar manejador de clic para el botón de reproducción
+            const playPauseBtn = document.getElementById('play-pause');
+            playPauseBtn.addEventListener('click', function() {
+                if (audioPlayer.paused) {
+                    // Si no hay fuente, intentar cargar el primer capítulo
+                    if (!audioPlayer.src && playlist.length > 0) {
+                        audioPlayer.src = playlist[0];
+                    }
+                    audioPlayer.play().then(() => {
+                        this.innerHTML = '<i class="fas fa-pause"></i>';
+                    }).catch(err => {
+                        console.error('Error al reproducir:', err);
+                        this.innerHTML = '<i class="fas fa-play"></i>';
+                    });
+                } else {
+                    audioPlayer.pause();
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+        });
     </script>
     <script>
         const menuBtn = document.getElementById('side-menu-toggle');
