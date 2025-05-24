@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lectura - Biblia de Poder y Milagros</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
@@ -13,13 +13,131 @@
     <!-- corregido path para iOS icon -->
     <link rel="apple-touch-icon" href="../icons/pymicon.png">
     <style>
+        /* Estilos del menú lateral */
+        .side-menu { 
+            position: fixed; 
+            top: 0; 
+            left: -250px; 
+            width: 250px; 
+            height: 100%; 
+            background: #121212; 
+            color: #fff; 
+            box-shadow: 2px 0 8px rgba(0,0,0,0.5); 
+            transition: left 0.3s ease; 
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        
+        .side-menu.active { 
+            left: 0; 
+        }
+        
+        .side-menu ul { 
+            list-style: none; 
+            padding: 20px; 
+            margin: 0; 
+            margin-top: 20px;
+        }
+        
+        .side-menu-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .side-menu-close:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .side-menu ul li { 
+            padding: 12px 15px; 
+            cursor: pointer; 
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .side-menu ul li:hover { 
+            background: rgba(255,255,255,0.1); 
+        }
+        
+        .side-menu-toggle { 
+            background: none; 
+            border: none; 
+            font-size: 1.5em; 
+            color: var(--text-color); 
+            cursor: pointer; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-right: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .side-menu-toggle:hover { 
+            background-color: rgba(255,255,255,0.1); 
+        }
+        
+        /* Overlay para cerrar el menú al hacer clic fuera */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .menu-overlay.active {
+            display: block;
+        }
+        
+        /* Deshabilitar zoom táctil */
+        html, body {
+            touch-action: manipulation;
+            -ms-touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Permitir selección de texto en versículos */
+        .verse, .verse * {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Deshabilitar selección en otros elementos */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         :root {
             --primary-color: #4CAF50;
             --text-color: #333;
             --bg-color: #fff;
-            --verse-font-size: 1.1em;
+            --verse-font-size: 1em;
             --menu-bg: rgba(0, 0, 0, 0.6);
             --menu-blur: blur(10px);
+            --font-size: 16px; /* Tamaño de fuente base */
         }
 
         [data-theme="dark"] {
@@ -158,9 +276,69 @@
         }
 
         .chapter-content {
-            max-width: 1200px;
-            margin: 120px auto 80px;
-            padding: 0 20px;
+            padding: 40px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-size: 16px;
+            width: 90%;
+        }
+        
+        @media (min-width: 1200px) {
+            .chapter-content {
+                padding: 40px 10%;
+                width: 80%;
+            }
+        }
+        
+        @media (min-width: 1600px) {
+            .chapter-content {
+                padding: 40px 15%;
+                width: 70%;
+            }
+        }
+        
+        .chapter-content p {
+            font-size: 1em;
+            margin: 0.6em 0;
+            word-wrap: break-word;
+        }
+        
+        .verse-number {
+            font-size: 0.7em;
+            vertical-align: super;
+            color: #4CAF50;
+            margin: 0 2px;
+        }
+        
+        /* Reset de tamaño de fuente heredado */
+        #verses, #verses * {
+            font-size: inherit !important;
+            line-height: inherit !important;
+        }
+        
+        @media (max-width: 1024px) {
+            .chapter-content {
+                width: 90%;
+                padding: 40px 5%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .chapter-content {
+                font-size: 15px;
+                padding: 30px 4% 50px;
+                width: 92%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chapter-content {
+                font-size: 14px;
+                padding: 25px 4% 40px;
+                width: 92%;
+                line-height: 1.5;
+            }
         }
 
         .chapter-title {
@@ -214,15 +392,55 @@
             right: 0;
             background: var(--menu-bg);
             backdrop-filter: var(--menu-blur);
-            color: white;
-            padding: 12px;
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
             z-index: 1000;
-            transition: transform 0.3s ease;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            gap: 15px;
+        }
+        
+        .nav-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .font-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .font-btn {
+            background: none;
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .font-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .font-size-display {
+            color: white;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            font-size: 0.9em;
         }
 
         .navigation-bottom.hidden {
@@ -230,15 +448,23 @@
         }
 
         .nav-button {
-            background: var(--primary-color);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
-            min-width: 100px;
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .nav-button:hover {
@@ -302,22 +528,21 @@
         }
 
         .chapter-btn:hover,
-        .chapter-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
 
-        .chapter-btn::after {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: white;
-            opacity: 0;
-            transition: opacity 0.3s;
-            margin-left: 8px;
-        }
+.chapter-btn::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-left: 8px;
+}
 
+.chapter-btn.active::after {
+    opacity: 1;
+}
         .chapter-btn.active::after {
             opacity: 1;
         }
@@ -413,15 +638,101 @@
         }
 
         /* Verso marcado y men├║ contextual */
-        .verse-menu {
+        .menu-container {
+            position: relative;
+            display: inline-block;
+            z-index: 2000; /* Asegurar que el contenedor esté en una capa alta */
+        }
+
+        .dropdown-menu {
+            display: none !important; /* Forzar display none inicial */
+            position: absolute;
+            right: 0;
+            top: calc(100% + 5px);
+            background-color: var(--bg-color);
+            min-width: 240px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 2001; /* Mayor z-index que el contenedor */
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        
+        .dropdown-menu {
             display: none;
             position: absolute;
-            background: var(--bg-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            right: 0;
+            top: 100%;
+            margin-top: 5px;
+            background-color: var(--bg-color);
+            min-width: 240px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
             border-radius: 8px;
-            z-index: 1200;
-            padding: 8px;
+            z-index: 2000;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
+        
+        .dropdown-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            visibility: visible;
+        }
+        
+        .dropdown-section {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .dropdown-section:last-child {
+            border-bottom: none;
+        }
+        
+        .font-size-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+        }
+        
+        .font-size-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .font-size-btn:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .font-size-display {
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .dropdown-item span {
+            flex: 1;
+            text-align: left;
+        }
+
         .verse-menu ul { list-style: none; margin: 0; padding: 0; }
         .verse-menu li {
             padding: 8px; cursor: pointer;
@@ -474,18 +785,6 @@
             flex-direction: row;
             align-items: center;
             gap: 10px;
-            margin: 10px 20px;
-        }
-        .extra-controls.active {
-            display: flex;
-        }
-        /* Menú lateral */
-        .side-menu { 
-            position: fixed; 
-            top: 0; 
-            left: -250px; 
-            width: 250px; 
-            height: 100%; 
             background: #121212; 
             color: #fff; 
             box-shadow: 2px 0 8px rgba(0,0,0,0.5); 
@@ -733,14 +1032,62 @@
 .main-menu-toggle:hover {
     background-color: rgba(76, 175, 80, 0.1);
 }
+/* Botón de tema */
+.theme-toggle {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.3s, background-color 0.3s;
+    margin-left: 10px;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: var(--primary-color);
+}
+
+.home-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-right: 5px;
+}
+
+.home-icon:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+[data-theme="dark"] .home-icon {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .home-icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
 </style>
         }
     </style>
 </head>
 <body>
     <!-- Menú lateral -->
-    <div class="menu-overlay" id="menu-overlay"></div>
     <div id="side-menu" class="side-menu">
+        <button class="side-menu-close">
+            <i class="fas fa-times"></i>
+        </button>
         <ul>
             <li onclick="window.location.href='index.html'">Página principal</li>
             <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
@@ -753,7 +1100,8 @@
             <li onclick="window.location.href='temas.html'">Temas</li>
         </ul>
     </div>
-
+    <div class="menu-overlay"></div>
+    <div class="app-container">
     <div class="controls" id="controls">
         <div class="top-row">
             <button id="main-menu-toggle" class="side-menu-toggle"><i class="fas fa-bars"></i></button>
@@ -769,12 +1117,15 @@
                 <button id="search-button" class="search-button"><i class="fas fa-search"></i></button>
                 <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
+            <!-- Botón de cambio de tema -->
+            <button id="theme-toggle" class="theme-toggle">
+                Modo oscuro
+            </button>
         </div>
         <div id="extra-controls" class="extra-controls">
-            <a href="/biblia-poder-milagros/" class="home-icon">≡ƒÅá</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">≡ƒîÖ</button>
-            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
-            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
+            <a href="/biblia-poder-milagros/" class="home-icon">
+                <i class="fas fa-home"></i>
+            </a>
         </div>
     </div> <!-- cierre .controls -->
 
@@ -811,11 +1162,29 @@
     </div> <!-- cierre .chapter-content -->
 
     <div class="navigation-bottom" id="navigation-bottom">
-        <button class="nav-button" id="prev-button">◄ Anterior</button>
-        <select id="chapter-select" class="select-css">
-            <option value="">Capítulo</option>
-        </select>
-        <button class="nav-button" id="next-button">Siguiente ►</button>
+        <div class="nav-section">
+            <button class="nav-button" id="prev-button">
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <select id="chapter-select" class="select-css">
+                <option value="">Capítulo</option>
+            </select>
+            <button class="nav-button" id="next-button">
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="font-controls">
+            <button id="decrease-font" class="font-btn" title="Disminuir tamaño de letra">
+                <i class="fas fa-minus"></i>
+            </button>
+            <span id="font-size-display" class="font-size-display">100%</span>
+            <button id="increase-font" class="font-btn" title="Aumentar tamaño de letra">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button id="reset-font" class="font-btn" title="Tamaño predeterminado">
+                <i class="fas fa-undo"></i>
+            </button>
+        </div>
     </div>
 
     <!-- texto actualizado -->
@@ -1420,47 +1789,478 @@
         }
     </script>
     <script>
-        // Toggle del menú lateral
+        // Inicializar controles de interfaz
+        function initUIControls() {
+            console.log('Inicializando controles de interfaz...');
+            
+            // Elementos del DOM
+            const themeToggle = document.getElementById('theme-toggle');
+            const decreaseFontBtn = document.getElementById('decrease-font');
+            const increaseFontBtn = document.getElementById('increase-font');
+            const resetFontBtn = document.getElementById('reset-font');
+            const fontSizeDisplay = document.getElementById('font-size-display');
+            
+            // Verificar que los elementos existan
+            console.log('Elementos encontrados:', {
+                themeToggle,
+                decreaseFontBtn,
+                increaseFontBtn,
+                resetFontBtn,
+                fontSizeDisplay
+            });
+            
+            // Configuración de tamaño de fuente
+            let currentFontSize = 100;
+            const minFontSize = 70;
+            const maxFontSize = 200;
+            const fontSizeStep = 10;
+            
+            // Cargar preferencias guardadas
+            const savedFontSize = localStorage.getItem('verseFontSize');
+            const savedTheme = localStorage.getItem('theme');
+            
+            // Aplicar tema guardado
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            // Función para actualizar el tamaño de fuente
+            function updateFontSize() {
+                console.log('Actualizando tamaño de fuente a:', currentFontSize + '%');
+                
+                // Aplicar el tamaño de fuente al contenedor principal
+                const content = document.querySelector('.chapter-content');
+                if (content) {
+                    content.style.fontSize = `${currentFontSize}%`;
+                    console.log('Tamaño de fuente aplicado al contenedor');
+                } else {
+                    console.error('No se encontró el contenedor .chapter-content');
+                }
+                
+                // Actualizar el indicador de tamaño
+                if (fontSizeDisplay) {
+                    fontSizeDisplay.textContent = `${currentFontSize}%`;
+                    console.log('Indicador de tamaño actualizado');
+                }
+                
+                // Guardar preferencia
+                localStorage.setItem('verseFontSize', currentFontSize.toString());
+                console.log('Preferencia guardada en localStorage');
+                
+                // Actualizar estado de los botones
+                if (decreaseFontBtn) {
+                    decreaseFontBtn.disabled = currentFontSize <= minFontSize;
+                    console.log('Estado del botón disminuir:', decreaseFontBtn.disabled ? 'deshabilitado' : 'habilitado');
+                }
+                if (increaseFontBtn) {
+                    increaseFontBtn.disabled = currentFontSize >= maxFontSize;
+                    console.log('Estado del botón aumentar:', increaseFontBtn.disabled ? 'deshabilitado' : 'habilitado');
+                }
+            }
+            
+            // Aplicar tamaño de fuente guardado
+            if (savedFontSize) {
+                currentFontSize = parseInt(savedFontSize, 10);
+                console.log('Tamaño de fuente cargado desde localStorage:', currentFontSize);
+                updateFontSize();
+            } else {
+                console.log('No se encontró tamaño de fuente guardado, usando valor predeterminado');
+                updateFontSize(); // Asegurarse de que se aplique el tamaño predeterminado
+            }
+            
+            // Función para actualizar el ícono del tema
+            function updateThemeIcon(theme) {
+                if (!themeToggle) {
+                    console.error('No se encontró el botón de tema');
+                    return;
+                }
+                const icon = themeToggle.querySelector('i');
+                if (!icon) {
+                    console.error('No se encontró el ícono dentro del botón de tema');
+                    return;
+                }
+                
+                if (theme === 'dark') {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    themeToggle.title = 'Cambiar a modo claro';
+                    console.log('Tema cambiado a oscuro');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    themeToggle.title = 'Cambiar a modo oscuro';
+                    console.log('Tema cambiado a claro');
+                }
+            }
+            
+            // Event listeners
+            console.log('Configurando event listeners...');
+            
+            // Tema
+            if (themeToggle) {
+                console.log('Configurando listener para el botón de tema');
+                themeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic en el botón de tema');
+                    
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    console.log('Cambiando tema de', currentTheme, 'a', newTheme);
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                });
+            } else {
+                console.error('No se pudo configurar el botón de tema: elemento no encontrado');
+            }
+            
+            // Disminuir tamaño de fuente
+            if (decreaseFontBtn) {
+                console.log('Configurando listener para el botón de disminuir fuente');
+                decreaseFontBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic en el botón de disminuir fuente');
+                    
+                    if (currentFontSize > minFontSize) {
+                        currentFontSize -= fontSizeStep;
+                        console.log('Nuevo tamaño de fuente:', currentFontSize);
+                        updateFontSize();
+                    } else {
+                        console.log('Tamaño de fuente mínimo alcanzado');
+                    }
+                });
+            } else {
+                console.error('No se pudo configurar el botón de disminuir fuente: elemento no encontrado');
+            }
+            
+            // Aumentar tamaño de fuente
+            if (increaseFontBtn) {
+                console.log('Configurando listener para el botón de aumentar fuente');
+                increaseFontBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic en el botón de aumentar fuente');
+                    
+                    if (currentFontSize < maxFontSize) {
+                        currentFontSize += fontSizeStep;
+                        console.log('Nuevo tamaño de fuente:', currentFontSize);
+                        updateFontSize();
+                    } else {
+                        console.log('Tamaño de fuente máximo alcanzado');
+                    }
+                });
+            } else {
+                console.error('No se pudo configurar el botón de aumentar fuente: elemento no encontrado');
+            }
+            
+            // Reiniciar tamaño de fuente
+            if (resetFontBtn) {
+                console.log('Configurando listener para el botón de reiniciar fuente');
+                resetFontBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic en el botón de reiniciar fuente');
+                    
+                    currentFontSize = 100;
+                    console.log('Tamaño de fuente reiniciado a 100%');
+                    updateFontSize();
+                });
+            } else {
+                console.error('No se pudo configurar el botón de reiniciar fuente: elemento no encontrado');
+            }
+            
+            // Función para cambiar entre tema claro y oscuro
+            function toggleTheme() {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                const newTheme = isDark ? 'light' : 'dark';
+                
+                // Cambiar el tema
+                document.body.setAttribute('data-theme', newTheme);
+                
+                // Actualizar el texto del botón
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.textContent = isDark ? 'Modo oscuro' : 'Modo claro';
+                }
+                
+                // Guardar preferencia
+                localStorage.setItem('theme', newTheme);
+            }
+            
+            // Inicializar tema guardado
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                const themeToggle = document.getElementById('theme-toggle');
+                
+                document.body.setAttribute('data-theme', savedTheme);
+                
+                if (themeToggle) {
+                    themeToggle.textContent = savedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+                }
+            }
+            
+            // Configurar el evento de clic para el botón de tema
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+            
+            // Inicializar tema
+            initTheme();
+        }
+
+        // Funcionalidad del menú lateral
+        function initSideMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            const menuToggle = document.querySelector('.side-menu-toggle');
+            const menuClose = document.querySelector('.side-menu-close');
+            const menuOverlay = document.querySelector('.menu-overlay');
+            
+            // Función para abrir el menú
+            function openMenu() {
+                sideMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Función para cerrar el menú
+            function closeMenu() {
+                sideMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // Función para alternar el menú
+            function toggleMenu() {
+                if (sideMenu.classList.contains('active')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            }
+            
+            // Evento para el botón de menú
+            if (menuToggle) {
+                menuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+            }
+            
+            // Evento para el botón de cierre
+            if (menuClose) {
+                menuClose.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeMenu();
+                });
+            }
+            
+            // Cerrar menú al hacer clic fuera
+            if (menuOverlay) {
+                menuOverlay.addEventListener('click', closeMenu);
+            }
+            
+            // Cerrar menú al hacer clic en un enlace
+            const menuLinks = sideMenu.querySelectorAll('li');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    // Pequeño retraso para permitir la navegación antes de cerrar el menú
+                    setTimeout(closeMenu, 100);
+                });
+            });
+            
+            // Cerrar menú con la tecla Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sideMenu.classList.contains('active')) {
+                    closeMenu();
+                }
+            });
+        }
+        
+        // Inicializar controles de la interfaz cuando el DOM esté completamente cargado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initSideMenu();
+                initUIControls();
+            });
+        } else {
+            initSideMenu();
+            initUIControls();
+        }
+
+        // Código del menú lateral
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('main-menu-toggle');
             const sideMenu = document.getElementById('side-menu');
             const menuOverlay = document.getElementById('menu-overlay');
-            
-            if (menuToggle && sideMenu) {
-                // Abrir/cerrar menú
-                menuToggle.addEventListener('click', function(e) {
+            const menuBtn = document.getElementById('menu-btn');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            const themeToggleMenu = document.getElementById('theme-toggle-menu');
+            const themeToggle = document.querySelector('.theme-toggle');
+
+            // Cerrar menú al hacer clic fuera de él
+            document.addEventListener('click', (e) => {
+                if (menuBtn && dropdownMenu && !menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Toggle del menú desplegable
+            if (menuBtn && dropdownMenu) {
+                console.log('Botón de menú encontrado');
+                menuBtn.addEventListener('click', (e) => {
+                    console.log('Clic en el botón de menú');
                     e.stopPropagation();
+                    e.preventDefault();
+                    console.log('Clases antes de toggle:', dropdownMenu.className);
+                    dropdownMenu.classList.toggle('show');
+                    console.log('Clases después de toggle:', dropdownMenu.className);
+                    console.log('¿Tiene la clase show?', dropdownMenu.classList.contains('show'));
+                });
+            } else {
+                console.error('No se encontró el botón de menú o el menú desplegable');
+                console.log('menuBtn:', menuBtn);
+                console.log('dropdownMenu:', dropdownMenu);
+            }
+
+            // Cambiar tema desde el menú
+            if (themeToggleMenu) {
+                themeToggleMenu.addEventListener('click', () => {
+                    toggleTheme();
+                    dropdownMenu.classList.remove('show');
+                });
+            }
+
+            // Sincronizar el botón de tema del menú con el tema actual
+            if (themeToggle && themeToggleMenu) {
+                const updateThemeIcon = () => {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const icon = themeToggleMenu.querySelector('i');
+                    const textSpan = themeToggleMenu.querySelector('span');
+                    if (isDark) {
+                        icon.className = 'fas fa-sun';
+                        textSpan.textContent = 'Modo claro';
+                    } else {
+                        icon.className = 'fas fa-moon';
+                        textSpan.textContent = 'Modo oscuro';
+                    }
+                };
+
+                // Actualizar ícono al cargar la página
+                updateThemeIcon();
+
+                // Actualizar ícono cuando cambie el tema
+                const observer = new MutationObserver(updateThemeIcon);
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['data-theme']
+                });
+            }
+
+            // Control de tamaño de fuente
+            const decreaseFontBtn = document.getElementById('decrease-font');
+            const increaseFontBtn = document.getElementById('increase-font');
+            const resetFontBtn = document.getElementById('reset-font');
+            const fontSizeDisplay = document.getElementById('font-size-display');
+            const verseTextElements = document.querySelectorAll('.verse-text');
+            
+            // Tamaño de fuente base (100%)
+            let currentFontSize = 100; // Valor inicial en porcentaje
+            const minFontSize = 80;    // Tamaño mínimo (80%)
+            const maxFontSize = 150;    // Tamaño máximo (150%)
+            const fontSizeStep = 5;     // Incremento/decremento en porcentaje
+            
+            // Cargar tamaño de fuente guardado
+            const savedFontSize = localStorage.getItem('verseFontSize');
+            if (savedFontSize) {
+                currentFontSize = parseInt(savedFontSize, 10);
+            }
+            
+            // Función para actualizar el tamaño de fuente
+            function updateFontSize() {
+                const baseSize = 16; // Tamaño base en píxeles
+                const calculatedSize = (baseSize * currentFontSize) / 100;
+                
+                // Aplicar tamaño al contenedor principal
+                document.documentElement.style.setProperty('--font-size', `${calculatedSize}px`);
+                
+                // Actualizar indicador
+                if (fontSizeDisplay) {
+                    fontSizeDisplay.textContent = `${currentFontSize}%`;
+                }
+                
+                // Guardar preferencia
+                localStorage.setItem('verseFontSize', currentFontSize.toString());
+                
+                // Actualizar estado de los botones
+                if (decreaseFontBtn) decreaseFontBtn.disabled = currentFontSize <= minFontSize;
+                if (increaseFontBtn) increaseFontBtn.disabled = currentFontSize >= maxFontSize;
+            }
+            
+            // Inicializar tamaño de fuente
+            updateFontSize();
+            
+            // Event listeners para los botones
+            if (decreaseFontBtn) {
+                decreaseFontBtn.addEventListener('click', () => {
+                    if (currentFontSize > minFontSize) {
+                        currentFontSize -= fontSizeStep;
+                        updateFontSize();
+                    }
+                });
+            }
+            
+            if (increaseFontBtn) {
+                increaseFontBtn.addEventListener('click', () => {
+                    if (currentFontSize < maxFontSize) {
+                        currentFontSize += fontSizeStep;
+                        updateFontSize();
+                    }
+                });
+            }
+            
+            if (resetFontBtn) {
+                resetFontBtn.addEventListener('click', () => {
+                    currentFontSize = 100; // Tamaño predeterminado
+                    updateFontSize();
+                });
+            }
+
+            if (menuToggle && sideMenu && menuOverlay) {
+                menuToggle.addEventListener('click', () => {
                     sideMenu.classList.toggle('active');
                     menuOverlay.classList.toggle('active');
-                    document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
                 });
-                
-                // Cerrar menú al hacer clic en el overlay
-                menuOverlay.addEventListener('click', function() {
+
+                menuOverlay.addEventListener('click', () => {
                     sideMenu.classList.remove('active');
                     menuOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
                 });
-                
-                // Cerrar menú al hacer clic en un ítem del menú
+            }
+
+            // Cerrar menú al hacer clic en un ítem del menú
+            if (sideMenu) {
                 const menuItems = sideMenu.querySelectorAll('li');
                 menuItems.forEach(item => {
                     item.addEventListener('click', function() {
                         sideMenu.classList.remove('active');
-                        menuOverlay.classList.remove('active');
+                        if (menuOverlay) menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
                     });
                 });
+            }
                 
                 // Cerrar menú con tecla Escape
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && sideMenu.classList.contains('active')) {
-                        sideMenu.classList.remove('active');
-                        menuOverlay.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                });
-            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sideMenu && sideMenu.classList.contains('active')) {
+                    sideMenu.classList.remove('active');
+                    if (menuOverlay) menuOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
             
             // Controles adicionales (si existen)
             const extraControls = document.getElementById('extra-controls');
