@@ -85,18 +85,14 @@
             'joshua': 'Josué', 'judges': 'Jueces', 'ruth': 'Rut', '1sam': '1 Samuel', '2sam': '2 Samuel',
             '1kin': '1 Reyes', '2kin': '2 Reyes', '1chron': '1 Crónicas', '2chron': '2 Crónicas',
             'ezra': 'Esdras', 'nehemiah': 'Nehemías', 'esther': 'Ester', 'job': 'Job', 'psalm': 'Salmos',
-            'proverbs': 'Proverbios', 'ecc': 'Eclesiastés', 'song': 'Cantar de los Cantares', 'wisdom': 'Sabiduría',
-            'sirach': 'Eclesiástico', 'isaiah': 'Isaías', 'jere': 'Jeremías', 'lam': 'Lamentaciones', 'ezek': 'Ezequiel',
-            'dan': 'Daniel', 'hosea': 'Oseas', 'joel': 'Joel', 'amos': 'Amós', 'oba': 'Abdías', 'jonah': 'Jonás',
-            'micah': 'Miqueas', 'nahum': 'Nahúm', 'habak': 'Habacuc', 'haggai': 'Hageo', 'zeph': 'Sofonías',
-            'zech': 'Zacarías', 'mal': 'Malaquías', 'matt': 'Mateo', 'mark': 'Marcos', 'luke': 'Lucas',
-            'john': 'Juan', 'acts': 'Hechos de los Apóstoles', 'romans': 'Romanos', '1cor': '1 Corintios',
-            '2cor': '2 Corintios', 'gal': 'Gálatas', 'eph': 'Efesios', 'phil': 'Filipenses', 'phi': 'Filemón',
-            'col': 'Colosenses', '1the': '1 Tesalonicenses', '2the': '2 Tesalonicenses',
-            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'tit': 'Tito',
-            'heb': 'Hebreos', 'jam': 'Santiago',
-            '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan',
-            'jude': 'Judas', 'rev': 'Apocalipsis'
+            'proverbs': 'Proverbios', 'ecc': 'Eclesiastés', 'song': 'Cantares', 'isaiah': 'Isaías', 'jere': 'Jeremías',
+            'lam': 'Lamentaciones', 'ezek': 'Ezequiel', 'dan': 'Daniel', 'hosea': 'Oseas', 'joel': 'Joel', 'amos': 'Amós',
+            'oba': 'Abdías', 'jonah': 'Jonás', 'micah': 'Miqueas', 'nahum': 'Nahúm', 'habak': 'Habacuc', 'zeph': 'Sofonías',
+            'haggai': 'Hageo', 'zech': 'Zacarías', 'mal': 'Malaquías', 'matt': 'Mateo', 'mark': 'Marcos', 'luke': 'Lucas',
+            'john': 'Juan', 'acts': 'Hechos', 'romans': 'Romanos', '1cor': '1 Corintios', '2cor': '2 Corintios', 'gal': 'Gálatas',
+            'eph': 'Efesios', 'phil': 'Filipenses', 'col': 'Colosenses', '1the': '1 Tesalonicenses', '2the': '2 Tesalonicenses',
+            '1tim': '1 Timoteo', '2tim': '2 Timoteo', 'tit': 'Tito', 'philem': 'Filemón', 'heb': 'Hebreos', 'jam': 'Santiago',
+            '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan', 'jude': 'Judas', 'rev': 'Apocalipsis'
         };
         // Mapa de metadatos de libros para descripción (autor, fecha, tema, descripción, temas clave)
         const bookMeta = {
@@ -126,7 +122,7 @@
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
             try {
-                const res = await fetch('audio/manifest.json');
+                const res = await fetch('https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/manifest.json');
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
                 // Store manifest globally
@@ -161,29 +157,108 @@
                     if (chapters.length > 0) {
                         const first = chapters[0];
                         const num = first.file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${first.file}`);
+                        const audioUrl = `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${first.file}`;
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                        // Forzar reproducción automática para el primer capítulo
+                        const audioPlayer = document.getElementById('audio-player');
+                        audioPlayer.play().catch(error => {
+                            console.log('Error al reproducir automáticamente:', error);
+                        });
                     }
                     chapterSelect.onchange = e => {
                         const file = e.target.value;
                         localStorage.setItem('audio-last-book', code);
                         localStorage.setItem('audio-last-file', file);
-                        const num = file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${file}`);
+                        const num = file.match(/_\d+/)[1];
+                        const audioUrl = `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${file}`;
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                        // Forzar reproducción automática
+                        const audioPlayer = document.getElementById('audio-player');
+                        audioPlayer.play().catch(error => {
+                            console.log('Error al reproducir automáticamente:', error);
+                        });
                     };
                 };
                 // Auto-load last listened book and chapter
                 const lastBook = localStorage.getItem('audio-last-book');
                 const lastFile = localStorage.getItem('audio-last-file');
+                const autoPlayEnabled = localStorage.getItem('audio-autoplay') !== 'false';
+                
+                // Función para activar/desactivar controles
+                const updateControls = (enabled = true) => {
+                    const nextBtn = document.querySelector('.next-btn');
+                    const prevBtn = document.querySelector('.prev-btn');
+                    if (nextBtn) nextBtn.disabled = !enabled;
+                    if (prevBtn) prevBtn.disabled = !enabled;
+                };
+
+                // Función para cargar y reproducir un capítulo
+                const loadAndPlayChapter = (file, code) => {
+                    if (!file || !code) {
+                        updateControls(false);
+                        return;
+                    }
+                    
+                    // Extraer el número del capítulo del nombre del archivo (ej: '1chron_01.mp3' -> '1')
+                    const match = file.match(/(\d+)\.mp3$/);
+                    const num = match ? match[1] : '1';  // Usar '1' como valor por defecto
+                    // Usar la ruta correcta a los archivos de audio
+                    const audioUrl = `https://raw.githubusercontent.com/MJoelGV/biblia-poder-milagros/main/docs/audio/${file}`;
+                    playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                    
+                    // Activar controles
+                    updateControls(true);
+                    
+                    if (autoPlayEnabled) {
+                        const audioPlayer = document.getElementById('audio-player');
+                        audioPlayer.play().catch(error => {
+                            console.log('Error al reproducir automáticamente:', error);
+                        });
+                    }
+                };
+
+                // Configurar evento de cambio de capítulo
+                chapterSelect.onchange = e => {
+                    const file = e.target.value;
+                    if (!file) return;
+                    
+                    const code = bookSelect.value;
+                    localStorage.setItem('audio-last-book', code);
+                    localStorage.setItem('audio-last-file', file);
+                    
+                    console.log('Reproduciendo:', file, 'code:', code);
+                    loadAndPlayChapter(file, code);
+                };
+
+                // Cargar último capítulo escuchado si existe
                 if (lastBook && codes.includes(lastBook)) {
                     bookSelect.value = lastBook;
-                    bookSelect.onchange();
-                    if (lastFile) {
-                        const optValues = Array.from(chapterSelect.options).map(o => o.value);
-                        if (optValues.includes(lastFile)) {
-                            chapterSelect.value = lastFile;
-                            chapterSelect.onchange();
+                    // Disparar evento change para cargar los capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                    
+                    // Esperar a que se carguen las opciones del select
+                    setTimeout(() => {
+                        if (lastFile) {
+                            const optValues = Array.from(chapterSelect.options).map(o => o.value);
+                            if (optValues.includes(lastFile)) {
+                                chapterSelect.value = lastFile;
+                                // Activar controles inmediatamente
+                                updateControls(true);
+                                // Disparar evento change para reproducir
+                                const changeEvent = new Event('change');
+                                chapterSelect.dispatchEvent(changeEvent);
+                            } else {
+                                // Si no hay archivo válido, desactivar controles
+                                updateControls(false);
+                            }
+                        } else {
+                            updateControls(false);
                         }
-                    }
+                    }, 100);
+                } else {
+                    // Si no hay libro guardado, desactivar controles
+                    updateControls(false);
                 }
             } catch (err) {
                 console.error(err);
@@ -197,7 +272,7 @@
             const chapters = Array.from(bookNode.getElementsByTagName('c'));
             const playlist = chapters.map(c => {
                 const chap = c.getAttribute('n');
-                return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+                return `/audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
             });
             trackIndex = 0;
             audioPlayer.style.display = '';
@@ -211,18 +286,43 @@
             // Construir playlist completo del libro
             const fileName = src.split('/').pop();
             const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            
+            // Filtrar y ordenar capítulos
             const chapters = manifestData
-                .filter(item => item.file.startsWith(code + '_'))
-                .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-            playlist = chapters.map(item => `audio/${item.file}`);
-            trackIndex = playlist.indexOf(src);
+                .filter(item => item.file && item.file.startsWith(code + '_'))
+                .sort((a,b) => {
+                    const aNum = parseInt((a.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
+                    const bNum = parseInt((b.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
+                    return aNum - bNum;
+                });
+            
+            // Usar la ruta base correcta para los audios
+            playlist = chapters.map(item => `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${item.file}`);
+            trackIndex = playlist.indexOf(src) >= 0 ? playlist.indexOf(src) : 0;
+            
             // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
             document.getElementById('player-controls').style.display = 'flex';
             audioPlayer.style.display = 'block';
-            audioPlayer.src = playlist[trackIndex];
-            audioPlayer.play().catch(err => console.error('Error MP3:', err));
-            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            // Cargar el audio
+            const audioUrl = playlist[trackIndex];
+            console.log('Intentando reproducir:', audioUrl);
+            
+            // Forzar precarga del audio
+            audioPlayer.pause();
+            audioPlayer.src = audioUrl;
+            audioPlayer.load();
+            
+            // Actualizar botón de reproducción
+            const playPauseBtn = document.getElementById('play-pause');
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            
+            // Mostrar mensaje para el usuario
+            document.getElementById('now-playing').textContent = 'Haz clic en el botón de reproducción para escuchar';
+            
+            // Habilitar controles
+            playPauseBtn.disabled = false;
         }
 
         // Función para reproducir track y actualizar indicador
@@ -282,6 +382,8 @@
         audioPlayer.addEventListener('loadedmetadata', () => {
             seekSlider.max = audioPlayer.duration;
             durationEl.textContent = formatTime(audioPlayer.duration);
+            // Ruta base para los audios en GitHub Pages
+            const AUDIO_BASE_PATH = 'https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/';
             // Restore saved position
             const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
             const saved = localStorage.getItem(key);
@@ -299,7 +401,32 @@
         };
         // Iniciar lista y reproducción
         let manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
-        loadBooks();
+        
+        // Precargar manifest y configurar evento de interacción
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar el manifest
+            loadBooks();
+            
+            // Agregar manejador de clic para el botón de reproducción
+            const playPauseBtn = document.getElementById('play-pause');
+            playPauseBtn.addEventListener('click', function() {
+                if (audioPlayer.paused) {
+                    // Si no hay fuente, intentar cargar el primer capítulo
+                    if (!audioPlayer.src && playlist.length > 0) {
+                        audioPlayer.src = playlist[0];
+                    }
+                    audioPlayer.play().then(() => {
+                        this.innerHTML = '<i class="fas fa-pause"></i>';
+                    }).catch(err => {
+                        console.error('Error al reproducir:', err);
+                        this.innerHTML = '<i class="fas fa-play"></i>';
+                    });
+                } else {
+                    audioPlayer.pause();
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+        });
     </script>
     <script>
         const menuBtn = document.getElementById('side-menu-toggle');

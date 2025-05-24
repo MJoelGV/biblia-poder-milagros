@@ -8,8 +8,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <!-- PWA manifest and meta -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icons/pymicon.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/pymicon.png">
     <meta name="application-name" content="BibliaPYM">
     <meta name="apple-mobile-web-app-title" content="BibliaPYM">
     <meta name="theme-color" content="#4CAF50">
@@ -182,6 +182,9 @@
             </a>
             <div class="navigation-buttons">
                 <a href="lectura.html" id="read-more-link" class="nav-button"><i class="fas fa-bible icon"></i></a>
+                <button id="share-button" class="nav-button" style="background: #4CAF50; color: white; border: none; cursor: pointer;">
+                    <i class="fas fa-share-alt icon"></i><span>Compartir</span>
+                </button>
                 <a href="pericopas-standalone.html" class="nav-button" style="border-color: #9c27b0;"><i class="fas fa-book icon" style="color: #9c27b0;"></i><span>Perícopas</span></a>
                 <a href="audio.html" class="nav-button"><i class="fas fa-headphones icon"></i><span>Escuchar</span></a>
                 <a href="memorizados.html" class="nav-button"><i class="fas fa-graduation-cap icon"></i><span>Memorizados</span></a>
@@ -190,7 +193,6 @@
                 <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
                 <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
                 <a href="topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
-                <a href="#" id="share-button" class="nav-button" style="border-color: #ff9800;"><i class="fas fa-share-alt icon" style="color: #ff9800;"></i><span>Compartir</span></a>
             </div>
         </div>
     </div>
@@ -269,45 +271,41 @@
                 sideMenuIdx.classList.remove('active');
             }
         });
-        
-        // Funcionalidad de compartir
-        document.getElementById('share-button').addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            // Obtener la URL actual (para compartir la PWA)
-            const shareUrl = window.location.href.split('?')[0]; // Eliminar parámetros de consulta si los hay
-            
-            // Texto personalizado para compartir
-            const shareTitle = 'Biblia de Poder y Milagros';
-            const shareText = 'Quiero compartir contigo esta maravillosa Biblia de Poder y Milagros. ¡Descárgala y lleva la Palabra de Dios contigo a todas partes!';
-            
-            // Verificar si el navegador soporta la API Web Share
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: shareTitle,
-                        text: shareText,
-                        url: shareUrl
-                    });
-                    console.log('¡Contenido compartido con éxito!');
-                } catch (error) {
-                    console.error('Error al compartir:', error);
-                    alert('No se pudo compartir. Por favor, intenta de nuevo más tarde.');
+    </script>
+    <script>
+        // Función para compartir la PWA
+        async function sharePWA() {
+            const shareData = {
+                title: 'Biblia de Poder y Milagros',
+                text: '¡Descarga la Biblia de Poder y Milagros! Una aplicación completa para leer, escuchar y estudiar la Palabra de Dios.',
+                url: window.location.href
+            };
+
+            try {
+                // Intentar usar la Web Share API
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                    console.log('¡Contenido compartido exitosamente!');
+                } else {
+                    // Fallback para navegadores que no soportan la Web Share API
+                    await navigator.clipboard.writeText(shareData.url);
+                    alert('¡Enlace copiado al portapapeles! Comparte este enlace: ' + shareData.url);
                 }
-            } else {
-                // Fallback para navegadores que no soportan Web Share API
-                // Mostrar un mensaje con la URL para copiar manualmente
-                alert('Tu navegador no soporta la función de compartir. Copia este enlace: ' + shareUrl);
-                
-                // Intentar copiar al portapapeles si es posible
+            } catch (err) {
+                console.error('Error al compartir:', err);
+                // Si hay un error, intentar copiar al portapapeles
                 try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert('¡Enlace copiado al portapapeles!');
-                } catch (clipboardError) {
-                    console.error('No se pudo copiar al portapapeles:', clipboardError);
+                    await navigator.clipboard.writeText(shareData.url);
+                    alert('¡Enlace copiado al portapapeles! Comparte este enlace: ' + shareData.url);
+                } catch (err) {
+                    console.error('Error al copiar al portapapeles:', err);
+                    alert('No se pudo compartir. Por favor, copia manualmente esta URL: ' + shareData.url);
                 }
             }
-        });
+        }
+
+        // Agregar evento al botón de compartir
+        document.getElementById('share-button').addEventListener('click', sharePWA);
     </script>
 </body>
 </html>
