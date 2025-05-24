@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorizar Versículos - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .themes-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .theme-card {
+            background: var(--bg-color);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .theme-header {
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 0;
+        }
+
+        .theme-arrow {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-arrow.rotated {
+            transform: rotate(90deg);
+        }
+
+        .subthemes-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: var(--bg-color);
+        }
+
+        .subtheme-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .subtheme-item:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .subtheme-item:last-child {
+            border-bottom: none;
+        }
+
+        .verses-container {
+            display: none;
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .verses-container.active {
+            display: block;
+        }
+
+        .verse-card {
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .verse-card:hover {
+            transform: translateX(5px);
+            background: rgba(76, 175, 80, 0.15);
+        }
+
+        .verse-reference {
+            font-style: italic;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .verse-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .memorize-button {
+            display: inline-block;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .show-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .hide-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .hide-button:hover {
+            background-color: #da190b;
+        }
+
+        .show-button:hover {
+            background-color: #3e8e41;
+        }
+
+        @media (max-width: 768px) {
+            .themes-container {
+                padding: 10px;
+            }
+
+            .theme-header {
+                padding: 12px;
+            }
+
+            .subtheme-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <div class="navigation-top">
+                <a href="index.html" class="nav-button">Inicio</a>
+            </div>
+            <h1>Memorizar Versículos</h1>
+            <p>Seleccione los versículos que desea memorizar y practique con ellos.</p>
+        </div>
+    </div>
+
+    <div class="themes-container" id="themes-container"></div>
+    <div class="verses-container" id="verses-container"></div>
+
+    <script>
+        let currentTheme = null;
+        let currentSubtheme = null;
+        let currentVerseIndex = 0;
+        let memorizedVerses = [];
+        let temas = [];
+
+        // Cargar temas y versículos
+        async function loadTemas() {
+            try {
+                const response = await fetch('biblia-files/temas-versiculos.xml');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                temas = xml.getElementsByTagName('tema');
+                displayTemas();
+            } catch (error) {
+                console.error('Error loading temas:', error);
+            }
+        }
+
+        // Mostrar lista de temas
+        function displayTemas() {
+            const container = document.getElementById('themes-container');
+            container.innerHTML = '';
+
+            Array.from(temas).forEach(tema => {
+                const temaName = tema.getAttribute('nombre');
+                const themeCard = document.createElement('div');
+                themeCard.className = 'theme-card';
+                
+                // Crear subtemas container
+                const subthemesContainer = document.createElement('div');
+                subthemesContainer.className = 'subthemes-container';
+
+                // Agregar subtemas
+                Array.from(tema.getElementsByTagName('subtema')).forEach(subtema => {
+                    const subthemeItem = document.createElement('div');
+                    subthemeItem.className = 'subtheme-item';
+                    subthemeItem.innerHTML = `
+                        <h3>${subtema.getAttribute('nombre')}</h3>
+                    `;
+                    subthemeItem.onclick = () => selectSubtheme(temaName, subtema.getAttribute('nombre'));
+                    subthemesContainer.appendChild(subthemeItem);
+                });
+
+                // Agregar flecha
+                const arrow = document.createElement('img');
+                arrow.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZmlsbD0iIzRDRkU1MCIgZD0iTTEwIDAgTDIwIDEwIEwxMCAyMCAgTDAgMTAgTDEwIDAgeiIvPjwvc3ZnPg==';
+                arrow.className = 'theme-arrow';
+
+                themeCard.innerHTML = `
+                    <div class="theme-header" onclick="toggleTheme('${temaName}')">
+                        <h2 class="theme-title">${temaName}</h2>
+                        ${arrow.outerHTML}
+                    </div>
+                `;
+                themeCard.appendChild(subthemesContainer);
+                container.appendChild(themeCard);
+            });
+        }
+
+        // Alternar visibilidad de subtemas
+        function toggleTheme(temaName) {
+            const themeCard = document.querySelector(`.theme-card .theme-title:contains('${temaName}')`).closest('.theme-card');
+            const subthemesContainer = themeCard.querySelector('.subthemes-container');
+            const arrow = themeCard.querySelector('.theme-arrow');
+            
+            if (subthemesContainer.style.maxHeight) {
+                subthemesContainer.style.maxHeight = null;
+                arrow.classList.remove('rotated');
+            } else {
+                subthemesContainer.style.maxHeight = subthemesContainer.scrollHeight + 'px';
+                arrow.classList.add('rotated');
+            }
+        }
+
+        // Seleccionar subtema
+        function selectSubtheme(tema, subtema) {
+            currentTheme = tema;
+            currentSubtheme = subtema;
+            loadSubthemeVerses(tema, subtema);
+
+            // Mostrar los versículos
+            const versesContainer = document.getElementById('verses-container');
+            versesContainer.style.display = 'block';
+        }
+
+        // Cargar versículos de un subtema
+        function loadSubthemeVerses(tema, subtema) {
+            const temaElement = Array.from(temas).find(t => t.getAttribute('nombre') === tema);
+            if (!temaElement) return;
+
+            const subtemaElement = Array.from(temaElement.getElementsByTagName('subtema'))
+                .find(s => s.getAttribute('nombre') === subtema);
+            if (!subtemaElement) return;
+
+            const versos = Array.from(subtemaElement.getElementsByTagName('referencia'));
+            displayVerses(versos);
+        }
+
+        // Mostrar versículos
+        function displayVerses(versos) {
+            const container = document.getElementById('verses-container');
+            container.innerHTML = '';
+
+            versos.forEach((verso, index) => {
+                const verseCard = document.createElement('div');
+                verseCard.className = 'verse-card';
+                
+                const isMemorized = memorizedVerses.includes(index);
+                verseCard.className += isMemorized ? ' memorized-verse' : '';
+
+                verseCard.innerHTML = `
+                    <div class="verse-reference">
+                        ${verso.getElementsByTagName('libro')[0].textContent} 
+                        ${verso.getElementsByTagName('capitulo')[0].textContent}:
+                        ${verso.getElementsByTagName('versiculo')[0].textContent}
+                    </div>
+                    <div class="verse-text">${verso.getElementsByTagName('texto')[0].textContent}</div>
+                    <button class="memorize-button ${isMemorized ? 'hide-button' : 'show-button'}" 
+                            onclick="markAsMemorized(${index})">
+                        ${isMemorized ? 'Ocultar' : 'Marcar como memorizado'}
+                    </button>
+                `;
+
+                container.appendChild(verseCard);
+            });
+
+            // Mostrar el contenedor de versículos
+            container.style.display = 'block';
+        }
+
+        // Marcar como memorizado
+        function markAsMemorized(index) {
+            memorizedVerses.push(index);
+            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
+            updateProgress();
+            updateVerseDisplay(index);
+        }
+
+        // Actualizar progreso
+        function updateProgress() {
+            const progress = (memorizedVerses.length / temas.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        // Inicializar
+        loadTemas();
+    </script>
+</body>
+</html>

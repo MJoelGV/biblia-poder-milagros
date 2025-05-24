@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectura Nueva - Biblia de Poder y Milagros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px 24px 40px 24px;
+        }
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 24px;
+        }
+        .selectors {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        select {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #4CAF50;
+            font-size: 1em;
+            background: #f3f3f3;
+            color: #222;
+        }
+        .chapter-content {
+            margin-top: 24px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            padding: 18px 16px;
+            min-height: 140px;
+        }
+        .verse {
+            margin-bottom: 0.7em;
+            line-height: 1.7;
+        }
+        .verse-num {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 0.5em;
+        }
+        .nav-btns {
+            margin: 18px 0 0 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 7px 18px;
+            border-radius: 8px;
+            border: none;
+            background: #4CAF50;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #388e3c;
+        }
+        .version-label {
+            font-weight: bold;
+            color: #388e3c;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 10px 3vw 24px 3vw; }
+            .selectors { flex-direction: column; gap: 12px; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Biblia de Poder y Milagros</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <div class="selectors">
+                <label for="version-select" class="version-label">Versión:
+                    <select id="version-select"></select>
+                </label>
+                <label for="book-select">Libro:
+                    <select id="book-select"></select>
+                </label>
+                <label for="chapter-select">Capítulo:
+                    <select id="chapter-select"></select>
+                </label>
+            </div>
+            <button id="toggle-dark" title="Modo oscuro" style="background:#222;color:#fff;min-width:40px;font-size:1.2em;padding:7px 14px;">🌙</button>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:center;margin-bottom:18px;gap:8px;">
+            <input id="search-input" type="text" placeholder="Buscar palabra o frase..." style="padding:8px 12px;border-radius:8px;border:1px solid #bbb;font-size:1em;width:220px;">
+            <button id="search-btn" style="background:#4CAF50;color:#fff;padding:7px 16px;border-radius:8px;border:none;font-size:1em;cursor:pointer;">🔍</button>
+            <button id="clear-search" style="background:#bbb;color:#fff;padding:7px 12px;border-radius:8px;border:none;font-size:1em;cursor:pointer;display:none;">Limpiar</button>
+        </div>
+        <div id="search-results" style="display:none;margin-bottom:18px;background:#f3fff3;border:1px solid #4CAF50;border-radius:8px;padding:10px 12px;"></div>
+        <div class="nav-btns">
+            <button id="prev-chapter">Anterior</button>
+            <button id="next-chapter">Siguiente</button>
+        </div>
+        <div class="chapter-content" id="chapter-content">
+            <span style="color:#aaa;">Selecciona un libro y capítulo...</span>
+        </div>
+    </div>
+    <script>
+    // Archivos de versiones disponibles
+    const versions = [
+        { value: 'Reina-Valera-1960', label: 'Reina-Valera 1960' },
+        { value: 'TLA', label: 'Traducción en Lenguaje Actual' },
+        { value: 'Dios-Habla-Hoy', label: 'Dios Habla Hoy' },
+        { value: 'La-Biblia-de-Las-Americas', label: 'La Biblia de las Américas' },
+        { value: 'Nueva-Traduccion-Viviente', label: 'Nueva Traducción Viviente' }
+    ];
+
+    let xmlDoc = null;
+    let currentBook = '';
+    let currentChapter = 1;
+    let currentVersion = versions[0].value;
+
+    // Llenar selectores de versión
+    const versionSelect = document.getElementById('version-select');
+    versions.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.value;
+        opt.textContent = v.label;
+        versionSelect.appendChild(opt);
+    });
+    versionSelect.value = currentVersion;
+
+    // Cargar la Biblia
+    async function loadBible(version) {
+        try {
+            const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
+            const url = `${baseUrl}biblia-files/${version}.xmm`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('No se pudo cargar la Biblia');
+            // Forzar decodificación Windows-1252 para máxima compatibilidad
+            const buffer = await response.arrayBuffer();
+            const decoder = new TextDecoder('windows-1252');
+            const xmlText = decoder.decode(buffer);
+            xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+            currentVersion = version;
+            fillBookSelect();
+        } catch (e) {
+            document.getElementById('chapter-content').innerHTML = `<span style='color:red'>Error: ${e.message}</span>`;
+        }
+    }
+
+    // Llenar selector de libros
+    function fillBookSelect() {
+        const bookSelect = document.getElementById('book-select');
+        bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+        const books = xmlDoc.getElementsByTagName('b');
+        Array.from(books).forEach(book => {
+            const opt = document.createElement('option');
+            opt.value = book.getAttribute('n');
+            opt.textContent = book.getAttribute('n');
+            bookSelect.appendChild(opt);
+        });
+        bookSelect.value = '';
+        document.getElementById('chapter-select').innerHTML = '<option value="">Capítulo</option>';
+        document.getElementById('chapter-content').innerHTML = '<span style="color:#aaa;">Selecciona un libro y capítulo...</span>';
+    }
+
+    // Llenar selector de capítulos
+    function fillChapterSelect() {
+        const chapterSelect = document.getElementById('chapter-select');
+        chapterSelect.innerHTML = '<option value="">Capítulo</option>';
+        if (!currentBook) return;
+        const bookNode = Array.from(xmlDoc.getElementsByTagName('b')).find(b => b.getAttribute('n') === currentBook);
+        if (!bookNode) return;
+        const chapters = bookNode.getElementsByTagName('c');
+        Array.from(chapters).forEach(chap => {
+            const opt = document.createElement('option');
+            opt.value = chap.getAttribute('n');
+            opt.textContent = chap.getAttribute('n');
+            chapterSelect.appendChild(opt);
+        });
+        chapterSelect.value = currentChapter;
+    }
+
+    // Mostrar capítulo
+    function showChapter() {
+        const chapterDiv = document.getElementById('chapter-content');
+        if (!currentBook) {
+            chapterDiv.innerHTML = '<span style="color:#aaa;">Selecciona un libro y capítulo...</span>';
+            return;
+        }
+        const bookNode = Array.from(xmlDoc.getElementsByTagName('b')).find(b => b.getAttribute('n') === currentBook);
+        if (!bookNode) {
+            chapterDiv.innerHTML = '<span style="color:red">Libro no encontrado</span>';
+            return;
+        }
+        const chapterNode = Array.from(bookNode.getElementsByTagName('c')).find(c => c.getAttribute('n') == currentChapter);
+        if (!chapterNode) {
+            chapterDiv.innerHTML = '<span style="color:red">Capítulo no encontrado</span>';
+            return;
+        }
+        const verses = chapterNode.getElementsByTagName('v');
+        chapterDiv.innerHTML = Array.from(verses).map(v => `<div class='verse'><span class='verse-num'>${v.getAttribute('n')}</span>${v.textContent}</div>`).join('');
+    }
+
+    // Eventos
+    versionSelect.addEventListener('change', async e => {
+        await loadBible(e.target.value);
+        currentBook = '';
+        currentChapter = 1;
+        document.getElementById('chapter-select').innerHTML = '<option value="">Capítulo</option>';
+        document.getElementById('chapter-content').innerHTML = '<span style="color:#aaa;">Selecciona un libro y capítulo...</span>';
+    });
+    document.getElementById('book-select').addEventListener('change', e => {
+        currentBook = e.target.value;
+        currentChapter = 1;
+        fillChapterSelect();
+        showChapter();
+    });
+    document.getElementById('chapter-select').addEventListener('change', e => {
+        currentChapter = e.target.value;
+        showChapter();
+    });
+    document.getElementById('prev-chapter').addEventListener('click', () => {
+        if (!currentBook || currentChapter <= 1) return;
+        currentChapter--;
+        document.getElementById('chapter-select').value = currentChapter;
+        showChapter();
+    });
+    document.getElementById('next-chapter').addEventListener('click', () => {
+        const bookNode = Array.from(xmlDoc.getElementsByTagName('b')).find(b => b.getAttribute('n') === currentBook);
+        const chapters = bookNode ? bookNode.getElementsByTagName('c') : [];
+        if (!currentBook || currentChapter >= chapters.length) return;
+        currentChapter++;
+        document.getElementById('chapter-select').value = currentChapter;
+        showChapter();
+    });
+
+    // Inicializar
+    window.addEventListener('DOMContentLoaded', async () => {
+        await loadBible(currentVersion);
+    });
+        // --- BUSQUEDA Y MODO OSCURO ---
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const searchResultsDiv = document.getElementById('search-results');
+        let lastSearchTerm = '';
+
+        function highlight(text, term) {
+            if (!term) return text;
+            return text.replace(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+        }
+
+        function searchInCurrentChapter(term) {
+            if (!xmlDoc || !currentBook || !currentChapter) return [];
+            const bookNode = Array.from(xmlDoc.getElementsByTagName('b')).find(b => b.getAttribute('n') === currentBook);
+            if (!bookNode) return [];
+            const chapterNode = Array.from(bookNode.getElementsByTagName('c')).find(c => c.getAttribute('n') == currentChapter);
+            if (!chapterNode) return [];
+            const verses = chapterNode.getElementsByTagName('v');
+            const results = [];
+            Array.from(verses).forEach(v => {
+                if (v.textContent.toLowerCase().includes(term)) {
+                    results.push({
+                        book: currentBook,
+                        chapter: currentChapter,
+                        verse: v.getAttribute('n'),
+                        text: v.textContent
+                    });
+                }
+            });
+            return results;
+        }
+
+        function searchInBible(term) {
+            if (!xmlDoc) return [];
+            const results = [];
+            const books = xmlDoc.getElementsByTagName('b');
+            Array.from(books).forEach(book => {
+                const bookName = book.getAttribute('n');
+                Array.from(book.getElementsByTagName('c')).forEach(chap => {
+                    const chapNum = chap.getAttribute('n');
+                    Array.from(chap.getElementsByTagName('v')).forEach(v => {
+                        if (v.textContent.toLowerCase().includes(term)) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapNum,
+                                verse: v.getAttribute('n'),
+                                text: v.textContent
+                            });
+                        }
+                    });
+                });
+            });
+            return results;
+        }
+
+        function showSearchResults(results, term) {
+            if (!results.length) {
+                searchResultsDiv.innerHTML = `<span style='color:#888'>No se encontraron resultados.</span>`;
+            } else {
+                searchResultsDiv.innerHTML = results.map(r =>
+                    `<div class='verse' style='margin-bottom:0.5em;'>
+                        <span class='verse-num'>${r.book} ${r.chapter}:${r.verse}</span> <span>${highlight(r.text, term)}</span>
+                    </div>`
+                ).join('');
+            }
+            searchResultsDiv.style.display = 'block';
+            clearSearchBtn.style.display = 'inline-block';
+        }
+
+        searchBtn.addEventListener('click', () => {
+            const term = searchInput.value.trim().toLowerCase();
+            if (!term) return;
+            lastSearchTerm = term;
+            // Buscar en capítulo actual primero
+            let results = searchInCurrentChapter(term);
+            if (results.length === 0) {
+                // Buscar en toda la Biblia cargada
+                results = searchInBible(term);
+            }
+            showSearchResults(results, term);
+        });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') searchBtn.click();
+        });
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchResultsDiv.style.display = 'none';
+            clearSearchBtn.style.display = 'none';
+        });
+
+        // --- Modo oscuro ---
+        const darkBtn = document.getElementById('toggle-dark');
+        darkBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                darkBtn.textContent = '☀️';
+                localStorage.setItem('bpm-dark', '1');
+            } else {
+                darkBtn.textContent = '🌙';
+                localStorage.removeItem('bpm-dark');
+            }
+        });
+        // Mantener preferencia
+        if (localStorage.getItem('bpm-dark')) {
+            document.body.classList.add('dark-mode');
+            darkBtn.textContent = '☀️';
+        }
+    </script>
+    <style>
+    body.dark-mode {
+        background: #181a1b !important;
+        color: #e2e2e2 !important;
+    }
+    body.dark-mode .container {
+        background: #232526 !important;
+        color: #e2e2e2 !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    body.dark-mode select, body.dark-mode input {
+        background: #232526 !important;
+        color: #e2e2e2 !important;
+        border: 1px solid #4CAF50 !important;
+    }
+    body.dark-mode .chapter-content, body.dark-mode #search-results {
+        background: #232526 !important;
+        color: #e2e2e2 !important;
+        border-color: #388e3c !important;
+    }
+    body.dark-mode button {
+        background: #388e3c !important;
+        color: #fff !important;
+    }
+    body.dark-mode #toggle-dark {
+        background: #e2e2e2 !important;
+        color: #222 !important;
+    }
+    body.dark-mode mark {
+        background: #4CAF50;
+        color: #fff;
+    }
+    </style>
+</body>
+</html>
