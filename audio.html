@@ -122,9 +122,51 @@
         // Cargar lista de libros desde el manifest.json dinámico
         async function loadBooks() {
             try {
-                const res = await fetch('https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/manifest.json');
-                if (!res.ok) throw new Error(res.statusText);
-                const manifest = await res.json();
+                // Mostrar mensaje de carga
+                const nowPlaying = document.getElementById('now-playing');
+                nowPlaying.textContent = 'Cargando lista de libros...';
+                
+                // Intentar cargar el manifest desde varias ubicaciones posibles
+                const manifestPaths = [
+                    './audio/manifest.json',
+                    'https://mjoelgv.github.io/biblia-poder-milagros/audio/manifest.json',
+                    'https://raw.githubusercontent.com/mjoelgv/biblia-poder-milagros/main/audio/manifest.json'
+                ];
+                
+                let manifest;
+                let lastError;
+                
+                for (const path of manifestPaths) {
+                    try {
+                        console.log(`Intentando cargar manifest desde: ${path}`);
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos de timeout
+                        
+                        const res = await fetch(path, { signal: controller.signal });
+                        clearTimeout(timeoutId);
+                        
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        manifest = await res.json();
+                        
+                        // Verificar que el manifest tenga el formato correcto
+                        if (!Array.isArray(manifest) || manifest.length === 0) {
+                            throw new Error('El manifest está vacío o tiene un formato incorrecto');
+                        }
+                        
+                        console.log('Manifest cargado correctamente desde:', path);
+                        break; // Si llegamos aquí, salir del bucle
+                    } catch (err) {
+                        console.error(`Error al cargar ${path}:`, err);
+                        lastError = err;
+                    }
+                }
+                
+                if (!manifest) {
+                    const errorMsg = `No se pudo cargar el manifest. ${lastError?.message || 'Verifica tu conexión a internet e intenta recargar la página.'}`;
+                    console.error(errorMsg);
+                    nowPlaying.textContent = 'Error al cargar la lista de libros. Recarga la página.';
+                    throw new Error(errorMsg);
+                }
                 // Store manifest globally
                 manifestData = manifest;
                 // Populate native book <select>
@@ -140,45 +182,96 @@
                 });
                 // On book selection, populate chapter-select and play first
                 bookSelect.onchange = () => {
-                    const code = bookSelect.value;
-                    localStorage.setItem('audio-last-book', code);
-                    const chapters = manifestData
-                        .filter(item => item.name === code)
-                        .sort((a, b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-                    chapterSelect.disabled = false;
-                    chapterSelect.innerHTML = '<option disabled selected>Selecciona un capítulo</option>';
-                    chapters.forEach(item => {
-                        const num = item.file.match(/_(\d+)/)[1];
-                        const opt = document.createElement('option');
-                        opt.value = item.file;
-                        opt.textContent = (bookDisplayNames[code] || code) + ' ' + num;
-                        chapterSelect.appendChild(opt);
-                    });
-                    if (chapters.length > 0) {
-                        const first = chapters[0];
-                        const num = first.file.match(/_(\d+)/)[1];
-                        const audioUrl = `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${first.file}`;
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
-                        // Forzar reproducción automática para el primer capítulo
-                        const audioPlayer = document.getElementById('audio-player');
-                        audioPlayer.play().catch(error => {
-                            console.log('Error al reproducir automáticamente:', error);
-                        });
-                    }
-                    chapterSelect.onchange = e => {
-                        const file = e.target.value;
+                    try {
+                        const code = bookSelect.value;
+                        console.log('Libro seleccionado:', code);
+                        
+                        if (!code) {
+                            console.warn('No se seleccionó ningún libro');
+                            return;
+                        }
+                        
                         localStorage.setItem('audio-last-book', code);
-                        localStorage.setItem('audio-last-file', file);
-                        const num = file.match(/_\d+/)[1];
-                        const audioUrl = `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${file}`;
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
-                        // Forzar reproducción automática
-                        const audioPlayer = document.getElementById('audio-player');
-                        audioPlayer.play().catch(error => {
-                            console.log('Error al reproducir automáticamente:', error);
-                        });
-                    };
+                        
+                        // Filtrar y ordenar capítulos para el libro seleccionado
+                        const chapters = manifestData
+                            .filter(item => item && item.name === code)
+                            .sort((a, b) => {
+                                const aNum = parseInt((a.file.match(/\d+/) || ['0'])[0]) || 0;
+                                const bNum = parseInt((b.file.match(/\d+/) || ['0'])[0]) || 0;
+                                return aNum - bNum;
+                            });
+                        
+                        console.log(`Encontrados ${chapters.length} capítulos para ${code}`);
+                        
+                        // Limpiar y deshabilitar el selector de capítulos
+                        chapterSelect.disabled = true;
+                        chapterSelect.innerHTML = '<option disabled selected>Cargando capítulos...</option>';
+                        
+                        // Usar setTimeout para permitir que la UI se actualice
+                        setTimeout(() => {
+                            try {
+                                chapterSelect.innerHTML = '<option disabled selected>Selecciona un capítulo</option>';
+                                
+                                if (chapters.length === 0) {
+                                    console.warn('No se encontraron capítulos para el libro:', code);
+                                    chapterSelect.disabled = true;
+                                    return;
+                                }
+                                
+                                // Llenar el selector de capítulos
+                                chapters.forEach(item => {
+                                    const num = (item.file.match(/\d+/) || ['?'])[0];
+                                    const opt = document.createElement('option');
+                                    opt.value = item.file;
+                                    opt.textContent = `${bookDisplayNames[code] || code} ${num}`;
+                                    chapterSelect.appendChild(opt);
+                                });
+                                
+                                chapterSelect.disabled = false;
+                                
+                                // Reproducir automáticamente el primer capítulo
+                                if (chapters.length > 0) {
+                                    const first = chapters[0];
+                                    const num = (first.file.match(/\d+/) || ['?'])[0];
+                                    const isLocal = window.location.href.startsWith('file://');
+                                    const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+                                    const audioUrl = basePath + first.file;
+                                    
+                                    console.log('Reproduciendo primer capítulo:', audioUrl);
+                                    playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                                }
+                            } catch (error) {
+                                console.error('Error al cargar capítulos:', error);
+                                chapterSelect.innerHTML = '<option disabled>Error al cargar capítulos</option>';
+                            }
+                        }, 100);
+                        
+                        // Configurar el manejador de cambio de capítulo
+                        chapterSelect.onchange = e => {
+                            try {
+                                const file = e.target.value;
+                                if (!file) return;
+                                
+                                console.log('Capítulo seleccionado:', file);
+                                
+                                localStorage.setItem('audio-last-file', file);
+                                const num = (file.match(/\d+/) || ['?'])[0];
+                                const isLocal = window.location.href.startsWith('file://');
+                                const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+                                const audioUrl = basePath + file;
+                                
+                                console.log('Reproduciendo capítulo:', audioUrl);
+                                playCustom(`${bookDisplayNames[code] || code} ${num}`, audioUrl);
+                            } catch (error) {
+                                console.error('Error al cambiar de capítulo:', error);
+                            }
+                        };
+                    } catch (error) {
+                        console.error('Error al manejar la selección de libro:', error);
+                    }
                 };
+                
                 // Auto-load last listened book and chapter
                 const lastBook = localStorage.getItem('audio-last-book');
                 const lastFile = localStorage.getItem('audio-last-file');
@@ -282,26 +375,78 @@
         }
 
         function playCustom(name, src) {
-            console.log('playCustom src:', src);
-            // Construir playlist completo del libro
+            console.log('playCustom - Iniciando con src:', src);
+            
+            // Mostrar mensaje de carga
+            const nowPlaying = document.getElementById('now-playing');
+            nowPlaying.textContent = `Cargando ${name}...`;
+            
+            // Extraer el código del libro del nombre del archivo
             const fileName = src.split('/').pop();
             const [code] = fileName.replace('.mp3','').split(/[-_]/);
             
+            // Verificar si el código es válido
+            if (!code) {
+                const errorMsg = 'No se pudo determinar el código del libro para: ' + src;
+                console.error(errorMsg);
+                nowPlaying.textContent = 'Error: ' + errorMsg;
+                return;
+            }
+            
+            // Verificar que exista manifestData
+            if (!manifestData || !Array.isArray(manifestData)) {
+                const errorMsg = 'No se han cargado los datos de la Biblia. Por favor, recarga la página.';
+                console.error(errorMsg);
+                nowPlaying.textContent = errorMsg;
+                return;
+            }
+            
+            console.log('Buscando capítulos para el libro:', code);
+            
             // Filtrar y ordenar capítulos
             const chapters = manifestData
-                .filter(item => item.file && item.file.startsWith(code + '_'))
+                .filter(item => item && item.file && item.file.startsWith(code + '_'))
                 .sort((a,b) => {
-                    const aNum = parseInt((a.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
-                    const bNum = parseInt((b.file.match(/_\d+/) || ['_0'])[0].substring(1)) || 0;
+                    const aNum = parseInt((a.file.match(/\d+/) || ['0'])[0]) || 0;
+                    const bNum = parseInt((b.file.match(/\d+/) || ['0'])[0]) || 0;
                     return aNum - bNum;
                 });
             
-            // Usar la ruta base correcta para los audios
-            playlist = chapters.map(item => `https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/${item.file}`);
-            trackIndex = playlist.indexOf(src) >= 0 ? playlist.indexOf(src) : 0;
+            console.log(`Encontrados ${chapters.length} capítulos para ${code}`);
+            
+            if (chapters.length === 0) {
+                const errorMsg = `No se encontraron capítulos para el libro: ${code}`;
+                console.error(errorMsg);
+                nowPlaying.textContent = 'Error: ' + errorMsg;
+                return;
+            }
+            
+            // Determinar la ruta base según el entorno
+            const isLocal = window.location.href.startsWith('file://');
+            const basePath = isLocal ? './audio/' : 'https://mjoelgv.github.io/biblia-poder-milagros/audio/';
+            
+            console.log('Ruta base para audios:', basePath);
+            
+            // Crear la lista de reproducción con las rutas completas
+            playlist = chapters.map(item => {
+                const path = basePath + item.file;
+                console.log('Añadiendo a la lista de reproducción:', path);
+                return path;
+            });
+            
+            // Encontrar el índice del capítulo actual en la lista de reproducción
+            const currentFile = fileName.includes('/') ? fileName.split('/').pop() : fileName;
+            trackIndex = playlist.findIndex(url => url.endsWith('/' + currentFile) || url.endsWith(currentFile));
+            
+            console.log(`Capítulo actual: ${currentFile}, Índice: ${trackIndex}`);
+            
+            if (trackIndex === -1) {
+                console.warn('No se encontró el capítulo en la lista, usando el primero');
+                trackIndex = 0; // Usar el primer capítulo si no se encuentra
+            }
             
             // Mostrar y reproducir en cadena
-            document.getElementById('now-playing').textContent = 'Escuchando ' + name;
+            document.getElementById('now-playing').textContent = 'Cargando ' + name + '...';
             document.getElementById('player-controls').style.display = 'flex';
             audioPlayer.style.display = 'block';
             
@@ -319,7 +464,7 @@
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             
             // Mostrar mensaje para el usuario
-            document.getElementById('now-playing').textContent = 'Haz clic en el botón de reproducción para escuchar';
+            document.getElementById('now-playing').textContent = 'Haz clic en el botón de reproducción para escuchar ' + name;
             
             // Habilitar controles
             playPauseBtn.disabled = false;
@@ -382,8 +527,8 @@
         audioPlayer.addEventListener('loadedmetadata', () => {
             seekSlider.max = audioPlayer.duration;
             durationEl.textContent = formatTime(audioPlayer.duration);
-            // Ruta base para los audios en GitHub Pages
-            const AUDIO_BASE_PATH = 'https://mjoelgv.github.io/biblia-poder-milagros/docs/audio/';
+            // Ruta base relativa para los audios
+            const AUDIO_BASE_PATH = './audio/';
             // Restore saved position
             const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
             const saved = localStorage.getItem(key);
@@ -400,14 +545,33 @@
             audioPlayer.currentTime = seekSlider.value;
         };
         // Iniciar lista y reproducción
-        let manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
+        let manifestData = [];
+        let playlist = [];
+        let trackIndex = 0; 
+        let currentBookName;
+        let currentBookNode;
         
         // Precargar manifest y configurar evento de interacción
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar el manifest
-            loadBooks();
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM cargado, iniciando carga de libros...');
+            try {
+                await loadBooks();
+                console.log('Libros cargados correctamente');
+                
+                // Configurar controles de audio después de cargar los libros
+                const lastBook = localStorage.getItem('audio-last-book');
+                if (lastBook) {
+                    bookSelect.value = lastBook;
+                    // Disparar el evento change para cargar los capítulos
+                    const event = new Event('change');
+                    bookSelect.dispatchEvent(event);
+                }
+            } catch (error) {
+                console.error('Error al cargar los libros:', error);
+                alert('Error al cargar la lista de libros. Por favor, recarga la página.');
+            }
             
-            // Agregar manejador de clic para el botón de reproducción
+            // Configurar controles de audio para el botón de reproducción
             const playPauseBtn = document.getElementById('play-pause');
             playPauseBtn.addEventListener('click', function() {
                 if (audioPlayer.paused) {
