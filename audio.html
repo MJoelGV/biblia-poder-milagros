@@ -472,14 +472,51 @@
 
         // Función para reproducir track y actualizar indicador
         function playTrack(index) {
-            const src = playlist[index];
-            audioPlayer.src = src;
-            const fileName = src.split('/').pop().replace('.mp3','');
-            const parts = fileName.includes('-') ? fileName.split('-') : fileName.split('_');
-            const code = parts[0], chap = parts[1];
-            document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code]} ${chap}`;
-            audioPlayer.play();
-            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            try {
+                console.log('playTrack called with index:', index);
+                if (!playlist || !playlist.length) {
+                    console.error('Playlist is empty or not defined');
+                    return;
+                }
+                
+                const src = playlist[index];
+                if (!src) {
+                    console.error('No source found at index', index);
+                    return;
+                }
+                
+                console.log('Setting audio source to:', src);
+                audioPlayer.src = src;
+                
+                // Actualizar la interfaz de usuario
+                const playPauseBtn = document.getElementById('play-pause');
+                if (playPauseBtn) {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    playPauseBtn.setAttribute('title', 'Pausar');
+                }
+                
+                // Extraer información del archivo para mostrar
+                const fileName = src.split('/').pop().replace('.mp3','');
+                const parts = fileName.includes('-') ? fileName.split('-') : fileName.split('_');
+                if (parts.length >= 2) {
+                    const code = parts[0], chap = parts[1];
+                    document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code] || code} ${chap}`;
+                }
+                
+                // Reproducir
+                audioPlayer.play()
+                    .then(() => console.log('Playback started successfully'))
+                    .catch(error => {
+                        console.error('Error playing audio:', error);
+                        if (playPauseBtn) {
+                            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                            playPauseBtn.setAttribute('title', 'Reproducir');
+                        }
+                    });
+                    
+            } catch (error) {
+                console.error('Error in playTrack:', error);
+            }
         }
 
         // Controles pausa y stop
@@ -506,15 +543,62 @@
         });
         // Play/Pause toggle
         const playPauseBtn = document.getElementById('play-pause');
-        playPauseBtn.onclick = () => {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
+        
+        // Función para actualizar el estado del botón
+        function updatePlayPauseButton(isPlaying) {
+            if (!playPauseBtn) return;
+            
+            if (isPlaying) {
                 playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                playPauseBtn.setAttribute('title', 'Pausar');
             } else {
-                audioPlayer.pause();
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                playPauseBtn.setAttribute('title', 'Reproducir');
             }
-        };
+        }
+        
+        // Inicializar el estado del botón
+        updatePlayPauseButton(false);
+        
+        // Manejar el clic en el botón Play/Pause
+        if (playPauseBtn && audioPlayer) {
+            playPauseBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Play/Pause clicked. Current state - paused:', audioPlayer.paused);
+                
+                if (audioPlayer.paused) {
+                    // Si no hay fuente o la fuente no se está reproduciendo
+                    if (!audioPlayer.src || audioPlayer.ended) {
+                        if (playlist && playlist.length > 0) {
+                            // Reproducir el primer track si no hay ninguno seleccionado
+                            playTrack(trackIndex >= 0 ? trackIndex : 0);
+                        } else {
+                            console.error('No hay pistas disponibles en la lista de reproducción');
+                            return;
+                        }
+                    } else {
+                        // Reanudar la reproducción
+                        audioPlayer.play().catch(error => {
+                            console.error('Error al reanudar la reproducción:', error);
+                        });
+                    }
+                } else {
+                    // Pausar la reproducción
+                    audioPlayer.pause();
+                }
+            });
+            
+            // Actualizar el botón cuando cambia el estado de reproducción
+            audioPlayer.addEventListener('play', () => updatePlayPauseButton(true));
+            audioPlayer.addEventListener('pause', () => updatePlayPauseButton(false));
+            audioPlayer.addEventListener('ended', () => updatePlayPauseButton(false));
+            
+            console.log('Controlador de Play/Pause inicializado correctamente');
+        } else {
+            console.error('Error: No se pudo encontrar el botón de Play/Pause o el reproductor de audio');
+        }
         // Seek slider and time update
         const seekSlider = document.getElementById('seek-slider');
         const currentTimeEl = document.getElementById('current-time');

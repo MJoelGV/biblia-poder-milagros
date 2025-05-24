@@ -3,8 +3,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lectura - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -193,11 +194,6 @@
         .verse.bookmarked { background: #fffa8c; }
         .verse.comment { border-left: 4px solid var(--primary-color); }
         .verse.memorized { background: #c6f4d6; }
-        /* Dark mode: texto negro para bookmarked y memorized */
-        [data-theme="dark"] .verse.bookmarked,
-        [data-theme="dark"] .verse.memorized {
-            color: #000;
-        }
 
         .verse-number {
             color: var(--primary-color);
@@ -208,15 +204,7 @@
 
         .verse-text {
             font-size: var(--verse-font-size);
-            line-height: 1.7;
-        }
-
-        /* Estilo para versículos marcados como favoritos */
-        .verse.bookmarked {
-            background-color: rgba(76, 175, 80, 0.1); /* Verde claro */
-            border-left: 4px solid #4CAF50;
-            padding-left: 10px;
-            border-radius: 4px;
+            line-height: 1.6;
         }
 
         .navigation-bottom {
@@ -270,46 +258,35 @@
             text-align: center;
         }
 
-        .chapter-grid, .verse-grid {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+        .chapter-grid {
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .chapter-grid.active, .verse-grid.active {
-            display: flex;
-        }
-        .chapter-grid .grid-content, .verse-grid .grid-content {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
             background: var(--bg-color);
-            border-radius: 8px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
-            gap: 10px;
-        }
-        /* Header for modal grids */
-        .chapter-grid .grid-header, .verse-grid .grid-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        .close-grid {
-            cursor: pointer;
-            font-size: 1.5em;
-            line-height: 1;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+            max-width: 90%;
+            width: 300px;
         }
 
-        /* Botón de título: línea única con indicador */
+        .chapter-grid.active {
+            display: grid;
+            /* Siempre 1 columna en m├│vil/tablet */
+            grid-template-columns: 1fr;
+        }
+
+        /* Pantallas grandes: 4 columnas */
+        @media (min-width: 701px) {
+            .chapter-grid.active {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Bot├│n de t├¡tulo: l├¡nea ├║nica con indicador */
         .chapter-btn {
             display: flex;
             justify-content: space-between;
@@ -366,7 +343,7 @@
             display: block;
         }
 
-        /* Botón cerrar resultados de búsqueda */
+        /* Bot├│n cerrar resultados de b├║squeda */
         .search-results .close-search {
             position: absolute;
             top: 8px;
@@ -435,7 +412,7 @@
             padding: 6px 12px;
         }
 
-        /* Verso marcado y menú contextual */
+        /* Verso marcado y men├║ contextual */
         .verse-menu {
             display: none;
             position: absolute;
@@ -468,7 +445,7 @@
                 flex: 0 1 auto;
             }
         }
-        /* Responsive: menú más compacto en móviles */
+        /* Responsive: men├║ m├ís compacto en m├│viles */
         @media (max-width: 600px) {
             .controls { padding: 8px; }
             .controls .home-icon,
@@ -502,940 +479,267 @@
         .extra-controls.active {
             display: flex;
         }
-        /* Main menu toggle button */
-        .main-menu-toggle {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--primary-color);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .main-menu-toggle:hover {
-            background-color: rgba(76, 175, 80, 0.1);
-        }
-
         /* Menú lateral */
-        .search-results {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-color);
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 2000;
-            display: none;
-            width: 100%;
-            max-width: 100vw;
-            box-sizing: border-box;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        
-        .search-results.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .search-results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            background: var(--bg-color);
-            z-index: 10;
-            padding-top: 10px;
-            margin-top: -10px;
-        }
-        
-        .search-results-header h3 {
-            margin: 0;
-            font-size: 1.4rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .close-search {
-            background: rgba(0, 0, 0, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-color);
-            transition: all 0.2s ease;
-        }
-        
-        .close-search:hover {
-            background: rgba(0, 0, 0, 0.2);
-            transform: rotate(90deg);
-        }
-        
-        [data-theme="dark"] .close-search {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        [data-theme="dark"] .close-search:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Estilos para los resultados de búsqueda */
-        .search-result-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: rgba(76, 175, 80, 0.05);
-            transition: all 0.2s ease;
-        }
-        
-        .search-result-item:hover {
-            background-color: rgba(76, 175, 80, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .search-result-reference {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-            font-size: 1.1em;
-        }
-        
-        .search-highlight {
-            background-color: rgba(255, 193, 7, 0.5);
-            font-weight: bold;
-            padding: 0 2px;
-            border-radius: 3px;
-            color: #000;
-            text-shadow: none;
-            box-shadow: 0 0 3px rgba(255, 193, 7, 0.3);
-        }
-        .highlighted {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .highlighted:after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 235, 59, 0.3);
-            border-radius: 3px;
-            z-index: -1;
-            animation: highlight-fade 2s ease-out forwards;
-        }
-        
-        @keyframes highlight-fade {
-            0% { opacity: 0.8; }
-            100% { opacity: 0; }
-        }
-        
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -250px;
-            width: 250px;
-            height: 100%;
-            background: var(--bg-color);
-            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-            transition: left 0.3s ease;
+        .side-menu { 
+            position: fixed; 
+            top: 0; 
+            left: -250px; 
+            width: 250px; 
+            height: 100%; 
+            background: #121212; 
+            color: #fff; 
+            box-shadow: 2px 0 8px rgba(0,0,0,0.5); 
+            transition: left 0.3s ease; 
             z-index: 1001;
+            padding-top: 20px;
         }
-        .side-menu.active {
-            left: 0;
+        .side-menu.active { left: 0; }
+        .side-menu ul { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
         }
-        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
-        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
-        .side-menu ul li:last-child { border-bottom: none; }
-        .side-menu-toggle {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-color);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
+        .side-menu ul li { 
+            padding: 12px 20px; 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .side-menu ul li:hover { 
+            background: rgba(255,255,255,0.1); 
+        }
+        .side-menu-toggle { 
+            background: none; 
+            border: none; 
+            font-size: 1.5em; 
+            color: #fff; 
+            cursor: pointer; 
+            padding: 5px 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 8px;
         }
-        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
-        
-        /* Outline grid styling */
-        .outline-grid {
+        .side-menu-toggle:hover { 
+            background-color: rgba(255,255,255,0.1); 
+            border-radius: 4px;
+        }
+        .menu-overlay {
+            display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .outline-grid.active {
-            display: flex;
-        }
-        .outline-grid .grid-content {
-            background: var(--bg-color);
-            border-radius: 8px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
-            gap: 10px;
-        }
-        .fullscreen-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #fff;
-            z-index: 2000;
-        [data-theme="dark"] .fullscreen-overlay {
-            background-color: #222;
-            color: #eee;
-        }
-        
-        [data-theme="dark"] .search-header {
-            background-color: #333;
-            border-color: #444;
-        }
-        .outline-grid .grid-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        /* Verse grid styling and hide dropdowns */
-        #chapter-select, #verse-select {
-            display: none !important;
-        }
-
-        /* Mostrar grid de capítulos cuando esté activo */
-        .chapter-grid.active { display: flex; }
-        
-        /* Estilos para resultados de búsqueda (pantalla completa) */
-        .fullscreen-results {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color, #fff);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        [data-theme="dark"] .fullscreen-results {
-            background-color: var(--dark-bg-color, #222);
-            color: var(--dark-text-color, #eee);
-        }
-        
-        .results-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .search-results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #ddd;
-            position: sticky;
-            top: 0;
-            z-index: 101;
-        }
-        
-        .search-results-header h3 {
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .close-search {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-        
-        #results-content {
-            padding: 10px 15px;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            margin: 0 auto;
-        }
-        
-        .result-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            width: 100%;
-            box-sizing: border-box;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-        
-        .result-reference {
-            font-weight: 500;
-            margin-bottom: 5px;
-            cursor: pointer;
-            color: #1a73e8;
-            display: block;
-            width: 100%;
-        }
-        
-        .result-reference:hover {
-            text-decoration: underline;
-        }
-        
-        .result-text {
-            line-height: 1.5;
-            width: 100%;
-            display: block;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-        
-        .search-highlight {
-            background-color: #ffeb3b;
-            color: black;
-            padding: 0 2px;
-            font-weight: bold;
-        }
-        
-        /* Estilos para el menú contextual */
-        .menu-item {
-            padding: 8px 15px;
-            cursor: pointer;
-        }
-        
-        .menu-item:hover {
-            background-color: #f5f5f5;
-        }
-        
-        /* Estilos para versículos memorizados */
-        .verse.memorized {
-            background-color: rgba(33, 150, 243, 0.1); /* Azul claro */
-            border-left: 4px solid #2196F3;
-            padding-left: 10px;
-            border-radius: 4px;
-        }
-        
-        /* Estilos para versículos con comentarios */
-        .verse.commented {
-            background-color: rgba(255, 193, 7, 0.1); /* Amarillo claro */
-            border-left: 4px solid #FFC107;
-            padding-left: 10px;
-            border-radius: 4px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-style: italic;
-        }
-        
-        .search-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            z-index: 100;
-        }
-        
-        .search-input {
-            padding: 8px 15px 8px 35px;
-            border: 1px solid var(--border-color, #ddd);
-            border-radius: 20px;
-            width: 200px;
-            font-size: 14px;
-            background-color: var(--bg-color, #fff);
-            color: var(--text-color, #333);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23777' viewBox='0 0 16 16'%3e%3cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: 12px center;
-            background-size: 16px;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color, #4CAF50);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-            width: 250px;
-        }
-        
-        .search-button {
-            background: var(--primary-color, #4CAF50);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .search-button:hover {
-            background: var(--primary-hover, #45a049);
-            transform: scale(1.05);
-        }
-        
-        .search-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
-        .search-button {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-        
-        .search-input {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 8px 10px;
-            font-size: 16px;
-            width: 100%;
-            max-width: 200px;
-        }
-        
-        [data-theme="dark"] .search-results {
-            background-color: #333;
-            border-color: #444;
-        }
-        
-        [data-theme="dark"] .search-results-header {
-            background-color: #444;
-            border-color: #555;
-        }
-        
-        [data-theme="dark"] .result-item {
-            border-color: #444;
-        }
-        
-        [data-theme="dark"] .search-highlight {
-            background-color: #ffc107;
-            color: #333;
-        }
-
-        /* Estilos para el contenedor de búsqueda */
-        .search-container {
-            display: flex;
-            align-items: center;
-            margin: 0 10px;
-            position: relative;
-            flex: 1;
-            max-width: 300px;
-        }
-
-        #search-input {
-            flex: 1;
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        #search-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-        }
-
-        .search-button {
-            position: absolute;
-            right: 5px;
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .search-button:hover {
-            color: var(--primary-color);
-        }
-
-        /* Estilos para el contenedor de resultados */
-        .search-results-container {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--bg-color);
             z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-            display: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .search-results-container.active {
+        .menu-overlay.active {
             display: block;
         }
-
-        .search-results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .search-results-header h3 {
-            margin: 0;
-            color: var(--primary-color);
-        }
-
-        .close-search {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .close-search:hover {
-            color: #333;
-        }
-
-        .result-item {
-            margin-bottom: 15px;
-            padding: 16px;
-            border-radius: 8px;
-            background-color: var(--card-bg);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 4px solid var(--primary-color);
-            border: 1px solid var(--border-color);
-        }
         
-        [data-theme="dark"] .result-item {
-            background-color: var(--card-bg-dark);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .result-item:hover {
-            background-color: var(--hover-color);
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        [data-theme="dark"] .result-item:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .result-reference {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .result-text {
-            color: var(--text-color);
-            line-height: 1.5;
-        }
-
-        .search-highlight {
-            background-color: #fff9c4;
-            color: #000;
-            padding: 0 2px;
-            border-radius: 3px;
-            font-weight: 600;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-        }
-        
-        [data-theme="dark"] .search-highlight {
-            background-color: #ffeb3b;
-            color: #000;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        /* Efecto de resaltado al hacer hover en los resultados */
-        .preview-highlight {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .preview-highlight:after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -4px;
-            right: -4px;
-            bottom: -2px;
-            background: rgba(255, 235, 59, 0.4);
-            border-radius: 4px;
-            z-index: -1;
-            animation: preview-pulse 1.5s infinite;
-        }
-        
-        @keyframes preview-pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 0.7; }
-            100% { opacity: 0.4; }
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-            font-style: italic;
-        }
-        
-        .verse-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .verse-reference {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 0.95em;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .verse-reference:before {
-            content: '📖';
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-
-        .match-count {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
-            font-size: 0.8em;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-            border: 1px solid rgba(76, 175, 80, 0.2);
-        }
-        
-        [data-theme="dark"] .match-count {
-            color: var(--text-color);
-            font-size: 0.95em;
-        }
-        
-        .search-highlight {
-            background-color: #FFEB3B;
-            color: #000;
-            padding: 0 4px;
-            border-radius: 3px;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--text-muted);
-        }
-        
-        .no-results svg {
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            opacity: 0.7;
-        }
-        
-        .close-search {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 22px;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            transition: all 0.2s ease;
-        }
-        
-        .close-search:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-        
-        /* Estilos para el modo oscuro */
-        [data-theme="dark"] .search-results {
-            background: rgba(0, 0, 0, 0.97);
-        }
-        
-        [data-theme="dark"] .search-results-content {
+        /* Ajustes para el tema oscuro */
+        [data-theme="dark"] .side-menu {
             background: #1e1e1e;
-            border: 1px solid #333;
         }
-        
-        [data-theme="dark"] .search-highlight {
-            background-color: #ffd700;
-            color: #000;
+        [data-theme="dark"] .side-menu ul li:hover {
+            background: rgba(255,255,255,0.05);
         }
-        
-        [data-theme="dark"] .result-item {
-            background: #252525;
-            border-color: #333;
-        }
-        
-        [data-theme="dark"] .result-item:hover {
-            background: #2d2d2d;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        
-        .loading p {
-            margin-top: 16px;
-            font-size: 1.1em;
-            color: var(--text-color);
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .search-summary {
-            margin: 0 0 25px 0;
-            padding: 16px;
-            border-radius: 8px;
-            background-color: var(--card-bg);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            color: var(--text-color);
-            font-size: 0.95em;
-            border: 1px solid var(--border-color);
-        }
-        
-        [data-theme="dark"] .search-summary {
-            background-color: var(--card-bg-dark);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .search-summary p {
-            margin: 0 0 8px 0;
-            line-height: 1.5;
-        }
-        
-        .search-summary .search-term {
-            display: inline-block;
-            background: var(--primary-color);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-weight: 500;
-            margin-top: 5px;
-            font-size: 0.9em;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .no-results svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.7;
-            color: var(--primary-color);
-        }
-        
-        .no-results p {
-            margin: 8px 0;
-            font-size: 1.1em;
-            color: var(--text-color);
-        }
-        
-        .no-results .search-term {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-top: 12px;
-            word-break: break-word;
-        }
-        
-        /* Estilos para el contenedor de resultados de búsqueda */
-        .search-results {
-            display: none;
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-color);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .search-results.active {
-            display: block;
-        }
-        
-        .search-results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .search-results-header h3 {
-            margin: 0;
-            color: var(--text-color);
-        }
-        
-        .close-search {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-        
-        .search-results-content {
-            margin-top: 20px;
-        }
-        
-        /* Estilos para el campo de búsqueda */
-        .search-container {
-            display: flex;
-            align-items: center;
-            margin: 0 10px;
-            flex-grow: 1;
-            max-width: 300px;
-        }
-        
-        #search-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 20px 0 0 20px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        #search-input:focus {
-            border-color: var(--primary-color);
-        }
-        
-        .search-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0 20px 20px 0;
-            padding: 8px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-        
-        .search-button:hover {
-            background-color: #45a049;
+
+.chapter-btn::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-left: 8px;
+}
+
+.chapter-btn.active::after {
+    opacity: 1;
+}
+
+.search-results {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1100;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.search-results.active {
+    display: block;
+}
+
+/* Botón cerrar resultados de búsqueda */
+.search-results .close-search {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.search-results .close-search:hover {
+    color: var(--primary-color);
+}
+
+.result-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(128,128,128,0.2);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.result-item:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.result-book {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.result-text {
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* Modal para comentarios */
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1300;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    background: var(--bg-color);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1301;
+    max-width: 90%; width: 300px;
+}
+.modal textarea {
+    width: 100%; height: 100px; resize: vertical;
+}
+.modal-actions {
+    display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+}
+.modal-actions button {
+    padding: 6px 12px;
+}
+
+/* Verso marcado y menú contextual */
+.verse-menu {
+    display: none;
+    position: absolute;
+    background: var(--bg-color);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 1200;
+    padding: 8px;
+}
+.verse-menu ul { list-style: none; margin: 0; padding: 0; }
+.verse-menu li {
+    padding: 8px; cursor: pointer;
+}
+.verse-menu li:hover { background: rgba(0,0,0,0.05); }
+/* Responsive: wrap controls and selectors on small screens */
+@media (max-width: 768px) {
+    .top-row, .navigation {
+        flex-wrap: wrap;
+    }
+    /* Reduce spacing on mobile */
+    .top-row > *, .navigation > * {
+        margin: 3px 5px;
+    }
+    .navigation {
+        margin: 8px 0;
+    }
+    /* Allow selectors and input to shrink and limit width */
+    .select-css, .search-input {
+        max-width: 80px;
+        flex: 0 1 auto;
+    }
+}
+/* Responsive: menú más compacto en móviles */
+@media (max-width: 600px) {
+    .controls { padding: 8px; }
+    .controls .home-icon,
+    .controls .theme-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+        padding: 4px;
+    }
+    .selector-row {
+        padding: 8px;
+        top: 48px; /* altura de controls reducida */
+    }
+    #version-selector {
+        width: 180px;
+        min-width: 150px;
+    }
+    #book-select {
+        width: 120px;
+        min-width: 100px;
+    }
+}
+/* Extra controls (hidden por defecto) */
+.extra-controls {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 20px;
+}
+.extra-controls.active {
+    display: flex;
+}
+/* Main menu toggle button */
+.main-menu-toggle {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+.main-menu-toggle:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+</style>
         }
     </style>
-    <!-- texto actualizado -->
-    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 </head>
 <body>
     <!-- Menú lateral -->
+    <div class="menu-overlay" id="menu-overlay"></div>
     <div id="side-menu" class="side-menu">
         <ul>
             <li onclick="window.location.href='index.html'">Página principal</li>
@@ -1446,15 +750,13 @@
             <li onclick="window.location.href='diccionario.html'">Diccionario</li>
             <li onclick="window.location.href='bookmarks.html'">Marcados</li>
             <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='temas.html'">Temas</li>
         </ul>
     </div>
-    
-    <!-- Controles superiores -->
+
     <div class="controls" id="controls">
         <div class="top-row">
-            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
-            
-            <!-- Selector de versión -->
+            <button id="main-menu-toggle" class="side-menu-toggle"><i class="fas fa-bars"></i></button>
             <select id="version-selector" class="select-css">
                 <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
                 <option value="TLA">Traducción en Lenguaje Actual</option>
@@ -1462,96 +764,62 @@
                 <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
-            
-            <!-- Selector de libro -->
             <select id="book-select" class="select-css"></select>
-            
-            <!-- Campo de búsqueda -->
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Buscar en la Biblia...">
-                <button id="search-button" class="search-button">🔍</button>
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button"><i class="fas fa-search"></i></button>
+                <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
-            
-            <!-- Botón de menú principal -->
-            <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
-        
-        <!-- Controles adicionales -->
         <div id="extra-controls" class="extra-controls">
-            <a href="index.html" class="home-icon">🏠</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="decrease-font" class="font-control" onclick="adjustFontSize(-0.1)">A-</button>
-            <button id="increase-font" class="font-control" onclick="adjustFontSize(0.1)">A+</button>
+            <a href="/biblia-poder-milagros/" class="home-icon">≡ƒÅá</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">≡ƒîÖ</button>
+            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-0.1)">A-</button>
+            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(0.1)">A+</button>
         </div>
     </div> <!-- cierre .controls -->
 
-    <!-- Modal de resultados de búsqueda (pantalla completa) -->
+    <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
-        <div class="search-results-content">
-            <div class="search-header">
-                <h3>Resultados de búsqueda <span id="search-count"></span></h3>
-                <button id="close-search" class="close-search">&times;</button>
-            </div>
-            <div id="search-results-content" class="results-container"></div>
-        </div>
+        <button id="close-search" class="close-search">&times;</button>
+        <div id="results-content"></div>
     </div>
 
     <!-- Menú contextual para versículos -->
-    <div id="verse-menu" style="display:none; position:absolute; z-index:1000; background:white; border:1px solid #ccc; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.2); padding:5px 0;">
-        <div id="menu-toggle-bookmark" class="menu-item">Marcar versículo</div>
-        <div id="menu-toggle-memorized" class="menu-item">Memorizar versículo</div>
-        <div id="menu-add-comment" class="menu-item">Agregar comentario</div>
-        <div id="menu-copy-verse" class="menu-item">Copiar versículo</div>
-    </div>
-    
-    <!-- Modal para agregar comentarios -->
-    <div id="comment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:2000;">
-        <div style="position:relative; background:white; margin:100px auto; padding:20px; width:90%; max-width:500px; border-radius:8px;">
-            <h3>Agregar comentario</h3>
-            <textarea id="comment-text" style="width:100%; height:150px; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:4px;"></textarea>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button id="cancel-comment" style="padding:8px 15px; background:#f5f5f5; border:1px solid #ccc; border-radius:4px; cursor:pointer;">Cancelar</button>
-                <button id="save-comment" style="padding:8px 15px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">Guardar</button>
-            </div>
-        </div>
+    <div id="verse-menu" class="verse-menu">
+        <ul>
+            <li id="menu-toggle-bookmark">Marcar versículo</li>
+            <li id="menu-add-comment">Agregar comentario</li>
+            <li id="menu-memorize-verse">Memorizar versículo</li>
+        </ul>
     </div>
 
     <!-- Modal de comentarios -->
     <div id="comment-backdrop" class="modal-backdrop"></div>
     <div id="comment-modal" class="modal">
-        <h3 id="comment-modal-title">Comentario</h3>
+        <h3>Comentario</h3>
         <textarea id="modal-comment-input"></textarea>
         <div class="modal-actions">
             <button id="modal-save-btn">Guardar</button>
-            <button id="modal-delete-btn" style="background-color: #e74c3c; display: none;">Borrar</button>
             <button id="modal-cancel-btn">Cancelar</button>
         </div>
     </div>
 
     <div class="chapter-grid" id="chapter-grid"></div>
-    <div class="verse-grid" id="verse-grid"></div>
-    <div class="outline-grid" id="outline-grid"></div>
-    <!-- outline-grid removed temporarily until feature complete -->
+
     <div class="chapter-content" id="chapter-content">
         <div id="verses"></div>
     </div> <!-- cierre .chapter-content -->
 
     <div class="navigation-bottom" id="navigation-bottom">
-        <button class="nav-button" id="prev-button">← Anterior</button>
-        <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
-        <button class="nav-button" id="next-button">Siguiente →</button>
+        <button class="nav-button" id="prev-button">◄ Anterior</button>
+        <select id="chapter-select" class="select-css">
+            <option value="">Capítulo</option>
+        </select>
+        <button class="nav-button" id="next-button">Siguiente ►</button>
     </div>
 
-    <!-- Contenedor de resultados de búsqueda -->
-    <div id="search-results" class="search-results-container">
-        <div class="search-results-header">
-            <h3>Resultados de búsqueda</h3>
-            <button class="close-search">&times;</button>
-        </div>
-        <div id="search-results-content">
-            <!-- Los resultados se mostrarán aquí -->
-        </div>
-    </div>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
 
     <script>
         let xmlDoc = null;
@@ -1563,7 +831,7 @@
         let playlist = [];
         let trackIndex = 0;
 
-        // Controlar la visibilidad de los menús al hacer scroll
+        // Controlar la visibilidad de los men├║s al hacer scroll
         let lastScrollY = window.scrollY;
         let ticking = false;
         let lastTouchY = 0;
@@ -1574,10 +842,10 @@
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             document.body.setAttribute('data-theme', savedTheme);
-            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? 'ΓÿÇ∩╕Å' : '≡ƒîÖ';
         }
 
-        // Función para manejar el scroll
+        // Funci├│n para manejar el scroll
         function handleScroll() {
             if (!ticking) {
                 window.requestAnimationFrame(() => {
@@ -1598,7 +866,7 @@
             }
         }
 
-        // Función para manejar el toque
+        // Funci├│n para manejar el toque
         function handleTouch(e) {
             const currentY = e.touches[0].clientY;
             
@@ -1625,12 +893,12 @@
         document.addEventListener('touchstart', handleTouch, { passive: true });
         document.addEventListener('touchmove', handleTouch, { passive: true });
 
-        // Mostrar menús al tocar cerca de ellos
+        // Mostrar men├║s al tocar cerca de ellos
         document.addEventListener('touchstart', (e) => {
             const touchY = e.touches[0].clientY;
             const windowHeight = window.innerHeight;
             
-            // Si el toque está cerca del borde superior o inferior
+            // Si el toque est├í cerca del borde superior o inferior
             if (touchY < 50 || touchY > windowHeight - 50) {
                 menuVisible = true;
                 document.getElementById('controls').classList.remove('hidden');
@@ -1638,17 +906,44 @@
             }
         }, { passive: true });
 
-        // Función para cambiar el tema
+        // Funci├│n para cambiar el tema
         function toggleTheme() {
             const body = document.body;
             const button = document.getElementById('theme-toggle');
             const isDark = body.getAttribute('data-theme') === 'dark';
             body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            button.textContent = isDark ? '🌙' : '☀️';
+            button.textContent = isDark ? '≡ƒîÖ' : 'ΓÿÇ∩╕Å';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
-        // Event listeners para los botones de navegación
+        // Event listeners para los selectores
+
+        document.getElementById('book-select').addEventListener('change', (e) => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            currentVerse = 0;
+            loadChapters();
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        document.getElementById('chapter-select').addEventListener('change', (e) => {
+            currentChapter = parseInt(e.target.value);
+            loadChapter();
+            updateControls();
+            updateURL();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Event listeners para los botones de navegaci├│n
         document.getElementById('prev-button').addEventListener('click', () => {
             if (currentChapter > 1) {
                 currentChapter--;
@@ -1670,114 +965,64 @@
         });
 
         // Función para cargar capítulos
-        async function loadChapters() {
+        function loadChapters() {
             const book = document.getElementById('book-select').value;
             if (!book) return;
 
             const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
-            
-            // Verificar si el elemento chapter-select existe antes de intentar modificarlo
             const chapterSelect = document.getElementById('chapter-select');
-            if (!chapterSelect) {
-                console.log('Elemento chapter-select no encontrado - se omite esta operación');
-                return;
-            }
-            
-            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
-                Array.from(chapters).map((_, index) => `
-                    <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
-                        Capítulo ${index + 1}
-                    </option>
-                `).join('');
+            chapterSelect.innerHTML = Array.from(chapters).map((_, index) => `
+                <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                    Capítulo ${index + 1}
+                </option>
+            `).join('');
         }
 
-        // Función para cargar capítulo
+        // Funci├│n para cargar cap├¡tulo
         async function loadChapter() {
-            console.log(`Cargando ${currentBook} capítulo ${currentChapter}...`);
-            
+            const versesContainer = document.getElementById('verses');
+            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+
             try {
-                // Buscar el capítulo en el XML
-                const chapterElement = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
-                if (!chapterElement) {
-                    throw new Error(`No se encontró el capítulo ${currentChapter} de ${currentBook}`);
-                }
-                
-                // Obtener todos los versículos del capítulo
-                const verses = chapterElement.getElementsByTagName('v');
-                console.log(`Encontrados ${verses.length} versículos`);
-                
-                // Crear el HTML de los versículos con estilos mejorados
-                let versesHTML = `
-                    <div class="chapter-header">
-                        <h2>${currentBook} ${currentChapter}</h2>
+                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapter) throw new Error('No se encontró el capítulo');
+
+                let html = `
+                    <div class="chapter-title">
+                        ${currentBook} - Capítulo ${currentChapter}
                     </div>
-                    <div class="verses-container">
                 `;
                 
-                // Generar HTML para cada versículo
-                for (let i = 0; i < verses.length; i++) {
-                    const verse = verses[i];
-                    const verseNumber = verse.getAttribute('n');
-                    const verseText = verse.textContent;
-                    
-                    versesHTML += `
-                        <div class="verse" data-verse="${verseNumber}">
-                            <span class="verse-number">${verseNumber}</span>
-                            <span class="verse-text">${verseText}</span>
+                const verses = chapter.getElementsByTagName('v');
+                html += Array.from(verses).map(verse => {
+                    const verseNum = verse.getAttribute('n');
+                    const isHighlighted = parseInt(verseNum) === currentVerse;
+                    return `
+                        <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
+                             data-verse="${verseNum}"
+                             onclick="highlightVerse(this)">
+                            <span class="verse-number">${verseNum}</span>
+                            <span class="verse-text">${verse.textContent}</span>
                         </div>
                     `;
-                }
-                
-                // Cerrar el contenedor de versículos
-                versesHTML += '</div>';
-                
-                // Obtener referencia al contenedor
-                const versesContainer = document.getElementById('verses');
-                if (!versesContainer) {
-                    throw new Error('No se encontró el contenedor de versículos');
-                }
-                
-                // Aplicar estilos y contenido
-                versesContainer.style.opacity = '1';
-                versesContainer.style.visibility = 'visible';
-                versesContainer.style.minHeight = '100vh';
-                versesContainer.innerHTML = versesHTML;
-                
-                // Forzar repintado
-                void versesContainer.offsetHeight;
-                
-                // Aplicar menú contextual a todos los versículos
-                if (typeof applyVerseContextMenu === 'function') {
-                    applyVerseContextMenu();
-                }
-                
-                console.log('Capítulo cargado correctamente');
+                }).join('');
 
-                // Resaltar versículo actual si es necesario
+                versesContainer.innerHTML = html;
+
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
                     if (verseElement) {
                         setTimeout(() => {
                             verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // Quitar resaltado después de 3 segundos
+                            // difuminar highlight después de unos segundos
                             setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
                         }, 100);
                     }
                 }
-                
+                restoreStates();
             } catch (error) {
-                console.error('Error al cargar el capítulo:', error);
-                const errorHTML = `
-                    <div class="error" style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px;">
-                        <h3>Error al cargar el capítulo</h3>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-                
-                const container = document.getElementById('verses') || document.body;
-                container.innerHTML = errorHTML;
-                container.style.opacity = '1';
-                container.style.visibility = 'visible';
+                console.error('Error loading chapter:', error);
+                versesContainer.innerHTML = `<div class="error">Error al cargar el cap├¡tulo: ${error.message}</div>`;
             }
         }
 
@@ -1785,6 +1030,7 @@
         function updateControls() {
             const prevButton = document.getElementById('prev-button');
             const nextButton = document.getElementById('next-button');
+            const chapterSelect = document.getElementById('chapter-select');
             
             if (!currentBook) {
                 prevButton.disabled = true;
@@ -1797,8 +1043,8 @@
             prevButton.disabled = currentChapter <= 1;
             nextButton.disabled = currentChapter >= totalChapters;
             
-            // Actualizar texto del botón de capítulo
-            document.getElementById('current-chapter-button').textContent = currentChapter;
+            // Actualizar el selector de cap├¡tulos
+            chapterSelect.value = currentChapter;
         }
 
         // Función para actualizar URL
@@ -1812,42 +1058,16 @@
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
-                // Mostrar indicador de carga
-                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia...</div>';
-                
-                // Usar ruta relativa para desarrollo local
                 const url = `biblia-files/${version}.xmm`;
-                console.log('[BIBLIA] Intentando cargar directamente:', url);
-                
+                console.log('[BIBLIA] Intentando cargar:', url);
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error(`No se pudo cargar el archivo: ${url} (HTTP ${response.status})`);
+                    throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')');
                 }
-                
-                console.log(`[BIBLIA] ¡Archivo cargado exitosamente desde: ${url}!`);
-                
                 const xmlText = await response.text();
-                if (!xmlText || xmlText.trim().length === 0) {
-                    throw new Error('El archivo de la Biblia está vacío');
-                }
-                
-                console.log(`[BIBLIA] XML cargado: ${xmlText.length} caracteres`);
-                
-                // Parsear el XML
                 xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                
-                // Verificar errores de parseo
-                const parseError = xmlDoc.querySelector('parsererror');
-                if (parseError) {
-                    throw new Error('Error al analizar el XML: ' + parseError.textContent);
-                }
-                
-                // Guardar la versión actual
                 currentVersion = version;
                 
-                console.log('[BIBLIA] Biblia cargada correctamente');
-                
-                // Si ya hay un libro seleccionado, cargar el capítulo
                 if (currentBook) {
                     loadChapter();
                 }
@@ -1887,22 +1107,259 @@
                 option.textContent = book.getAttribute('n');
                 bookSelect.appendChild(option);
             });
-            
-            // Agregar el evento change para el selector de libros
-            bookSelect.addEventListener('change', function(e) {
-                if (e.target.value) {
-                    currentBook = e.target.value;
-                    currentChapter = 1; // Reiniciar a capítulo 1 al cambiar de libro
-                    currentVerse = 0; // Reiniciar versiculo seleccionado
-                    
-                    // Mostrar la cuadrícula de capítulos para seleccionar
-                    showChapterGrid();
-                }
-            });
         }
 
-        // OLD loadFromUrl function - REMOVED AND REPLACED BY initializeApp
-        /* function loadFromUrl() {
+        // Función de búsqueda
+        function searchText() {
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!searchTerm) return;
+
+            const resultsDiv = document.getElementById('search-results');
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '<div style="text-align: center">Buscando...</div>';
+            resultsDiv.classList.add('active');
+
+            const results = [];
+            const books = xmlDoc.getElementsByTagName('b');
+            const searchRegex = new RegExp(`\\b${searchTerm}\\b`, 'i');
+
+            for (const book of books) {
+                const bookName = book.getAttribute('n');
+                const chapters = book.getElementsByTagName('c');
+
+                for (const chapter of chapters) {
+                    const chapterNum = chapter.getAttribute('n');
+                    const verses = chapter.getElementsByTagName('v');
+
+                    for (const verse of verses) {
+                        const verseNum = verse.getAttribute('n');
+                        const verseText = verse.textContent;
+
+                        if (searchRegex.test(verseText)) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: verseText
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (results.length > 0) {
+                resultsContent.innerHTML = results.map(result => `
+                    <div class="result-item" onclick="goToVerse('${result.book}', ${result.chapter}, ${result.verse})">
+                        <div class="result-book">${result.book} ${result.chapter}:${result.verse}</div>
+                        <div class="result-text">${highlightSearchTerm(result.text, searchTerm)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsContent.innerHTML = '<div style="text-align: center">No se encontraron resultados</div>';
+            }
+        }
+
+        // Resaltar término de búsqueda
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`\\b${searchTerm}\\b`, 'gi');
+            return text.replace(regex, match => `<mark style="background: var(--primary-color); color: white;">${match}</mark>`);
+        }
+
+        // Ir a un versículo específico
+        function goToVerse(book, chapter, verse) {
+            currentBook = book;
+            currentChapter = parseInt(chapter);
+            currentVerse = parseInt(verse);
+
+            document.getElementById('book-select').value = book;
+            loadChapters();
+            loadChapter();
+            updateControls();
+            updateURL();
+            
+            closeSearch();
+        }
+
+        // Cerrar resultados de búsqueda
+        function closeSearch() {
+            document.getElementById('search-results').classList.remove('active');
+        }
+
+        // Search input toggle and execution: primer click muestra input, segundo click o Enter busca
+        (function(){
+            const wrapper = document.querySelector('.search-wrapper');
+            const input = document.getElementById('search-input');
+            const button = document.getElementById('search-button');
+            if (wrapper && input && button) {
+                button.addEventListener('click', () => {
+                    if (!wrapper.classList.contains('active')) {
+                        wrapper.classList.add('active');
+                        input.focus();
+                    } else if (input.value.trim()) {
+                        searchText();
+                    }
+                });
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && input.value.trim()) searchText();
+                });
+            }
+        })();
+        // Reactivar cierre de b├║squeda: bot├│n X y tecla Esc
+        const closeBtn = document.getElementById('close-search');
+        if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearch();
+        });
+
+        // Ocultar grid al hacer click fuera
+        document.addEventListener('click', (e) => {
+            const chapterGrid = document.getElementById('chapter-grid');
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!chapterGrid.contains(e.target) && !chapterSelect.contains(e.target)) {
+                chapterGrid.classList.remove('active');
+            }
+        });
+
+        // Estados y men├║ contextual de vers├¡culo
+        function loadBookmarks() {
+            return JSON.parse(localStorage.getItem('bookmarks') || '[]');
+        }
+        function saveBookmarks(arr) {
+            localStorage.setItem('bookmarks', JSON.stringify(arr));
+        }
+        function loadComments() {
+            return JSON.parse(localStorage.getItem('comments') || '{}');
+        }
+        function saveComments(obj) {
+            localStorage.setItem('comments', JSON.stringify(obj));
+        }
+        function loadMemorized() {
+            return JSON.parse(localStorage.getItem('memorized') || '[]');
+        }
+        function saveMemorized(arr) {
+            localStorage.setItem('memorized', JSON.stringify(arr));
+        }
+        function toggleBookmark(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const bm = loadBookmarks();
+            const idx = bm.indexOf(key);
+            if (idx >= 0) bm.splice(idx, 1);
+            else bm.push(key);
+            saveBookmarks(bm);
+            verseEl.classList.toggle('bookmarked');
+        }
+        function toggleComment(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const com = loadComments();
+            const c = prompt('Escribe tu comentario:');
+            if (c === null) return;
+            if (c) com[key] = c;
+            else delete com[key];
+            saveComments(com);
+            verseEl.classList.toggle('comment', !!c);
+        }
+        function toggleMemorize(verseEl) {
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const mem = loadMemorized();
+            const idx = mem.indexOf(key);
+            if (idx >= 0) mem.splice(idx, 1);
+            else mem.push(key);
+            saveMemorized(mem);
+            verseEl.classList.toggle('memorized');
+        }
+        // Restaurar estados de marcados, comentarios y memorización
+        function restoreStates() {
+            const bm = loadBookmarks();
+            const com = loadComments();
+            const mem = loadMemorized();
+            document.querySelectorAll('.verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bm.includes(key)) v.classList.add('bookmarked');
+                if (com[key]) v.classList.add('comment');
+                if (mem.includes(key)) v.classList.add('memorized');
+            });
+        }
+        const versesContainer = document.getElementById('verses');
+        const menu = document.getElementById('verse-menu');
+        let menuTarget = null;
+        // Mostrar menú con doble clic (desktop y móvil)
+        versesContainer.addEventListener('dblclick', e => {
+            const v = e.target.closest('.verse'); 
+            if (!v) return;
+            
+            menuTarget = v;
+            document.getElementById('menu-toggle-bookmark').textContent =
+                v.classList.contains('bookmarked') ? 'Desmarcar versículo' : 'Marcar versículo';
+                
+            const commentItem = document.getElementById('menu-add-comment');
+            commentItem.textContent = v.classList.contains('comment') ? 'Ver comentario' : 'Agregar comentario';
+            
+            const memItem = document.getElementById('menu-memorize-verse');
+            const memKey = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+            memItem.textContent = loadMemorized().includes(memKey) ? 'Dejar de memorizar versículo' : 'Memorizar versículo';
+            
+            const rect = v.getBoundingClientRect();
+            menu.style.top = (rect.top + window.scrollY) + 'px';
+            menu.style.left = (rect.left + window.scrollX) + 'px';
+            menu.style.display = 'block';
+        });
+        
+        // Manejo de opciones del menú
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (!menuTarget) return;
+            toggleBookmark(menuTarget);
+            menu.style.display = 'none';
+        });
+        
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!menuTarget) return;
+            openCommentModal(menuTarget);
+            menu.style.display = 'none';
+        });
+        
+        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            if (!menuTarget) return;
+            toggleMemorize(menuTarget);
+            menu.style.display = 'none';
+        });
+        // Cerrar men├║ al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#verse-menu')) menu.style.display = 'none';
+        });
+
+        // Modal de comentarios
+        function openCommentModal(verseEl) {
+            menuTarget = verseEl;
+            const key = `${currentBook}-${currentChapter}-${verseEl.dataset.verse}`;
+            const com = loadComments();
+            const input = document.getElementById('modal-comment-input');
+            input.value = com[key] || '';
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            input.focus();
+        }
+        function hideCommentModal() {
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('comment-modal').style.display = 'none';
+        }
+
+        // Guardar o cancelar en el modal
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            const key = `${currentBook}-${currentChapter}-${menuTarget.dataset.verse}`;
+            const input = document.getElementById('modal-comment-input');
+            const c = input.value.trim();
+            const com = loadComments();
+            if (c) com[key] = c;
+            else delete com[key];
+            saveComments(com);
+            menuTarget.classList.toggle('comment', !!c);
+            hideCommentModal();
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', hideCommentModal);
+
+        // Funci├│n para cargar desde URL
+        function loadFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const bookParam = params.get('book');
             const chapterParam = params.get('chapter');
@@ -1912,440 +1369,30 @@
                 currentBook = bookParam;
                 currentChapter = chapterParam ? parseInt(chapterParam) : 1;
                 currentVerse = verseParam ? parseInt(verseParam) : 0;
-            } else {
-                // Cargar primer libro por defecto
-                const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
-                currentBook = firstBookElem.getAttribute('n');
-                currentChapter = 1;
-                currentVerse = 0;
-            }
 
-            // Actualizar selector de libros y cargar capítulo
-            const bookSelect = document.getElementById('book-select');
-            bookSelect.value = currentBook;
-            loadChapters();
-            loadChapter();
-            updateControls();
-            updateURL();
-        } */
-
-        // Variables para el menú contextual de versículos
-        let contextMenuVerse = null;
-        let memorizedVerses = [];
-        let verseComments = [];
-        
-        // Función para mostrar menú contextual al hacer clic derecho en un versículo
-        function showVerseMenu(verse, e) {
-            e.preventDefault();
-            const verseMenu = document.getElementById('verse-menu');
-            contextMenuVerse = verse;
-            
-            // Posicionar menú junto al cursor
-            verseMenu.style.top = e.pageY + 'px';
-            verseMenu.style.left = e.pageX + 'px';
-            verseMenu.style.display = 'block';
-            
-            // Actualizar texto del botón de marcar/desmarcar versículo
-            const book = verse.dataset.book;
-            const chapter = verse.dataset.chapter;
-            const verseNum = verse.dataset.verse;
-            
-            // Verificar estados actuales
-            const isBookmarked = isVerseBookmarked(book, chapter, verseNum);
-            const isMemorized = isVerseMemorized(book, chapter, verseNum);
-            const hasComment = hasVerseComment(book, chapter, verseNum);
-            
-            // Actualizar texto de los elementos del menú
-            document.getElementById('menu-toggle-bookmark').textContent = 
-                isBookmarked ? 'Desmarcar versículo' : 'Marcar versículo';
-                
-            document.getElementById('menu-toggle-memorized').textContent = 
-                isMemorized ? 'Quitar de memorizados' : 'Memorizar versículo';
-                
-            document.getElementById('menu-add-comment').textContent = 
-                hasComment ? 'Editar comentario' : 'Agregar comentario';
-        }
-        
-        // Cerrar menú contextual al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            const verseMenu = document.getElementById('verse-menu');
-            if (verseMenu.style.display === 'block' && !verseMenu.contains(e.target)) {
-                verseMenu.style.display = 'none';
-            }
-        });
-        
-        // FUNCIONES PARA VERSÍCULOS MEMORIZADOS
-        // Cargar versículos memorizados desde localStorage
-        function loadMemorizedVerses() {
-            const savedMemorized = localStorage.getItem('memorizedVerses');
-            if (savedMemorized) {
-                try {
-                    memorizedVerses = JSON.parse(savedMemorized);
-                } catch (e) {
-                    console.error('Error al cargar versículos memorizados:', e);
-                    memorizedVerses = [];
-                }
-            }
-        }
-        
-        // Guardar versículos memorizados en localStorage
-        function saveMemorizedVerses() {
-            localStorage.setItem('memorizedVerses', JSON.stringify(memorizedVerses));
-        }
-        
-        // Verificar si un versículo está memorizado
-        function isVerseMemorized(book, chapter, verse) {
-            return memorizedVerses.some(item => 
-                item.book === book && 
-                item.chapter === parseInt(chapter) && 
-                item.verse === parseInt(verse)
-            );
-        }
-        
-        // Marcar o desmarcar un versículo como memorizado
-        function toggleMemorized(book, chapter, verse) {
-            console.log(`Toggle memorizar: ${book} ${chapter}:${verse}`);
-            
-            try {
-                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
-                if (!verseElement) {
-                    console.error('No se encontró el elemento del versículo para memorizar');
-                    return false;
-                }
-                
-                // Buscar si el versículo ya está memorizado
-                const memorizedIndex = memorizedVerses.findIndex(item => 
-                    item.book === book && 
-                    item.chapter === parseInt(chapter) && 
-                    item.verse === parseInt(verse)
-                );
-                
-                let isNowMemorized = false;
-                
-                if (memorizedIndex >= 0) {
-                    // Si ya está memorizado, quitarlo
-                    memorizedVerses.splice(memorizedIndex, 1);
-                    verseElement.classList.remove('memorized');
-                    console.log('Versículo desmarcado como memorizado');
-                } else {
-                    // Si no está memorizado, añadirlo
-                    memorizedVerses.push({
-                        book,
-                        chapter: parseInt(chapter),
-                        verse: parseInt(verse),
-                        text: verseElement.querySelector('.verse-text').textContent
-                    });
-                    verseElement.classList.add('memorized');
-                    isNowMemorized = true;
-                    console.log('Versículo marcado como memorizado');
-                }
-                
-                // Guardar cambios en localStorage
-                saveMemorizedVerses();
-                return isNowMemorized;
-            } catch (error) {
-                console.error('Error al marcar/desmarcar versículo como memorizado:', error);
-                return false;
-            }
-        }
-        
-        // FUNCIONES PARA COMENTARIOS DE VERSÍCULOS
-        // Cargar comentarios desde localStorage
-        function loadVerseComments() {
-            const savedComments = localStorage.getItem('verseComments');
-            if (savedComments) {
-                try {
-                    verseComments = JSON.parse(savedComments);
-                } catch (e) {
-                    console.error('Error al cargar comentarios:', e);
-                    verseComments = [];
-                }
-            }
-        }
-        
-        // Guardar comentarios en localStorage
-        function saveVerseComments() {
-            localStorage.setItem('verseComments', JSON.stringify(verseComments));
-        }
-        
-        // Verificar si un versículo tiene comentario
-        function hasVerseComment(book, chapter, verse) {
-            return verseComments.some(comment => 
-                comment.book === book && 
-                comment.chapter === parseInt(chapter) && 
-                comment.verse === parseInt(verse)
-            );
-        }
-        
-        // Obtener el comentario de un versículo
-        function getVerseComment(book, chapter, verse) {
-            const comment = verseComments.find(item => 
-                item.book === book && 
-                item.chapter === parseInt(chapter) && 
-                item.verse === parseInt(verse)
-            );
-            return comment ? comment.text : '';
-        }
-        
-        // Guardar o actualizar comentario para un versículo
-        function saveComment(book, chapter, verse, commentText) {
-            console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
-            
-            try {
-                const verseElement = document.querySelector(`.verse[data-verse="${verse}"]`);
-                if (!verseElement) {
-                    console.error('No se encontró el elemento del versículo');
-                    return;
-                }
-                
-                // Buscar si ya existe un comentario
-                const commentIndex = verseComments.findIndex(item => 
-                    item.book === book && 
-                    item.chapter === parseInt(chapter) && 
-                    item.verse === parseInt(verse)
-                );
-                
-                if (commentText.trim() === '') {
-                    // Si el comentario está vacío y existe, eliminarlo
-                    if (commentIndex >= 0) {
-                        verseComments.splice(commentIndex, 1);
-                        verseElement.classList.remove('commented');
-                    }
-                } else {
-                    // Guardar o actualizar comentario
-                    if (commentIndex >= 0) {
-                        verseComments[commentIndex].text = commentText;
-                    } else {
-                        verseComments.push({
-                            book,
-                            chapter: parseInt(chapter),
-                            verse: parseInt(verse),
-                            text: commentText
-                        });
-                        verseElement.classList.add('commented');
-                    }
-                }
-                
-                // Guardar cambios en localStorage
-                saveVerseComments();
-                console.log('Comentario guardado correctamente');
-            } catch (error) {
-                console.error('Error al guardar comentario:', error);
-            }
-        }
-        
-        // Manejar acciones del menú contextual
-        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
-            if (contextMenuVerse) {
-                const book = contextMenuVerse.dataset.book;
-                const chapter = contextMenuVerse.dataset.chapter;
-                const verse = contextMenuVerse.dataset.verse;
-                
-                toggleBookmark(book, chapter, verse);
-                document.getElementById('verse-menu').style.display = 'none';
-            }
-        });
-        
-        // Manejar acción de memorizar versículo
-        document.getElementById('menu-toggle-memorized').addEventListener('click', () => {
-            if (contextMenuVerse) {
-                const book = contextMenuVerse.dataset.book;
-                const chapter = contextMenuVerse.dataset.chapter;
-                const verse = contextMenuVerse.dataset.verse;
-                
-                toggleMemorized(book, chapter, verse);
-                document.getElementById('verse-menu').style.display = 'none';
-            }
-        });
-        
-        // Manejar acción de comentar versículo
-        document.getElementById('menu-add-comment').addEventListener('click', () => {
-            if (contextMenuVerse) {
-                const book = contextMenuVerse.dataset.book;
-                const chapter = contextMenuVerse.dataset.chapter;
-                const verse = contextMenuVerse.dataset.verse;
-                
-                // Cargar comentario existente si hay uno
-                const existingComment = getVerseComment(book, chapter, verse);
-                document.getElementById('comment-text').value = existingComment;
-                
-                // Mostrar modal de comentario
-                document.getElementById('comment-modal').style.display = 'block';
-                document.getElementById('verse-menu').style.display = 'none';
-                
-                // Guardar referencia al versículo actual para el guardado
-                document.getElementById('comment-text').dataset.book = book;
-                document.getElementById('comment-text').dataset.chapter = chapter;
-                document.getElementById('comment-text').dataset.verse = verse;
-            }
-        });
-        
-        // Botón cancelar comentario
-        document.getElementById('cancel-comment').addEventListener('click', function() {
-            console.log('Botón cancelar comentario clickeado');
-            document.getElementById('comment-modal').style.display = 'none';
-        });
-        
-        // Botón guardar comentario
-        document.getElementById('save-comment').addEventListener('click', function() {
-            console.log('Botón guardar comentario clickeado');
-            
-            try {
-                const commentText = document.getElementById('comment-text');
-                const book = commentText.dataset.book;
-                const chapter = commentText.dataset.chapter;
-                const verse = commentText.dataset.verse;
-                
-                if (!book || !chapter || !verse) {
-                    console.error('Faltan datos del versículo para guardar el comentario');
-                    return;
-                }
-                
-                console.log(`Guardando comentario para ${book} ${chapter}:${verse}`);
-                saveComment(book, chapter, verse, commentText.value);
-                
-                // Cerrar el modal explícitamente
-                const commentModal = document.getElementById('comment-modal');
-                commentModal.style.display = 'none';
-                
-                // Recargar el capítulo actual para reflejar los cambios
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
                 loadChapter();
-            } catch (error) {
-                console.error('Error al guardar comentario:', error);
-                alert('Hubo un error al guardar el comentario. Por favor intenta de nuevo.');
+                updateControls();
             }
-        });
-        
-        // Función para aplicar eventos a los versículos
-        function applyVerseContextMenu() {
-            document.querySelectorAll('.verse').forEach(verse => {
-                // Eliminar eventos previos para evitar duplicados
-                verse.removeEventListener('contextmenu', handleContextMenu);
-                verse.removeEventListener('touchstart', handleTouchStart);
-                verse.removeEventListener('touchend', handleTouchEnd);
-                verse.removeEventListener('touchmove', handleTouchMove);
-                
-                // Clic derecho para computadoras
-                verse.addEventListener('contextmenu', handleContextMenu);
-                
-                // Mantener clic largo para móviles
-                verse.addEventListener('touchstart', handleTouchStart);
-                verse.addEventListener('touchend', handleTouchEnd);
-                verse.addEventListener('touchmove', handleTouchMove);
-            });
-        }
-        
-        // Variables para el clic largo
-        let longPressTimer;
-        
-        // Funciones para manejar eventos táctiles
-        function handleContextMenu(e) {
-            e.preventDefault();
-            showVerseMenu(this, e);
-        }
-        
-        function handleTouchStart(e) {
-            const verse = this;
-            longPressTimer = setTimeout(() => {
-                showVerseMenu(verse, e.touches[0]);
-            }, 500);
-        }
-        
-        function handleTouchEnd() {
-            clearTimeout(longPressTimer);
-        }
-        
-        function handleTouchMove() {
-            clearTimeout(longPressTimer);
-        }
-        
-        // Iniciar la aplicación (OLD - REMOVED)
-        /* async function init() {
-            console.log('Iniciando aplicación...');
-            
-            // Establecer la versión inicial como Reina-Valera 1960
-            currentVersion = 'rv1960';
-            document.getElementById('version-selector').value = currentVersion;
-            
-            // Cargar los versículos marcados, memorizados y comentarios desde localStorage
-            loadBookmarkedVerses();
-            loadMemorizedVerses();
-            loadVerseComments();
-            
-            // Configurar eventos para mostrar/ocultar menús
-            setupMenuBehavior();
-            
-            try {
-                // Cargar la biblia de forma explícita
-                await loadBible(currentVersion);
-                
-                // Configurar el selector de libros
-                setupBookSelector();
-                
-                // Si no hay parámetros en la URL, cargar Génesis capítulo 1 por defecto
-                if (!window.location.search) {
-                    currentBook = 'Génesis';
-                    currentChapter = 1;
-                    currentVerse = 0;
-                    
-                    // Seleccionar Génesis en el selector
-                    if (document.getElementById('book-select')) {
-                        document.getElementById('book-select').value = currentBook;
-                    }
-                    
-                    // Cargar capítulo 1 directamente
-                    loadChapters();
-                    loadChapter();
-                    updateControls();
-                    updateURL();
-                } else {
-                    // Si hay parámetros en la URL, cargar según esos parámetros
-                    loadFromUrl();
-                }
-            } catch (error) {
-                console.error('Error al inicializar:', error);
-                document.getElementById('verses').innerHTML = `<div class="error">Error al inicializar: ${error.message}</div>`;
-            }
-            
-            console.log('Aplicación iniciada correctamente');
-        } */
-        
-        // Configurar comportamiento de menús superior e inferior
-        function setupMenuBehavior() {
-            // Variables para controlar la visibilidad de los menús
-            let lastScrollTop = 0;
-            const controlsElement = document.getElementById('controls');
-            const navigationBottom = document.getElementById('navigation-bottom');
-            
-            // Función para manejar el scroll y mostrar/ocultar menús
-            window.addEventListener('scroll', function() {
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
-                // Si se desplaza hacia abajo, ocultar menús
-                if (scrollTop > lastScrollTop && scrollTop > 50) {
-                    controlsElement.classList.add('hidden');
-                    navigationBottom.classList.add('hidden');
-                } 
-                // Si se desplaza hacia arriba, mostrar menús
-                else if (scrollTop < lastScrollTop) {
-                    controlsElement.classList.remove('hidden');
-                    navigationBottom.classList.remove('hidden');
-                }
-                
-                lastScrollTop = scrollTop;
-            });
-            
-            // Asegurar que ambos menús estén visibles al inicio
-            controlsElement.classList.remove('hidden');
-            navigationBottom.classList.remove('hidden');
         }
 
-        // init(); // OLD - REMOVED
+        // Iniciar la aplicación
+        async function init() {
+            await loadBible(currentVersion);
+            setupBookSelector();
+            loadFromUrl();
+        }
 
-        // Deshabilitado Service Worker para evitar caché en lectura.html
-        // if('serviceWorker' in navigator) {
-        //     navigator.serviceWorker.register('service-worker.js');
-        // }
+        init();
+
+        if('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(() => console.log('SW registered'))
+                    .catch(err => console.error('SW registration failed:', err));
+            });
+        }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', e => {
             e.preventDefault(); deferredPrompt = e;
@@ -2373,504 +1420,52 @@
         }
     </script>
     <script>
-        // Deshabilitar service worker temporalmente
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                for (const registration of registrations) {
-                    registration.unregister();
-                    console.log('ServiceWorker unregistered');
-                }
-            });
-        }
-
-        // Toggle extra controls
-        const menuToggle = document.getElementById('main-menu-toggle');
-        const extraControls = document.getElementById('extra-controls');
-        if (menuToggle && extraControls) {
-            menuToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                extraControls.classList.toggle('active');
-            });
-        }
-        
-        // Cerrar menú de controles al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (extraControls && extraControls.classList.contains('active') && 
-                !extraControls.contains(e.target) && 
-                e.target !== menuToggle) {
-                extraControls.classList.remove('active');
-            }
-        });
-        
-        // Variables globales para la búsqueda
-        // Las variables de búsqueda ahora están en search.js
-        // Inicializar la búsqueda cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar la funcionalidad de búsqueda
-            if (typeof initSearch === 'function') {
-                initSearch();
-            }
-            
-            // Seleccionar el libro actual en el selector
-            const bookSelect = document.getElementById('book-select');
-        });
-        
-        // Función para cargar una referencia bíblica (libro, capítulo, versículo)
-        function loadReference(book, chapter, verse) {
-            currentBook = book;
-            currentChapter = parseInt(chapter);
-            currentVerse = parseInt(verse);
-            loadChapter();
-            updateControls();
-            updateURL();
-            
-            // Cerrar la ventana de resultados (si existe)
-            if (document.getElementById('search-results')) {
-                document.getElementById('search-results').style.display = 'none';
-            }
-        }
-    </script>
-    <script>
-        // Menú contextual al hacer doble clic en versículo
-        // Global declarations for verseContainer and verseMenu removed as they are now handled in setupGlobalEventListeners
-        let activeVerseEl = null; // This global state variable remains
-        document.addEventListener('click', e => {
-            const menu = document.getElementById('verse-menu');
-            if (menu && !e.target.closest('#verse-menu')) {
-                menu.style.display = 'none';
-            }
-        });
-        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
-            if (!activeVerseEl) return;
-            activeVerseEl.classList.toggle('bookmarked');
-            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-            if (activeVerseEl.classList.contains('bookmarked')) {
-                if (!bookmarks.includes(key)) bookmarks.push(key);
-            } else {
-                bookmarks = bookmarks.filter(k => k !== key);
-            }
-            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-            verseMenu.style.display = 'none';
-        });
-        document.getElementById('menu-add-comment').addEventListener('click', () => {
-            if (!activeVerseEl) return;
-            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-            const existingComment = comments[key];
-            
-            // Actualizar el título del modal según si es nuevo comentario o edición
-            document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
-            
-            // Si ya existe un comentario, cargarlo en el textarea
-            document.getElementById('modal-comment-input').value = existingComment || '';
-            
-            // Mostrar u ocultar el botón de borrar según corresponda
-            document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
-            
-            document.getElementById('comment-backdrop').style.display = 'block';
-            document.getElementById('comment-modal').style.display = 'block';
-            verseMenu.style.display = 'none';
-        });
-        document.getElementById('modal-save-btn').addEventListener('click', () => {
-            const comment = document.getElementById('modal-comment-input').value.trim();
-            if (comment) {
-                activeVerseEl.classList.add('comment');
-                activeVerseEl.dataset.comment = comment;
-                const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-                comments[key] = comment;
-                localStorage.setItem('comments', JSON.stringify(comments));
-            }
-            document.getElementById('comment-modal').style.display = 'none';
-            document.getElementById('comment-backdrop').style.display = 'none';
-            document.getElementById('modal-comment-input').value = '';
-        });
-        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
-            document.getElementById('comment-modal').style.display = 'none';
-            document.getElementById('comment-backdrop').style.display = 'none';
-            document.getElementById('modal-comment-input').value = '';
-        });
-        
-        // Añadir manejador para el botón de borrar comentario
-        document.getElementById('modal-delete-btn').addEventListener('click', () => {
-            if (!activeVerseEl) return;
-            
-            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-            
-            // Eliminar el comentario del localStorage
-            delete comments[key];
-            localStorage.setItem('comments', JSON.stringify(comments));
-            
-            // Quitar la clase 'comment' del versículo
-            activeVerseEl.classList.remove('comment');
-            
-            // Cerrar el modal
-            document.getElementById('comment-modal').style.display = 'none';
-            document.getElementById('comment-backdrop').style.display = 'none';
-            document.getElementById('modal-comment-input').value = '';
-        });
-        /*
-        // MOVED: document.getElementById('menu-memorize-verse').addEventListener('click', () => {
-            if (!activeVerseEl) return;
-            activeVerseEl.classList.toggle('memorized');
-            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-            let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
-            if (activeVerseEl.classList.contains('memorized')) {
-                if (!memorized.includes(key)) memorized.push(key);
-            } else {
-                memorized = memorized.filter(k => k !== key);
-            }
-            localStorage.setItem('memorized', JSON.stringify(memorized));
-            verseMenu.style.display = 'none';
-        });
-        */
-        // END OF MOVED VERSE MENU LISTENERS
-        // The following function was previously block-commented for debugging
-        function setupGlobalEventListeners() {
-            console.log('[Init] Setting up global event listeners...');
-
-            // Listener Botón Temas & Outline Grid (original lines 2034-2046) - COMMENTED OUT FOR DEBUGGING LINT
-            /* if (document.getElementById('outline-button')) {
-                document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
-            }
-            if (document.getElementById('outline-grid')) {
-                 document.getElementById('outline-grid').addEventListener('click', e => {
-                    if (!e.target.dataset.start) return;
-                    const start = parseInt(e.target.dataset.start, 10);
-                    currentVerse = start;
-                    document.getElementById('outline-grid').classList.remove('active');
-                    loadChapter(); updateControls(); updateURL();
-                    setTimeout(() => {
-                        const el = document.querySelector(`.verse[data-verse="${start}"]`);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                });
-            } */
-
-            // Listener Strong's Modal Close (original line 2075)
-            if (document.getElementById('strongs-close')) {
-                document.getElementById('strongs-close').addEventListener('click', () => {
-                    if (document.getElementById('strongs-backdrop')) document.getElementById('strongs-backdrop').style.display = 'none';
-                    if (document.getElementById('strongs-modal')) document.getElementById('strongs-modal').style.display = 'none';
-                });
-            }
-
-            // Funcionalidad de búsqueda de palabras exactas (original lines 2105-2157)
-            const searchButton = document.getElementById('search-button');
-            const searchInput = document.getElementById('search-input');
-            const searchResults = document.getElementById('search-results');
-            // const resultsContent = document.getElementById('results-content'); // Defined globally for searchExactWord
-            const closeSearchButton = document.getElementById('close-search');
-            // const searchCount = document.getElementById('search-count'); // Defined globally for searchExactWord
-
-            if (searchButton) {
-                searchButton.addEventListener('click', function() {
-                    if (searchInput.style.display === 'none') {
-                        searchInput.style.display = 'block';
-                        searchInput.focus();
-                        return;
-                    }
-                    const query = searchInput.value.trim();
-                    if (query.length >= 2) {
-                        searchExactWord(query);
-                    } else if (query) {
-                        alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                    }
-                });
-            }
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const query = this.value.trim();
-                        if (query.length >= 2) {
-                            searchExactWord(query);
-                        } else if (query) {
-                            alert('Por favor ingresa al menos 2 caracteres para buscar.');
-                        }
-                    }
-                });
-            }
-            if (closeSearchButton) {
-                closeSearchButton.addEventListener('click', function() {
-                    if(searchResults) searchResults.style.display = 'none';
-                    if(document.getElementById('search-backdrop')) document.getElementById('search-backdrop').style.display = 'none';
-                });
-            }
-            if (document.getElementById('search-backdrop')) {
-                document.getElementById('search-backdrop').addEventListener('click', function() {
-                    if(searchResults) searchResults.style.display = 'none';
-                    this.style.display = 'none';
-                });
-            }
-
-            // Menú contextual al hacer doble clic en versículo (original lines 2258-2368)
-            const verseContainer = document.getElementById('verses');
-            const verseMenu = document.getElementById('verse-menu');
-            // activeVerseEl is a global variable
-            if (verseContainer) {
-                verseContainer.addEventListener('dblclick', e => {
-                    activeVerseEl = e.target.closest('.verse');
-                    if (!activeVerseEl) return;
-                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-                    const hasComment = comments[key];
-                    if(document.getElementById('menu-add-comment')) {
-                       document.getElementById('menu-add-comment').textContent = hasComment ? 'Ver/Editar comentario' : 'Agregar comentario';
-                    }
-                    const rect = activeVerseEl.getBoundingClientRect();
-                    verseMenu.style.display = 'block';
-                    verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
-                    verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
-                });
-            }
-            // The document click listener for closing the menu is fine globally
-            if (document.getElementById('menu-toggle-bookmark')) {
-                document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    activeVerseEl.classList.toggle('bookmarked');
-                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-                    if (activeVerseEl.classList.contains('bookmarked')) {
-                        if (!bookmarks.includes(key)) bookmarks.push(key);
-                    } else {
-                        bookmarks = bookmarks.filter(k => k !== key);
-                    }
-                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-                    if(verseMenu) verseMenu.style.display = 'none';
-                });
-            }
-            if (document.getElementById('menu-add-comment')) {
-                document.getElementById('menu-add-comment').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-                    const existingComment = comments[key];
-                    if(document.getElementById('comment-modal-title')) document.getElementById('comment-modal-title').textContent = existingComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
-                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = existingComment || '';
-                    if(document.getElementById('modal-delete-btn')) document.getElementById('modal-delete-btn').style.display = existingComment ? 'inline-block' : 'none';
-                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'block';
-                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'block';
-                    if(verseMenu) verseMenu.style.display = 'none';
-                });
-            }
-            if (document.getElementById('modal-save-btn')) {
-                document.getElementById('modal-save-btn').addEventListener('click', () => {
-                    const comment = document.getElementById('modal-comment-input').value.trim();
-                    if (comment && activeVerseEl) {
-                        activeVerseEl.classList.add('comment');
-                        activeVerseEl.dataset.comment = comment;
-                        const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                        const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-                        comments[key] = comment;
-                        localStorage.setItem('comments', JSON.stringify(comments));
-                    }
-                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
-                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
-                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
-                });
-            }
-            if (document.getElementById('modal-cancel-btn')) {
-                document.getElementById('modal-cancel-btn').addEventListener('click', () => {
-                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
-                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
-                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
-                });
-            }
-            if (document.getElementById('modal-delete-btn')) {
-                document.getElementById('modal-delete-btn').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                    const comments = JSON.parse(localStorage.getItem('comments') || '{}');
-                    delete comments[key];
-                    localStorage.setItem('comments', JSON.stringify(comments));
-                    activeVerseEl.classList.remove('comment');
-                    if(document.getElementById('comment-modal')) document.getElementById('comment-modal').style.display = 'none';
-                    if(document.getElementById('comment-backdrop')) document.getElementById('comment-backdrop').style.display = 'none';
-                    if(document.getElementById('modal-comment-input')) document.getElementById('modal-comment-input').value = '';
-                });
-            }
-            if (document.getElementById('menu-memorize-verse')) {
-                 document.getElementById('menu-memorize-verse').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    activeVerseEl.classList.toggle('memorized');
-                    const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                    let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
-                    if (activeVerseEl.classList.contains('memorized')) {
-                        if (!memorized.includes(key)) memorized.push(key);
-                    } else {
-                        memorized = memorized.filter(k => k !== key);
-                    }
-                    localStorage.setItem('memorized', JSON.stringify(memorized));
-                    if(verseMenu) verseMenu.style.display = 'none';
-                });
-            }
-             // Event listeners for menu-copy-verse and menu-share-verse would go here if found/needed
-            if (document.getElementById('menu-copy-verse')) {
-                document.getElementById('menu-copy-verse').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    const text = activeVerseEl.querySelector('.verse-text').textContent;
-                    navigator.clipboard.writeText(`${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse} - ${text}`)
-                        .then(() => alert('Versículo copiado!'))
-                        .catch(err => console.error('Error al copiar:', err));
-                    if(verseMenu) verseMenu.style.display = 'none';
-                });
-            }
-            if (document.getElementById('menu-share-verse')) {
-                document.getElementById('menu-share-verse').addEventListener('click', () => {
-                    if (!activeVerseEl) return;
-                    const text = activeVerseEl.querySelector('.verse-text').textContent;
-                    const shareData = {
-                        title: `Versículo de la Biblia: ${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse}`,
-                        text: `${text} (${currentBook} ${currentChapter}:${activeVerseEl.dataset.verse})`,
-                        url: window.location.href // Puede ser más específico si se desea
-                    };
-                    if (navigator.share) {
-                        navigator.share(shareData).catch(err => console.error('Error al compartir:', err));
-                    }
-                    if(verseMenu) verseMenu.style.display = 'none';
-                });
-            }
-
-            console.log('[Init] Global event listeners set up.');
-        } // End of function that was previously block-commented for debugging
-
-        // Function to initialize the page and load content based on URL or defaults
-        async function initializeApp() {
-            try {
-                console.log("[Init] Iniciando carga de la Biblia...");
-                document.getElementById('verses').innerHTML = '<div class="loading">Cargando la Biblia Reina-Valera 1960...</div>';
-                
-                // Obtener parámetros de la URL o usar valores por defecto
-                const params = new URLSearchParams(window.location.search);
-                const urlBook = 'Génesis'; // Siempre cargar Génesis por defecto
-                const urlChapter = 1; // Siempre cargar capítulo 1 por defecto
-                const urlVerse = 1; // Siempre cargar versículo 1 por defecto
-                
-                // Actualizar la URL sin recargar la página
-                const newUrl = new URL(window.location);
-                newUrl.searchParams.set('book', urlBook);
-                newUrl.searchParams.set('chapter', urlChapter);
-                newUrl.searchParams.set('verse', urlVerse);
-                window.history.replaceState({}, '', newUrl);
-
-                // Versión predeterminada: Reina Valera 1960
-                const versionToLoad = 'Reina-Valera-1960';
-                
-                // Establecer la versión en el selector
-                const versionSelector = document.getElementById('version-selector');
-                if (versionSelector) {
-                    versionSelector.value = versionToLoad;
-                }
-                
-                // Actualizar variables globales
-                currentBook = urlBook;
-                currentChapter = urlChapter;
-                currentVerse = urlVerse;
-
-                console.log(`[Init] Cargando versión: ${versionToLoad}`);
-                
-                // Cargar el archivo XML de la Biblia
-                await loadBible(versionToLoad);
-
-                // Verificar que el XML se cargó correctamente
-                if (!xmlDoc) {
-                    throw new Error("No se pudo cargar el documento XML de la Biblia");
-                }
-                
-                console.log("[Init] ¡XML de la Biblia cargado correctamente!");
-                
-                // Configurar selector de libros
-                setupBookSelector();
-                
-                // Actualizar selectores
-                const bookSelect = document.getElementById('book-select');
-                if (bookSelect) {
-                    bookSelect.value = currentBook;
-                    
-                    // Cargar capítulos
-                    await loadChapters();
-                    
-                    // Actualizar el selector de capítulos
-                    const chapterSelect = document.getElementById('chapter-select');
-                    if (chapterSelect) {
-                        chapterSelect.value = currentChapter;
-                    }
-                }
-                
-                console.log(`[Init] Libro: ${currentBook}, Capítulo: ${currentChapter}, Versículo: ${currentVerse}`);
-                
-                // Cargar el contenido del capítulo actual
-                await loadChapter();
-                console.log(`[Init] Contenido del capítulo cargado exitosamente.`);
-                
-                // Actualizar navegación y URL
-                updateControls();
-                updateURL();
-                
-                // Configurar comportamientos
-                setupMenuBehavior();
-                setupGlobalEventListeners();
-                
-                console.log("[Init] ¡Inicialización completa! La Biblia debería estar visible.");
-                
-            } catch (error) {
-                console.error("[Init] Error durante la inicialización:", error);
-                const errorContainer = document.getElementById('verses') || document.body;
-                errorContainer.innerHTML = 
-                    `<div class="error" style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px;">
-                        <h3>Error al cargar la Biblia</h3>
-                        <p>${error.message}</p>
-                        <p>Por favor, recarga la página o verifica tu conexión a internet.</p>
-                    </div>`;
-                errorContainer.style.opacity = '1';
-                errorContainer.style.visibility = 'visible';
-            }
-        }
-
-        // Inicializar la aplicación cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
-            initSearch(); // Inicializar la funcionalidad de búsqueda
-        });
-
-    </script>
-
-    <!-- Contenedor para resultados de búsqueda -->
-    <div id="search-results" class="search-results">
-        <div class="search-results-header">
-            <h3>Resultados de búsqueda</h3>
-            <button class="close-search">&times;</button>
-        </div>
-        <div id="search-results-content" class="search-results-content">
-            <!-- Los resultados se cargarán aquí dinámicamente -->
-        </div>
-    </div>
-
-    <!-- Script para la funcionalidad de búsqueda -->
-    <script src="js/search.js"></script>
-    
-    <!-- Script para el menú lateral -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        // Toggle del menú lateral
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('main-menu-toggle');
             const sideMenu = document.getElementById('side-menu');
+            const menuOverlay = document.getElementById('menu-overlay');
             
-            if (sideMenuToggleBtn && sideMenu) {
-                sideMenuToggleBtn.addEventListener('click', (e) => {
+            if (menuToggle && sideMenu) {
+                // Abrir/cerrar menú
+                menuToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     sideMenu.classList.toggle('active');
+                    menuOverlay.classList.toggle('active');
+                    document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
                 });
                 
-                // Cerrar el menú al hacer clic fuera de él
-                document.addEventListener('click', (e) => {
-                    if (sideMenu.classList.contains('active') && 
-                        !sideMenu.contains(e.target) && 
-                        !sideMenuToggleBtn.contains(e.target)) {
+                // Cerrar menú al hacer clic en el overlay
+                menuOverlay.addEventListener('click', function() {
+                    sideMenu.classList.remove('active');
+                    menuOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+                
+                // Cerrar menú al hacer clic en un ítem del menú
+                const menuItems = sideMenu.querySelectorAll('li');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', function() {
                         sideMenu.classList.remove('active');
+                        menuOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
+                
+                // Cerrar menú con tecla Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sideMenu.classList.contains('active')) {
+                        sideMenu.classList.remove('active');
+                        menuOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
                     }
                 });
+            }
+            
+            // Controles adicionales (si existen)
+            const extraControls = document.getElementById('extra-controls');
+            if (extraControls) {
+                // Código para controles adicionales si es necesario
             }
         });
     </script>
