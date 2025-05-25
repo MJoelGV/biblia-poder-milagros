@@ -156,6 +156,25 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
+        .pericopes-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .pericopes-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+
         .chapter-content {
             max-width: 1200px;
             margin: 120px auto 80px;
@@ -642,7 +661,7 @@
                 <button id="search-button" class="search-button">🔍</button>
                 <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
-            <button id="pericopes-button" class="search-button" title="Ver perícopas del capítulo">📖</button>
+            <button id="pericopes-button" class="pericopes-button" title="Ver perícopas del capítulo">Perícopas</button>
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
