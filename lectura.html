@@ -624,6 +624,7 @@
                 <button id="search-button" class="search-button">🔍</button>
                 <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
+            <button id="pericopes-button" class="search-button" title="Ver perícopas del capítulo">📖</button>
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
@@ -859,6 +860,13 @@
                             setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
                         }, 100);
                     }
+                }
+                
+                // Agregar botón de perícopas después de cargar el capítulo
+                try {
+                    agregarBotonPericopas();
+                } catch (error) {
+                    console.error('Error al agregar botón de perícopas:', error);
                 }
             } catch (error) {
                 console.error('Error loading chapter:', error);
@@ -1331,6 +1339,11 @@
             searchWrapper.classList.toggle('active');
             if (searchWrapper.classList.contains('active')) searchInput.focus();
         });
+
+        // Manejador para el botón de perícopas
+        document.getElementById('pericopes-button').addEventListener('click', () => {
+            mostrarPericopas();
+        });
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 const rawQuery = searchInput.value.trim();
@@ -1531,23 +1544,86 @@
             
             // Función para mostrar perícopas
             window.mostrarPericopas = function() {
+                console.log('[Perícopas] Iniciando búsqueda de perícopas...');
+                
                 // Obtener libro y capítulo actuales
                 const titulo = document.querySelector('.chapter-title');
-                if (!titulo) return;
+                if (!titulo) {
+                    console.error('[Perícopas] No se pudo encontrar el título del capítulo');
+                    return;
+                }
                 
-                const match = titulo.textContent.match(/([A-Za-z\u00C0-\u00FF\s]+)\s+(\d+)/); // Soporte para acentos
-                if (!match) return;
+                const tituloTexto = titulo.textContent.trim();
+                console.log('[Perícopas] Título del capítulo:', tituloTexto);
                 
-                const nombreLibro = match[1].trim();
+                // Intentar con el formato "Libro - Capítulo X" primero
+                let match = tituloTexto.match(/(.+?)\s*-\s*Capítulo\s*(\d+)/i);
+                
+                // Si no coincide, intentar con el formato anterior por si acaso
+                if (!match) {
+                    match = tituloTexto.match(/([A-Za-z\u00C0-\u00FF\s]+)\s+(\d+)/);
+                }
+                
+                if (!match) {
+                    console.error('[Perícopas] No se pudo extraer libro y capítulo del título');
+                    return;
+                }
+                
+                let nombreLibro = match[1].trim();
                 const capitulo = match[2];
+                
+                // Si el nombre del libro está vacío, usar la variable global currentBook
+                if (!nombreLibro && window.currentBook) {
+                    nombreLibro = window.currentBook;
+                    console.log('[Perícopas] Usando currentBook como nombre del libro:', nombreLibro);
+                }
+                
                 const libroKey = obtenerCodigoLibro(nombreLibro);
                 
-                // Buscar perícopas
-                const clave = `${libroKey}-${capitulo}`;
-                const pericopas = window.PERICOPES_DATA[clave] || [];
+                console.log('[Perícopas] Datos extraídos:', { 
+                    nombreLibro, 
+                    capitulo, 
+                    libroKey,
+                    currentBook: window.currentBook // Variable global que debería existir
+                });
+                
+                // Verificar si PERICOPES_DATA está disponible
+                if (typeof window.PERICOPES_DATA === 'undefined') {
+                    console.error('[Perícopas] Error: PERICOPES_DATA no está definido');
+                    alert('Error: No se pudieron cargar los datos de perícopas');
+                    return;
+                }
+                
+                // Intentar con el código del libro y también con el nombre del libro actual
+                const clavesABuscar = [
+                    `${libroKey}-${capitulo}`,
+                    `${window.currentBook || ''}-${capitulo}`.toUpperCase()
+                ];
+                
+                console.log('[Perícopas] Buscando perícopas con claves:', clavesABuscar);
+                
+                let pericopas = [];
+                let claveEncontrada = '';
+                
+                // Buscar en todas las claves posibles
+                for (const clave of clavesABuscar) {
+                    if (window.PERICOPES_DATA[clave]) {
+                        pericopas = window.PERICOPES_DATA[clave];
+                        claveEncontrada = clave;
+                        break;
+                    }
+                }
+                
+                console.log('[Perícopas] Resultados de búsqueda:', {
+                    claveEncontrada,
+                    cantidadPericopas: pericopas.length,
+                    muestrasClaves: Object.keys(window.PERICOPES_DATA).slice(0, 5)
+                });
                 
                 if (pericopas.length === 0) {
-                    alert('No hay perícopas disponibles para este capítulo');
+                    const mensaje = `No hay perícopas disponibles para ${nombreLibro} ${capitulo} (${libroKey}-${capitulo})`;
+                    console.warn('[Perícopas]', mensaje);
+                    alert(mensaje);
                     return;
                 }
                 
@@ -1641,16 +1717,201 @@
             
             // Función para agregar botón de perícopas
             function agregarBotonPericopas() {
-                if (document.getElementById('pericopas-boton')) return;
+                console.log('[Perícopas] Iniciando agregarBotonPericopas');
                 
-                const titulo = document.querySelector('.chapter-title');
-                if (!titulo) return;
+                // Verificar si ya existe el botón
+                if (document.getElementById('pericopas-boton')) {
+                    console.log('[Perícopas] El botón ya existe');
+                    return;
+                }
                 
-                const boton = document.createElement('div');
+                // Verificar si los datos de perícopas están disponibles
+                console.log('[Perícopas] Verificando datos de perícopas...');
+                if (typeof PERICOPES_DATA === 'undefined') {
+                    console.warn('[Perícopas] Los datos de perícopas no están disponibles (PERICOPES_DATA no está definido)');
+                    console.log('[Perícopas] Verificando si window.PERICOPES_DATA existe:', typeof window.PERICOPES_DATA);
+                    return;
+                }
+                
+                console.log('[Perícopas] Datos de perícopas disponibles:', Object.keys(PERICOPES_DATA).length > 0);
+                console.log('[Perícopas] Muestra de claves de perícopas:', Object.keys(PERICOPES_DATA).slice(0, 5));
+                
+                // Obtener libro y capítulo actual
+                const libroActual = document.getElementById('book-select')?.value;
+                const capituloActual = parseInt(document.getElementById('chapter-select')?.value) || 1;
+                
+                if (!libroActual) return;
+                
+                // Obtener el código del libro
+                const codigoLibro = window.obtenerCodigoLibro?.(libroActual);
+                if (!codigoLibro) {
+                    console.warn('[Perícopas] No se pudo obtener el código del libro:', libroActual);
+                    return;
+                }
+                
+                const clavePericopa = `${codigoLibro}-${capituloActual}`;
+                const pericopas = PERICOPES_DATA[clavePericopa];
+                
+                // Si no hay perícopas para este capítulo, no mostrar el botón
+                if (!pericopas || pericopas.length === 0) {
+                    console.log(`[Perícopas] No hay perícopas para ${clavePericopa}`);
+                    console.log(`[Perícopas] Claves disponibles en PERICOPES_DATA:`, Object.keys(PERICOPES_DATA));
+                    return;
+                }
+                
+                console.log(`[Perícopas] Encontradas ${pericopas.length} perícopas para ${clavePericopa}:`, pericopas);
+                
+                // Crear el botón
+                const boton = document.createElement('button');
                 boton.id = 'pericopas-boton';
-                boton.textContent = 'Ver perícopas';
-                boton.onclick = window.mostrarPericopas;
-                titulo.insertAdjacentElement('afterend', boton);
+                boton.className = 'pericopas-btn';
+                boton.innerHTML = '📖 Ver perícopas del capítulo';
+                
+                // Añadir estilos al botón
+                const style = document.createElement('style');
+                style.textContent = `
+                    .pericopas-btn {
+                        display: block;
+                        margin: 15px auto;
+                        padding: 8px 16px;
+                        background-color: var(--primary-color, #4CAF50);
+                        color: white;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:hover {
+                        background-color: #45a049;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:active {
+                        transform: translateY(0);
+                    }
+                    .pericopas-container {
+                        margin: 20px 0;
+                        padding: 15px;
+                        background-color: rgba(76, 175, 80, 0.1);
+                        border-radius: 8px;
+                        border-right: 4px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item {
+                        margin: 15px 0;
+                        padding: 12px;
+                        background: white;
+                        border-radius: 6px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        border-left: 3px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item h4 {
+                        margin: 0 0 8px 0;
+                        color: #2c3e50;
+                        font-size: 1.1em;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 5px;
+                    }
+                    .pericopa-item p {
+                        margin: 8px 0 0 0;
+                        color: #34495e;
+                        font-size: 0.95em;
+                        line-height: 1.6;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Función para mostrar/ocultar las perícopas
+                function togglePericopas() {
+                    let contenedor = document.getElementById('pericopas-container');
+                    
+                    // Si ya existe, alternar visibilidad
+                    if (contenedor) {
+                        if (contenedor.style.display === 'none') {
+                            contenedor.style.display = 'block';
+                            boton.textContent = 'Ocultar perícopas';
+                        } else {
+                            contenedor.style.display = 'none';
+                            boton.textContent = '📖 Ver perícopas del capítulo';
+                        }
+                        return;
+                    }
+                    
+                    // Si no existe, crear el contenedor
+                    contenedor = document.createElement('div');
+                    contenedor.id = 'pericopas-container';
+                    contenedor.className = 'pericopas-container';
+                    
+                    // Agregar título
+                    const titulo = document.createElement('h3');
+                    titulo.textContent = `Perícopas de ${libroActual} ${capituloActual}`;
+                    titulo.style.marginTop = '0';
+                    titulo.style.color = 'var(--primary-color, #4CAF50)';
+                    contenedor.appendChild(titulo);
+                    
+                    // Agregar cada perícopa
+                    pericopas.forEach((pericopa, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'pericopa-item';
+                        
+                        const tituloPericopa = document.createElement('h4');
+                        tituloPericopa.textContent = pericopa.title || `Perícopa ${index + 1}`;
+                        
+                        // Convertir saltos de línea en párrafos
+                        const contenido = document.createElement('div');
+                        const parrafos = (pericopa.text || '').split('\n').filter(p => p.trim() !== '');
+                        
+                        if (parrafos.length > 0) {
+                            parrafos.forEach(parrafo => {
+                                if (parrafo.trim() !== '') {
+                                    const p = document.createElement('p');
+                                    p.textContent = parrafo.trim();
+                                    contenido.appendChild(p);
+                                }
+                            });
+                        } else {
+                            const p = document.createElement('p');
+                            p.textContent = pericopa.text || '';
+                            contenido.appendChild(p);
+                        }
+                        
+                        item.appendChild(tituloPericopa);
+                        item.appendChild(contenido);
+                        contenedor.appendChild(item);
+                    });
+                    
+                    // Insertar después del título del capítulo
+                    const tituloCap = document.querySelector('h2');
+                    if (tituloCap) {
+                        tituloCap.insertAdjacentElement('afterend', contenedor);
+                    } else {
+                        // Si no hay título, insertar al principio del contenedor de versículos
+                        const versContainer = document.getElementById('verses');
+                        if (versContainer) {
+                            versContainer.insertBefore(contenedor, versContainer.firstChild);
+                        }
+                    }
+                    
+                    boton.textContent = 'Ocultar perícopas';
+                }
+                
+                // Asignar evento al botón
+                boton.onclick = togglePericopas;
+                
+                // Insertar el botón después del título del capítulo
+                const tituloCap = document.querySelector('h2');
+                if (tituloCap) {
+                    tituloCap.insertAdjacentElement('afterend', boton);
+                } else {
+                    // Si no hay título, insertar al principio del contenedor de versículos
+                    const versContainer = document.getElementById('verses');
+                    if (versContainer) {
+                        versContainer.insertBefore(boton, versContainer.firstChild);
+                    }
+                }
+                
+                console.log(`[Perícopas] Botón agregado para ${clavePericopa} (${pericopas.length} perícopas)`);
             }
             
             // Obtener código de libro
@@ -1735,6 +1996,8 @@
         })();
     </script>
     
+    <!-- Cargar datos de perícopas primero -->
+    <script src="pericopas-datos-completo.js"></script>
     <script>
         // Verificar que las perícopas estén correctamente cargadas
         console.log('[Perícopas] Estado de carga:', {
@@ -1748,9 +2011,25 @@
             const titoCap1 = PERICOPES_DATA['TIT-1'] || [];
             console.log('[Perícopas] Ejemplo de Tito 1:', titoCap1);
             
-            // Mostrar libros disponibles
-            console.log('[Perícopas] Libros disponibles:', Object.keys(PERICOPES_DATA));
+            // Mostrar libros disponibles (solo los primeros 5 para no saturar la consola)
+            const libros = Object.keys(PERICOPES_DATA);
+            console.log('[Perícopas] Total de capítulos con perícopas:', libros.length);
+            console.log('[Perícopas] Ejemplos de capítulos con perícopas:', libros.slice(0, 5));
+            
+            // Verificar si hay datos para el libro actual
+            function verificarPericopasDisponibles(libro, capitulo) {
+                const clave = `${libro}-${capitulo}`;
+                const tienePericopas = PERICOPES_DATA[clave] && PERICOPES_DATA[clave].length > 0;
+                console.log(`[Perícopas] Verificando ${clave}:`, tienePericopas ? 'Disponible' : 'No disponible');
+                return tienePericopas;
+            }
+            
+            // Hacer la función accesible globalmente
+            window.verificarPericopasDisponibles = verificarPericopasDisponibles;
+        } else {
+            console.error('[Perícopas] Error: No se pudo cargar el objeto PERICOPES_DATA');
         }
     </script>
+    <script src="app.js"></script>
 </body>
 </html>
