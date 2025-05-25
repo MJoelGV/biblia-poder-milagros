@@ -337,6 +337,24 @@
             opacity: 1;
         }
 
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        #search-results-count {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
         .search-results {
             display: none;
             position: fixed;
@@ -639,7 +657,10 @@
 
     <!-- Overlay de resultados de búsqueda -->
     <div id="search-results" class="search-results">
-        <button id="close-search" class="close-search">&times;</button>
+        <div class="search-results-header">
+            <div id="search-results-count">0 resultados</div>
+            <button id="close-search" class="close-search">&times;</button>
+        </div>
         <div id="results-content"></div>
     </div>
 
@@ -1352,8 +1373,15 @@
                 resultsContent.innerHTML = '';
                 // Buscar en todo xmlDoc (toda la Biblia)
                 const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
-                const regex = new RegExp(escapeRegExp(query), 'gi');
-                const matches = verses.filter(v => v.textContent.toLowerCase().includes(query));
+                // Modificado para buscar solo palabras completas
+                const regex = new RegExp(`\\b${escapeRegExp(query)}\\b`, 'gi');
+                const matches = verses.filter(v => {
+                    // Buscar solo palabras completas usando límites de palabra \b
+                    return new RegExp(`\\b${escapeRegExp(query)}\\b`, 'i').test(v.textContent);
+                });
+                const resultsCount = document.getElementById('search-results-count');
+                resultsCount.textContent = `${matches.length} ${matches.length === 1 ? 'resultado' : 'resultados'}`;
+                
                 if (matches.length) {
                     matches.forEach(v => {
                         const verseNum = v.getAttribute('n');
@@ -1382,6 +1410,7 @@
                     });
                     searchResults.classList.add('active');
                 } else {
+                    resultsCount.textContent = '0 resultados';
                     alert('No se encontraron resultados');
                 }
             }
