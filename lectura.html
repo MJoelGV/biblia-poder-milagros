@@ -175,6 +175,39 @@
             opacity: 0.9;
         }
 
+        /* Controles de fuente */
+        .font-controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 8px;
+        }
+        
+        .font-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .font-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* Asegurar contraste en modo oscuro */
+        [data-theme="dark"] .font-button {
+            background: #4a6b57;
+        }
+
         .chapter-content {
             max-width: 1200px;
             margin: 120px auto 80px;
@@ -657,20 +690,20 @@
                 <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
             </select>
             <select id="book-select" class="select-css"></select>
+            <button id="pericopes-button" class="pericopes-button" title="Ver perícopas del capítulo">Perícopas</button>
             <div class="search-wrapper">
                 <button id="search-button" class="search-button">🔍</button>
                 <input id="search-input" class="search-input" placeholder="Buscar versículo" />
             </div>
-            <button id="pericopes-button" class="pericopes-button" title="Ver perícopas del capítulo">Perícopas</button>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" title="Cambiar tema">🌙</button>
             <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
         </div>
         <div id="extra-controls" class="extra-controls">
-            <a href="/biblia-poder-milagros/" class="home-icon">🏠</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
-            <button id="decrease-font" class="theme-toggle" onclick="adjustFontSize(-1)" title="Disminuir tamaño de fuente">A-</button>
-            <span class="font-size-display" style="margin: 0 5px; font-size: 0.9em;">16px</span>
-            <button id="increase-font" class="theme-toggle" onclick="adjustFontSize(1)" title="Aumentar tamaño de fuente">A+</button>
-            <button id="reset-font" class="theme-toggle" title="Restablecer tamaño de fuente">↺</button>
+            <div class="font-controls">
+                <button id="decrease-font" class="font-button" onclick="adjustFontSize(-1)" title="Disminuir tamaño de fuente">A-</button>
+                <button id="increase-font" class="font-button" onclick="adjustFontSize(1)" title="Aumentar tamaño de fuente">A+</button>
+                <button id="reset-font" class="font-button" title="Restablecer tamaño de fuente">↺</button>
+            </div>
         </div>
     </div> <!-- cierre .controls -->
 
