@@ -1,39 +1,39 @@
 {
-  "name": "Biblia de Poder y Milagros - Audio",
-  "short_name": "Biblia Audio",
-  "description": "Escucha la Biblia en audio con reproducción en segundo plano",
-  "start_url": "reproductor-simple.html",
+  "name": "Biblia de Poder y Milagros",
+  "short_name": "Biblia PYM",
+  "description": "Biblia de Poder y Milagros - Tu compañera espiritual diaria",
+  "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
-  "theme_color": "#2c3e50",
+  "theme_color": "#4CAF50",
   "background_color": "#2c3e50",
   "orientation": "portrait-primary",
   "categories": ["books", "education", "religion"],
   "icons": [
     {
-      "src": "icons/pymicon-192x192.png",
+      "src": "icons/pymicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/pymicon-512x512.png",
+      "src": "icons/pymicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/pymicon-144x144.png",
+      "src": "icons/pymicon.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "icons/pymicon-96x96.png",
+      "src": "icons/pymicon.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "icons/pymicon-48x48.png",
+      "src": "icons/pymicon.png",
       "sizes": "48x48",
       "type": "image/png"
     }
@@ -66,6 +66,25 @@
     "mediaSession"
   ],
   "shortcuts": [
+    {
+      "name": "Inicio",
+      "short_name": "Inicio",
+      "description": "Ir a la página de inicio",
+      "url": "./",
+      "icons": [{ "src": "icons/pymicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Leer Biblia",
+      "short_name": "Leer",
+      "description": "Leer la Biblia",
+      "url": "./lectura.html"
+    },
+    {
+      "name": "Buscar",
+      "short_name": "Buscar",
+      "description": "Buscar en la Biblia",
+      "url": "./buscar.html"
+    },
     {
       "name": "Continuar escuchando",
       "short_name": "Continuar",
