@@ -243,7 +243,18 @@
             color: #000;
         }
         .verse.bookmarked { background: #fffa8c; }
-        .verse.comment { border-left: 4px solid var(--primary-color); }
+        .verse.comment { 
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+        }
+        .verse.comment::after {
+            content: '💬';
+            position: absolute;
+            right: 5px;
+            top: 2px;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
         .verse.memorized { background: #c6f4d6; }
         /* Dark mode: texto negro para bookmarked y memorized */
         [data-theme="dark"] .verse.bookmarked,
@@ -1567,13 +1578,42 @@
         const verseContainer = document.getElementById('verses');
         const verseMenu = document.getElementById('verse-menu');
         let activeVerseEl = null;
-        verseContainer.addEventListener('dblclick', e => {
-            activeVerseEl = e.target.closest('.verse');
-            if (!activeVerseEl) return;
-            const rect = activeVerseEl.getBoundingClientRect();
+        // Función para mostrar el menú contextual
+        function showVerseMenu(verseEl, x, y) {
+            if (!verseEl) return;
+            activeVerseEl = verseEl;
+            
+            // Verificar si el versículo ya tiene un comentario
+            const verseNum = verseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const hasComment = !!comments[key];
+            
+            // Actualizar el texto del botón de comentario
+            const commentBtn = document.getElementById('menu-add-comment');
+            commentBtn.textContent = hasComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+            
+            // Posicionar y mostrar el menú
+            verseMenu.style.left = `${x}px`;
+            verseMenu.style.top = `${y}px`;
             verseMenu.style.display = 'block';
-            verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
-            verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
+        }
+
+        // Mostrar menú contextual al hacer clic derecho en un versículo
+        verseContainer.addEventListener('contextmenu', (e) => {
+            const verseEl = e.target.closest('.verse');
+            if (!verseEl) return;
+            e.preventDefault();
+            showVerseMenu(verseEl, e.clientX, e.clientY);
+        });
+
+        // Mostrar menú contextual al hacer doble clic en un versículo
+        verseContainer.addEventListener('dblclick', (e) => {
+            const verseEl = e.target.closest('.verse');
+            if (!verseEl) return;
+            e.preventDefault();
+            const rect = verseEl.getBoundingClientRect();
+            showVerseMenu(verseEl, rect.left + window.scrollX + 10, rect.top + window.scrollY + 10);
         });
         document.addEventListener('click', e => {
             if (!e.target.closest('#verse-menu')) {
@@ -1593,22 +1633,66 @@
             localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
             verseMenu.style.display = 'none';
         });
-        document.getElementById('menu-add-comment').addEventListener('click', () => {
-            if (!activeVerseEl) return;
+        // Función para abrir el modal de comentarios
+        function openCommentModal(verseEl) {
+            if (!verseEl) return;
+            activeVerseEl = verseEl;
+            const verseNum = verseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const existingComment = comments[key] || '';
+            
+            // Actualizar el título del modal
+            const modalTitle = document.querySelector('#comment-modal h3');
+            modalTitle.textContent = existingComment ? 'Editar Comentario' : 'Agregar Comentario';
+            
+            // Cargar el comentario existente si existe
+            document.getElementById('modal-comment-input').value = existingComment;
+            
+            // Mostrar el modal
             document.getElementById('comment-backdrop').style.display = 'block';
             document.getElementById('comment-modal').style.display = 'block';
             verseMenu.style.display = 'none';
+            
+            // Enfocar el textarea
+            document.getElementById('modal-comment-input').focus();
+        }
+        
+        // Manejador para el botón de agregar/editar comentario
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            openCommentModal(activeVerseEl);
         });
+        
+        // Manejador para el botón de guardar comentario
         document.getElementById('modal-save-btn').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            
             const comment = document.getElementById('modal-comment-input').value.trim();
+            const verseNum = activeVerseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            
             if (comment) {
+                // Actualizar o agregar comentario
                 activeVerseEl.classList.add('comment');
                 activeVerseEl.dataset.comment = comment;
-                const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
-                const comments = JSON.parse(localStorage.getItem('comments') || '{}');
                 comments[key] = comment;
-                localStorage.setItem('comments', JSON.stringify(comments));
+                // Actualizar el título del botón si es necesario
+                document.querySelector('#menu-add-comment').textContent = 'Editar Comentario';
+            } else {
+                // Eliminar comentario si está vacío
+                delete comments[key];
+                activeVerseEl.classList.remove('comment');
+                delete activeVerseEl.dataset.comment;
+                // Actualizar el título del botón
+                document.querySelector('#menu-add-comment').textContent = 'Agregar Comentario';
             }
+            
+            // Guardar cambios
+            localStorage.setItem('comments', JSON.stringify(comments));
+            
+            // Cerrar modal
             document.getElementById('comment-modal').style.display = 'none';
             document.getElementById('comment-backdrop').style.display = 'none';
             document.getElementById('modal-comment-input').value = '';
