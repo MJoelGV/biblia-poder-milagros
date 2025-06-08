@@ -654,12 +654,53 @@
 
         /* Mostrar grid de capítulos cuando esté activo */
         .chapter-grid.active { display: flex; }
+        
+        /* Estilos para mensajes de carga y error */
+        .loading, .error-message {
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            margin: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .error-message p {
+            margin: 10px 0;
+        }
+        
+        [data-theme="dark"] .loading {
+            color: #e0e0e0;
+            background-color: #2d2d2d;
+        }
+        
+        [data-theme="dark"] .error-message {
+            color: #f5c6cb;
+            background-color: #721c24;
+            border-color: #f5c6cb;
+        }
     </style>
     <script>
+        // Inicializar strongsData como un objeto vacío
         let strongsData = {};
+        // Intentar cargar strongs.json, pero no es crítico si falla
         fetch('strongs.json')
-          .then(res => res.json())
-          .then(data => { strongsData = data; });
+          .then(res => res.ok ? res.json() : {})
+          .then(data => { 
+              strongsData = data; 
+              console.log('Datos de Strong cargados correctamente');
+          })
+          .catch(err => {
+              console.warn('No se pudo cargar strongs.json. Las anotaciones de Strong no estarán disponibles.');
+          });
     </script>
     <!-- texto actualizado -->
     <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
@@ -978,26 +1019,39 @@
         // Función para cargar la Biblia
         async function loadBible(version) {
             try {
-                const url = `biblia-files/${version}.xmm`;
-                console.log('[BIBLIA] Intentando cargar directamente:', url);
-                const response = await fetch(url);
+                // Mostrar indicador de carga
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'loading';
+                loadingDiv.textContent = 'Cargando versión ' + version + '...';
+                document.getElementById('verses').innerHTML = '';
+                document.getElementById('verses').appendChild(loadingDiv);
                 
-                if (!response.ok) {
+                // Intentar cargar la versión solicitada
+                const url = `biblia-files/${version}.xmm`;
+                console.log('[BIBLIA] Intentando cargar:', url);
+                
+                let response;
+                try {
+                    response = await fetch(url);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                } catch (firstError) {
+                    console.log('[BIBLIA] Primera carga fallida, intentando ruta alternativa...');
                     // Si falla, intentar con la ruta completa
                     const fullUrl = window.location.href.replace(/\/lectura\.html.*$/, '') + '/biblia-files/' + version + '.xmm';
                     console.log('[BIBLIA] Intentando con ruta completa:', fullUrl);
-                    const fullResponse = await fetch(fullUrl);
-                    
-                    if (!fullResponse.ok) {
-                        throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')' + 
-                                      ' ni ' + fullUrl + ' (HTTP ' + fullResponse.status + ')');
+                    response = await fetch(fullUrl);
+                    if (!response.ok) {
+                        throw new Error('No se pudo cargar el archivo: ' + url + ' (Error: ' + firstError.message + ')' + 
+                                      ' ni ' + fullUrl + ' (HTTP ' + response.status + ')');
                     }
-                    
-                    const xmlText = await fullResponse.text();
-                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                } else {
-                    const xmlText = await response.text();
-                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                }
+                
+                const xmlText = await response.text();
+                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
+                // Verificar que el XML se haya parseado correctamente
+                if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                    throw new Error('Error al analizar el archivo XML');
                 }
                 
                 currentVersion = version;
@@ -1008,10 +1062,35 @@
                     versionSelect.value = version;
                 }
                 
+                console.log('[BIBLIA] Versión cargada correctamente:', version);
                 return true;
+                
             } catch (error) {
-                console.error('[BIBLIA] Error loading Bible:', error);
-                throw new Error('No se pudo cargar el documento XML de la Biblia');
+                console.error('[BIBLIA] Error al cargar la Biblia:', error);
+                
+                // Mostrar mensaje de error al usuario
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <p>No se pudo cargar la versión seleccionada.</p>
+                    <p>Detalles: ${error.message}</p>
+                    <p>Por favor, intente con otra versión o recargue la página.</p>
+                `;
+                
+                const versesEl = document.getElementById('verses');
+                if (versesEl) {
+                    versesEl.innerHTML = '';
+                    versesEl.appendChild(errorDiv);
+                }
+                
+                // Intentar cargar una versión por defecto si es posible
+                if (version !== 'Reina-Valera-1960' && document.getElementById('version-selector')) {
+                    console.log('[BIBLIA] Intentando cargar Reina-Valera-1960 como respaldo...');
+                    document.getElementById('version-selector').value = 'Reina-Valera-1960';
+                    return loadBible('Reina-Valera-1960');
+                }
+                
+                return false;
             }
         }
 
@@ -1344,20 +1423,32 @@
         document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
     </script>
     <script>
-        // Annotate strong numbers
+        // Annotate strong numbers - Función segura que no falla si no hay datos
         function annotateStrongNumbers() {
-            const verseEls = document.querySelectorAll('.verse-text');
-            const wordMap = {};
-            for (const code in strongsData) {
-                const entry = strongsData[code];
-                wordMap[entry.word.toLowerCase()] = code;
-            }
-            verseEls.forEach(el => {
-                el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
-                    const code = wordMap[match.toLowerCase()];
-                    return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+            try {
+                const verseEls = document.querySelectorAll('.verse-text');
+                if (!strongsData || Object.keys(strongsData).length === 0) {
+                    console.log('No hay datos de Strong disponibles para anotaciones');
+                    return;
+                }
+                
+                const wordMap = {};
+                for (const code in strongsData) {
+                    const entry = strongsData[code];
+                    if (entry && entry.word) {
+                        wordMap[entry.word.toLowerCase()] = code;
+                    }
+                }
+                
+                verseEls.forEach(el => {
+                    el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
+                        const code = wordMap[match.toLowerCase()];
+                        return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+                    });
                 });
-            });
+            } catch (error) {
+                console.error('Error al anotar números de Strong:', error);
+            }
         }
         document.body.addEventListener('click', e => {
             const sw = e.target.closest('.strong-word');
@@ -2038,6 +2129,7 @@
                     'marcos': 'MRK',
                     'lucas': 'LUK',
                     'juan': 'JHN',
+                    '1 juan': '1JN', '2 juan': '2JN', '3 juan': '3JN',
                     'hechos': 'ACT',
                     'romanos': 'ROM',
                     'corintios': 'CO', '1 corintios': '1CO', '2 corintios': '2CO',
@@ -2052,7 +2144,7 @@
                     'hebreos': 'HEB',
                     'santiago': 'JAS',
                     'pedro': 'PE', '1 pedro': '1PE', '2 pedro': '2PE',
-                    'juan': 'JN', '1 juan': '1JN', '2 juan': '2JN', '3 juan': '3JN',
+                    // 'juan' ya está mapeado a 'JHN' más arriba
                     'judas': 'JUD',
                     'apocalipsis': 'REV'
                 };

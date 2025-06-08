@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2c3e50">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Biblia de Poder y Milagros</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <!-- PWA manifest and meta -->
-    <link rel="manifest" href="manifest.json?v=1.0">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icons/pymicon.png">
     <meta name="application-name" content="BibliaPYM">
     <meta name="apple-mobile-web-app-title" content="BibliaPYM">
@@ -173,7 +169,7 @@
             <li onclick="window.location.href='diccionario.html'">Diccionario</li>
             <li onclick="window.location.href='bookmarks.html'">Marcados</li>
             <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='https://mjoelgv.github.io/biblia-poder-milagros/topics.html'">Temas</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
         </ul>
     </div>
     <div class="background"></div>
@@ -186,9 +182,6 @@
             </a>
             <div class="navigation-buttons">
                 <a href="lectura.html" id="read-more-link" class="nav-button"><i class="fas fa-bible icon"></i></a>
-                <button id="share-button" class="nav-button" style="background: #4CAF50; color: white; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    <i class="fas fa-share-alt icon"></i><span>Compartir</span>
-                </button>
                 <a href="pericopas-standalone.html" class="nav-button" style="border-color: #9c27b0;"><i class="fas fa-book icon" style="color: #9c27b0;"></i><span>Perícopas</span></a>
                 <a href="audio.html" class="nav-button"><i class="fas fa-headphones icon"></i><span>Escuchar</span></a>
                 <a href="memorizados.html" class="nav-button"><i class="fas fa-graduation-cap icon"></i><span>Memorizados</span></a>
@@ -196,61 +189,14 @@
                 <a href="diccionario.html" class="nav-button"><i class="fas fa-books icon"></i><span>Diccionario</span></a>
                 <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
                 <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
-                <a href="https://mjoelgv.github.io/biblia-poder-milagros/topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
+                <a href="topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
+                <a href="#" id="share-button" class="nav-button" style="border-color: #ff9800;"><i class="fas fa-share-alt icon" style="color: #ff9800;"></i><span>Compartir</span></a>
             </div>
         </div>
     </div>
     <!-- Install button and SW registration -->
-    <button id="install-button" style="display:none;position:fixed;bottom:20px;right:20px;padding:12px 24px;background:#4CAF50;color:#fff;border:none;border-radius:25px;box-shadow:0 4px 8px rgba(0,0,0,0.2);z-index:1000;font-size:16px;font-weight:bold;cursor:pointer;transition:all 0.3s ease;">
-        <i class="fas fa-download" style="margin-right:8px;"></i>Instalar App
-    </button>
-    
-    <!-- Botón de instalación forzada eliminado ya que el botón de instalación normal está funcionando correctamente -->
+    <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">descargar biblia de Poder y Milagros</button>
     <script>
-        // Función para mostrar el botón de instalación manualmente
-        function showInstallButton() {
-            const installButton = document.getElementById('install-button');
-            if (installButton) {
-                installButton.style.display = 'block';
-                console.log('Botón de instalación mostrado manualmente');
-            }
-        }
-
-        // Función para forzar la instalación
-        async function forceInstall() {
-            try {
-                console.log('Intentando forzar la instalación...');
-                // Verificar si el navegador soporta la instalación
-                if (!window.PWADetected) {
-                    alert('La instalación de PWA no está soportada en este navegador o la página ya está instalada.');
-                    return;
-                }
-
-                // Mostrar el prompt de instalación si está disponible
-                if (window.deferredPrompt) {
-                    console.log('Mostrando prompt de instalación...');
-                    window.deferredPrompt.prompt();
-                    const { outcome } = await window.deferredPrompt.userChoice;
-                    console.log(`Usuario respondió: ${outcome}`);
-                    
-                    // Limpiar el prompt guardado
-                    window.deferredPrompt = null;
-                    
-                    // Ocultar el botón de instalación
-                    const installButton = document.getElementById('install-button');
-                    if (installButton) {
-                        installButton.style.display = 'none';
-                    }
-                } else {
-                    console.log('No hay prompt de instalación disponible');
-                    alert('No se puede mostrar el prompt de instalación. Intenta recargar la página.');
-                }
-            } catch (error) {
-                console.error('Error al forzar la instalación:', error);
-                alert('Ocurrió un error al intentar instalar la aplicación: ' + error.message);
-            }
-        }
-
         // Cargar versículo del día
         async function loadDailyVerse() {
             try {
@@ -299,6 +245,17 @@
                 .then(() => console.log('SW registered'))
                 .catch(console.error);
         }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
     </script>
     <script>
         // Toggle side-menu
@@ -312,166 +269,45 @@
                 sideMenuIdx.classList.remove('active');
             }
         });
-    </script>
-    <script>
-        // Función para compartir la PWA
-        async function sharePWA() {
-            const shareData = {
-                title: 'Biblia de Poder y Milagros',
-                text: '¡Descarga la Biblia de Poder y Milagros! Una aplicación completa para leer, escuchar y estudiar la Palabra de Dios.',
-                url: window.location.href
-            };
-
-            try {
-                // Intentar usar la Web Share API
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                    console.log('¡Contenido compartido exitosamente!');
-                } else {
-                    // Fallback para navegadores que no soportan la Web Share API
-                    await navigator.clipboard.writeText(shareData.url);
-                    alert('¡Enlace copiado al portapapeles! Comparte este enlace: ' + shareData.url);
-                }
-            } catch (err) {
-                console.error('Error al compartir:', err);
-                // Si hay un error, intentar copiar al portapapeles
-                try {
-                    await navigator.clipboard.writeText(shareData.url);
-                    alert('¡Enlace copiado al portapapeles! Comparte este enlace: ' + shareData.url);
-                } catch (err) {
-                    console.error('Error al copiar al portapapeles:', err);
-                    alert('No se pudo compartir. Por favor, copia manualmente esta URL: ' + shareData.url);
-                }
-            }
-        }
-
-        // Agregar evento al botón de compartir
-        document.getElementById('share-button').addEventListener('click', sharePWA);
-
-        // PWA Installation
-        // Mover el código de instalación PWA al final del archivo
-    </script>
-    
-    <!-- Código de instalación PWA -->
-    <script>
-        console.log('Código de instalación PWA cargado');
         
-        // Variables globales para el manejo de la instalación
-        window.deferredPrompt = null;
-        window.PWADetected = false;
-        
-        // Elemento del botón de instalación
-        const installButton = document.getElementById('install-button');
-        
-        // Verificar si el botón de instalación existe
-        if (!installButton) {
-            console.error('Error: No se encontró el botón de instalación con id "install-button"');
-        } else {
-            console.log('Botón de instalación encontrado:', installButton);
-        }
-
-        // Manejar el evento beforeinstallprompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('Evento beforeinstallprompt detectado');
-            // Prevenir que el navegador muestre el prompt automáticamente
+        // Funcionalidad de compartir
+        document.getElementById('share-button').addEventListener('click', async (e) => {
             e.preventDefault();
-            // Guardar el evento para usarlo más tarde
-            window.deferredPrompt = e;
-            window.PWADetected = true;
             
-            // Mostrar el botón de instalación
-            if (installButton) {
-                console.log('Mostrando botón de instalación');
-                installButton.style.display = 'block';
-                installButton.addEventListener('click', handleInstallClick);
-            }
+            // Obtener la URL actual (para compartir la PWA)
+            const shareUrl = window.location.href.split('?')[0]; // Eliminar parámetros de consulta si los hay
             
-            // El botón de instalación forzada ha sido eliminado
+            // Texto personalizado para compartir
+            const shareTitle = 'Biblia de Poder y Milagros';
+            const shareText = 'Quiero compartir contigo esta maravillosa Biblia de Poder y Milagros. ¡Descárgala y lleva la Palabra de Dios contigo a todas partes!';
             
-            // Registrar en la consola que la PWA es instalable
-            console.log('Esta aplicación se puede instalar como PWA');
-        });
-
-        // Función para manejar el clic en el botón de instalación
-        async function handleInstallClick() {
-            console.log('Botón de instalación clickeado');
-            if (window.deferredPrompt) {
+            // Verificar si el navegador soporta la API Web Share
+            if (navigator.share) {
                 try {
-                    console.log('Mostrando prompt de instalación');
-                    // Mostrar el prompt de instalación
-                    window.deferredPrompt.prompt();
-                    // Esperar a que el usuario responda al prompt
-                    const { outcome } = await window.deferredPrompt.userChoice;
-                    console.log(`Usuario respondió al prompt de instalación: ${outcome}`);
-                    
-                    // El prompt ya no se puede reutilizar, limpiarlo
-                    window.deferredPrompt = null;
-                    
-                    // Ocultar el botón de instalación
-                    if (installButton) {
-                        installButton.style.display = 'none';
-                        installButton.removeEventListener('click', handleInstallClick);
-                    }
-                    
-                    // El botón de instalación forzada ha sido eliminado
-                } catch (err) {
-                    console.error('Error al mostrar el prompt de instalación:', err);
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                    console.log('¡Contenido compartido con éxito!');
+                } catch (error) {
+                    console.error('Error al compartir:', error);
+                    alert('No se pudo compartir. Por favor, intenta de nuevo más tarde.');
                 }
             } else {
-                console.log('No hay prompt de instalación disponible');
-            }
-        }
-
-        // Manejar el evento cuando la aplicación se instala
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('La aplicación fue instalada exitosamente');
-            // Ocultar los botones de instalación
-            if (installButton) {
-                installButton.style.display = 'none';
-                installButton.removeEventListener('click', handleInstallClick);
-            }
-            // El botón de instalación forzada ha sido eliminado
-            window.deferredPrompt = null;
-            window.PWADetected = false;
-        });
-        
-        // Verificar si la aplicación ya está instalada cuando se carga la página
-        window.addEventListener('load', () => {
-            console.log('Página cargada, verificando si la aplicación ya está instalada...');
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                               window.navigator.standalone === true ||
-                               document.referrer.includes('android-app://');
-            
-            if (isStandalone) {
-                console.log('La aplicación ya está instalada');
-                // Ocultar los botones de instalación
-                if (installButton) {
-                    installButton.style.display = 'none';
-                    installButton.removeEventListener('click', handleInstallClick);
+                // Fallback para navegadores que no soportan Web Share API
+                // Mostrar un mensaje con la URL para copiar manualmente
+                alert('Tu navegador no soporta la función de compartir. Copia este enlace: ' + shareUrl);
+                
+                // Intentar copiar al portapapeles si es posible
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert('¡Enlace copiado al portapapeles!');
+                } catch (clipboardError) {
+                    console.error('No se pudo copiar al portapapeles:', clipboardError);
                 }
-                if (forceInstallButton) {
-                    forceInstallButton.style.display = 'none';
-                }
-            } else {
-                console.log('La aplicación no está instalada');
-                // El botón de instalación forzada ha sido eliminado
-            }
-            
-            // Verificar si el navegador soporta PWA
-            if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
-                console.log('Este navegador soporta la instalación de PWAs');
-                window.PWADetected = true;
-            } else {
-                console.log('Este navegador NO soporta la instalación de PWAs');
-                window.PWADetected = false;
-                // Ocultar los botones de instalación si no hay soporte
-                if (installButton) installButton.style.display = 'none';
-                // El botón de instalación forzada ha sido eliminado
             }
         });
     </script>
 </body>
 </html>
-<!-- Última actualización: 2025-05-24 09:44 -->
-< ! - -   F o r z a r   a c t u a l i z a c i o n   - - >  
- 

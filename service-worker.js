@@ -30,49 +30,24 @@ self.addEventListener('activate', event => {
 // Fetch handler: network-first for page navigations, cache-first for other requests
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  
-  // Evitar el caché para el manifest.json
-  if (event.request.url.includes('manifest.json')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-  
   // Use network-first for page navigations
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // Solo almacenar en caché respuestas exitosas
-          if (response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          }
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
           return response;
         })
         .catch(() => caches.match(event.request) || caches.match('/index.html'))
     );
     return;
   }
-  
   // Cache-first for other requests
   event.respondWith(
     caches.match(event.request).then(cached => {
-      // Si está en caché, devolver la respuesta en caché
-      if (cached) {
-        return cached;
-      }
-      
-      // Si no está en caché, hacer la solicitud de red
+      if (cached) return cached;
       return fetch(event.request).then(response => {
-        // Solo almacenar en caché respuestas exitosas
-        if (response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-        }
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
         return response;
       });
     })
