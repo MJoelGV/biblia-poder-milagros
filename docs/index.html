@@ -154,6 +154,90 @@
         .side-menu ul li:last-child {border-bottom: none;}
         .side-menu-toggle {background: none; border: none; font-size: 24px; color: #fff; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px;}
         .side-menu-toggle:hover {background-color: rgba(0,0,0,0.05); border-radius: 50%;}
+        
+        /* Estilos para el modal de instalación iOS */
+        #ios-install-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        #ios-install-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        #ios-install-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        #ios-install-content h2 {
+            color: #4CAF50;
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        .ios-step {
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .ios-step-number {
+            background: #4CAF50;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .ios-step-content {
+            flex-grow: 1;
+        }
+        
+        .ios-image {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        #dont-show-again {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        #dont-show-again input {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +280,52 @@
     </div>
     <!-- Install button and SW registration -->
     <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">descargar biblia de Poder y Milagros</button>
+    
+    <!-- Modal de instalación para iOS -->
+    <div id="ios-install-modal">
+        <div id="ios-install-content">
+            <span id="ios-install-close">&times;</span>
+            <h2>¡Instala la Biblia en tu iPhone!</h2>
+            <p>Sigue estos sencillos pasos para agregar la Biblia de Poder y Milagros a tu pantalla de inicio:</p>
+            
+            <div class="ios-step">
+                <div class="ios-step-number">1</div>
+                <div class="ios-step-content">
+                    <p>Presiona el botón <strong>Compartir</strong> (el ícono de caja con flecha hacia arriba) en la parte inferior de la pantalla.</p>
+                    <img src="images/1.jpg" alt="Paso 1: Presionar el botón Compartir" class="ios-image">
+                </div>
+            </div>
+            
+            <div class="ios-step">
+                <div class="ios-step-number">2</div>
+                <div class="ios-step-content">
+                    <p>Desliza hacia arriba y selecciona <strong>Agregar a Inicio</strong>.</p>
+                    <img src="images/2.jpg" alt="Paso 2: Seleccionar Agregar a Inicio" class="ios-image">
+                </div>
+            </div>
+            
+            <div class="ios-step">
+                <div class="ios-step-number">3</div>
+                <div class="ios-step-content">
+                    <p>Presiona <strong>Agregar</strong> en la esquina superior derecha para confirmar.</p>
+                    <img src="images/4.jpg" alt="Paso 3: Presionar el botón Agregar" class="ios-image">
+                </div>
+            </div>
+            
+            <div class="ios-step">
+                <div class="ios-step-number">4</div>
+                <div class="ios-step-content">
+                    <p>¡Listo! El ícono de la Biblia de Poder y Milagros aparecerá en tu pantalla de inicio.</p>
+                    <img src="images/3.jpg" alt="Paso 4: Ícono en la pantalla de inicio" class="ios-image">
+                </div>
+            </div>
+            
+            <div id="dont-show-again">
+                <input type="checkbox" id="hide-ios-install">
+                <label for="hide-ios-install">No volver a mostrar este mensaje</label>
+            </div>
+        </div>
+    </div>
     <script>
         // Cargar versículo del día
         async function loadDailyVerse() {
@@ -238,6 +368,59 @@
         }
         // Cargar el versículo cuando la página esté lista
         loadDailyVerse();
+        
+        // Detectar si es un dispositivo iOS
+        function isIOS() {
+            return [
+                'iPad Simulator',
+                'iPhone Simulator',
+                'iPod Simulator',
+                'iPad',
+                'iPhone',
+                'iPod'
+            ].includes(navigator.platform) ||
+            (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+        }
+        
+        // Mostrar el modal de instalación para iOS
+        function showIosInstallModal() {
+            // Verificar si el usuario ya ha optado por no ver el mensaje
+            if (localStorage.getItem('hideIosInstall') === 'true') {
+                return;
+            }
+            
+            const modal = document.getElementById('ios-install-modal');
+            const closeBtn = document.getElementById('ios-install-close');
+            const dontShowAgain = document.getElementById('hide-ios-install');
+            
+            // Mostrar el modal
+            modal.style.display = 'flex';
+            
+            // Manejar el cierre del modal
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                // Guardar preferencia si el usuario lo solicitó
+                if (dontShowAgain.checked) {
+                    localStorage.setItem('hideIosInstall', 'true');
+                }
+            });
+            
+            // Cerrar al hacer clic fuera del contenido
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    if (dontShowAgain.checked) {
+                        localStorage.setItem('hideIosInstall', 'true');
+                    }
+                }
+            });
+        }
+        
+        // Mostrar el modal solo si es un dispositivo iOS y no es una PWA instalada
+        if (isIOS() && !window.navigator.standalone) {
+            // Esperar un momento para asegurar que el DOM esté listo
+            setTimeout(showIosInstallModal, 2000);
+        }
     </script>
     <script>
         if('serviceWorker' in navigator) {
