@@ -333,13 +333,13 @@
         <ul>
             <li><a href="index.html"><i class="fas fa-home"></i> Página principal</a></li>
             <li><a href="lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
-            <li><a href="pericopas.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
+            <li><a href="pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
             <li><a href="audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
-            <li><a href="memorizar.html"><i class="fas fa-brain"></i> Memorizados</a></li>
+            <li><a href="memorizados.html"><i class="fas fa-brain"></i> Memorizados</a></li>
             <li><a href="historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
             <li><a href="diccionario.html"><i class="fas fa-book-reader"></i> Diccionario</a></li>
-            <li><a href="marcados.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
-            <li><a href="comentarios.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
             <li><a href="temas.html"><i class="fas fa-tags"></i> Temas</a></li>
             <li class="active"><a href="planes-estudio.html"><i class="fas fa-calendar-check"></i> Planes de Estudio</a></li>
         </ul>
@@ -363,6 +363,12 @@
             </div>
             <div style="text-align: center; margin-top: 10px; color: #7f8c8d; font-size: 0.9em;">
                 <i class="fas fa-info-circle"></i> Marca los días como completados a medida que avanzas
+            </div>
+            <div id="welcome-message" class="welcome-message" style="display: none; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                <h3 style="color: #2c3e50; margin-top: 0;">¡Bienvenido a 30 Días con Jesús!</h3>
+                <p style="color: #555; margin: 10px 0;">Comienza tu viaje de 30 días aprendiendo sobre la vida y enseñanzas de Jesús.</p>
+                <p style="color: #555; margin: 10px 0 15px;">Tu progreso se guardará automáticamente.</p>
+                <button onclick="document.getElementById('welcome-message').style.display='none';" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;">Comenzar</button>
             </div>
         </div>
         
@@ -681,15 +687,10 @@
             
             // Mostrar mensaje de bienvenida si es el primer día
             if (progress.diasCompletados.length === 0) {
-                const welcomeMessage = document.createElement('div');
-                welcomeMessage.className = 'welcome-message';
-                welcomeMessage.innerHTML = `
-                    <h3>¡Bienvenido a 30 Días con Jesús!</h3>
-                    <p>Comienza tu viaje de 30 días aprendiendo sobre la vida y enseñanzas de Jesús.</p>
-                    <p>Tu progreso se guardará automáticamente.</p>
-                    <button onclick="this.parentElement.remove()">Comenzar</button>
-                `;
-                document.body.appendChild(welcomeMessage);
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'block';
+                }
             }
         });
 
