@@ -976,14 +976,20 @@
 
                 versesContainer.innerHTML = html;
 
+                // Desplazarse al versículo si está especificado
                 if (currentVerse > 0) {
                     const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
                     if (verseElement) {
                         setTimeout(() => {
+                            // Asegurarse de que el versículo esté visible
                             verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // difuminar highlight después de unos segundos
+                            // Resaltar el versículo
+                            verseElement.classList.add('highlighted');
+                            // Quitar el resaltado después de 3 segundos
                             setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
                         }, 100);
+                    } else {
+                        console.warn(`No se encontró el versículo ${currentVerse}`);
                     }
                 }
                 
