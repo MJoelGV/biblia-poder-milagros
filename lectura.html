@@ -2783,9 +2783,9 @@
                     document.addEventListener('touchend', stopDrag);
                 }
                 
-                // Iniciar arrastre con mouse o toque
+                // Iniciar arrastre
                 element.addEventListener('mousedown', startDrag);
-                element.addEventListener('touchstart', startDrag, { passive: false });
+                element.addEventListener('touchstart', startDrag, { passive: true });
                 
                 // Función de arrastre
                 function dragElement(e) {
@@ -2864,17 +2864,31 @@
                 });
             }
             
-            // Event Listeners
+            // Event listeners originales
             floatingBtn.addEventListener('click', toggleNotesPanel);
             closeNotes.addEventListener('click', toggleNotesPanel);
             saveNoteBtn.addEventListener('click', saveNote);
             
+            // Agregar manejadores para las pestañas
             tabButtons.forEach(button => {
                 button.addEventListener('click', switchTab);
             });
             
             // Hacer el botón arrastrable
             makeDraggable(floatingBtn);
+            
+            // Soporte táctil mejorado
+            floatingBtn.addEventListener('touchend', function(e) {
+                // Si no hubo movimiento significativo, abrir el panel
+                if (!isDragging) {
+                    toggleNotesPanel();
+                }
+                isDragging = false;
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Inicializar el panel de notas
+            renderNotesList();
             
             // Cerrar el panel al hacer clic fuera de él
             document.addEventListener('click', (e) => {
