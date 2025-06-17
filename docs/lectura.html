@@ -43,6 +43,59 @@
             cursor: grabbing;
         }
 
+        /* Estilos para el modal personalizado */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 80%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .custom-modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .custom-modal-button.confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .custom-modal-button.cancel {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .custom-modal-button:hover {
+            opacity: 0.9;
+        }
+
         /* Estilos para el panel de notas */
         .notes-panel {
             position: fixed;
@@ -1002,6 +1055,64 @@
     </div>
 
     <script>
+        // Variables globales para el sistema de notas
+        let notes = [];
+        let currentNoteId = null; // Variable para rastrear la nota que se está editando
+        const NOTES_STORAGE_KEY = 'bible_notes';
+
+        // Variables globales para el sistema de confirmación
+        let customConfirm;
+        
+        // Inicializar el sistema de confirmación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sistema de confirmación personalizado
+            customConfirm = (function() {
+                const modal = document.getElementById('customConfirmModal');
+                const message = document.getElementById('customConfirmMessage');
+                const confirmBtn = document.getElementById('customConfirmOk');
+                const cancelBtn = document.getElementById('customConfirmCancel');
+                
+                if (!modal || !message || !confirmBtn || !cancelBtn) {
+                    console.error('Error: No se encontraron todos los elementos del modal de confirmación');
+                    return function() { return Promise.resolve(false); };
+                }
+                
+                return function(msg) {
+                    return new Promise((resolve) => {
+                        message.textContent = msg;
+                        modal.style.display = 'flex';
+                        
+                        const handleConfirm = () => {
+                            modal.style.display = 'none';
+                            confirmBtn.removeEventListener('click', handleConfirm);
+                            cancelBtn.removeEventListener('click', handleCancel);
+                            resolve(true);
+                        };
+                        
+                        const handleCancel = () => {
+                            modal.style.display = 'none';
+                            confirmBtn.removeEventListener('click', handleConfirm);
+                            cancelBtn.removeEventListener('click', handleCancel);
+                            resolve(false);
+                        };
+                        
+                        confirmBtn.addEventListener('click', handleConfirm);
+                        cancelBtn.addEventListener('click', handleCancel);
+                    });
+                };
+            })();
+        });
+
+        // Función para mostrar mensajes personalizados
+        async function showConfirm(message) {
+            if (!customConfirm) {
+                // Si el modal no está listo, usar confirm nativo
+                console.warn('Modal no inicializado, usando confirm nativo');
+                return confirm(message);
+            }
+            return await customConfirm(message);
+        }
+
         let xmlDoc = null;
         let currentBook = '';
         let currentChapter = 1;
@@ -2541,7 +2652,8 @@
             const noteContent = document.getElementById('note-content');
             const notesList = document.getElementById('notes-list');
             
-            // Cargar notas guardadas
+            // Variables para el sistema de notas
+            let currentNoteId = null; // Variable para rastrear la nota que se está editando
             let notes = JSON.parse(localStorage.getItem('bible-notes')) || [];
             
             // Mostrar/ocultar panel de notas
@@ -2575,35 +2687,81 @@
             }
             
             // Guardar nota
-            function saveNote() {
-                const title = noteTitle.value.trim();
-                const content = noteContent.value.trim();
+            async function saveNote() {
+                const noteTitleInput = document.getElementById('note-title');
+                const noteContentInput = document.getElementById('note-content');
                 
-                if (!title && !content) {
-                    alert('Por favor ingresa un título o contenido para la nota');
+                // Verificar que los elementos del formulario existan
+                if (!noteTitleInput || !noteContentInput) {
+                    console.error('Error: No se encontraron los campos del formulario de notas');
                     return;
                 }
                 
-                const newNote = {
-                    id: Date.now(),
-                    title: title || 'Nota sin título',
-                    content: content,
-                    date: new Date().toISOString(),
-                    reference: getCurrentReference()
-                };
+                const title = noteTitleInput.value.trim() || 'Nota sin título';
+                const content = noteContentInput.value.trim();
+                const reference = getCurrentReference();
+                const now = new Date().toISOString();
                 
-                notes.unshift(newNote);
-                saveNotes();
+                console.log('Guardando nota:', { title, content, reference, currentNoteId });
                 
-                // Limpiar campos
-                noteTitle.value = '';
-                noteContent.value = '';
+                // Validar contenido
+                if (!content) {
+                    // Usar showConfirm para mostrar el mensaje
+                    await showConfirm('Por favor ingresa el contenido de la nota');
+                    return;
+                }
                 
-                // Mostrar mensaje de éxito
-                alert('Nota guardada correctamente');
-                
-                // Cambiar a la pestaña de todas las notas
-                document.querySelector('.tab-btn[data-tab="all-notes"]').click();
+                try {
+                    // Si estamos editando una nota existente
+                    if (currentNoteId) {
+                        const index = notes.findIndex(n => n.id === currentNoteId);
+                        if (index !== -1) {
+                            notes[index] = {
+                                ...notes[index],
+                                title,
+                                content,
+                                updatedAt: now
+                            };
+                            console.log('Nota actualizada:', notes[index]);
+                            
+                            // Mostrar confirmación de actualización
+                            await showConfirm('Nota actualizada correctamente');
+                        }
+                    } else {
+                        // Crear nueva nota
+                        const note = {
+                            id: Date.now().toString(),
+                            title,
+                            content,
+                            reference,
+                            createdAt: now,
+                            updatedAt: now
+                        };
+                        notes.unshift(note);
+                        console.log('Nueva nota creada:', note);
+                        
+                        // Mostrar confirmación de creación
+                        await showConfirm('Nota guardada correctamente');
+                    }
+                    
+                    // Guardar cambios
+                    saveNotes();
+                    renderNotesList();
+                    
+                    // Limpiar formulario
+                    noteTitleInput.value = '';
+                    noteContentInput.value = '';
+                    currentNoteId = null;
+                    
+                    // Cambiar a la pestaña de todas las notas
+                    const allNotesTab = document.querySelector('.tab-button[data-tab="all"]');
+                    if (allNotesTab) allNotesTab.click();
+                    
+                } catch (error) {
+                    console.error('Error al guardar la nota:', error);
+                    // Mostrar mensaje de error
+                    await showConfirm('Ocurrió un error al guardar la nota. Por favor, inténtalo de nuevo.');
+                }
             }
             
             // Obtener referencia actual (puedes personalizar esto según tu aplicación)
@@ -2659,7 +2817,7 @@
             // Editar nota
             function editNote(e) {
                 e.stopPropagation();
-                const noteId = parseInt(this.getAttribute('data-id'));
+                const noteId = this.getAttribute('data-id');
                 const note = notes.find(n => n.id === noteId);
                 
                 if (note) {
@@ -2676,12 +2834,37 @@
             }
             
             // Eliminar nota
-            function deleteNote(e) {
-                e.stopPropagation();
-                if (confirm('¿Estás seguro de que quieres eliminar esta nota?')) {
-                    const noteId = parseInt(this.getAttribute('data-id'));
-                    notes = notes.filter(note => note.id !== noteId);
-                    saveNotes();
+            async function deleteNote(e) {
+                try {
+                    e.stopPropagation();
+                    const noteItem = e.target.closest('.note-item');
+                    if (!noteItem) {
+                        console.error('No se pudo encontrar el elemento de la nota');
+                        return;
+                    }
+                    
+                    const noteId = noteItem.dataset.id;
+                    console.log('Eliminando nota ID:', noteId);
+                    
+                    const confirmDelete = await showConfirm('¿Estás seguro de que quieres eliminar esta nota?');
+                    if (confirmDelete) {
+                        notes = notes.filter(note => note.id !== noteId);
+                        saveNotes();
+                        renderNotesList();
+                        
+                        // Si estábamos editando la nota que se eliminó, limpiar el formulario
+                        if (currentNoteId === noteId) {
+                            const noteTitleInput = document.getElementById('note-title');
+                            const noteContentInput = document.getElementById('note-content');
+                            if (noteTitleInput) noteTitleInput.value = '';
+                            if (noteContentInput) noteContentInput.value = '';
+                            currentNoteId = null;
+                        }
+                        
+                        console.log('Nota eliminada');
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar la nota:', error);
                 }
             }
             
@@ -2907,5 +3090,16 @@
             console.log('Sistema de notas cargado correctamente');
         });
     </script>
+    
+    <!-- Modal personalizado para confirmaciones -->
+    <div id="customConfirmModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <p id="customConfirmMessage">¿Estás seguro?</p>
+            <div class="custom-modal-buttons">
+                <button id="customConfirmCancel" class="custom-modal-button cancel">Cancelar</button>
+                <button id="customConfirmOk" class="custom-modal-button confirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
