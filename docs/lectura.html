@@ -2752,14 +2752,19 @@
                     localStorage.setItem('floating-btn-pos', JSON.stringify(initialPos));
                 }
                 
-                // Iniciar arrastre
-                element.onmousedown = function(e) {
-                    e = e || window.event;
+                // Función para iniciar arrastre
+                function startDrag(e) {
                     e.preventDefault();
                     
-                    // Obtener posición inicial del mouse
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
+                    // Obtener posición táctil o del mouse
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    if (!clientX || !clientY) return;
+                    
+                    // Obtener posición inicial
+                    mouseX = clientX;
+                    mouseY = clientY;
                     
                     // Obtener posición actual del elemento
                     posX = element.offsetLeft;
@@ -2768,20 +2773,34 @@
                     isDragging = true;
                     element.style.cursor = 'grabbing';
                     
+                    // Prevenir el scroll en dispositivos táctiles
+                    document.body.style.overflow = 'hidden';
+                    
                     // Agregar eventos de arrastre
-                    document.onmousemove = dragElement;
-                    document.onmouseup = stopDrag;
-                };
+                    document.addEventListener('mousemove', dragElement);
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchmove', dragElement, { passive: false });
+                    document.addEventListener('touchend', stopDrag);
+                }
+                
+                // Iniciar arrastre con mouse o toque
+                element.addEventListener('mousedown', startDrag);
+                element.addEventListener('touchstart', startDrag, { passive: false });
                 
                 // Función de arrastre
                 function dragElement(e) {
                     if (!isDragging) return;
-                    e = e || window.event;
                     e.preventDefault();
                     
+                    // Obtener posición táctil o del mouse
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    if (!clientX || !clientY) return;
+                    
                     // Calcular nueva posición
-                    const dx = e.clientX - mouseX;
-                    const dy = e.clientY - mouseY;
+                    const dx = clientX - mouseX;
+                    const dy = clientY - mouseY;
                     
                     // Calcular límites
                     const maxX = window.innerWidth - element.offsetWidth;
@@ -2806,10 +2825,17 @@
                 
                 // Detener arrastre
                 function stopDrag() {
+                    if (!isDragging) return;
+                    
                     isDragging = false;
                     element.style.cursor = 'grab';
-                    document.onmousemove = null;
-                    document.onmouseup = null;
+                    document.body.style.overflow = '';
+                    
+                    // Remover todos los listeners de arrastre
+                    document.removeEventListener('mousemove', dragElement);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchmove', dragElement);
+                    document.removeEventListener('touchend', stopDrag);
                 }
                 
                 // Guardar posición
