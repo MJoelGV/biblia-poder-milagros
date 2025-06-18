@@ -1,0 +1,144 @@
+/* Estilos para el menú lateral */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100%;
+    background: #2c3e50;
+    color: white;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+.menu-header {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-title {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.close-menu {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.close-menu:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.side-menu li {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.side-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.side-menu li a i {
+    margin-right: 10px;
+    width: 24px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.side-menu li a:hover,
+.side-menu li.active a {
+    background-color: #34495e;
+}
+
+/* Estilos para el botón de menú */
+.menu-toggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #3498db;
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.menu-toggle:hover {
+    transform: scale(1.05);
+    background-color: #2980b9;
+}
+
+/* Overlay cuando el menú está abierto */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 990;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Ajustes para el contenido principal */
+.main-content {
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+/* Estilos para pantallas pequeñas */
+@media (max-width: 768px) {
+    .side-menu {
+        width: 85%;
+        left: -85%;
+    }
+    
+    .menu-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+}

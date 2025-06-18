@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Días con Jesús - Plan de Estudio Bíblico</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="manifest" href="../manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            font-family: 'Great Vibes', cursive;
+            color: #2c3e50;
+            text-align: center;
+            margin: 20px 0 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 2.8em;
+        }
+        h2 {
+            font-size: 2em;
+            margin-top: 40px;
+        }
+        .welcome-text {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .progress-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        .progress-text {
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .day-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        .day-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .day-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .day-reference {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        .day-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #3498db;
+            color: #3498db;
+        }
+        .btn-outline:hover {
+            background: #3498db;
+            color: white;
+        }
+        .completed {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+        .current-day {
+            border: 2px solid #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+        .menu-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            background-color: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+        .side-menu a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 1.1em;
+            color: #ecf0f1;
+            display: block;
+            transition: 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .side-menu a:hover {
+            background-color: #34495e;
+            border-left: 3px solid #3498db;
+        }
+        .side-menu .close-menu {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 2em;
+            margin-left: 50px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .menu-header {
+            padding: 10px 15px;
+            color: white;
+            font-size: 1.2em;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .days-container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2.2em;
+                margin: 60px 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button class="close-menu" onclick="toggleMenu()">&times;</button>
+            <span>Menú</span>
+        </div>
+        <ul>
+            <li><a href="../index.html"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="../lectura.html"><i class="fas fa-bible"></i> Leer Biblia</a></li>
+            <li><a href="../pericopas-standalone.html"><i class="fas fa-book"></i> Perícopas</a></li>
+            <li><a href="../audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="../memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
+            <li><a href="../historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
+            <li><a href="../diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
+            <li><a href="../bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="../comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li class="active"><a href="index.html"><i class="fas fa-calendar-check"></i> Planes de Estudio</a></li>
+            <li><a href="../topics.html"><i class="fas fa-tags"></i> Temas</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        
+        <h1>30 Días con Jesús</h1>
+        
+        <p class="welcome-text">
+            Un viaje de un mes a través de los evangelios para conocer más a Jesús, sus enseñanzas, 
+            milagros y el impacto que tuvo en la vida de quienes lo conocieron. Tu progreso se guardará automáticamente.
+        </p>
+        
+        <div class="progress-container">
+            <h3>Tu Progreso</h3>
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0% Completado</div>
+            <button class="btn btn-outline" style="margin-top: 10px;" onclick="irAlDiaActual()">
+                Ir al día actual
+            </button>
+        </div>
+        
+        <h2>Plan de Lectura</h2>
+        <div class="days-container" id="days-container">
+            <!-- Los días se generarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Plan de estudio: 30 días con Jesús
+        const plan30Dias = [
+            { day: 1, title: "El Nacimiento de Jesús", reference: "Lucas 2:1-20", libro: "LUK", capitulo: "2", versiculo: "1" },
+            { day: 2, title: "El Bautismo de Jesús", reference: "Mateo 3:13-17", libro: "MAT", capitulo: "3", versiculo: "13" },
+            { day: 3, title: "Las Tentaciones en el Desierto", reference: "Mateo 4:1-11", libro: "MAT", capitulo: "4", versiculo: "1" },
+            { day: 4, title: "Las Bienaventuranzas", reference: "Mateo 5:1-12", libro: "MAT", capitulo: "5", versiculo: "1" },
+            { day: 5, title: "La Sal de la Tierra y la Luz del Mundo", reference: "Mateo 5:13-16", libro: "MAT", capitulo: "5", versiculo: "13" },
+            { day: 6, title: "El Sermón del Monte (Parte 1)", reference: "Mateo 5:17-48", libro: "MAT", capitulo: "5", versiculo: "17" },
+            { day: 7, title: "El Sermón del Monte (Parte 2)", reference: "Mateo 6:1-18", libro: "MAT", capitulo: "6", versiculo: "1" },
+            { day: 8, title: "No os Afanéis", reference: "Mateo 6:19-34", libro: "MAT", capitulo: "6", versiculo: "19" },
+            { day: 9, title: "Juzgar a los Demás", reference: "Mateo 7:1-14", libro: "MAT", capitulo: "7", versiculo: "1" },
+            { day: 10, title: "Los Falsos Profetas", reference: "Mateo 7:15-29", libro: "MAT", capitulo: "7", versiculo: "15" },
+            { day: 11, title: "La Pesca Milagrosa", reference: "Lucas 5:1-11", libro: "LUK", capitulo: "5", versiculo: "1" },
+            { day: 12, title: "El Paralítico Perdonado", reference: "Marcos 2:1-12", libro: "MRK", capitulo: "2", versiculo: "1" },
+            { day: 13, title: "La Elección de los Doce", reference: "Marcos 3:13-19", libro: "MRK", capitulo: "3", versiculo: "13" },
+            { day: 14, title: "El Sermón del Llano", reference: "Lucas 6:20-49", libro: "LUK", capitulo: "6", versiculo: "20" },
+            { day: 15, title: "La Fe del Centurión", reference: "Mateo 8:5-13", libro: "MAT", capitulo: "8", versiculo: "5" },
+            { day: 16, title: "La Tempestad Calmada", reference: "Marcos 4:35-41", libro: "MRK", capitulo: "4", versiculo: "35" },
+            { day: 17, title: "La Hija de Jairo y la Mujer con Flujo de Sangre", reference: "Marcos 5:21-43", libro: "MRK", capitulo: "5", versiculo: "21" },
+            { day: 18, title: "La Alimentación de los Cinco Mil", reference: "Juan 6:1-15", libro: "JHN", capitulo: "6", versiculo: "1" },
+            { day: 19, title: "Jesús Anda sobre el Mar", reference: "Mateo 14:22-33", libro: "MAT", capitulo: "14", versiculo: "22" },
+            { day: 20, title: "La Confesión de Pedro", reference: "Mateo 16:13-20", libro: "MAT", capitulo: "16", versiculo: "13" },
+            { day: 21, title: "La Transfiguración", reference: "Mateo 17:1-13", libro: "MAT", capitulo: "17", versiculo: "1" },
+            { day: 22, title: "El Hijo Pródigo", reference: "Lucas 15:11-32", libro: "LUK", capitulo: "15", versiculo: "11" },
+            { day: 23, title: "El Buen Samaritano", reference: "Lucas 10:25-37", libro: "LUK", capitulo: "10", versiculo: "25" },
+            { day: 24, title: "Lázaro Resucitado", reference: "Juan 11:1-44", libro: "JHN", capitulo: "11", versiculo: "1" },
+            { day: 25, title: "La Entrada Triunfal", reference: "Mateo 21:1-11", libro: "MAT", capitulo: "21", versiculo: "1" },
+            { day: 26, title: "La Última Cena", reference: "Mateo 26:17-30", libro: "MAT", capitulo: "26", versiculo: "17" },
+            { day: 27, title: "La Oración en el Huerto", reference: "Mateo 26:36-46", libro: "MAT", capitulo: "26", versiculo: "36" },
+            { day: 28, title: "La Crucifixión", reference: "Juan 19:16-30", libro: "JHN", capitulo: "19", versiculo: "16" },
+            { day: 29, title: "La Resurrección", reference: "Juan 20:1-18", libro: "JHN", capitulo: "20", versiculo: "1" },
+            { day: 30, title: "La Gran Comisión", reference: "Mateo 28:16-20", libro: "MAT", capitulo: "28", versiculo: "16" }
+        ];
+
+        // Cargar el progreso guardado
+        function loadProgress() {
+            const progress = JSON.parse(localStorage.getItem('plan30DiasProgress')) || [];
+            const today = new Date().toDateString();
+            
+            // Si es un nuevo día, marcar automáticamente el día actual
+            if (progress.lastVisit !== today) {
+                const currentDay = calcularDiaActual();
+                if (!progress.completedDays) {
+                    progress.completedDays = [];
+                }
+                if (!progress.completedDays.includes(currentDay)) {
+                    progress.completedDays.push(currentDay);
+                    saveProgress(progress);
+                }
+                progress.lastVisit = today;
+                saveProgress(progress);
+            }
+            
+            return progress.completedDays || [];
+        }
+
+        // Guardar el progreso
+        function saveProgress(progress) {
+            const progressData = {
+                completedDays: progress,
+                lastVisit: new Date().toDateString()
+            };
+            localStorage.setItem('plan30DiasProgress', JSON.stringify(progressData));
+            updateProgressBar();
+        }
+
+        // Calcular el día actual del plan (1-30)
+        function calcularDiaActual() {
+            const startDate = new Date();
+            startDate.setHours(0, 0, 0, 0);
+            
+            // Obtener el día del mes actual
+            const currentDay = startDate.getDate();
+            
+            // Calcular el día del plan (1-30) basado en el día del mes
+            let planDay = currentDay % 30;
+            if (planDay === 0) planDay = 30; // Asegurarse de que sea entre 1 y 30
+            
+            return planDay;
+        }
+
+        // Actualizar la barra de progreso
+        function updateProgressBar() {
+            const progress = loadProgress();
+            const totalDays = 30;
+            const completedDays = progress.length;
+            const progressPercentage = Math.round((completedDays / totalDays) * 100);
+            
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = `${progressPercentage}%`;
+                progressText.textContent = `${progressPercentage}% Completado (${completedDays} de ${totalDays} días)`;
+            }
+            
+            // Resaltar el día actual
+            const currentDay = calcularDiaActual();
+            document.querySelectorAll('.day-card').forEach(card => {
+                const dayNumber = parseInt(card.getAttribute('data-day'));
+                if (dayNumber === currentDay) {
+                    card.classList.add('current-day');
+                    // Desplazarse al día actual
+                    setTimeout(() => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 500);
+                } else {
+                    card.classList.remove('current-day');
+                }
+            });
+        }
+
+        // Alternar día completado
+        function toggleDiaCompletado(diaNumero, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const progress = loadProgress();
+            const index = progress.indexOf(diaNumero);
+            
+            if (index === -1) {
+                // Marcar como completado
+                progress.push(diaNumero);
+                // Ordenar los días completados
+                progress.sort((a, b) => a - b);
+                // Mostrar notificación
+                showNotification('¡Día marcado como completado!');
+            } else {
+                // Desmarcar
+                progress.splice(index, 1);
+            }
+            
+            saveProgress(progress);
+            renderDays();
+            
+            // Actualizar la clase de la tarjeta
+            const card = document.querySelector(`.day-card[data-day="${diaNumero}"]`);
+            if (card) {
+                if (index === -1) {
+                    card.classList.add('completed');
+                } else {
+                    card.classList.remove('completed');
+                }
+            }
+        }
+
+        // Mostrar notificación
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Estilo de la notificación
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '15px 30px';
+            notification.style.borderRadius = '5px';
+            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            notification.style.zIndex = '1000';
+            notification.style.transition = 'opacity 0.5s ease';
+            
+            // Desvanecer la notificación después de 3 segundos
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+        }
+
+        // Ir al día actual
+        function irAlDiaActual() {
+            const currentDay = calcularDiaActual();
+            const dayElement = document.querySelector(`.day-card[data-day="${currentDay}"]`);
+            if (dayElement) {
+                dayElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Resaltar el día actual brevemente
+                dayElement.style.animation = 'highlight 2s';
+                setTimeout(() => {
+                    dayElement.style.animation = '';
+                }, 2000);
+            }
+        }
+
+        // Mapeo de códigos de libro a nombres completos
+        const libroANombre = {
+            'MAT': 'Mateo', 'MRK': 'Marcos', 'LUK': 'Lucas', 'JHN': 'Juan', 'ACT': 'Hechos'
+        };
+
+        // Renderizar los días
+        function renderDays() {
+            const container = document.getElementById('days-container');
+            if (!container) return;
+            
+            const progress = loadProgress();
+            const currentDay = calcularDiaActual();
+            
+            container.innerHTML = '';
+            
+            plan30Dias.forEach(day => {
+                const isCompleted = progress.includes(day.day);
+                const isCurrentDay = day.day === currentDay;
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = `day-card ${isCompleted ? 'completed' : ''} ${isCurrentDay ? 'current-day' : ''}`;
+                dayElement.setAttribute('data-day', day.day);
+                
+                dayElement.innerHTML = `
+                    ${isCompleted ? '<div class="completed">✓</div>' : ''}
+                    <div class="day-number">Día ${day.day}</div>
+                    <div class="day-title">${day.title}</div>
+                    <div class="day-reference">${day.reference}</div>
+                    <div class="day-actions">
+                        <a href="#" class="btn btn-primary" 
+                           onclick="navegarAPasaje('${day.libro}', '${day.capitulo}', '${day.versiculo}')">
+                            Leer Pasaje
+                        </a>
+                        <button class="btn ${isCompleted ? 'btn-outline' : ''}" 
+                                onclick="toggleDiaCompletado(${day.day}, event)">
+                            ${isCompleted ? 'Completado ✓' : 'Marcar como Completado'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(dayElement);
+            });
+            
+            // Agregar animación de resaltado
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes highlight {
+                    0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+                    70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Función para manejar la navegación a un pasaje bíblico
+        function navegarAPasaje(book, chapter, verse = '') {
+            // Guardar la posición actual para poder volver
+            const returnUrl = window.location.pathname;
+            localStorage.setItem('returnToPlan', returnUrl);
+            
+            // Construir la URL de navegación
+            let url = `../lectura.html?libro=${book}&capitulo=${chapter}`;
+            if (verse) {
+                url += `&versiculo=${verse}`;
+            }
+            
+            // Navegar al pasaje
+            window.location.href = url;
+        }
+
+        // Función para alternar el menú
+        function toggleMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            const menuButton = document.querySelector('.menu-button');
+            
+            if (sideMenu.style.width === '250px') {
+                sideMenu.style.width = '0';
+                menuButton.innerHTML = '☰';
+            } else {
+                sideMenu.style.width = '250px';
+                menuButton.innerHTML = '✕';
+            }
+        }
+        
+        // Cerrar menú al hacer clic en un enlace
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.side-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    toggleMenu();
+                });
+            });
+            
+            // Cerrar menú al hacer clic fuera de él
+            document.addEventListener('click', (event) => {
+                const sideMenu = document.getElementById('side-menu');
+                const menuButton = document.querySelector('.menu-button');
+                
+                if (event.target !== menuButton && 
+                    !sideMenu.contains(event.target) && 
+                    !menuButton.contains(event.target)) {
+                    sideMenu.style.width = '0';
+                    menuButton.innerHTML = '☰';
+                }
+            });
+            
+            // Renderizar los días al cargar la página
+            renderDays();
+            
+            // Verificar si venimos de la página de lectura
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('from') === 'reading') {
+                // Mostrar notificación de bienvenida
+                showNotification('¡Bienvenido de vuelta al plan de estudio!');
+                
+                // Eliminar el parámetro de la URL sin recargar la página
+                const url = new URL(window.location);
+                url.searchParams.delete('from');
+                window.history.replaceState({}, '', url);
+            }
+            
+            // Si venimos de la página de lectura, volver al día actual
+            if (localStorage.getItem('returnToPlan')) {
+                localStorage.removeItem('returnToPlan');
+                // Desplazarse al día actual después de un breve retraso
+                setTimeout(irAlDiaActual, 500);
+            }
+        });
+    </script>
+</body>
+</html>

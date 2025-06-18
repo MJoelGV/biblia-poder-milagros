@@ -79,6 +79,19 @@
         </div>
     </div>
     <script>
+        // Configuración de rutas
+        const AUDIO_BASE_PATH = window.location.hostname === 'localhost' ? '' : '/biblia-poder-milagros';
+        
+        // Deshabilitar service worker temporalmente
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                    console.log('ServiceWorker unregistered');
+                }
+            });
+        }
+
         // Mapa de códigos a nombres completos global
         const bookDisplayNames = {
             'genesis': 'Génesis', 'exodus': 'Éxodo', 'lev': 'Levítico', 'num': 'Números', 'deu': 'Deuteronomio',
@@ -160,16 +173,27 @@
                     });
                     if (chapters.length > 0) {
                         const first = chapters[0];
-                        const num = first.file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${first.file}`);
+                        const num = first.file.match(/_\d+/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `${AUDIO_BASE_PATH}/audio/${first.file}`);
                     }
-                    chapterSelect.onchange = e => {
+                    
+                    // Guardar la función onchange en una variable para evitar duplicados
+                    if (chapterSelect._onchange) {
+                        chapterSelect.removeEventListener('change', chapterSelect._onchange);
+                    }
+                    
+                    const onChapterChange = (e) => {
                         const file = e.target.value;
+                        if (!file) return;
+                        
                         localStorage.setItem('audio-last-book', code);
                         localStorage.setItem('audio-last-file', file);
-                        const num = file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `audio/${file}`);
+                        const num = file.match(/_\d+/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `${AUDIO_BASE_PATH}/audio/${file}`);
                     };
+                    
+                    chapterSelect._onchange = onChapterChange;
+                    chapterSelect.addEventListener('change', onChapterChange);
                 };
                 // Auto-load last listened book and chapter
                 const lastBook = localStorage.getItem('audio-last-book');
@@ -197,13 +221,48 @@
             const chapters = Array.from(bookNode.getElementsByTagName('c'));
             const playlist = chapters.map(c => {
                 const chap = c.getAttribute('n');
-                return `audio/${encodeURIComponent(bookName)}-${chap}.mp3`;
+                // Usar el formato correcto de nombre de archivo: 1chron_01.mp3
+                const bookCode = getBookCode(bookName);
+                return `${AUDIO_BASE_PATH}/audio/${bookCode}_${chap.padStart(2, '0')}.mp3`;
             });
             trackIndex = 0;
             audioPlayer.style.display = '';
             audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
             document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            // Guardar la playlist actual para navegación
+            currentPlaylist = playlist;
+            currentTrackName = bookName;
+        }
+        
+        // Función auxiliar para obtener el código corto del libro
+        function getBookCode(bookName) {
+            // Mapeo de nombres de libros a códigos cortos
+            const bookMap = {
+                'Génesis': 'genesis', 'Éxodo': 'exodus', 'Levítico': 'lev', 'Números': 'num', 'Deuteronomio': 'deu',
+                'Josué': 'joshua', 'Jueces': 'judges', 'Rut': 'ruth', '1 Samuel': '1sam', '2 Samuel': '2sam',
+                '1 Reyes': '1kin', '2 Reyes': '2kin', '1 Crónicas': '1chron', '2 Crónicas': '2chron', 'Esdras': 'ezra',
+                'Nehemías': 'nehemiah', 'Ester': 'esther', 'Job': 'job', 'Salmos': 'psalm', 'Proverbios': 'proverbs',
+                'Eclesiastés': 'ecc', 'Cantares': 'song', 'Isaías': 'isaiah', 'Jeremías': 'jere', 'Lamentaciones': 'lam',
+                'Ezequiel': 'ezek', 'Daniel': 'dan', 'Oseas': 'hosea', 'Joel': 'joel', 'Amós': 'amos',
+                'Abdías': 'oba', 'Jonás': 'jonah', 'Miqueas': 'micah', 'Nahúm': 'nahum', 'Habacuc': 'habak',
+                'Sofonías': 'zeph', 'Hageo': 'haggai', 'Zacarías': 'zech', 'Malaquías': 'mal',
+                'Mateo': 'matt', 'Marcos': 'mark', 'Lucas': 'luke', 'Juan': 'john', 'Hechos': 'acts',
+                'Romanos': 'rom', '1 Corintios': '1cor', '2 Corintios': '2cor', 'Gálatas': 'gal', 'Efesios': 'eph',
+                'Filipenses': 'phi', 'Colosenses': 'col', '1 Tesalonicenses': '1the', '2 Tesalonicenses': '2the', '1 Timoteo': '1tim',
+                '2 Timoteo': '2tim', 'Tito': 'titus', 'Filemón': 'phil', 'Hebreos': 'heb', 'Santiago': 'jam',
+                '1 Pedro': '1pet', '2 Pedro': '2pet', '1 Juan': '1joh', '2 Juan': '2joh', '3 Juan': '3joh',
+                'Judas': 'jude', 'Apocalipsis': 'rev'
+            };
+            
+            // Buscar el código del libro
+            for (const [name, code] of Object.entries(bookMap)) {
+                if (name === bookName) {
+                    return code;
+                }
+            }
+            return bookName.toLowerCase();
         }
 
         function playCustom(name, src) {
@@ -211,18 +270,29 @@
             // Construir playlist completo del libro
             const fileName = src.split('/').pop();
             const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            
+            // Filtrar y ordenar los capítulos del libro
             const chapters = manifestData
-                .filter(item => item.file.startsWith(code + '_'))
-                .sort((a,b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-            playlist = chapters.map(item => `audio/${item.file}`);
+                .filter(item => item.name === code.toLowerCase())
+                .sort((a, b) => {
+                    const numA = parseInt(a.file.match(/_\d+/)[0].substring(1));
+                    const numB = parseInt(b.file.match(/_\d+/)[0].substring(1));
+                    return numA - numB;
+                });
+                
+            // Crear la lista de reproducción con las rutas correctas
+            playlist = chapters.map(item => `${AUDIO_BASE_PATH}/audio/${item.file}`);
             trackIndex = playlist.indexOf(src);
+            
             // Mostrar y reproducir en cadena
             document.getElementById('now-playing').textContent = 'Escuchando ' + name;
             document.getElementById('player-controls').style.display = 'flex';
-            audioPlayer.style.display = 'block';
+            audioPlayer.style.display = '';
             audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
             document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            currentPlaylist = playlist;
+            currentTrackName = name;
         }
 
         // Función para reproducir track y actualizar indicador
@@ -280,12 +350,30 @@
             return `${m}:${s}`;
         }
         audioPlayer.addEventListener('loadedmetadata', () => {
-            seekSlider.max = audioPlayer.duration;
-            durationEl.textContent = formatTime(audioPlayer.duration);
-            // Restore saved position
-            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
-            const saved = localStorage.getItem(key);
-            if (saved) audioPlayer.currentTime = parseFloat(saved);
+            if (isFinite(audioPlayer.duration) && !isNaN(audioPlayer.duration)) {
+                seekSlider.max = Math.floor(audioPlayer.duration);
+                durationEl.textContent = formatTime(audioPlayer.duration);
+                // Restore saved position
+                const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const time = parseFloat(saved);
+                    if (!isNaN(time)) {
+                        audioPlayer.currentTime = Math.min(time, audioPlayer.duration - 1);
+                    }
+                }
+            } else {
+                console.error('No se pudo cargar la duración del audio:', audioPlayer.src);
+                durationEl.textContent = '0:00';
+            }
+        });
+        
+        // Manejar errores de carga de audio
+        audioPlayer.addEventListener('error', (e) => {
+            console.error('Error al cargar el audio:', e);
+            console.error('Código de error:', audioPlayer.error ? audioPlayer.error.code : 'desconocido');
+            console.error('Ruta del audio:', audioPlayer.src);
+            alert('Error al cargar el audio. Por favor, verifica la consola para más detalles.');
         });
         audioPlayer.addEventListener('timeupdate', () => {
             seekSlider.value = audioPlayer.currentTime;
