@@ -148,89 +148,6 @@
             }
         }
     </style>
-    <style>
-        /* Estilos para el menú lateral */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100%;
-            background: #2c3e50;
-            color: white;
-            transition: left 0.3s ease;
-            z-index: 1000;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-            overflow-y: auto;
-        }
-        .side-menu.active {
-            left: 0;
-        }
-        .menu-header {
-            padding: 20px;
-            display: flex;
-            justify-content: flex-end;
-            background: #1a252f;
-        }
-        .close-menu {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .side-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .side-menu li {
-            padding: 0;
-        }
-        .side-menu a {
-            display: block;
-            padding: 15px 25px;
-            color: #ecf0f1;
-            text-decoration: none;
-            transition: background 0.3s;
-            border-bottom: 1px solid #34495e;
-        }
-        .side-menu a:hover, .side-menu li.active a {
-            background: #34495e;
-            color: #3498db;
-        }
-        .side-menu i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1001;
-            font-size: 18px;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }
-        .overlay.active {
-            display: block;
-        }
-    </style>
 </head>
 <body>
     <!-- Menú lateral -->
@@ -239,29 +156,23 @@
             <button class="close-menu" onclick="toggleMenu()">&times;</button>
         </div>
         <ul>
-            <li><a href="index.html"><i class="fas fa-home"></i> Página principal</a></li>
-            <li><a href="lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
-            <li><a href="pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
-            <li><a href="audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
-            <li><a href="memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
-            <li><a href="historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
-            <li><a href="diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
-            <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
-            <li><a href="comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
-            <li class="active"><a href="30-dias-con-jesus.html"><i class="fas fa-calendar-check"></i> 30 Días con Jesús</a></li>
-            <li><a href="topics.html"><i class="fas fa-tags"></i> Temas</a></li>
+            <li><a href="../index.html"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="../lectura.html"><i class="fas fa-bible"></i> Leer Biblia</a></li>
+            <li><a href="../pericopas-standalone.html"><i class="fas fa-book"></i> Perícopas</a></li>
+            <li><a href="../audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="../memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
+            <li><a href="../historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
+            <li><a href="../diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
+            <li><a href="../bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="../comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li class="active"><a href="index.html"><i class="fas fa-calendar-check"></i> Planes de Estudio</a></li>
+            <li><a href="../topics.html"><i class="fas fa-tags"></i> Temas</a></li>
         </ul>
     </div>
-    
-    <!-- Botón para abrir el menú -->
-    <button class="menu-toggle" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-    
-    <!-- Overlay para cerrar el menú -->
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="container">
+        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        
         <h1>Planes de Estudio Bíblico</h1>
         
         <p class="welcome-text">
@@ -291,7 +202,7 @@
             
             <!-- Plan: Biblia en un Año (Próximamente) -->
             <div class="plan-card">
-                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
                 </div>
                 <div class="plan-content">
                     <h3 class="plan-title">Biblia en un Año</h3>
@@ -330,35 +241,20 @@
     </div>
 
     <script>
-        // Función para alternar el menú
+        // Función para el menú lateral
         function toggleMenu() {
             const sideMenu = document.getElementById('side-menu');
-            const overlay = document.getElementById('overlay');
-            
-            sideMenu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Prevenir el desplazamiento del cuerpo cuando el menú está abierto
-            document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
+            sideMenu.style.width = sideMenu.style.width === '250px' ? '0' : '250px';
         }
-        
-        // Cerrar el menú al hacer clic fuera de él
+
+        // Cerrar menú al hacer clic fuera de él
         document.addEventListener('click', function(event) {
             const sideMenu = document.getElementById('side-menu');
-            const menuButton = document.querySelector('.menu-toggle');
+            const menuButton = document.querySelector('.menu-button');
             
-            if (!sideMenu.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
-                sideMenu.classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-                document.body.style.overflow = '';
+            if (event.target !== menuButton && !sideMenu.contains(event.target) && !menuButton.contains(event.target)) {
+                sideMenu.style.width = '0';
             }
-        });
-
-        // Cerrar el menú al hacer clic en un enlace
-        document.querySelectorAll('.side-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                toggleMenu();
-            });
         });
     </script>
 </body>
