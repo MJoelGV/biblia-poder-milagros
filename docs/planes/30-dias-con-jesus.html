@@ -331,17 +331,12 @@
             <button class="close-menu" onclick="toggleMenu()">&times;</button>
         </div>
         <ul>
-            <li><a href="/biblia-poder-milagros/index.html"><i class="fas fa-home"></i> Página principal</a></li>
-            <li><a href="/biblia-poder-milagros/lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
-            <li><a href="/biblia-poder-milagros/pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
-            <li><a href="/biblia-poder-milagros/audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
-            <li><a href="/biblia-poder-milagros/memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
-            <li><a href="/biblia-poder-milagros/historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
-            <li><a href="/biblia-poder-milagros/diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
-            <li><a href="/biblia-poder-milagros/bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
-            <li><a href="/biblia-poder-milagros/comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
-            <li class="active"><a href="/biblia-poder-milagros/planes/30-dias-con-jesus.html"><i class="fas fa-calendar-check"></i> 30 Días con Jesús</a></li>
-            <li><a href="/biblia-poder-milagros/topics.html"><i class="fas fa-tags"></i> Temas</a></li>
+            <li><a href="../index.html"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="../lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
+            <li><a href="../pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas</a></li>
+            <li><a href="../audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="30-dias-con-jesus.html" class="active"><i class="fas fa-calendar-check"></i> 30 Días con Jesús</a></li>
+            <li><a href="biblia-anual.html"><i class="fas fa-bible"></i> Plan Anual</a></li>
         </ul>
     </div>
     
@@ -605,7 +600,7 @@
         // Función para manejar la navegación a un pasaje bíblico
         function navegarAPasaje(book, chapter, verse = '') {
             // Construir la URL con los parámetros
-            let url = `/biblia-poder-milagros/lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}`;
+            let url = `../lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}`;
             
             // Agregar el versículo si está definido
             if (verse) {
