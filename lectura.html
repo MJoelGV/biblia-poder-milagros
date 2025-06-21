@@ -1807,6 +1807,13 @@
         window.addEventListener('load', () => {
             annotateStrongNumbers();
             applySavedStates();
+            
+            // Cargar notas guardadas al iniciar
+            const savedNotes = localStorage.getItem('bible_notes');
+            if (savedNotes) {
+                notes = JSON.parse(savedNotes);
+                renderNotesList();
+            }
         });
     </script>
     <script>
@@ -2041,8 +2048,64 @@
             if (window.initPericopesInterface) window.initPericopesInterface = function() {};
             if (window.showPericopes) window.showPericopes = function() {};
             
-            // Inicializar cuando se carga la página
-            window.addEventListener('DOMContentLoaded', function() {
+            // Variables globales para los elementos del formulario
+            let noteTitle, noteContent;
+            
+            // Cargar borrador de nota si existe
+            function loadDraftNote() {
+                // Asegurarse de que los elementos del formulario estén disponibles
+                noteTitle = document.getElementById('note-title');
+                noteContent = document.getElementById('note-content');
+                
+                if (!noteTitle || !noteContent) {
+                    console.error('No se encontraron los elementos del formulario de notas');
+                    return;
+                }
+                
+                const draft = localStorage.getItem('bible-note-draft');
+                if (draft) {
+                    try {
+                        const { title, content } = JSON.parse(draft);
+                        noteTitle.value = title || '';
+                        noteContent.value = content || '';
+                    } catch (e) {
+                        console.error('Error al cargar el borrador de la nota:', e);
+                        localStorage.removeItem('bible-note-draft'); // Limpiar borrador corrupto
+                    }
+                }
+            }
+            
+            // Guardar borrador de nota
+            function saveDraftNote() {
+                try {
+                    // Asegurarse de que los elementos del formulario estén disponibles
+                    if (!noteTitle) noteTitle = document.getElementById('note-title');
+                    if (!noteContent) noteContent = document.getElementById('note-content');
+                    
+                    if (noteTitle && noteContent) {
+                        const draft = {
+                            title: noteTitle.value || '',
+                            content: noteContent.value || ''
+                        };
+                        localStorage.setItem('bible-note-draft', JSON.stringify(draft));
+                    }
+                } catch (e) {
+                    console.error('Error al guardar el borrador de la nota:', e);
+                }
+            }
+            
+            // Inicializar el sistema de notas
+            document.addEventListener('DOMContentLoaded', function() {
+                // Cargar borrador al iniciar
+                loadDraftNote();
+                
+                // Guardar borrador cada vez que se escriba en los campos
+                if (noteTitle) {
+                    noteTitle.addEventListener('input', saveDraftNote);
+                }
+                if (noteContent) {
+                    noteContent.addEventListener('input', saveDraftNote);
+                }
                 console.log('Inicializando perícopas 100% en español');
                 
                 // Procesar parámetros de URL para navegación directa
@@ -2655,6 +2718,16 @@
             // Variables para el sistema de notas
             let currentNoteId = null; // Variable para rastrear la nota que se está editando
             let notes = JSON.parse(localStorage.getItem('bible-notes')) || [];
+            const DRAFT_NOTE_KEY = 'bible-note-draft';
+            
+            // Limpiar borrador de nota
+            function clearDraftNote() {
+                try {
+                    localStorage.removeItem(DRAFT_NOTE_KEY);
+                } catch (e) {
+                    console.error('Error al limpiar el borrador de la nota:', e);
+                }
+            }
             
             // Mostrar/ocultar panel de notas
             function toggleNotesPanel() {
@@ -2688,26 +2761,35 @@
             
             // Guardar nota
             async function saveNote() {
-                const noteTitleInput = document.getElementById('note-title');
-                const noteContentInput = document.getElementById('note-content');
+                // Asegurarse de que tenemos referencias a los elementos del formulario
+                if (!noteTitle) noteTitle = document.getElementById('note-title');
+                if (!noteContent) noteContent = document.getElementById('note-content');
                 
                 // Verificar que los elementos del formulario existan
-                if (!noteTitleInput || !noteContentInput) {
+                if (!noteTitle || !noteContent) {
                     console.error('Error: No se encontraron los campos del formulario de notas');
+                    showNotification('Error: No se pudo acceder al formulario de notas');
                     return;
                 }
                 
-                const title = noteTitleInput.value.trim() || 'Nota sin título';
-                const content = noteContentInput.value.trim();
-                const reference = getCurrentReference();
+                const title = noteTitle.value.trim() || 'Nota sin título';
+                const content = noteContent.value.trim();
+                let reference;
+                
+                try {
+                    reference = getCurrentReference();
+                } catch (error) {
+                    console.error('Error al obtener la referencia:', error);
+                    reference = 'Referencia no disponible';
+                }
+                
                 const now = new Date().toISOString();
                 
                 console.log('Guardando nota:', { title, content, reference, currentNoteId });
                 
                 // Validar contenido
                 if (!content) {
-                    // Usar showConfirm para mostrar el mensaje
-                    await showConfirm('Por favor ingresa el contenido de la nota');
+                    showNotification('Por favor ingresa el contenido de la nota');
                     return;
                 }
                 
@@ -2723,51 +2805,181 @@
                                 updatedAt: now
                             };
                             console.log('Nota actualizada:', notes[index]);
-                            
-                            // Mostrar confirmación de actualización
-                            await showConfirm('Nota actualizada correctamente');
                         }
                     } else {
                         // Crear nueva nota
-                        const note = {
-                            id: Date.now().toString(),
+                        const newNote = {
+                            id: Date.now(),
                             title,
                             content,
                             reference,
                             createdAt: now,
                             updatedAt: now
                         };
-                        notes.unshift(note);
-                        console.log('Nueva nota creada:', note);
-                        
-                        // Mostrar confirmación de creación
-                        await showConfirm('Nota guardada correctamente');
+                        notes.unshift(newNote);
+                        console.log('Nueva nota creada:', newNote);
                     }
                     
-                    // Guardar cambios
+                    // Guardar en localStorage
                     saveNotes();
-                    renderNotesList();
                     
-                    // Limpiar formulario
-                    noteTitleInput.value = '';
-                    noteContentInput.value = '';
+                    // Mostrar mensaje de éxito
+                    showNotification('Nota guardada correctamente');
+                    
+                    // Limpiar formulario y borrador
+                    noteTitle.value = '';
+                    noteContent.value = '';
                     currentNoteId = null;
+                    clearDraftNote(); // Limpiar el borrador guardado
                     
                     // Cambiar a la pestaña de todas las notas
-                    const allNotesTab = document.querySelector('.tab-button[data-tab="all"]');
+                    const allNotesTab = document.querySelector('.tab-btn[data-tab="all-notes"]');
                     if (allNotesTab) allNotesTab.click();
                     
                 } catch (error) {
                     console.error('Error al guardar la nota:', error);
-                    // Mostrar mensaje de error
-                    await showConfirm('Ocurrió un error al guardar la nota. Por favor, inténtalo de nuevo.');
+                    showNotification('Error al guardar la nota. Por favor, inténtalo de nuevo.');
                 }
             }
             
-            // Obtener referencia actual (puedes personalizar esto según tu aplicación)
+            // Obtener referencia actual
             function getCurrentReference() {
-                // Implementa la lógica para obtener la referencia bíblica actual
-                return 'Génesis 1:1';
+                try {
+                    // Intenta obtener la referencia actual de la página
+                    const referenceElement = document.querySelector('.current-reference');
+                    if (referenceElement) {
+                        return referenceElement.textContent.trim() || 'Referencia no disponible';
+                    }
+                    
+                    // Si no se encuentra un elemento con la clase current-reference,
+                    // intenta obtener la referencia del título de la página
+                    const titleElement = document.querySelector('h1, h2, h3');
+                    if (titleElement) {
+                        return titleElement.textContent.trim() || 'Referencia no disponible';
+                    }
+                    
+                    // Si no se puede determinar la referencia, devolver un valor por defecto
+                    return 'Referencia no disponible';
+                } catch (error) {
+                    console.error('Error al obtener la referencia actual:', error);
+                    return 'Referencia no disponible';
+                }
+            }
+            
+            // Función para mostrar diálogo de confirmación
+            function showConfirm(message) {
+                return new Promise((resolve) => {
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 2000;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        max-width: 80%;
+                        text-align: center;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                    `;
+                    
+                    const messageEl = document.createElement('p');
+                    messageEl.textContent = message;
+                    messageEl.style.marginBottom = '20px';
+                    
+                    const buttonsContainer = document.createElement('div');
+                    buttonsContainer.style.display = 'flex';
+                    buttonsContainer.style.justifyContent = 'center';
+                    buttonsContainer.style.gap = '10px';
+                    
+                    const confirmButton = document.createElement('button');
+                    confirmButton.textContent = 'Sí';
+                    confirmButton.style.padding = '8px 20px';
+                    confirmButton.style.background = '#4CAF50';
+                    confirmButton.style.color = 'white';
+                    confirmButton.style.border = 'none';
+                    confirmButton.style.borderRadius = '4px';
+                    confirmButton.style.cursor = 'pointer';
+                    
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'No';
+                    cancelButton.style.padding = '8px 20px';
+                    cancelButton.style.background = '#f44336';
+                    cancelButton.style.color = 'white';
+                    cancelButton.style.border = 'none';
+                    cancelButton.style.borderRadius = '4px';
+                    cancelButton.style.cursor = 'pointer';
+                    
+                    confirmButton.onclick = () => {
+                        document.body.removeChild(modal);
+                        resolve(true);
+                    };
+                    
+                    cancelButton.onclick = () => {
+                        document.body.removeChild(modal);
+                        resolve(false);
+                    };
+                    
+                    buttonsContainer.appendChild(confirmButton);
+                    buttonsContainer.appendChild(cancelButton);
+                    
+                    modalContent.appendChild(messageEl);
+                    modalContent.appendChild(buttonsContainer);
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                });
+            }
+            
+            // Función para mostrar notificaciones
+            function showNotification(message, duration = 3000) {
+                // Crear el elemento de notificación si no existe
+                let notification = document.getElementById('notification-toast');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.id = 'notification-toast';
+                    notification.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background-color: #4CAF50;
+                        color: white;
+                        padding: 12px 24px;
+                        border-radius: 4px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 1000;
+                        opacity: 0;
+                        transition: opacity 0.3s ease-in-out;
+                        max-width: 90%;
+                        text-align: center;
+                    `;
+                    document.body.appendChild(notification);
+                }
+                
+                // Establecer el mensaje
+                notification.textContent = message;
+                
+                // Mostrar la notificación
+                notification.style.opacity = '1';
+                
+                // Ocultar después de la duración especificada
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    // Eliminar después de la animación
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, duration);
             }
             
             // Guardar notas en localStorage
@@ -2843,25 +3055,26 @@
                         return;
                     }
                     
-                    const noteId = noteItem.dataset.id;
-                    console.log('Eliminando nota ID:', noteId);
+                    // Asegurarse de que el ID sea un número para comparación correcta
+                    const noteId = parseInt(noteItem.dataset.id);
+                    console.log('Eliminando nota ID:', noteId, 'Tipo:', typeof noteId);
                     
                     const confirmDelete = await showConfirm('¿Estás seguro de que quieres eliminar esta nota?');
                     if (confirmDelete) {
+                        // Convertir el ID a número para la comparación
                         notes = notes.filter(note => note.id !== noteId);
                         saveNotes();
                         renderNotesList();
                         
                         // Si estábamos editando la nota que se eliminó, limpiar el formulario
                         if (currentNoteId === noteId) {
-                            const noteTitleInput = document.getElementById('note-title');
-                            const noteContentInput = document.getElementById('note-content');
-                            if (noteTitleInput) noteTitleInput.value = '';
-                            if (noteContentInput) noteContentInput.value = '';
+                            if (noteTitle) noteTitle.value = '';
+                            if (noteContent) noteContent.value = '';
                             currentNoteId = null;
                         }
                         
-                        console.log('Nota eliminada');
+                        console.log('Nota eliminada. Notas restantes:', notes);
+                        showNotification('Nota eliminada correctamente');
                     }
                 } catch (error) {
                     console.error('Error al eliminar la nota:', error);
