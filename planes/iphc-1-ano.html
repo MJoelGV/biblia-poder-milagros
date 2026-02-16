@@ -154,52 +154,11 @@
             transform: translateY(-2px);
         }
         .day.completed {
-            background-color: #4CAF50;
+            background-color: #2ecc71;
             color: white;
-        }
-        
-        /* Estilo para el día actual */
-        .day.today {
-            position: relative;
-            border: 2px solid #ff6b6b;
             font-weight: bold;
-            transform: scale(1.1);
-            z-index: 1;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-        }
-        
-        /* Efecto de resaltado para el día actual */
-        .today-highlight {
-            animation: highlight-pulse 2s infinite;
-        }
-        
-        @keyframes highlight-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-        }
-        
-        /* Estilo para el indicador 'Hoy' */
-        .today-indicator {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #ff6b6b;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        /* Asegurar que el día tenga posición relativa para el indicador absoluto */
-        .day {
             position: relative;
+            overflow: hidden;
         }
         
         /* Efecto de resaltado al marcar como completado */
@@ -1171,10 +1130,6 @@
             const firstDay = new Date(currentYear, monthData.month - 1, 1).getDay();
             const monthIndex = readingPlan.findIndex(m => m.month === monthData.month) + 1;
             const days = [];
-            const today = new Date();
-            const currentDayOfMonth = today.getDate();
-            const currentMonth = today.getMonth() + 1; // Los meses van de 0 a 11
-            let todayId = null;
             
             // Días en blanco al inicio
             for (let i = 0; i < firstDay; i++) {
@@ -1188,26 +1143,19 @@
                 const dateKey = `${currentYear}-${monthIndex.toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
                 const completedDays = JSON.parse(localStorage.getItem('completedDays') || '{}');
                 const isCompleted = !!completedDays[dateKey];
-                const isToday = (i === currentDayOfMonth && monthIndex === currentMonth && currentYear === today.getFullYear());
-                const dayId = `day-${monthIndex}-${i}`;
-                
-                if (isToday) {
-                    todayId = dayId;
-                }
                 
                 days.push(`
-                    <div id="${dayId}" class="day ${hasReadings ? 'has-readings' : ''} ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}" 
+                    <div class="day ${hasReadings ? 'has-readings' : ''} ${isCompleted ? 'completed' : ''}" 
                          data-day="${i}" 
                          data-month="${monthIndex}"
-                         title="${hasReadings ? (isToday ? 'Hoy - ' + dayData : dayData) : 'No hay lecturas'}"
+                         title="${hasReadings ? dayData : 'No hay lecturas'}"
                          onclick="openDayReadings(${i}, ${monthIndex}, ${currentYear})">
                         ${i}
-                        ${isToday ? '<span class="today-indicator">Hoy</span>' : ''}
                     </div>
                 `);
             }
             
-            return { html: days.join(''), todayId: todayId };
+            return days.join('');
         }
 
         // Función para renderizar los meses
@@ -1215,25 +1163,16 @@
             const container = document.getElementById('months-container');
             container.innerHTML = '';
             
-            // Variable para guardar el ID del día actual para hacer scroll después
-            let todayElementId = null;
-            
             readingPlan.forEach((month, monthIndex) => {
                 const monthCard = document.createElement('div');
                 monthCard.className = 'month-card';
-                monthCard.id = `month-${monthIndex + 1}`;
                 monthCard.setAttribute('data-month', month.month);
                 
                 // Calcular progreso del mes
                 const progress = Math.round(((month.completed || 0) / month.days) * 100);
                 
                 // Generar el HTML de los días
-                const { html: daysHtml, todayId } = renderDays(month);
-                
-                // Si este mes contiene el día actual, guardar la referencia
-                if (todayId) {
-                    todayElementId = todayId;
-                }
+                const daysHtml = renderDays(month);
                 
                 monthCard.innerHTML = `
                     <div class="month-header">
@@ -1242,39 +1181,17 @@
                             <span class="month-progress-text">${month.completed || 0}/${month.days} días</span>
                             <div class="progress-bar month-progress-bar" style="width: ${progress}%" 
                                  title="Completado: ${month.completed || 0} de ${month.days} días (${progress}%)">
+                                <span class="progress-text">${progress}%</span>
                             </div>
                         </div>
                     </div>
                     <div class="days-grid">
-                        <div class="day-header">D</div>
-                        <div class="day-header">L</div>
-                        <div class="day-header">M</div>
-                        <div class="day-header">M</div>
-                        <div class="day-header">J</div>
-                        <div class="day-header">V</div>
-                        <div class="day-header">S</div>
                         ${daysHtml}
                     </div>
                 `;
                 
                 container.appendChild(monthCard);
             });
-            
-            // Después de renderizar todo, hacer scroll al día actual si existe
-            if (todayElementId) {
-                setTimeout(() => {
-                    const todayElement = document.getElementById(todayElementId);
-                    if (todayElement) {
-                        todayElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'nearest'
-                        });
-                        // Resaltar el día actual
-                        todayElement.classList.add('today-highlight');
-                    }
-                }, 100);
-            }
         }
 
         // Función para verificar si una fecha es hoy
@@ -1400,8 +1317,7 @@
             readingList.innerHTML = '';
             
             // Obtener las lecturas del día
-            // Usar el índice del mes (1-12) en lugar del nombre del mes
-            const dayReadings = getDayReadings(day, month);
+            const dayReadings = getDayReadings(day, monthName);
             
             if (dayReadings && dayReadings.length > 0) {
                 dayReadings.forEach((reading, index) => {
@@ -1455,85 +1371,43 @@
                     
                     link.textContent = displayText;
                     
-                    // Función auxiliar para extraer libro, capítulo y versículo de una referencia
+                    // Función auxiliar para extraer libro y capítulo de una referencia
                     function parseReference(ref) {
-                        console.log('Analizando referencia:', ref);
-                        
-                        // Patrón para referencias con formato: Libro C:V o Libro C:V-V o Libro C-C
-                        const pattern = /^(\d?\s*[\p{L}\s]+?)\s+(\d+)(?::(\d+)(?:-(\d+)?)?)?/u;
-                        const match = ref.match(pattern);
-                        
+                        // Primero intentar con el formato estándar
+                        let match = ref.match(/^(\d?\s*[\w\s]+?)\s*(\d+)(?::(\d+)(?:-(\d+))?)?/);
                         if (match) {
-                            console.log('Coincidencia encontrada:', match);
-                            const book = match[1].trim();
-                            const chapter = match[2];
-                            const verse = match[3] || ''; // Versículo opcional
-                            
-                            const result = { 
-                                book: book, 
-                                chapter: chapter,
-                                verse: verse,
-                                isRange: !!match[4] // Es un rango si hay un cuarto grupo
-                            };
-                            
-                            console.log('Resultado del análisis:', result);
-                            return result;
+                            let [, book, chapter] = match;
+                            return { book: book.trim(), chapter };
                         }
-                        
+                        // Si no coincide, intentar con otros formatos
+                        match = ref.match(/^([\w\s]+?)\s+(\d+)/);
+                        if (match) {
+                            let [, book, chapter] = match;
+                            return { book: book.trim(), chapter };
+                        }
                         return null;
                     }
 
                     // Manejar clic en la referencia bíblica
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
-                        console.log('Clic en referencia:', cleanReading);
                         
-                        // Intentar analizar la referencia completa
+                        // Primero intentar con la referencia completa
                         let refInfo = parseReference(cleanReading);
                         
-                        // Si no se pudo analizar, intentar con la primera parte antes de una coma
-                        if (!refInfo && cleanReading.includes(',')) {
-                            console.log('Intentando con la primera parte antes de la coma');
+                        // Si no se pudo analizar, intentar dividir por comas
+                        if (!refInfo) {
                             const firstPart = cleanReading.split(',')[0].trim();
                             refInfo = parseReference(firstPart);
                         }
                         
-                        // Si aún no se pudo, intentar con la primera palabra que parezca un libro
-                        if (!refInfo) {
-                            console.log('Usando estrategia de respaldo');
-                            const words = cleanReading.split(/\s+/);
-                            if (words.length > 1) {
-                                // Si hay al menos dos palabras, usar la primera como libro y la segunda como capítulo
-                                const book = words[0];
-                                const chapter = words[1].replace(/[^0-9]/g, ''); // Solo números
-                                refInfo = {
-                                    book: book,
-                                    chapter: chapter || '1',
-                                    isRange: false
-                                };
-                            } else if (words.length > 0) {
-                                // Si solo hay una palabra, usarla como libro
-                                refInfo = {
-                                    book: words[0],
-                                    chapter: '1',
-                                    isRange: false
-                                };
-                            }
-                        }
-                        
                         if (refInfo) {
-                            console.log('Navegando a:', refInfo);
-                            let url = `../lectura.html?book=${encodeURIComponent(refInfo.book)}&chapter=${refInfo.chapter}`;
-                            
-                            // Agregar versículo a la URL si está presente
-                            if (refInfo.verse) {
-                                url += `&verse=${refInfo.verse}`;
-                            }
-                            
-                            console.log('URL generada:', url);
-                            window.location.href = url; // Navegar en la misma pestaña
+                            // Construir URL con el formato correcto: book=Nombre&chapter=XX
+                            const url = `../lectura.html?book=${encodeURIComponent(refInfo.book)}&chapter=${refInfo.chapter}`;
+                            window.location.href = url;
                         } else {
-                            console.error('No se pudo analizar la referencia:', cleanReading);
+                            // Si no se pudo analizar, hacer una búsqueda simple
+                            window.location.href = `../lectura.html?buscar=${encodeURIComponent(cleanReading)}`;
                         }
                     });
                     
@@ -1569,13 +1443,8 @@
         
         // Función para obtener las lecturas de un día específico
         function getDayReadings(day, month) {
-            // Obtener el nombre del mes basado en el número (1-12)
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const monthName = monthNames[month - 1];
-            
             // Encontrar el mes correspondiente
-            const monthData = readingPlan.find(m => m.month === monthName);
+            const monthData = readingPlan.find(m => m.month === month);
             if (!monthData || !monthData.readings) return [];
             
             // Obtener las lecturas del día específico (el índice es day-1 porque los arrays son base 0)
@@ -1583,14 +1452,8 @@
             if (dayIndex >= 0 && dayIndex < monthData.readings.length) {
                 // Si hay lecturas para este día, devolverlas como un array
                 const dailyReadings = monthData.readings[dayIndex];
-                // Si dailyReadings es una cadena, dividirla por comas o saltos de línea para crear un array
-                if (typeof dailyReadings === 'string') {
-                    // Primero intentar dividir por comas, luego por saltos de línea y aplanar el resultado
-                    return dailyReadings.split(',')
-                                      .map(r => r.trim())
-                                      .filter(Boolean);
-                }
-                return [];
+                // Si dailyReadings es una cadena, dividirla por saltos de línea para crear un array
+                return typeof dailyReadings === 'string' ? dailyReadings.split('\n').filter(Boolean) : [];
             }
             
             return [];
