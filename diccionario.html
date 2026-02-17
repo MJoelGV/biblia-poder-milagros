@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionario Bíblico - Biblia de Poder y Milagros</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --nav-bg: rgba(248, 248, 248, 0.95);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #1a1a1a;
+            --nav-bg: rgba(42, 42, 42, 0.95);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s;
+        }
+
+        .header {
+            background: var(--nav-bg);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            transition: transform 0.3s;
+        }
+
+        .home-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 600px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .termino {
+            background: var(--bg-color);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .termino:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .palabra {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .definicion {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .referencias {
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        .ref {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 4px 8px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .ref:hover {
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .alphabet-nav {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: var(--nav-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: 85%;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .alphabet-toggle-btn {
+            background: var(--bg-color);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .alphabet-toggle-btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .letter-btn {
+            background: var(--bg-color);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .letter-btn:hover, .letter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .letter-section {
+            margin: 20px 0;
+            padding-top: 20px;
+            border-top: 2px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .letter-heading {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Menú lateral */
+        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: var(--bg-color); box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
+        .side-menu.active { left: 0; }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle { background: none; border: none; font-size: 24px; color: var(--primary-color); cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+
+        /* Fondo oscuro para el overlay del menu de letras */
+        .alphabet-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        /* Estilo para la cuadrícula de letras */
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            justify-items: center;
+        }
+        
+        /* Botón para cerrar el menú de letras */
+        .close-alphabet-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+                padding: 10px;
+            }
+
+            .search-container {
+                order: 2;
+                width: 100%;
+            }
+
+            .content {
+                margin: 10px;
+                padding: 10px;
+            }
+            
+            .alphabet-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .letter-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .alphabet-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+
+    <div class="header">
+        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+        <h1>Diccionario Bíblico</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar término bíblico...">
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+        <button id="alphabet-toggle" class="alphabet-toggle-btn">🔤 Letras</button>
+    </div>
+
+    <div class="content" id="content">
+        <div class="alphabet-overlay" id="alphabet-overlay"></div>
+        <div class="alphabet-nav" id="alphabet-nav">
+            <button class="close-alphabet-btn" id="close-alphabet-btn">&times;</button>
+            <div class="alphabet-grid" id="alphabet-grid"></div>
+        </div>
+        <div id="terms-container"></div>
+    </div>
+
+    <script>
+        let xmlDoc = null;
+        const content = document.getElementById('content');
+        const termsContainer = document.getElementById('terms-container');
+        const searchInput = document.getElementById('search-input');
+        const alphabetNav = document.getElementById('alphabet-nav');
+        const alphabetToggleBtn = document.getElementById('alphabet-toggle');
+        if (alphabetToggleBtn) alphabetToggleBtn.addEventListener('click', () => {
+            // Mostrar el overlay y el menú
+            document.getElementById('alphabet-overlay').style.display = 'block';
+            alphabetNav.style.display = 'block';
+            // Bloquear el scroll del body cuando el menú está abierto
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Crear navegación alfabética
+        function createAlphabetNav() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            const alphabetGrid = document.getElementById('alphabet-grid');
+            alphabetGrid.innerHTML = letters.map(letter => 
+                `<button class="letter-btn" onclick="filterByLetter('${letter}')">${letter}</button>`
+            ).join('');
+            
+            // Añadir botón de cerrar al menú
+            document.getElementById('close-alphabet-btn').addEventListener('click', () => {
+                alphabetNav.style.display = 'none';
+                document.getElementById('alphabet-overlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Añadir evento al overlay
+            document.getElementById('alphabet-overlay').addEventListener('click', () => {
+                alphabetNav.style.display = 'none';
+                document.getElementById('alphabet-overlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+        }
+
+        // Filtrar por letra
+        function filterByLetter(letter) {
+            // Actualizar botones activos
+            document.querySelectorAll('.letter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === letter);
+            });
+
+            const terminos = Array.from(xmlDoc.getElementsByTagName('termino'));
+            const filteredTerms = terminos.filter(termino => {
+                const palabra = termino.getElementsByTagName('palabra')[0].textContent;
+                return palabra.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().startsWith(letter);
+            });
+            
+            displayTerms(filteredTerms);
+            
+            // Limpiar el campo de búsqueda
+            searchInput.value = '';
+            
+            // Cerrar automáticamente el menú de letras
+            alphabetNav.style.display = 'none';
+            document.getElementById('alphabet-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cargar el diccionario
+        async function loadDictionary() {
+            try {
+                const response = await fetch('diccionario.xml');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                createAlphabetNav();
+                showAllTerms();
+            } catch (error) {
+                console.error('Error loading dictionary:', error);
+                termsContainer.innerHTML = `<div class="error">Error al cargar el diccionario: ${error.message}</div>`;
+            }
+        }
+
+        // Mostrar todos los términos organizados por letra
+        function showAllTerms() {
+            const terminos = Array.from(xmlDoc.getElementsByTagName('termino'));
+            const terminosPorLetra = {};
+            
+            // Agrupar términos por letra inicial
+            terminos.forEach(termino => {
+                const palabra = termino.getElementsByTagName('palabra')[0].textContent;
+                const letra = palabra.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().charAt(0);
+                if (!terminosPorLetra[letra]) {
+                    terminosPorLetra[letra] = [];
+                }
+                terminosPorLetra[letra].push(termino);
+            });
+            
+            // Mostrar términos organizados por sección
+            termsContainer.innerHTML = Object.entries(terminosPorLetra)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([letra, terminos]) => `
+                    <div class="letter-section" id="letra-${letra}">
+                        <div class="letter-heading">${letra}</div>
+                        ${displayTermsHTML(terminos)}
+                    </div>
+                `).join('');
+        }
+
+        // Generar HTML para los términos
+        function displayTermsHTML(terminos) {
+            return terminos.map(termino => {
+                const palabra = termino.getElementsByTagName('palabra')[0].textContent;
+                const definicion = termino.getElementsByTagName('definicion')[0].textContent;
+                const referencias = Array.from(termino.getElementsByTagName('ref')).map(ref => 
+                    `<span class="ref" onclick="openBible('${ref.textContent}')">${ref.textContent}</span>`
+                ).join(' ');
+
+                return `
+                    <div class="termino">
+                        <div class="palabra">${palabra}</div>
+                        <div class="definicion">${definicion}</div>
+                        <div class="referencias">
+                            Referencias: ${referencias}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Mostrar términos filtrados
+        function displayTerms(terminos) {
+            if (terminos.length === 0) {
+                termsContainer.innerHTML = '<div class="termino">No se encontraron términos.</div>';
+                return;
+            }
+            termsContainer.innerHTML = displayTermsHTML(terminos);
+        }
+
+        // Buscar términos
+        function searchTerms(query) {
+            if (!query.trim()) {
+                showAllTerms();
+                return;
+            }
+
+            // Limpiar botones activos
+            document.querySelectorAll('.letter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const terminos = Array.from(xmlDoc.getElementsByTagName('termino'));
+            const searchRegex = new RegExp(query.trim(), 'i');
+            
+            const filteredTerms = terminos.filter(termino => {
+                const palabra = termino.getElementsByTagName('palabra')[0].textContent;
+                const definicion = termino.getElementsByTagName('definicion')[0].textContent;
+                
+                return searchRegex.test(palabra) || searchRegex.test(definicion);
+            });
+            
+            displayTerms(filteredTerms);
+        }
+
+        // Abrir versículo en la Biblia
+        function openBible(reference) {
+            const [book, chapter] = reference.split(' ');
+            const [chapterNum, verse] = chapter.split(':');
+            window.location.href = `lectura.html?book=${book}&chapter=${chapterNum}&verse=${verse}`;
+        }
+
+        // Cambiar tema
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', (e) => searchTerms(e.target.value));
+
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Iniciar la aplicación
+        loadDictionary();
+    </script>
+
+    <script>
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn) sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

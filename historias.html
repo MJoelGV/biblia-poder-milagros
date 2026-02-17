@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historias Bíblicas - Biblia de Poder y Milagros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --nav-bg: rgba(248, 248, 248, 0.95);
+            --nav-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #1a1a1a;
+            --nav-bg: rgba(42, 42, 42, 0.95);
+            --nav-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --card-bg: rgba(42, 42, 42, 0.95);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.3));
+            z-index: 0;
+        }
+
+        .header {
+            background: var(--nav-bg);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: var(--nav-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .page-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin: 0;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .side-menu-toggle {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            transition: transform 0.3s;
+        }
+
+        .side-menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        select {
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+            min-width: 200px;
+        }
+
+        select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+
+        .book-title {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+
+        .book-category {
+            color: var(--primary-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .book-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .info-item {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: var(--text-color);
+        }
+
+        .book-description {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .book-topics {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 10px;
+        }
+
+        .read-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s, background-color 0.3s;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .read-button:hover {
+            transform: translateY(-2px);
+            background: #45a049;
+        }
+
+        .theme-toggle {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 250px;
+            background-color: var(--nav-bg);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .side-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            select {
+                width: 100%;
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+
+            .book-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+
+    <div class="header">
+        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+        <div class="filters">
+            <select id="testament-selector">
+                <option value="all">Todos los Testamentos</option>
+                <option value="old">Antiguo Testamento</option>
+                <option value="new">Nuevo Testamento</option>
+            </select>
+            <select id="category-selector">
+                <option value="all">Todas las Categorías</option>
+                <option value="pentateuch">Pentateuco</option>
+                <option value="historical">Libros Históricos</option>
+                <option value="poetic">Libros Poéticos</option>
+                <option value="prophetic-major">Profetas Mayores</option>
+                <option value="prophetic-minor">Profetas Menores</option>
+                <option value="gospel">Evangelios</option>
+                <option value="historical-nt">Historia (NT)</option>
+                <option value="pauline">Epístolas Paulinas</option>
+                <option value="general">Epístolas Generales</option>
+                <option value="apocalyptic">Apocalíptico</option>
+            </select>
+            <select id="author-selector">
+                <option value="all">Todos los Autores</option>
+            </select>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+    </div>
+
+    <h1 class="page-title">Historias Bíblicas</h1>
+
+    <div class="content" id="books-container"></div>
+
+    <script>
+        const booksData = {
+            // Pentateuco
+            "Génesis": {
+                testament: "old",
+                category: "pentateuch",
+                author: "Moisés",
+                date: "1445-1405 a.C.",
+                theme: "Los orígenes y el pacto de Dios",
+                description: "El libro del Génesis narra la creación del mundo, la caída del hombre, el diluvio universal y las historias de los patriarcas Abraham, Isaac y Jacob. Establece los fundamentos de la relación entre Dios y la humanidad.",
+                keyTopics: ["La Creación", "El Diluvio", "Abraham y el Pacto", "José en Egipto"]
+            },
+            "Éxodo": {
+                testament: "old",
+                category: "pentateuch",
+                author: "Moisés",
+                date: "1445-1405 a.C.",
+                theme: "La liberación y la ley",
+                description: "Éxodo relata la liberación del pueblo de Israel de la esclavitud en Egipto bajo el liderazgo de Moisés, la entrega de los Diez Mandamientos y el establecimiento del sistema de adoración.",
+                keyTopics: ["Las Plagas", "El Éxodo", "Los Diez Mandamientos", "El Tabernáculo"]
+            },
+            "Levítico": {
+                testament: "old",
+                category: "pentateuch",
+                author: "Moisés",
+                date: "1445-1405 a.C.",
+                theme: "La santidad y la adoración",
+                description: "El Levítico establece las leyes y regulaciones para el sacerdocio, los sacrificios y la vida santa. Enseña cómo el pueblo de Dios debe acercarse a Él y vivir en santidad.",
+                keyTopics: ["Leyes Sacrificiales", "Código de Santidad", "Días Festivos", "Leyes de Pureza"]
+            },
+            "Números": {
+                testament: "old",
+                category: "pentateuch",
+                author: "Moisés",
+                date: "1445-1405 a.C.",
+                theme: "El viaje en el desierto",
+                description: "Números registra el viaje de Israel por el desierto, incluyendo dos censos del pueblo, varias rebeliones y la preparación para entrar a la Tierra Prometida.",
+                keyTopics: ["Los Censos", "La Murmuración", "Balaam", "La Nueva Generación"]
+            },
+            "Deuteronomio": {
+                testament: "old",
+                category: "pentateuch",
+                author: "Moisés",
+                date: "1445-1405 a.C.",
+                theme: "Recordar y obedecer",
+                description: "Deuteronomio contiene los últimos discursos de Moisés, repasando la ley y exhortando a la nueva generación a ser fiel a Dios antes de entrar a la Tierra Prometida.",
+                keyTopics: ["Repaso de la Ley", "El Gran Mandamiento", "Bendiciones y Maldiciones", "Muerte de Moisés"]
+            },
+            // Libros Históricos
+            "Josué": {
+                testament: "old",
+                category: "historical",
+                author: "Josué",
+                date: "1405-1385 a.C.",
+                theme: "La conquista de la tierra prometida",
+                description: "Josué narra la conquista y división de la Tierra Prometida bajo el liderazgo de Josué, sucesor de Moisés, demostrando la fidelidad de Dios a sus promesas.",
+                keyTopics: ["Cruce del Jordán", "Caída de Jericó", "Conquistas", "División de la Tierra"]
+            },
+            "Jueces": {
+                testament: "old",
+                category: "historical",
+                author: "Samuel y otros",
+                date: "1043 a.C.",
+                theme: "Ciclos de apostasía y liberación",
+                description: "Jueces relata el período turbulento después de Josué, donde Israel experimenta ciclos repetidos de pecado, opresión, arrepentimiento y liberación a través de jueces designados por Dios.",
+                keyTopics: ["Débora", "Gedeón", "Sansón", "Decadencia Moral"]
+            },
+            "Rut": {
+                testament: "old",
+                category: "historical",
+                author: "Samuel",
+                date: "1030-1010 a.C.",
+                theme: "La redención y la lealtad",
+                description: "Rut es una hermosa historia de lealtad, amor y redención, mostrando cómo una mujer moabita llegó a ser parte del linaje del Mesías a través de su fidelidad a Dios y su suegra.",
+                keyTopics: ["Lealtad Familiar", "Redención", "Linaje del Mesías", "Bondad de Dios"]
+            },
+            "1 Samuel": {
+                testament: "old",
+                category: "historical",
+                author: "Samuel, Natán y Gad",
+                date: "931-722 a.C.",
+                theme: "Transición a la monarquía",
+                description: "Primer Samuel registra la transición de Israel de los jueces a la monarquía, centrándose en las vidas de Samuel, Saúl y David, mostrando las consecuencias de la obediencia e desobediencia a Dios.",
+                keyTopics: ["Samuel el Profeta", "Rey Saúl", "David y Goliat", "Amistad con Jonatán"]
+            },
+            "2 Samuel": {
+                testament: "old",
+                category: "historical",
+                author: "Natán y Gad",
+                date: "931-722 a.C.",
+                theme: "El reinado de David",
+                description: "Segundo Samuel narra el reinado de David, sus victorias, pecados y las consecuencias en su familia y reino, demostrando tanto la grandeza como la humanidad del rey según el corazón de Dios.",
+                keyTopics: ["Reino Unificado", "Pecado con Betsabé", "Rebelión de Absalón", "Pacto Davídico"]
+            },
+            "1 Reyes": {
+                testament: "old",
+                category: "historical",
+                author: "Jeremías",
+                date: "561-538 a.C.",
+                theme: "División del reino",
+                description: "Primer Reyes relata desde el reinado de Salomón hasta la división del reino, mostrando cómo la desobediencia y la idolatría llevaron a la decadencia de Israel.",
+                keyTopics: ["Sabiduría de Salomón", "Templo", "Reino Dividido", "Elías"]
+            },
+            "2 Reyes": {
+                testament: "old",
+                category: "historical",
+                author: "Jeremías",
+                date: "561-538 a.C.",
+                theme: "Caída de los reinos",
+                description: "Segundo Reyes continúa la historia hasta el exilio, mostrando cómo la continua desobediencia llevó a la caída de Israel y Judá, con la destrucción de Jerusalén.",
+                keyTopics: ["Eliseo", "Caída de Israel", "Caída de Judá", "Exilio"]
+            },
+            "1 Crónicas": {
+                testament: "old",
+                category: "historical",
+                author: "Esdras",
+                date: "450-430 a.C.",
+                theme: "Historia desde Adán hasta David",
+                description: "Primer Crónicas proporciona una genealogía desde Adán y se centra en el reinado de David, enfatizando los aspectos espirituales y el templo.",
+                keyTopics: ["Genealogías", "Reino de David", "Arca del Pacto", "Preparativos del Templo"]
+            },
+            "2 Crónicas": {
+                testament: "old",
+                category: "historical",
+                author: "Esdras",
+                date: "450-430 a.C.",
+                theme: "Historia del reino de Judá",
+                description: "Segundo Crónicas narra la historia desde Salomón hasta el exilio, enfocándose en el reino de Judá y el templo, mostrando cómo la fidelidad a Dios trae bendición.",
+                keyTopics: ["Templo de Salomón", "Reyes de Judá", "Reformas", "Exilio y Decreto de Ciro"]
+            },
+            "Esdras": {
+                testament: "old",
+                category: "historical",
+                author: "Esdras",
+                date: "457-444 a.C.",
+                theme: "Restauración y reforma",
+                description: "Esdras registra el regreso de los exiliados a Jerusalén y la reconstrucción del templo, enfatizando la importancia de la pureza espiritual y la obediencia a la ley de Dios.",
+                keyTopics: ["Retorno del Exilio", "Reconstrucción del Templo", "Reforma Espiritual", "Matrimonios Mixtos"]
+            },
+            "Nehemías": {
+                testament: "old",
+                category: "historical",
+                author: "Nehemías",
+                date: "445-432 a.C.",
+                theme: "Reconstrucción de Jerusalén",
+                description: "Nehemías lidera la reconstrucción de los muros de Jerusalén y la reforma social del pueblo, demostrando un liderazgo piadoso y práctico en tiempos de adversidad.",
+                keyTopics: ["Muros de Jerusalén", "Oposición", "Reforma Social", "Renovación del Pacto"]
+            },
+            "Ester": {
+                testament: "old",
+                category: "historical",
+                author: "Mardoqueo",
+                date: "483-473 a.C.",
+                theme: "Providencia divina",
+                description: "Ester muestra la providencia de Dios al salvar a su pueblo del genocidio a través de una reina judía en Persia, aunque el nombre de Dios no se menciona explícitamente en el libro.",
+                keyTopics: ["Reina Ester", "Mardoqueo", "Amán", "Purim"]
+            },
+            // Libros Poéticos
+            "Job": {
+                testament: "old",
+                category: "poetic",
+                author: "Desconocido (posiblemente Moisés)",
+                date: "Desconocido (posiblemente 2000-1800 a.C.)",
+                theme: "Sufrimiento y soberanía de Dios",
+                description: "Job explora el misterio del sufrimiento del justo, demostrando que Dios es soberano y digno de confianza incluso cuando no entendemos Sus caminos.",
+                keyTopics: ["Pruebas de Job", "Diálogos con Amigos", "Soberanía de Dios", "Restauración"]
+            },
+            "Salmos": {
+                testament: "old",
+                category: "poetic",
+                author: "David, Asaf, hijos de Coré y otros",
+                date: "1440-450 a.C.",
+                theme: "Adoración y vida espiritual",
+                description: "Los Salmos son una colección de 150 cantos y poemas que expresan toda la gama de la experiencia humana en relación con Dios, desde la alabanza hasta el lamento.",
+                keyTopics: ["Alabanza", "Lamento", "Sabiduría", "Profecías Mesiánicas"]
+            },
+            "Proverbios": {
+                testament: "old",
+                category: "poetic",
+                author: "Salomón y otros",
+                date: "970-930 a.C.",
+                theme: "Sabiduría práctica",
+                description: "Proverbios ofrece principios prácticos de sabiduría para la vida diaria, enseñando que el verdadero conocimiento comienza con el temor del Señor.",
+                keyTopics: ["Sabiduría vs Necedad", "Relaciones", "Trabajo", "Temor del Señor"]
+            },
+            "Eclesiastés": {
+                testament: "old",
+                category: "poetic",
+                author: "Salomón",
+                date: "940-931 a.C.",
+                theme: "El significado de la vida",
+                description: "Eclesiastés examina la vida 'bajo el sol' y concluye que todo es vanidad sin Dios, exhortando a temer a Dios y guardar sus mandamientos.",
+                keyTopics: ["Vanidad", "Búsqueda de Significado", "Sabiduría Humana", "Temor de Dios"]
+            },
+            "Cantares": {
+                testament: "old",
+                category: "poetic",
+                author: "Salomón",
+                date: "970-930 a.C.",
+                theme: "Amor matrimonial",
+                description: "El Cantar de los Cantares celebra el amor romántico en el matrimonio, también visto como una alegoría del amor entre Dios y su pueblo.",
+                keyTopics: ["Amor Matrimonial", "Romance", "Fidelidad", "Belleza"]
+            },
+            "Isaías": {
+                testament: "old",
+                category: "prophetic-major",
+                author: "Isaías",
+                date: "739-681 a.C.",
+                theme: "Juicio y esperanza mesiánica",
+                description: "Isaías profetiza sobre el juicio de Judá y las naciones, pero también ofrece esperanza a través de profecías mesiánicas detalladas y la promesa de restauración futura.",
+                keyTopics: ["El Mesías", "El Siervo Sufriente", "Juicio Divino", "Nueva Creación"]
+            },
+            "Jeremías": {
+                testament: "old",
+                category: "prophetic-major",
+                author: "Jeremías",
+                date: "627-586 a.C.",
+                theme: "Juicio y nuevo pacto",
+                description: "Jeremías advierte sobre la inminente destrucción de Jerusalén, pero también promete un nuevo pacto y restauración futura, llamando al arrepentimiento.",
+                keyTopics: ["Juicio de Judá", "Nuevo Pacto", "Cautiverio Babilónico", "Restauración"]
+            },
+            "Lamentaciones": {
+                testament: "old",
+                category: "prophetic-major",
+                author: "Jeremías",
+                date: "586 a.C.",
+                theme: "Lamento por Jerusalén",
+                description: "Lamentaciones expresa el dolor por la destrucción de Jerusalén, pero encuentra esperanza en la fidelidad de Dios en medio del sufrimiento.",
+                keyTopics: ["Destrucción de Jerusalén", "Juicio Divino", "Misericordia de Dios", "Esperanza"]
+            },
+            "Ezequiel": {
+                testament: "old",
+                category: "prophetic-major",
+                author: "Ezequiel",
+                date: "593-571 a.C.",
+                theme: "Gloria y restauración",
+                description: "Ezequiel, profetizando desde el exilio, usa visiones dramáticas para mostrar la gloria de Dios, el juicio sobre Israel y las naciones, y la futura restauración.",
+                keyTopics: ["Visiones de Gloria", "Valle de Huesos", "Nuevo Templo", "Nuevo Corazón"]
+            },
+            "Daniel": {
+                testament: "old",
+                category: "prophetic-major",
+                author: "Daniel",
+                date: "605-536 a.C.",
+                theme: "Soberanía divina",
+                description: "Daniel muestra la soberanía de Dios sobre los reinos del mundo a través de narrativas históricas y visiones apocalípticas del futuro.",
+                keyTopics: ["Fidelidad en Exilio", "Reinos Mundiales", "Hijo del Hombre", "Tiempo del Fin"]
+            },
+            "Oseas": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Oseas",
+                date: "755-715 a.C.",
+                theme: "Amor fiel de Dios",
+                description: "Oseas usa su propio matrimonio como metáfora del amor fiel de Dios hacia su pueblo infiel, llamando al arrepentimiento y la restauración.",
+                keyTopics: ["Amor Divino", "Infidelidad", "Arrepentimiento", "Restauración"]
+            },
+            "Joel": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Joel",
+                date: "835-796 a.C.",
+                theme: "Día del Señor",
+                description: "Joel usa una plaga de langostas como imagen del juicio venidero, llamando al arrepentimiento y prometiendo la venida del Espíritu.",
+                keyTopics: ["Plaga de Langostas", "Arrepentimiento", "Espíritu Santo", "Día del Señor"]
+            },
+            "Amós": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Amós",
+                date: "760-750 a.C.",
+                theme: "Justicia social",
+                description: "Amós denuncia la injusticia social y la hipocresía religiosa en Israel, llamando a la justicia y la rectitud verdadera.",
+                keyTopics: ["Justicia Social", "Juicio Divino", "Adoración Verdadera", "Restauración"]
+            },
+            "Abdías": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Abdías",
+                date: "586 a.C.",
+                theme: "Juicio de Edom",
+                description: "El libro más corto del Antiguo Testamento profetiza el juicio de Edom por su orgullo y crueldad hacia Israel.",
+                keyTopics: ["Juicio de Edom", "Orgullo", "Día del Señor", "Restauración de Israel"]
+            },
+            "Jonás": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Jonás",
+                date: "780-760 a.C.",
+                theme: "Misericordia universal",
+                description: "Jonás narra la historia del profeta reluctante que aprende sobre la misericordia de Dios hacia todas las naciones.",
+                keyTopics: ["Huida de Dios", "Gran Pez", "Nínive", "Misericordia Divina"]
+            },
+            "Miqueas": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Miqueas",
+                date: "735-700 a.C.",
+                theme: "Justicia y misericordia",
+                description: "Miqueas alterna entre mensajes de juicio y esperanza, profetizando tanto la destrucción como la venida del Mesías.",
+                keyTopics: ["Justicia Social", "Nacimiento del Mesías", "Juicio", "Perdón"]
+            },
+            "Nahúm": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Nahúm",
+                date: "663-612 a.C.",
+                theme: "Juicio de Nínive",
+                description: "Nahúm profetiza la destrucción de Nínive, mostrando la justicia de Dios contra la opresión y la maldad.",
+                keyTopics: ["Caída de Nínive", "Justicia Divina", "Venganza", "Liberación"]
+            },
+            "Habacuc": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Habacuc",
+                date: "609-605 a.C.",
+                theme: "Fe en tiempos difíciles",
+                description: "Habacuc dialoga con Dios sobre la injusticia y aprende a confiar en Él incluso cuando no entiende Sus caminos.",
+                keyTopics: ["Diálogo con Dios", "Fe", "Justicia", "Confianza"]
+            },
+            "Sofonías": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Sofonías",
+                date: "640-609 a.C.",
+                theme: "Día del Señor",
+                description: "Sofonías advierte sobre el día del juicio venidero, pero promete restauración para el remanente fiel.",
+                keyTopics: ["Día del Señor", "Juicio Universal", "Remanente Fiel", "Restauración"]
+            },
+            "Hageo": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Hageo",
+                date: "520 a.C.",
+                theme: "Reconstrucción del templo",
+                description: "Hageo exhorta a los judíos retornados del exilio a reconstruir el templo, prometiendo la bendición de Dios.",
+                keyTopics: ["Templo", "Prioridades", "Bendición", "Gloria Futura"]
+            },
+            "Zacarías": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Zacarías",
+                date: "520-518 a.C.",
+                theme: "Restauración y Mesías",
+                description: "Zacarías anima a la reconstrucción del templo con visiones apocalípticas y profecías mesiánicas detalladas.",
+                keyTopics: ["Visiones", "Mesías", "Jerusalén", "Reino Futuro"]
+            },
+            "Malaquías": {
+                testament: "old",
+                category: "prophetic-minor",
+                author: "Malaquías",
+                date: "430 a.C.",
+                theme: "Fidelidad al pacto",
+                description: "Malaquías confronta la infidelidad del pueblo y anuncia la venida del mensajero del Señor.",
+                keyTopics: ["Adoración Sincera", "Diezmos", "Matrimonio", "Día del Señor"]
+            },
+            // Evangelios
+            "Marcos": {
+                testament: "new",
+                category: "gospel",
+                author: "Marcos",
+                date: "65-70 d.C.",
+                theme: "Jesús como Siervo",
+                description: "Marcos presenta un evangelio conciso y dinámico, enfocándose en las acciones de Jesús como el Siervo sufriente de Dios.",
+                keyTopics: ["Milagros", "Servicio", "Pasión", "Victoria"]
+            },
+            "Mateo": {
+                testament: "new",
+                category: "gospel",
+                author: "Mateo",
+                date: "80-90 d.C.",
+                theme: "Jesús como Rey Mesías",
+                description: "Mateo presenta a Jesús como el Mesías prometido y Rey de los judíos, enfatizando el cumplimiento de las profecías del Antiguo Testamento.",
+                keyTopics: ["Reino de los Cielos", "Profecías Cumplidas", "Sermón del Monte", "Gran Comisión"]
+            },
+            "Lucas": {
+                testament: "new",
+                category: "gospel",
+                author: "Lucas",
+                date: "80-90 d.C.",
+                theme: "Jesús como Hijo del Hombre",
+                description: "Lucas, el médico, presenta una investigación ordenada de la vida de Jesús, enfatizando su humanidad y compasión por los marginados.",
+                keyTopics: ["Nacimiento Virginal", "Parábolas", "Mujeres", "Espíritu Santo"]
+            },
+            "Juan": {
+                testament: "new",
+                category: "gospel",
+                author: "Juan",
+                date: "90-100 d.C.",
+                theme: "Jesús como Hijo de Dios",
+                description: "Juan presenta a Jesús como el Verbo divino, enfocándose en su deidad y en las señales que demuestran su identidad divina.",
+                keyTopics: ["Divinidad de Cristo", "YO SOY", "Señales", "Vida Eterna"]
+            },
+            // Historia del Nuevo Testamento
+            "Hechos": {
+                testament: "new",
+                category: "historical-nt",
+                author: "Lucas",
+                date: "61-62 d.C.",
+                theme: "Expansión de la iglesia",
+                description: "Hechos narra la expansión de la iglesia primitiva desde Jerusalén hasta Roma, mostrando el poder del Espíritu Santo en la misión.",
+                keyTopics: ["Pentecostés", "Pablo", "Misiones", "Espíritu Santo"]
+            },
+            // Epístolas Paulinas
+            "Romanos": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "57 d.C.",
+                theme: "El evangelio de la justicia",
+                description: "Romanos presenta una exposición sistemática del evangelio, explicando cómo Dios hace justos a los pecadores por medio de la fe en Cristo.",
+                keyTopics: ["Justificación", "Santificación", "Israel", "Vida Cristiana"]
+            },
+            "1 Corintios": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "55 d.C.",
+                theme: "Orden en la iglesia",
+                description: "Primera de Corintios aborda varios problemas prácticos y doctrinales en la iglesia, incluyendo división, inmoralidad y el uso de dones espirituales.",
+                keyTopics: ["Unidad", "Dones Espirituales", "Amor", "Resurrección"]
+            },
+            "2 Corintios": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "56 d.C.",
+                theme: "Ministerio apostólico",
+                description: "Segunda de Corintios defiende el ministerio apostólico de Pablo y explora el verdadero liderazgo cristiano a través del servicio y el sufrimiento.",
+                keyTopics: ["Ministerio", "Reconciliación", "Generosidad", "Debilidad"]
+            },
+            "Gálatas": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "49 d.C.",
+                theme: "Libertad en Cristo",
+                description: "Gálatas defiende el evangelio de la gracia contra el legalismo, enfatizando la libertad que tenemos en Cristo.",
+                keyTopics: ["Gracia", "Libertad", "Fruto del Espíritu", "Fe vs. Obras"]
+            },
+            "Efesios": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "60-62 d.C.",
+                theme: "La iglesia en Cristo",
+                description: "Efesios revela el plan eterno de Dios para la iglesia y exhorta a los creyentes a vivir en unidad y santidad.",
+                keyTopics: ["Unidad", "Armadura de Dios", "Iglesia", "Nueva Vida"]
+            },
+            "Filipenses": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "61 d.C.",
+                theme: "Gozo en Cristo",
+                description: "Filipenses es una carta de gozo y gratitud, animando a los creyentes a regocijarse en Cristo a pesar de las circunstancias.",
+                keyTopics: ["Gozo", "Humildad", "Contentamiento", "Unidad"]
+            },
+            "Colosenses": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "60-62 d.C.",
+                theme: "Supremacía de Cristo",
+                description: "Colosenses enfatiza la supremacía y suficiencia de Cristo contra las falsas enseñanzas que amenazaban a la iglesia.",
+                keyTopics: ["Deidad de Cristo", "Nueva Vida", "Falsa Enseñanza", "Relaciones"]
+            },
+            "1 Tesalonicenses": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "51 d.C.",
+                theme: "Esperanza del retorno",
+                description: "Primera de Tesalonicenses anima a los creyentes en su fe y les instruye sobre la segunda venida de Cristo.",
+                keyTopics: ["Segunda Venida", "Santidad", "Amor Fraternal", "Esperanza"]
+            },
+            "2 Tesalonicenses": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "51-52 d.C.",
+                theme: "Día del Señor",
+                description: "Segunda de Tesalonicenses corrige malentendidos sobre el día del Señor y exhorta a la fidelidad en el trabajo.",
+                keyTopics: ["Día del Señor", "Apostasía", "Disciplina", "Perseverancia"]
+            },
+            "1 Timoteo": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "62-64 d.C.",
+                theme: "Orden en la iglesia",
+                description: "Primera de Timoteo proporciona instrucciones para el liderazgo y orden en la iglesia, combatiendo la falsa doctrina.",
+                keyTopics: ["Liderazgo", "Sana Doctrina", "Orden Eclesiástico", "Piedad"]
+            },
+            "2 Timoteo": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "66-67 d.C.",
+                theme: "Fidelidad ministerial",
+                description: "Segunda de Timoteo es el último testamento de Pablo, animando a la fidelidad en el ministerio frente a la oposición.",
+                keyTopics: ["Perseverancia", "Palabra de Dios", "Sufrimiento", "Corona"]
+            },
+            "Tito": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "62-64 d.C.",
+                theme: "Orden y buenas obras",
+                description: "Tito recibe instrucciones para organizar las iglesias en Creta y promover la sana doctrina y las buenas obras.",
+                keyTopics: ["Liderazgo", "Buenas Obras", "Sana Doctrina", "Gracia"]
+            },
+            "Filemón": {
+                testament: "new",
+                category: "pauline",
+                author: "Pablo",
+                date: "60-62 d.C.",
+                theme: "Reconciliación",
+                description: "Filemón es una carta personal que aboga por la reconciliación entre un amo y su esclavo fugitivo, ahora convertido.",
+                keyTopics: ["Perdón", "Reconciliación", "Hermandad", "Amor"]
+            },
+            // Epístolas Generales
+            "Hebreos": {
+                testament: "new",
+                category: "general",
+                author: "Desconocido",
+                date: "67-69 d.C.",
+                theme: "Supremacía de Cristo",
+                description: "Hebreos demuestra la supremacía de Cristo sobre el sistema levítico, exhortando a perseverar en la fe.",
+                keyTopics: ["Sacerdocio", "Fe", "Perseverancia", "Nuevo Pacto"]
+            },
+            "Santiago": {
+                testament: "new",
+                category: "general",
+                author: "Santiago",
+                date: "44-49 d.C.",
+                theme: "Fe práctica",
+                description: "Santiago enfatiza que la fe verdadera se demuestra a través de las obras, proporcionando sabiduría práctica para la vida cristiana.",
+                keyTopics: ["Fe y Obras", "Pruebas", "Lengua", "Sabiduría"]
+            },
+            "1 Pedro": {
+                testament: "new",
+                category: "general",
+                author: "Pedro",
+                date: "64 d.C.",
+                theme: "Esperanza en sufrimiento",
+                description: "Primera de Pedro anima a los creyentes a permanecer fieles en medio del sufrimiento, recordándoles su identidad en Cristo.",
+                keyTopics: ["Sufrimiento", "Santidad", "Esperanza", "Sumisión"]
+            },
+            "2 Pedro": {
+                testament: "new",
+                category: "general",
+                author: "Pedro",
+                date: "67-68 d.C.",
+                theme: "Falsos maestros",
+                description: "Segunda de Pedro advierte contra los falsos maestros y anima al crecimiento en el conocimiento de Cristo.",
+                keyTopics: ["Falsa Enseñanza", "Día del Señor", "Crecimiento", "Escritura"]
+            },
+            "1 Juan": {
+                testament: "new",
+                category: "general",
+                author: "Juan",
+                date: "85-95 d.C.",
+                theme: "Comunión con Dios",
+                description: "Primera de Juan enfatiza las marcas de la vida cristiana genuina: amor, obediencia y fe correcta en Cristo.",
+                keyTopics: ["Amor", "Luz", "Verdad", "Vida"]
+            },
+            "2 Juan": {
+                testament: "new",
+                category: "general",
+                author: "Juan",
+                date: "85-95 d.C.",
+                theme: "Verdad y amor",
+                description: "Segunda de Juan enfatiza la importancia de mantener la verdad y el amor, advirtiendo contra los falsos maestros.",
+                keyTopics: ["Verdad", "Amor", "Discernimiento", "Hospitalidad"]
+            },
+            "3 Juan": {
+                testament: "new",
+                category: "general",
+                author: "Juan",
+                date: "85-95 d.C.",
+                theme: "Hospitalidad",
+                description: "Tercera de Juan elogia la hospitalidad de Gayo y condena el comportamiento dominante de Diótrefes.",
+                keyTopics: ["Hospitalidad", "Verdad", "Ejemplo", "Liderazgo"]
+            },
+            "Judas": {
+                testament: "new",
+                category: "general",
+                author: "Judas",
+                date: "65-80 d.C.",
+                theme: "Contender por la fe",
+                description: "Judas exhorta a los creyentes a contender por la fe contra los falsos maestros que promueven el libertinaje.",
+                keyTopics: ["Falsa Enseñanza", "Juicio", "Perseverancia", "Fe"]
+            },
+            // Apocalíptico
+            "Apocalipsis": {
+                testament: "new",
+                category: "apocalyptic",
+                author: "Juan",
+                date: "90-95 d.C.",
+                theme: "Victoria final de Cristo",
+                description: "Apocalipsis revela la victoria final de Cristo sobre el mal, el juicio final y la nueva creación a través de visiones simbólicas.",
+                keyTopics: ["Siete Iglesias", "Juicio", "Segunda Venida", "Nueva Jerusalén"]
+            }
+        };
+
+        // Generar lista de autores únicos
+        function updateAuthorsList() {
+            const authors = new Set();
+            Object.values(booksData).forEach(book => authors.add(book.author));
+            
+            const authorSelector = document.getElementById('author-selector');
+            authorSelector.innerHTML = '<option value="all">Todos los Autores</option>' +
+                Array.from(authors).sort().map(author => 
+                    `<option value="${author}">${author}</option>`
+                ).join('');
+        }
+
+        function filterBooks() {
+            const testament = document.getElementById('testament-selector').value;
+            const category = document.getElementById('category-selector').value;
+            const author = document.getElementById('author-selector').value;
+            const container = document.getElementById('books-container');
+            
+            container.innerHTML = Object.entries(booksData)
+                .filter(([_, data]) => 
+                    (testament === 'all' || data.testament === testament) &&
+                    (category === 'all' || data.category === category) &&
+                    (author === 'all' || data.author === author)
+                )
+                .map(([book, data]) => `
+                    <div class="book-card">
+                        <h2 class="book-title">${book}</h2>
+                        <div class="book-category">
+                            ${getCategoryName(data.category)} · ${getTestamentName(data.testament)}
+                        </div>
+                        <div class="book-info">
+                            <div class="info-item">
+                                <div class="info-label">Autor</div>
+                                <div class="info-value">${data.author}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Fecha de Escritura</div>
+                                <div class="info-value">${data.date}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Tema Principal</div>
+                                <div class="info-value">${data.theme}</div>
+                            </div>
+                        </div>
+                        <p class="book-description">${data.description}</p>
+                        <div class="book-topics">
+                            <div class="info-label">Temas Clave</div>
+                            <div class="info-value">${data.keyTopics.join(' · ')}</div>
+                        </div>
+                        <a href="lectura.html?version=Reina-Valera-1960&book=${book}&chapter=1" 
+                           class="read-button">Leer ${book}</a>
+                    </div>
+                `).join('');
+        }
+
+        function getCategoryName(category) {
+            const categories = {
+                pentateuch: 'Pentateuco',
+                historical: 'Libro Histórico',
+                poetic: 'Libro Poético',
+                'prophetic-major': 'Profeta Mayor',
+                'prophetic-minor': 'Profeta Menor',
+                gospel: 'Evangelio',
+                'historical-nt': 'Historia (NT)',
+                pauline: 'Epístola Paulina',
+                general: 'Epístola General',
+                apocalyptic: 'Apocalíptico'
+            };
+            return categories[category] || category;
+        }
+
+        function getTestamentName(testament) {
+            return testament === 'old' ? 'Antiguo Testamento' : 'Nuevo Testamento';
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+            
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        function toggleSideMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const sideMenu = document.getElementById('side-menu');
+            const toggleBtn = document.getElementById('side-menu-toggle');
+            if (sideMenu.style.display === 'block' && !sideMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sideMenu.style.display = 'none';
+            }
+        });
+
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.querySelector('.theme-toggle').textContent = 
+                savedTheme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro';
+        }
+
+        // Inicialización
+        updateAuthorsList();
+        
+        // Event listeners
+        document.getElementById('testament-selector').addEventListener('change', filterBooks);
+        document.getElementById('category-selector').addEventListener('change', filterBooks);
+        document.getElementById('author-selector').addEventListener('change', filterBooks);
+        document.getElementById('side-menu-toggle').addEventListener('click', toggleSideMenu);
+
+        // Mostrar libros inicialmente
+        filterBooks();
+    </script>
+</body>
+</html>

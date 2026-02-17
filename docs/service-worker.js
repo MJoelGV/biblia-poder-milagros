@@ -27,29 +27,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch handler: network-first for page navigations, cache-first for other requests
+// Deshabilitar el service worker temporalmente
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  // Use network-first for page navigations
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
-          return response;
-        })
-        .catch(() => caches.match(event.request) || caches.match('/index.html'))
-    );
-    return;
-  }
-  // Cache-first for other requests
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
-        return response;
-      });
-    })
-  );
+  // No hacer nada, permitir que las peticiones pasen directamente a la red
+  return;
 });

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes de Estudio - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.8em;
+            margin: 20px 0 30px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .progress-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 20px;
+            margin: 15px 0;
+            height: 25px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .progress-text {
+            text-align: center;
+            margin: 15px 0 5px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .day-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .day-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #4CAF50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .day-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .day-card:hover::before {
+            opacity: 1;
+        }
+        .day-card.completed {
+            border-left: 4px solid #4CAF50;
+            background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+        }
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .day-number {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .day-complete {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+        }
+        .day-complete:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+        }
+        .day-card p {
+            margin: 8px 0 0;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .day-card a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .day-card a:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .day-card a::after {
+            content: '→';
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .day-card a:hover::after {
+            transform: translateX(3px);
+        }
+        @media (max-width: 768px) {
+            .days-container {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2.2em;
+                margin: 10px 0 20px;
+            }
+            .day-card {
+                padding: 15px;
+            }
+        }
+        /* Estilo para el día actual */
+        .day-card.today {
+            border: 2px solid #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+            position: relative;
+        }
+
+        /* Estilos para el menú lateral */
+        .side-menu {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: #2c3e50;
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        }
+
+        .side-menu.active {
+            left: 0;
+        }
+
+        .menu-header {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #3498db;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .side-menu li a {
+            display: block;
+            padding: 15px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .side-menu li a:hover,
+        .side-menu li.active a {
+            background: #34495e;
+        }
+
+        .side-menu li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Overlay cuando el menú está abierto */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 990;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Ajustes para el contenido principal */
+        .plan-container {
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .side-menu.active + .overlay {
+            display: block;
+        }
+        .day-card.today::after {
+            content: 'HOY';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #3498db;
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button class="close-menu" onclick="toggleMenu()">&times;</button>
+        </div>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Página principal</a></li>
+            <li><a href="lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
+            <li><a href="pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
+            <li><a href="audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="memorizados.html"><i class="fas fa-brain"></i> Memorizados</a></li>
+            <li><a href="historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
+            <li><a href="diccionario.html"><i class="fas fa-book-reader"></i> Diccionario</a></li>
+            <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li><a href="temas.html"><i class="fas fa-tags"></i> Temas</a></li>
+            <li class="active"><a href="planes-estudio.html"><i class="fas fa-calendar-check"></i> Planes de Estudio</a></li>
+        </ul>
+    </div>
+    
+    <!-- Botón para abrir el menú -->
+    <button class="menu-toggle" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para cerrar el menú -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <div class="plan-container">
+        <h1>Planes de Estudio Bíblico</h1>
+        
+        <div class="progress-section">
+            <div class="progress-text" id="progress-text">Tu progreso: 0%</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align: center; margin-top: 10px; color: #7f8c8d; font-size: 0.9em;">
+                <i class="fas fa-info-circle"></i> Marca los días como completados a medida que avanzas
+            </div>
+            <div id="welcome-message" class="welcome-message" style="display: none; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                <h3 style="color: #2c3e50; margin-top: 0;">¡Bienvenido a 30 Días con Jesús!</h3>
+                <p style="color: #555; margin: 10px 0;">Comienza tu viaje de 30 días aprendiendo sobre la vida y enseñanzas de Jesús.</p>
+                <p style="color: #555; margin: 10px 0 15px;">Tu progreso se guardará automáticamente.</p>
+                <button onclick="document.getElementById('welcome-message').style.display='none';" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;">Comenzar</button>
+            </div>
+        </div>
+        
+        <div class="days-container" id="days-container">
+            <!-- Los días se generarán con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Plan de estudio: 30 días con Jesús
+        const plan30Dias = [
+            { day: 1, title: "El Nacimiento de Jesús", reference: "Lucas 2:1-20", libro: "LUK", capitulo: "2", versiculo: "1" },
+            { day: 2, title: "El Bautismo de Jesús", reference: "Mateo 3:13-17", libro: "MAT", capitulo: "3", versiculo: "13" },
+            { day: 3, title: "Las Tentaciones en el Desierto", reference: "Mateo 4:1-11", libro: "MAT", capitulo: "4", versiculo: "1" },
+            { day: 4, title: "Las Bienaventuranzas", reference: "Mateo 5:1-12", libro: "MAT", capitulo: "5", versiculo: "1" },
+            { day: 5, title: "La Sal de la Tierra", reference: "Mateo 5:13-16", libro: "MAT", capitulo: "5", versiculo: "13" },
+            { day: 6, title: "El Sermón del Monte (capítulos 5, 6 y 7)", reference: "Mateo 5-7", libro: "MAT", capitulo: "5", versiculo: "1" },
+            { day: 7, title: "La Oración del Señor", reference: "Mateo 6:9-13", libro: "MAT", capitulo: "6", versiculo: "9" },
+            { day: 8, title: "La Pesca Milagrosa", reference: "Lucas 5:1-11", libro: "LUK", capitulo: "5", versiculo: "1" },
+            { day: 9, title: "La Fe del Centurión", reference: "Mateo 8:5-13", libro: "MAT", capitulo: "8", versiculo: "5" },
+            { day: 10, title: "Jesús Calma la Tormenta", reference: "Marcos 4:35-41", libro: "MRK", capitulo: "4", versiculo: "35" },
+            { day: 11, title: "La Hija de Jairo", reference: "Marcos 5:21-43", libro: "MRK", capitulo: "5", versiculo: "21" },
+            { day: 12, title: "La Alimentación de los 5,000", reference: "Juan 6:1-15", libro: "JHN", capitulo: "6", versiculo: "1" },
+            { day: 13, title: "Jesús Camina sobre el Agua", reference: "Mateo 14:22-33", libro: "MAT", capitulo: "14", versiculo: "22" },
+            { day: 14, title: "La Confesión de Pedro", reference: "Mateo 16:13-20", libro: "MAT", capitulo: "16", versiculo: "13" },
+            { day: 15, title: "La Transfiguración", reference: "Mateo 17:1-13", libro: "MAT", capitulo: "17", versiculo: "1" },
+            { day: 16, title: "El Hijo Pródigo", reference: "Lucas 15:11-32", libro: "LUK", capitulo: "15", versiculo: "11" },
+            { day: 17, title: "El Buen Samaritano", reference: "Lucas 10:25-37", libro: "LUK", capitulo: "10", versiculo: "25" },
+            { day: 18, title: "Zaqueo el Recaudador", reference: "Lucas 19:1-10", libro: "LUK", capitulo: "19", versiculo: "1" },
+            { day: 19, title: "Jesús y los Niños", reference: "Marcos 10:13-16", libro: "MRK", capitulo: "10", versiculo: "13" },
+            { day: 20, title: "El Joven Rico", reference: "Marcos 10:17-31", libro: "MRK", capitulo: "10", versiculo: "17" },
+            { day: 21, title: "La Entrada Triunfal", reference: "Juan 12:12-19", libro: "JHN", capitulo: "12", versiculo: "12" },
+            { day: 22, title: "La Última Cena", reference: "Mateo 26:17-30", libro: "MAT", capitulo: "26", versiculo: "17" },
+            { day: 23, title: "Jesús en Getsemaní", reference: "Mateo 26:36-46", libro: "MAT", capitulo: "26", versiculo: "36" },
+            { day: 24, title: "El Juicio de Jesús", reference: "Juan 18:28-40", libro: "JHN", capitulo: "18", versiculo: "28" },
+            { day: 25, title: "La Crucifixión", reference: "Juan 19:16-30", libro: "JHN", capitulo: "19", versiculo: "16" },
+            { day: 26, title: "La Resurrección", reference: "Juan 20:1-18", libro: "JHN", capitulo: "20", versiculo: "1" },
+            { day: 27, title: "Jesús y Tomás", reference: "Juan 20:24-29", libro: "JHN", capitulo: "20", versiculo: "24" },
+            { day: 28, title: "La Pesca Milagrosa (Después de la Resurrección)", reference: "Juan 21:1-14", libro: "JHN", capitulo: "21", versiculo: "1" },
+            { day: 29, title: "La Gran Comisión", reference: "Mateo 28:16-20", libro: "MAT", capitulo: "28", versiculo: "16" },
+            { day: 30, title: "La Ascensión", reference: "Hechos 1:6-11", libro: "ACT", capitulo: "1", versiculo: "6" }
+        ];
+
+        // Cargar el progreso guardado
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('30diasConJesucristo');
+            if (savedProgress) {
+                return JSON.parse(savedProgress);
+            }
+            return { 
+                diasCompletados: [], 
+                ultimoDiaAccedido: 1,
+                fechaInicio: new Date().toISOString()
+            };
+        }
+
+        // Guardar el progreso
+        function saveProgress(progress) {
+            localStorage.setItem('30diasConJesucristo', JSON.stringify(progress));
+            updateProgressBar();
+        }
+
+        // Calcular el día actual del plan (1-30)
+        function calcularDiaActual() {
+            const progress = loadProgress();
+            const fechaInicio = new Date(progress.fechaInicio);
+            const hoy = new Date();
+            
+            // Asegurarse de que la fecha de inicio sea hoy si es la primera vez
+            if (!progress.fechaInicio) {
+                progress.fechaInicio = hoy.toISOString();
+                saveProgress(progress);
+                return 1;
+            }
+            
+            // Calcular la diferencia en días
+            const diffTime = Math.abs(hoy - fechaInicio);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Asegurarse de que el día esté entre 1 y 30
+            return Math.min(Math.max(1, diffDays), 30);
+        }
+
+        // Actualizar la barra de progreso
+        function updateProgressBar() {
+            const progress = loadProgress();
+            const progressPercentage = Math.round((progress.diasCompletados.length / 30) * 100);
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            // Animación suave de la barra de progreso
+            progressBar.style.transition = 'width 1s ease-in-out';
+            progressBar.style.width = `${progressPercentage}%`;
+            
+            // Actualizar texto con animación de conteo
+            let current = parseInt(progressText.textContent) || 0;
+            const increment = progressPercentage > current ? 1 : -1;
+            
+            const updateText = () => {
+                if ((increment > 0 && current < progressPercentage) || 
+                    (increment < 0 && current > progressPercentage)) {
+                    current += increment;
+                    progressText.textContent = `Tu progreso: ${current}%`;
+                    requestAnimationFrame(updateText);
+                } else {
+                    progressText.textContent = `Tu progreso: ${progressPercentage}%`;
+                }
+            };
+            
+            updateText();
+        }
+
+        // Alternar día completado
+        function toggleDiaCompletado(diaNumero, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            const progress = loadProgress();
+            const index = progress.diasCompletados.indexOf(diaNumero);
+            
+            if (index === -1) {
+                // Agregar a completados
+                progress.diasCompletados.push(diaNumero);
+                // Ordenar los días completados
+                progress.diasCompletados.sort((a, b) => a - b);
+                
+                // Efecto visual al marcar como completado
+                const button = event ? event.target.closest('.day-complete') : null;
+                if (button) {
+                    button.innerHTML = '✓ Completado';
+                    button.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    button.parentElement.parentElement.classList.add('completed');
+                }
+            } else {
+                // Quitar de completados
+                progress.diasCompletados.splice(index, 1);
+                
+                // Efecto visual al desmarcar
+                const button = event ? event.target.closest('.day-complete') : null;
+                if (button) {
+                    button.innerHTML = 'Marcar como completado';
+                    button.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                    button.parentElement.parentElement.classList.remove('completed');
+                }
+            }
+            
+            saveProgress(progress);
+            renderDays();
+        }
+
+        // Ir al día actual
+        function irAlDiaActual() {
+            const diaActual = calcularDiaActual();
+            const elementoDia = document.querySelector(`.day-card[data-day="${diaActual}"]`);
+            if (elementoDia) {
+                elementoDia.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                elementoDia.style.animation = 'pulse 1.5s infinite';
+                
+                // Detener la animación después de 3 segundos
+                setTimeout(() => {
+                    elementoDia.style.animation = '';
+                }, 3000);
+            }
+        }
+
+        // Mapeo de códigos de libro a nombres completos
+        const libroANombre = {
+            'MAT': 'Mateo', 'MRK': 'Marcos', 'LUK': 'Lucas', 'JHN': 'Juan', 'ACT': 'Hechos'
+        };
+
+        // Renderizar los días
+        function renderDays() {
+            const progress = loadProgress();
+            const container = document.getElementById('days-container');
+            const diaActual = calcularDiaActual();
+            
+            container.innerHTML = '';
+            
+            plan30Dias.forEach(dia => {
+                const diaElement = document.createElement('div');
+                diaElement.className = 'day-card';
+                diaElement.dataset.day = dia.day;
+                
+                const estaCompleto = progress.diasCompletados.includes(dia.day);
+                const esHoy = dia.day === diaActual;
+                
+                if (esHoy) {
+                    diaElement.classList.add('today');
+                }
+                
+                const nombreLibro = libroANombre[dia.libro] || 'Génesis';
+                const capitulo = dia.capitulo || '1';
+                const referencia = dia.reference;
+                
+                diaElement.innerHTML = `
+                    <div class="day-header">
+                        <span class="day-number">Día ${dia.day}: ${dia.title}</span>
+                        <button class="day-complete" onclick="toggleDiaCompletado(${dia.day}, event)">
+                            ${estaCompleto ? '✓ Completado' : 'Marcar como completado'}
+                        </button>
+                    </div>
+                    <p>Lectura: <a href="#" class="lectura-link" data-book="${nombreLibro}" data-chapter="${capitulo}" data-verse="${dia.versiculo || '1'}">
+                        ${referencia}
+                    </a></p>
+                `;
+                
+                if (estaCompleto) {
+                    diaElement.classList.add('completed');
+                    const button = diaElement.querySelector('.day-complete');
+                    if (button) {
+                        button.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    }
+                }
+                
+                // Hacer que toda la tarjeta sea cliqueable para marcar/desmarcar
+                diaElement.addEventListener('click', (e) => {
+                    // No hacer nada si se hace clic en un enlace o en el botón
+                    if (e.target.tagName === 'A' || e.target.closest('a') || 
+                        e.target.classList.contains('day-complete') || 
+                        e.target.closest('.day-complete')) {
+                        return;
+                    }
+                    toggleDiaCompletado(dia.day, { target: diaElement });
+                });
+                
+                container.appendChild(diaElement);
+            });
+            
+            // Desplazarse al día actual después de un breve retraso
+            setTimeout(irAlDiaActual, 500);
+        }
+
+        // Función para manejar la navegación a un pasaje bíblico
+        function navegarAPasaje(book, chapter, verse = '') {
+            // Construir la URL con los parámetros
+            let url = `lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}`;
+            
+            // Agregar el versículo si está definido
+            if (verse) {
+                url += `&verse=${verse}`;
+            }
+            
+            // Verificar si ya estamos en lectura.html
+            if (window.location.pathname.endsWith('lectura.html')) {
+                // Si ya estamos en lectura.html, cargar el capítulo directamente
+                window.location.href = url;
+            } else {
+                // Si no, redirigir a lectura.html con los parámetros
+                window.location.href = url;
+            }
+        }
+
+        // Función para alternar el menú
+        function toggleMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            const overlay = document.getElementById('overlay');
+            const body = document.body;
+            
+            sideMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Bloquear/desbloquear el scroll del body
+            if (sideMenu.classList.contains('active')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+            }
+        }
+        
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.side-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                toggleMenu();
+            });
+        });
+        
+        // Manejador para los enlaces de lectura
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.lectura-link');
+            if (link) {
+                e.preventDefault();
+                const book = link.dataset.book;
+                const chapter = link.dataset.chapter;
+                const verse = link.dataset.verse || '';
+                navegarAPasaje(book, chapter, verse);
+            }
+        });
+        
+        // Cerrar menú con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const sideMenu = document.getElementById('side-menu');
+                if (sideMenu.classList.contains('active')) {
+                    toggleMenu();
+                }
+            }
+        });
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar si es la primera vez
+            const progress = loadProgress();
+            if (!progress.fechaInicio) {
+                // Si es la primera vez, establecer la fecha de inicio como hoy
+                progress.fechaInicio = new Date().toISOString();
+                saveProgress(progress);
+            }
+            
+            renderDays();
+            updateProgressBar();
+            
+            // Configurar el botón flotante
+            const floatingButton = document.createElement('button');
+            floatingButton.id = 'floating-button';
+            floatingButton.innerHTML = 'Ir a hoy <i class="fas fa-arrow-down"></i>';
+            floatingButton.onclick = irAlDiaActual;
+            document.body.appendChild(floatingButton);
+            
+            // Añadir animación al botón flotante
+            setTimeout(() => {
+                floatingButton.style.transform = 'translateY(0)';
+                floatingButton.style.opacity = '1';
+            }, 1000);
+            
+            // Manejar clics en los enlaces de lectura
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('.lectura-link');
+                if (link) {
+                    e.preventDefault();
+                    const book = link.dataset.book;
+                    const chapter = link.dataset.chapter;
+                    const verse = link.dataset.verse || '';
+                    navegarAPasaje(book, chapter, verse);
+                }
+            });
+            
+            // Mostrar mensaje de bienvenida si es el primer día
+            if (progress.diasCompletados.length === 0) {
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'block';
+                }
+            }
+        });
+
+        // Animación de pulso para resaltar
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
