@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<!-- Build timestamp: 2025-04-25T21:20:00Z -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lectura - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- corregido path para iOS icon -->
+    <link rel="apple-touch-icon" href="../icons/pymicon.png">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --verse-font-size: 16px;
+            --menu-bg: rgba(0, 0, 0, 0.6);
+            --menu-blur: blur(10px);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #121212;
+            --menu-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        .controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .controls.hidden {
+            transform: translateY(-100%);
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-icon:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .select-css {
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .select-css:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .select-css option {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 8px;
+        }
+
+        .search-wrapper { display: inline-flex; align-items: center; }
+        .search-wrapper .search-input { display: none; }
+        .search-wrapper.active .search-input { 
+            display: inline-block;
+            max-width: 180px;
+            opacity: 1;
+            margin-left: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .pericopes-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .pericopes-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+
+        /* Controles de fuente */
+        .font-controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 8px;
+        }
+        
+        .font-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .font-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* Asegurar contraste en modo oscuro */
+        [data-theme="dark"] .font-button {
+            background: #4a6b57;
+        }
+
+        .chapter-content {
+            max-width: 1200px;
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        .chapter-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0 30px 0;
+            padding: 10px;
+        }
+
+        .verse {
+            margin-bottom: 0.8em;
+            padding: 0.4em;
+            line-height: 1.6;
+            border-radius: 4px;
+            transition: background-color 1s ease;
+        }
+
+        .verse:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .verse.highlighted {
+            background-color: rgba(76, 175, 80, 0.15);
+        }
+        /* Dark mode: highlighted verse text black for readability */
+        [data-theme="dark"] .verse.highlighted {
+            color: #000;
+        }
+        .verse.bookmarked { background: #fffa8c; }
+        .verse.comment { border-left: 4px solid var(--primary-color); }
+        .verse.memorized { background: #c6f4d6; }
+        /* Dark mode: texto negro para bookmarked y memorized */
+        [data-theme="dark"] .verse.bookmarked,
+        [data-theme="dark"] .verse.memorized {
+            color: #000;
+        }
+
+        .verse-number {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 0.5em;
+            font-size: 0.9em;
+        }
+
+        .verse-text {
+            font-size: var(--verse-font-size);
+            line-height: 1.6;
+        }
+
+        .navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 12px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .navigation-bottom.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #chapter-select {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .chapter-grid, .verse-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .chapter-grid.active, .verse-grid.active {
+            display: flex;
+        }
+        .chapter-grid .grid-content, .verse-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        /* Header for modal grids */
+        .chapter-grid .grid-header, .verse-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .close-grid {
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        /* Botón de título: línea única con indicador */
+        .chapter-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .chapter-btn:hover,
+        .chapter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chapter-btn::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-left: 8px;
+        }
+
+        .chapter-btn.active::after {
+            opacity: 1;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        #search-results-count {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        /* Botón cerrar resultados de búsqueda */
+        .search-results .close-search {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .search-results .close-search:hover {
+            color: var(--primary-color);
+        }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Modal para comentarios */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1300;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1301;
+            max-width: 90%; width: 300px;
+        }
+        .modal textarea {
+            width: 100%; height: 100px; resize: vertical;
+        }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+        }
+        .modal-actions button {
+            padding: 6px 12px;
+        }
+
+        /* Verso marcado y menú contextual */
+        .verse-menu {
+            display: none;
+            position: absolute;
+            background: var(--bg-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1200;
+            padding: 8px;
+        }
+        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
+        .verse-menu li {
+            padding: 8px; cursor: pointer;
+        }
+        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
+        /* Responsive: wrap controls and selectors on small screens */
+        @media (max-width: 768px) {
+            .top-row, .navigation {
+                flex-wrap: wrap;
+            }
+            /* Reduce spacing on mobile */
+            .top-row > *, .navigation > * {
+                margin: 3px 5px;
+            }
+            .navigation {
+                margin: 8px 0;
+            }
+            /* Allow selectors and input to shrink and limit width */
+            .select-css, .search-input {
+                max-width: 80px;
+                flex: 0 1 auto;
+            }
+        }
+        /* Responsive: menú más compacto en móviles */
+        @media (max-width: 600px) {
+            .controls { padding: 8px; }
+            .controls .home-icon,
+            .controls .theme-toggle {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                padding: 4px;
+            }
+            .selector-row {
+                padding: 8px;
+                top: 48px; /* altura de controls reducida */
+            }
+            #version-selector {
+                width: 180px;
+                min-width: 150px;
+            }
+            #book-select {
+                width: 120px;
+                min-width: 100px;
+            }
+        }
+        /* Extra controls (hidden por defecto) */
+        .extra-controls {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 20px;
+        }
+        .extra-controls.active {
+            display: flex;
+        }
+        /* Main menu toggle button */
+        .main-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-menu-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: var(--bg-color);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 1001;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+        
+        /* Outline grid styling */
+        .outline-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .outline-grid.active {
+            display: flex;
+        }
+        .outline-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        .outline-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        /* Verse grid styling and hide dropdowns */
+        #chapter-select, #verse-select {
+            display: none !important;
+        }
+
+        /* Mostrar grid de capítulos cuando esté activo */
+        .chapter-grid.active { display: flex; }
+    </style>
+    <script>
+        let strongsData = {};
+        fetch('strongs.json')
+          .then(res => res.json())
+          .then(data => { strongsData = data; });
+    </script>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li id="chapter-menu-toggle">Capítulos</li>
+        </ul>
+    </div>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            <select id="version-selector" class="select-css">
+                <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
+                <option value="TLA">Traducción en Lenguaje Actual</option>
+                <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
+                <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
+                <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
+            </select>
+            <select id="book-select" class="select-css"></select>
+            <button id="pericopes-button" class="pericopes-button" title="Ver perícopas del capítulo">Perícopas</button>
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button">🔍</button>
+                <input id="search-input" class="search-input" placeholder="Buscar versículo" />
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" title="Cambiar tema">🌙</button>
+            <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
+        </div>
+        <div id="extra-controls" class="extra-controls">
+            <div class="font-controls">
+                <button id="decrease-font" class="font-button" onclick="adjustFontSize(-1)" title="Disminuir tamaño de fuente">A-</button>
+                <button id="increase-font" class="font-button" onclick="adjustFontSize(1)" title="Aumentar tamaño de fuente">A+</button>
+                <button id="reset-font" class="font-button" title="Restablecer tamaño de fuente">↺</button>
+            </div>
+        </div>
+    </div> <!-- cierre .controls -->
+
+    <!-- Overlay de resultados de búsqueda -->
+    <div id="search-results" class="search-results">
+        <div class="search-results-header">
+            <div id="search-results-count">0 resultados</div>
+            <button id="close-search" class="close-search">&times;</button>
+        </div>
+        <div id="results-content"></div>
+    </div>
+
+    <!-- Menú contextual para versículos -->
+    <div id="verse-menu" class="verse-menu">
+        <ul>
+            <li id="menu-toggle-bookmark">Marcar versículo</li>
+            <li id="menu-add-comment">Agregar comentario</li>
+            <li id="menu-memorize-verse">Memorizar versículo</li>
+            <li id="menu-copy-verse">Copiar versículo</li>
+        </ul>
+    </div>
+
+    <!-- Modal de comentarios -->
+    <div id="comment-backdrop" class="modal-backdrop"></div>
+    <div id="comment-modal" class="modal">
+        <h3>Comentario</h3>
+        <textarea id="modal-comment-input"></textarea>
+        <div class="modal-actions">
+            <button id="modal-save-btn">Guardar</button>
+            <button id="modal-cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="chapter-grid" id="chapter-grid"></div>
+    <div class="verse-grid" id="verse-grid"></div>
+    <div class="outline-grid" id="outline-grid"></div>
+    <!-- outline-grid removed temporarily until feature complete -->
+    <div class="chapter-content" id="chapter-content">
+        <div id="verses"></div>
+    </div> <!-- cierre .chapter-content -->
+
+    <div class="navigation-bottom" id="navigation-bottom">
+        <button class="nav-button" id="prev-button">← Anterior</button>
+        <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
+        <button class="nav-button" id="next-button">Siguiente →</button>
+    </div>
+
+    <div id="strongs-backdrop" class="modal-backdrop"></div>
+    <div id="strongs-modal" class="modal">
+        <div id="strongs-content"></div>
+        <button id="strongs-close">Cerrar</button>
+    </div>
+
+    <script>
+        let xmlDoc = null;
+        let currentBook = '';
+        let currentChapter = 1;
+        let currentVerse = 0;
+        let currentVersion = 'Reina-Valera-1960';
+        const audioPlayer = null;
+        let playlist = [];
+        let trackIndex = 0;
+
+        // Controlar la visibilidad de los menús al hacer scroll
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        let lastTouchY = 0;
+        let touchStartY = 0;
+        let menuVisible = true;
+
+        // Cargar preferencia de tema SOLO UNA VEZ
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Función para manejar el scroll
+        function handleScroll() {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    const scrollingDown = currentScrollY > lastScrollY;
+                    
+                    // Solo cambiamos la visibilidad si el scroll es significativo
+                    if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                        menuVisible = !scrollingDown;
+                        document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                        document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        // Función para manejar el toque
+        function handleTouch(e) {
+            const currentY = e.touches[0].clientY;
+            
+            if (e.type === 'touchstart') {
+                touchStartY = currentY;
+                lastTouchY = currentY;
+                return;
+            }
+            
+            const deltaY = currentY - lastTouchY;
+            
+            // Solo cambiamos la visibilidad si el movimiento es significativo
+            if (Math.abs(deltaY) > 30) {
+                menuVisible = deltaY > 0;
+                document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+            }
+            
+            lastTouchY = currentY;
+        }
+
+        // Event listeners para scroll y touch
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        document.addEventListener('touchstart', handleTouch, { passive: true });
+        document.addEventListener('touchmove', handleTouch, { passive: true });
+
+        // Mostrar menús al tocar cerca de ellos
+        document.addEventListener('touchstart', (e) => {
+            const touchY = e.touches[0].clientY;
+            const windowHeight = window.innerHeight;
+            
+            // Si el toque está cerca del borde superior o inferior
+            if (touchY < 50 || touchY > windowHeight - 50) {
+                menuVisible = true;
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('navigation-bottom').classList.remove('hidden');
+            }
+        }, { passive: true });
+
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.getElementById('theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Event listeners para los botones de navegación
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentChapter > 1) {
+                currentChapter--;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+        document.getElementById('next-button').addEventListener('click', () => {
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            if (currentChapter < totalChapters) {
+                currentChapter++;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+
+        // Función para cargar capítulos
+        async function loadChapters() {
+            const book = document.getElementById('book-select').value;
+            if (!book) return;
+
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            const chapterSelect = document.getElementById('chapter-select');
+            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
+                Array.from(chapters).map((_, index) => `
+                    <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                        Capítulo ${index + 1}
+                    </option>
+                `).join('');
+        }
+
+        // Función para cargar capítulo
+        async function loadChapter() {
+            const versesContainer = document.getElementById('verses');
+            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+
+            try {
+                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapter) throw new Error('No se encontró el capítulo');
+
+                let html = `
+                    <div class="chapter-title">
+                        ${currentBook} - Capítulo ${currentChapter}
+                    </div>
+                `;
+                
+                const verses = chapter.getElementsByTagName('v');
+                html += Array.from(verses).map(verse => {
+                    const verseNum = verse.getAttribute('n');
+                    const isHighlighted = parseInt(verseNum) === currentVerse;
+                    return `
+                        <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
+                             data-verse="${verseNum}"
+                             onclick="highlightVerse(this)">
+                            <span class="verse-number">${verseNum}</span>
+                            <span class="verse-text">${
+                                Array.from(verse.childNodes)
+                                    .filter(n => n.nodeType === Node.TEXT_NODE)
+                                    .map(n => n.textContent)
+                                    .join('').trim()
+                            }</span>
+                        </div>
+                    `;
+                }).join('');
+
+                versesContainer.innerHTML = html;
+
+                if (currentVerse > 0) {
+                    const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                    if (verseElement) {
+                        setTimeout(() => {
+                            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // difuminar highlight después de unos segundos
+                            setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
+                        }, 100);
+                    }
+                }
+                
+                // Agregar botón de perícopas después de cargar el capítulo
+                try {
+                    agregarBotonPericopas();
+                } catch (error) {
+                    console.error('Error al agregar botón de perícopas:', error);
+                }
+            } catch (error) {
+                console.error('Error loading chapter:', error);
+                versesContainer.innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+            }
+        }
+
+        // Función para actualizar controles
+        function updateControls() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            
+            if (!currentBook) {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
+
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar texto del botón de capítulo
+            document.getElementById('current-chapter-button').textContent = currentChapter;
+        }
+
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
+
+        // Función para cargar la Biblia
+        async function loadBible(version) {
+            try {
+                const url = `biblia-files/${version}.xmm`;
+                console.log('[BIBLIA] Intentando cargar directamente:', url);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    // Si falla, intentar con la ruta completa
+                    const fullUrl = window.location.href.replace(/\/lectura\.html.*$/, '') + '/biblia-files/' + version + '.xmm';
+                    console.log('[BIBLIA] Intentando con ruta completa:', fullUrl);
+                    const fullResponse = await fetch(fullUrl);
+                    
+                    if (!fullResponse.ok) {
+                        throw new Error('No se pudo cargar el archivo: ' + url + ' (HTTP ' + response.status + ')' + 
+                                      ' ni ' + fullUrl + ' (HTTP ' + fullResponse.status + ')');
+                    }
+                    
+                    const xmlText = await fullResponse.text();
+                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                } else {
+                    const xmlText = await response.text();
+                    xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                }
+                
+                currentVersion = version;
+                
+                // Actualizar el selector de versiones
+                const versionSelect = document.getElementById('version-selector');
+                if (versionSelect) {
+                    versionSelect.value = version;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('[BIBLIA] Error loading Bible:', error);
+                throw new Error('No se pudo cargar el documento XML de la Biblia');
+            }
+        }
+
+        // Event listener para el selector de versiones
+        document.getElementById('version-selector').addEventListener('change', async (e) => {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Cargando versión...';
+            document.getElementById('verses').innerHTML = '';
+            document.getElementById('verses').appendChild(loadingDiv);
+            
+            await loadBible(e.target.value);
+            setupBookSelector();
+            if (currentBook) {
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
+            }
+        });
+
+        // Configurar selector de libros
+        function setupBookSelector() {
+            const books = xmlDoc.getElementsByTagName('b');
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+            
+            Array.from(books).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.getAttribute('n');
+                option.textContent = book.getAttribute('n');
+                bookSelect.appendChild(option);
+            });
+        }
+
+        // Función para cargar desde URL y carga por defecto del primer libro
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+            const verseParam = params.get('verse');
+
+            if (bookParam) {
+                currentBook = bookParam;
+                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+                currentVerse = verseParam ? parseInt(verseParam) : 0;
+            } else {
+                // Cargar primer libro por defecto
+                const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
+                currentBook = firstBookElem.getAttribute('n');
+                currentChapter = 1;
+                currentVerse = 0;
+            }
+
+            // Actualizar selector de libros y cargar capítulo
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
+        }
+
+        // Iniciar la aplicación
+        async function init() {
+            try {
+                console.log('[Init] Iniciando carga de la Biblia...');
+                console.log(`[Init] Cargando versión: ${currentVersion}`);
+                await loadBible(currentVersion);
+                setupBookSelector();
+                loadFromUrl();
+                console.log('[Init] Aplicación inicializada correctamente');
+            } catch (error) {
+                console.error('[Init] Error durante la inicialización:', error);
+                document.getElementById('verses').innerHTML = `
+                    <div class="error">
+                        <p>Error al cargar la Biblia. Por favor, recarga la página.</p>
+                        <p>${error.message}</p>
+                    </div>`;
+            }
+        }
+
+        init();
+
+        // Deshabilitado Service Worker para evitar caché en lectura.html
+        // if('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('service-worker.js');
+        // }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Cargar tamaño de fuente guardado
+        const savedSize = localStorage.getItem('verseFontSize');
+        const defaultSize = 16; // Tamaño de fuente predeterminado
+        const minSize = 12;     // Tamaño mínimo de fuente
+        const maxSize = 24;     // Tamaño máximo de fuente
+        const step = 2;         // Incremento/decremento de tamaño
+        
+        // Función para actualizar el tamaño de fuente mostrado
+        function updateFontSizeDisplay(size) {
+            const sizeDisplay = document.querySelector('.font-size-display');
+            if (sizeDisplay) {
+                sizeDisplay.textContent = `${size}px`;
+            }
+        }
+        
+        // Inicializar tamaño de fuente
+        if (savedSize) {
+            const size = parseFloat(savedSize);
+            if (!isNaN(size) && size >= minSize && size <= maxSize) {
+                document.documentElement.style.setProperty('--verse-font-size', size + 'px');
+                updateFontSizeDisplay(size);
+            } else {
+                // Si el valor guardado no es válido, usar el valor predeterminado
+                document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+                localStorage.setItem('verseFontSize', defaultSize);
+                updateFontSizeDisplay(defaultSize);
+            }
+        } else {
+            // Usar valor predeterminado si no hay valor guardado
+            document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+            updateFontSizeDisplay(defaultSize);
+        }
+        
+        // Ajustar tamaño de fuente globalmente
+        function adjustFontSize(delta) {
+            const root = document.documentElement;
+            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size'));
+            // Calcular nuevo tamaño con límites
+            let newSize = current + (delta * step);
+            newSize = Math.max(minSize, Math.min(newSize, maxSize));
+            
+            // Aplicar solo si hubo cambio
+            if (newSize !== current) {
+                root.style.setProperty('--verse-font-size', newSize + 'px');
+                localStorage.setItem('verseFontSize', newSize);
+                updateFontSizeDisplay(newSize);
+            }
+        }
+        
+        // Función para restablecer el tamaño de fuente
+        function resetFontSize() {
+            document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+            localStorage.setItem('verseFontSize', defaultSize);
+            updateFontSizeDisplay(defaultSize);
+        }
+        
+        // Añadir manejadores de eventos una vez que el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejador para el botón de reinicio
+            const resetBtn = document.getElementById('reset-font');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetFontSize);
+            }
+            
+            // Manejadores para los botones de tamaño de fuente
+            const decreaseBtn = document.getElementById('decrease-font');
+            const increaseBtn = document.getElementById('increase-font');
+            
+            if (decreaseBtn) {
+                decreaseBtn.addEventListener('click', () => adjustFontSize(-1));
+            }
+            if (increaseBtn) {
+                increaseBtn.addEventListener('click', () => adjustFontSize(1));
+            }
+        });
+    </script>
+    <script>
+        // Toggle side menu
+        const menuToggle = document.getElementById('main-menu-toggle');
+        const extraControls = document.getElementById('extra-controls');
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        
+        if (menuToggle && extraControls) {
+            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        if (sideMenuToggleBtn && sideMenu) {
+            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        }
+        // Cerrar menú lateral al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+        // Agregar listener al item de capítulos
+        const chapterMenuToggle = document.getElementById('chapter-menu-toggle');
+        if (chapterMenuToggle) chapterMenuToggle.addEventListener('click', () => {
+            showChapterGrid();
+            sideMenu.classList.remove('active');
+        });
+    </script>
+    <script>
+        // Chapter & verse grid selection
+        function showChapterGrid() {
+            const grid = document.getElementById('chapter-grid');
+            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            const chapterButtons = Array.from(chapters).map((_, i) =>
+                `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
+            ).join('');
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
+                </div>
+                ${chapterButtons}
+            </div>`;
+            grid.classList.add('active');
+        }
+        function showVerseGrid() {
+            const grid = document.getElementById('verse-grid');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            const buttons = Array.from(verses)
+                .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
+                .join('');
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
+                </div>
+                ${buttons}
+            </div>`;
+            grid.classList.add('active');
+        }
+        // Handle chapter button click
+        document.getElementById('chapter-grid').addEventListener('click', e => {
+            const chap = e.target.dataset.chap;
+            if (!chap) return;
+            currentChapter = parseInt(chap, 10);
+            document.getElementById('chapter-grid').classList.remove('active');
+            updateControls();
+            showVerseGrid();
+        });
+        // Handle verse button click
+        document.getElementById('verse-grid').addEventListener('click', e => {
+            if (!e.target.dataset.verse) return;
+            currentVerse = parseInt(e.target.dataset.verse);
+            document.getElementById('verse-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+        });
+        // Close modal grids
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('close-grid')) {
+                document.getElementById(e.target.dataset.target).classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        // Bind botón 'Capítulo' inferior al grid principal
+        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
+        // Bind selector de libro para abrir grid de capítulos
+        document.getElementById('book-select').addEventListener('change', e => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            updateControls();
+            updateURL();
+            showChapterGrid();
+        });
+    </script>
+    <script>
+        // Populate verse-select with verses of current chapter
+        function populateVerseSelect() {
+            const verseSelect = document.getElementById('verse-select');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            verseSelect.innerHTML = '<option value="" disabled selected>Selecciona un versículo</option>';
+            Array.from(verses).forEach(v => {
+                const num = v.getAttribute('n');
+                const opt = document.createElement('option');
+                opt.value = num;
+                opt.textContent = 'Versículo ' + num;
+                verseSelect.appendChild(opt);
+            });
+            verseSelect.disabled = false;
+        }
+        // Handle verse selection
+        document.getElementById('verse-select').addEventListener('change', (e) => {
+            currentVerse = parseInt(e.target.value);
+            loadChapter();
+            updateControls();
+            updateURL();
+        });
+    </script>
+    <script>
+        // Obtiene los temas directamente del XML
+        function getOutlines(book, chapter) {
+            const nodes = xmlDoc.querySelectorAll(`b[n="${book}"] c[n="${chapter}"] o`);
+            return Array.from(nodes).map(o => ({
+                title: o.getAttribute('title'),
+                start: parseInt(o.getAttribute('start'), 10),
+                end: parseInt(o.getAttribute('end'), 10)
+            }));
+        }
+
+        // Muestra modal de temas
+        function showOutlineGrid() {
+            const grid = document.getElementById('outline-grid');
+            const outlines = getOutlines(currentBook, currentChapter);
+            const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
+            if (outlines.length === 0) {
+                grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
+            } else {
+                const buttons = outlines.map(o =>
+                    `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
+                ).join('');
+                grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            }
+            grid.classList.add('active');
+        }
+        // Maneja selección de tema
+        document.getElementById('outline-grid').addEventListener('click', e => {
+            if (!e.target.dataset.start) return;
+            const start = parseInt(e.target.dataset.start, 10);
+            currentVerse = start;
+            document.getElementById('outline-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+            setTimeout(() => {
+                const el = document.querySelector(`.verse[data-verse="${start}"]`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        });
+        // Listener Botón Temas
+        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+    </script>
+    <script>
+        // Annotate strong numbers
+        function annotateStrongNumbers() {
+            const verseEls = document.querySelectorAll('.verse-text');
+            const wordMap = {};
+            for (const code in strongsData) {
+                const entry = strongsData[code];
+                wordMap[entry.word.toLowerCase()] = code;
+            }
+            verseEls.forEach(el => {
+                el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
+                    const code = wordMap[match.toLowerCase()];
+                    return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+                });
+            });
+        }
+        document.body.addEventListener('click', e => {
+            const sw = e.target.closest('.strong-word');
+            if (!sw) return;
+            const info = strongsData[sw.dataset.strong];
+            if (!info) return;
+            document.getElementById('strongs-content').innerHTML = '<strong>' + info.word + ' (' + sw.dataset.strong + ')</strong><br>' +
+                'Translit: ' + info.translit + '<br>' +
+                'Def: ' + info.meaning;
+            document.getElementById('strongs-backdrop').style.display = 'block';
+            document.getElementById('strongs-modal').style.display = 'block';
+        });
+        document.getElementById('strongs-close').addEventListener('click', () => {
+            document.getElementById('strongs-backdrop').style.display = 'none';
+            document.getElementById('strongs-modal').style.display = 'none';
+        });
+        const origLoadChapter = window.loadChapter;
+        window.loadChapter = async function() {
+            await origLoadChapter();
+            annotateStrongNumbers();
+            applySavedStates();
+        };
+        // Reaplicar marcas guardadas: marcados, comentarios y memorizados
+        function applySavedStates() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            document.querySelectorAll('#verses .verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bookmarks.includes(key)) v.classList.add('bookmarked');
+                if (comments[key]) v.classList.add('comment');
+                if (memorized.includes(key)) v.classList.add('memorized');
+            });
+        }
+        // Aplicar anotaciones y estados guardados al cargar la página
+        window.addEventListener('load', () => {
+            annotateStrongNumbers();
+            applySavedStates();
+        });
+    </script>
+    <script>
+        // Búsqueda de versículos en toda la Biblia y resaltado de término
+        const searchWrapper = document.querySelector('.search-wrapper');
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const resultsContent = document.getElementById('results-content');
+        const closeSearchBtn = document.getElementById('close-search');
+        // Escapar texto para RegExp
+        function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\\]\\]/g, '\\\\$&'); }
+        searchButton.addEventListener('click', () => {
+            searchWrapper.classList.toggle('active');
+            if (searchWrapper.classList.contains('active')) searchInput.focus();
+        });
+
+        // Manejador para el botón de perícopas
+        document.getElementById('pericopes-button').addEventListener('click', () => {
+            mostrarPericopas();
+        });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                const rawQuery = searchInput.value.trim();
+                if (!rawQuery) return;
+                const query = rawQuery.toLowerCase();
+                resultsContent.innerHTML = '';
+                // Buscar en todo xmlDoc (toda la Biblia)
+                const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
+                // Modificado para buscar solo palabras completas
+                const regex = new RegExp(`\\b${escapeRegExp(query)}\\b`, 'gi');
+                const matches = verses.filter(v => {
+                    // Buscar solo palabras completas usando límites de palabra \b
+                    return new RegExp(`\\b${escapeRegExp(query)}\\b`, 'i').test(v.textContent);
+                });
+                const resultsCount = document.getElementById('search-results-count');
+                resultsCount.textContent = `${matches.length} ${matches.length === 1 ? 'resultado' : 'resultados'}`;
+                
+                if (matches.length) {
+                    matches.forEach(v => {
+                        const verseNum = v.getAttribute('n');
+                        const chapterNum = v.parentNode.getAttribute('n');
+                        const bookName = v.parentNode.parentNode.getAttribute('n');
+                        const text = v.textContent;
+                        // Resaltar término
+                        const highlighted = text.replace(regex, match => `<mark>${match}</mark>`);
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `<div class="result-book">${bookName} ${chapterNum}:${verseNum}</div><div class="result-text">${highlighted}</div>`;
+                        item.addEventListener('click', () => {
+                            searchResults.classList.remove('active');
+                            // Navegar a capítulo y versículo
+                            currentBook = bookName;
+                            currentChapter = parseInt(chapterNum);
+                            currentVerse = parseInt(verseNum);
+                            document.getElementById('book-select').value = currentBook;
+                            loadChapters(); loadChapter(); updateControls(); updateURL();
+                            setTimeout(() => {
+                                const el = document.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        });
+                        resultsContent.appendChild(item);
+                    });
+                    searchResults.classList.add('active');
+                } else {
+                    resultsCount.textContent = '0 resultados';
+                    alert('No se encontraron resultados');
+                }
+            }
+        });
+        closeSearchBtn.addEventListener('click', () => {
+            searchResults.classList.remove('active');
+        });
+    </script>
+    <script>
+        // Menú contextual al hacer doble clic en versículo
+        const verseContainer = document.getElementById('verses');
+        const verseMenu = document.getElementById('verse-menu');
+        let activeVerseEl = null;
+        verseContainer.addEventListener('dblclick', e => {
+            activeVerseEl = e.target.closest('.verse');
+            if (!activeVerseEl) return;
+            const rect = activeVerseEl.getBoundingClientRect();
+            verseMenu.style.display = 'block';
+            verseMenu.style.left = `${rect.left + window.scrollX + 10}px`;
+            verseMenu.style.top = `${rect.top + window.scrollY + 10}px`;
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#verse-menu')) {
+                verseMenu.style.display = 'none';
+            }
+        });
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('bookmarked');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            if (activeVerseEl.classList.contains('bookmarked')) {
+                if (!bookmarks.includes(key)) bookmarks.push(key);
+            } else {
+                bookmarks = bookmarks.filter(k => k !== key);
+            }
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            const comment = document.getElementById('modal-comment-input').value.trim();
+            if (comment) {
+                activeVerseEl.classList.add('comment');
+                activeVerseEl.dataset.comment = comment;
+                const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+                const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+                comments[key] = comment;
+                localStorage.setItem('comments', JSON.stringify(comments));
+            }
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('memorized');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            if (activeVerseEl.classList.contains('memorized')) {
+                if (!memorized.includes(key)) memorized.push(key);
+            } else {
+                memorized = memorized.filter(k => k !== key);
+            }
+            localStorage.setItem('memorized', JSON.stringify(memorized));
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-copy-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            const text = activeVerseEl.querySelector('.verse-text').textContent;
+            navigator.clipboard.writeText(text);
+            verseMenu.style.display = 'none';
+        });
+    </script>
+    <!-- SOLUCION FINAL: Perícopas 100% en español con datos completos -->
+    <script src="pericopas-datos-completo.js?v=20250519-2031"></script>
+    
+    <script>
+        // Sistema simplificado de perícopas en español
+        (function() {
+            // Desactivar cualquier sistema anterior
+            if (window.initPericopesInterface) window.initPericopesInterface = function() {};
+            if (window.showPericopes) window.showPericopes = function() {};
+            
+            // Inicializar cuando se carga la página
+            window.addEventListener('DOMContentLoaded', function() {
+                console.log('Inicializando perícopas 100% en español');
+                
+                // Procesar parámetros de URL para navegación directa
+                setTimeout(function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const libro = urlParams.get('book');
+                    const capitulo = urlParams.get('chapter');
+                    const versiculo = urlParams.get('verse');
+                    
+                    if (libro && capitulo) {
+                        console.log(`Intentando navegar a ${libro} ${capitulo}:${versiculo || '1'}`);
+                        cargarCapitulo(libro, capitulo, versiculo);
+                    }
+                }, 500);
+                
+                // Agregar botón de perícopas cuando cargue un capítulo
+                agregarBotonPericopas();
+                const observer = new MutationObserver(function() {
+                    agregarBotonPericopas();
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            });
+            
+            // Función para cargar capítulos
+            function cargarCapitulo(libro, capitulo, versiculo) {
+                // Simular clics en selectores
+                const selectorLibro = document.querySelector('select.book-select');
+                const selectorCapitulo = document.querySelector('select.chapter-select');
+                
+                if (selectorLibro && selectorCapitulo) {
+                    // Seleccionar libro
+                    for (let i = 0; i < selectorLibro.options.length; i++) {
+                        if (selectorLibro.options[i].textContent.includes(libro)) {
+                            selectorLibro.selectedIndex = i;
+                            selectorLibro.dispatchEvent(new Event('change'));
+                            break;
+                        }
+                    }
+                    
+                    // Esperar un momento y seleccionar capítulo
+                    setTimeout(() => {
+                        for (let i = 0; i < selectorCapitulo.options.length; i++) {
+                            if (selectorCapitulo.options[i].value == capitulo) {
+                                selectorCapitulo.selectedIndex = i;
+                                selectorCapitulo.dispatchEvent(new Event('change'));
+                                break;
+                            }
+                        }
+                        
+                        // Esperar a que cargue el capítulo y navegar al versículo
+                        if (versiculo) {
+                            setTimeout(() => {
+                                const elementoVersiculo = document.querySelector(`.verse[data-verse="${versiculo}"]`);
+                                if (elementoVersiculo) {
+                                    elementoVersiculo.scrollIntoView({ behavior: 'smooth' });
+                                    elementoVersiculo.classList.add('highlight');
+                                    setTimeout(() => elementoVersiculo.classList.remove('highlight'), 2000);
+                                }
+                            }, 500);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Función para mostrar perícopas
+            window.mostrarPericopas = function() {
+                console.log('[Perícopas] Iniciando búsqueda de perícopas...');
+                
+                // Obtener libro y capítulo actuales
+                const titulo = document.querySelector('.chapter-title');
+                if (!titulo) {
+                    console.error('[Perícopas] No se pudo encontrar el título del capítulo');
+                    return;
+                }
+                
+                const tituloTexto = titulo.textContent.trim();
+                console.log('[Perícopas] Título del capítulo:', tituloTexto);
+                
+                // Intentar con el formato "Libro - Capítulo X" primero
+                let match = tituloTexto.match(/(.+?)\s*-\s*Capítulo\s*(\d+)/i);
+                
+                // Si no coincide, intentar con el formato anterior por si acaso
+                if (!match) {
+                    match = tituloTexto.match(/([A-Za-z\u00C0-\u00FF\s]+)\s+(\d+)/);
+                }
+                
+                if (!match) {
+                    console.error('[Perícopas] No se pudo extraer libro y capítulo del título');
+                    return;
+                }
+                
+                let nombreLibro = match[1].trim();
+                const capitulo = match[2];
+                
+                // Si el nombre del libro está vacío, usar la variable global currentBook
+                if (!nombreLibro && window.currentBook) {
+                    nombreLibro = window.currentBook;
+                    console.log('[Perícopas] Usando currentBook como nombre del libro:', nombreLibro);
+                }
+                
+                const libroKey = obtenerCodigoLibro(nombreLibro);
+                
+                console.log('[Perícopas] Datos extraídos:', { 
+                    nombreLibro, 
+                    capitulo, 
+                    libroKey,
+                    currentBook: window.currentBook // Variable global que debería existir
+                });
+                
+                // Verificar si PERICOPES_DATA está disponible
+                if (typeof window.PERICOPES_DATA === 'undefined') {
+                    console.error('[Perícopas] Error: PERICOPES_DATA no está definido');
+                    alert('Error: No se pudieron cargar los datos de perícopas');
+                    return;
+                }
+                
+                // Intentar con el código del libro y también con el nombre del libro actual
+                const clavesABuscar = [
+                    `${libroKey}-${capitulo}`,
+                    `${window.currentBook || ''}-${capitulo}`.toUpperCase()
+                ];
+                
+                console.log('[Perícopas] Buscando perícopas con claves:', clavesABuscar);
+                
+                let pericopas = [];
+                let claveEncontrada = '';
+                
+                // Buscar en todas las claves posibles
+                for (const clave of clavesABuscar) {
+                    if (window.PERICOPES_DATA[clave]) {
+                        pericopas = window.PERICOPES_DATA[clave];
+                        claveEncontrada = clave;
+                        break;
+                    }
+                }
+                
+                console.log('[Perícopas] Resultados de búsqueda:', {
+                    claveEncontrada,
+                    cantidadPericopas: pericopas.length,
+                    muestrasClaves: Object.keys(window.PERICOPES_DATA).slice(0, 5)
+                });
+                
+                if (pericopas.length === 0) {
+                    const mensaje = `No hay perícopas disponibles para ${nombreLibro} ${capitulo} (${libroKey}-${capitulo})`;
+                    console.warn('[Perícopas]', mensaje);
+                    alert(mensaje);
+                    return;
+                }
+                
+                // Crear modal si no existe
+                crearModalPericopas();
+                
+                // Actualizar contenido
+                const contenido = document.getElementById('pericopes-content');
+                contenido.innerHTML = '';
+                pericopas.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'pericope-item';
+                    div.innerHTML = `
+                        <div class="pericope-title">${p.title}</div>
+                        <div class="pericope-verses">Versículos ${p.verses}</div>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('pericopes-modal').style.display = 'none';
+                        document.getElementById('pericopes-backdrop').style.display = 'none';
+                        const verso = document.querySelector(`.verse[data-verse="${p.startVerseId}"]`);
+                        if (verso) {
+                            verso.scrollIntoView({ behavior: 'smooth' });
+                            verso.classList.add('highlight');
+                            setTimeout(() => verso.classList.remove('highlight'), 2000);
+                        }
+                    };
+                    contenido.appendChild(div);
+                });
+                
+                // Mostrar modal
+                document.getElementById('pericopes-modal').style.display = 'block';
+                document.getElementById('pericopes-backdrop').style.display = 'block';
+            };
+            
+            // Función para crear modal de perícopas
+            function crearModalPericopas() {
+                if (document.getElementById('pericopes-modal')) return;
+                
+                // Estilos
+                const estilos = document.createElement('style');
+                estilos.textContent = `
+                    #pericopes-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                      background-color: rgba(0,0,0,0.5); z-index: 9998; }
+                    #pericopes-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                      background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                      z-index: 9999; max-width: 90%; width: 500px; max-height: 80vh; overflow-y: auto; }
+                    #pericopes-header { display: flex; justify-content: space-between; align-items: center;
+                      margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+                    #pericopes-title { font-size: 18px; font-weight: bold; }
+                    #pericopes-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+                    .pericope-item { padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;
+                      border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+                    .pericope-item:hover { background-color: #eaeaea; }
+                    .pericope-title { font-weight: bold; margin-bottom: 5px; }
+                    .pericope-verses { font-size: 12px; color: #666; }
+                    #pericopas-boton { display: inline-block; background-color: var(--primary-color, #4CAF50);
+                      color: white; padding: 6px 12px; border-radius: 4px; margin: 10px 0; cursor: pointer; }
+                    .verse.highlight { background-color: #ffff99; transition: background-color 1s; }
+                `;
+                document.head.appendChild(estilos);
+                
+                // Backdrop
+                const backdrop = document.createElement('div');
+                backdrop.id = 'pericopes-backdrop';
+                backdrop.style.display = 'none';
+                backdrop.onclick = () => {
+                    document.getElementById('pericopes-modal').style.display = 'none';
+                    backdrop.style.display = 'none';
+                };
+                document.body.appendChild(backdrop);
+                
+                // Modal
+                const modal = document.createElement('div');
+                modal.id = 'pericopes-modal';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div id="pericopes-header">
+                        <div id="pericopes-title">Perícopas del capítulo</div>
+                        <button id="pericopes-close">&times;</button>
+                    </div>
+                    <div id="pericopes-content"></div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Botón cerrar
+                document.getElementById('pericopes-close').onclick = () => {
+                    modal.style.display = 'none';
+                    backdrop.style.display = 'none';
+                };
+            }
+            
+            // Función para agregar botón de perícopas
+            function agregarBotonPericopas() {
+                console.log('[Perícopas] Iniciando agregarBotonPericopas');
+                
+                // Verificar si ya existe el botón
+                if (document.getElementById('pericopas-boton')) {
+                    console.log('[Perícopas] El botón ya existe');
+                    return;
+                }
+                
+                // Verificar si los datos de perícopas están disponibles
+                console.log('[Perícopas] Verificando datos de perícopas...');
+                if (typeof PERICOPES_DATA === 'undefined') {
+                    console.warn('[Perícopas] Los datos de perícopas no están disponibles (PERICOPES_DATA no está definido)');
+                    console.log('[Perícopas] Verificando si window.PERICOPES_DATA existe:', typeof window.PERICOPES_DATA);
+                    return;
+                }
+                
+                console.log('[Perícopas] Datos de perícopas disponibles:', Object.keys(PERICOPES_DATA).length > 0);
+                console.log('[Perícopas] Muestra de claves de perícopas:', Object.keys(PERICOPES_DATA).slice(0, 5));
+                
+                // Obtener libro y capítulo actual
+                const libroActual = document.getElementById('book-select')?.value;
+                const capituloActual = parseInt(document.getElementById('chapter-select')?.value) || 1;
+                
+                if (!libroActual) return;
+                
+                // Obtener el código del libro
+                const codigoLibro = window.obtenerCodigoLibro?.(libroActual);
+                if (!codigoLibro) {
+                    console.warn('[Perícopas] No se pudo obtener el código del libro:', libroActual);
+                    return;
+                }
+                
+                const clavePericopa = `${codigoLibro}-${capituloActual}`;
+                const pericopas = PERICOPES_DATA[clavePericopa];
+                
+                // Si no hay perícopas para este capítulo, no mostrar el botón
+                if (!pericopas || pericopas.length === 0) {
+                    console.log(`[Perícopas] No hay perícopas para ${clavePericopa}`);
+                    console.log(`[Perícopas] Claves disponibles en PERICOPES_DATA:`, Object.keys(PERICOPES_DATA));
+                    return;
+                }
+                
+                console.log(`[Perícopas] Encontradas ${pericopas.length} perícopas para ${clavePericopa}:`, pericopas);
+                
+                // Crear el botón
+                const boton = document.createElement('button');
+                boton.id = 'pericopas-boton';
+                boton.className = 'pericopas-btn';
+                boton.innerHTML = '📖 Ver perícopas del capítulo';
+                
+                // Añadir estilos al botón
+                const style = document.createElement('style');
+                style.textContent = `
+                    .pericopas-btn {
+                        display: block;
+                        margin: 15px auto;
+                        padding: 8px 16px;
+                        background-color: var(--primary-color, #4CAF50);
+                        color: white;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:hover {
+                        background-color: #45a049;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:active {
+                        transform: translateY(0);
+                    }
+                    .pericopas-container {
+                        margin: 20px 0;
+                        padding: 15px;
+                        background-color: rgba(76, 175, 80, 0.1);
+                        border-radius: 8px;
+                        border-right: 4px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item {
+                        margin: 15px 0;
+                        padding: 12px;
+                        background: white;
+                        border-radius: 6px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        border-left: 3px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item h4 {
+                        margin: 0 0 8px 0;
+                        color: #2c3e50;
+                        font-size: 1.1em;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 5px;
+                    }
+                    .pericopa-item p {
+                        margin: 8px 0 0 0;
+                        color: #34495e;
+                        font-size: 0.95em;
+                        line-height: 1.6;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Función para mostrar/ocultar las perícopas
+                function togglePericopas() {
+                    let contenedor = document.getElementById('pericopas-container');
+                    
+                    // Si ya existe, alternar visibilidad
+                    if (contenedor) {
+                        if (contenedor.style.display === 'none') {
+                            contenedor.style.display = 'block';
+                            boton.textContent = 'Ocultar perícopas';
+                        } else {
+                            contenedor.style.display = 'none';
+                            boton.textContent = '📖 Ver perícopas del capítulo';
+                        }
+                        return;
+                    }
+                    
+                    // Si no existe, crear el contenedor
+                    contenedor = document.createElement('div');
+                    contenedor.id = 'pericopas-container';
+                    contenedor.className = 'pericopas-container';
+                    
+                    // Agregar título
+                    const titulo = document.createElement('h3');
+                    titulo.textContent = `Perícopas de ${libroActual} ${capituloActual}`;
+                    titulo.style.marginTop = '0';
+                    titulo.style.color = 'var(--primary-color, #4CAF50)';
+                    contenedor.appendChild(titulo);
+                    
+                    // Agregar cada perícopa
+                    pericopas.forEach((pericopa, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'pericopa-item';
+                        
+                        const tituloPericopa = document.createElement('h4');
+                        tituloPericopa.textContent = pericopa.title || `Perícopa ${index + 1}`;
+                        
+                        // Convertir saltos de línea en párrafos
+                        const contenido = document.createElement('div');
+                        const parrafos = (pericopa.text || '').split('\n').filter(p => p.trim() !== '');
+                        
+                        if (parrafos.length > 0) {
+                            parrafos.forEach(parrafo => {
+                                if (parrafo.trim() !== '') {
+                                    const p = document.createElement('p');
+                                    p.textContent = parrafo.trim();
+                                    contenido.appendChild(p);
+                                }
+                            });
+                        } else {
+                            const p = document.createElement('p');
+                            p.textContent = pericopa.text || '';
+                            contenido.appendChild(p);
+                        }
+                        
+                        item.appendChild(tituloPericopa);
+                        item.appendChild(contenido);
+                        contenedor.appendChild(item);
+                    });
+                    
+                    // Insertar después del título del capítulo
+                    const tituloCap = document.querySelector('h2');
+                    if (tituloCap) {
+                        tituloCap.insertAdjacentElement('afterend', contenedor);
+                    } else {
+                        // Si no hay título, insertar al principio del contenedor de versículos
+                        const versContainer = document.getElementById('verses');
+                        if (versContainer) {
+                            versContainer.insertBefore(contenedor, versContainer.firstChild);
+                        }
+                    }
+                    
+                    boton.textContent = 'Ocultar perícopas';
+                }
+                
+                // Asignar evento al botón
+                boton.onclick = togglePericopas;
+                
+                // Insertar el botón después del título del capítulo
+                const tituloCap = document.querySelector('h2');
+                if (tituloCap) {
+                    tituloCap.insertAdjacentElement('afterend', boton);
+                } else {
+                    // Si no hay título, insertar al principio del contenedor de versículos
+                    const versContainer = document.getElementById('verses');
+                    if (versContainer) {
+                        versContainer.insertBefore(boton, versContainer.firstChild);
+                    }
+                }
+                
+                console.log(`[Perícopas] Botón agregado para ${clavePericopa} (${pericopas.length} perícopas)`);
+            }
+            
+            // Obtener código de libro
+            function obtenerCodigoLibro(nombre) {
+                const mapeoLibros = {
+                    'génesis': 'GEN', 'genesis': 'GEN',
+                    'éxodo': 'EXO', 'exodo': 'EXO',
+                    'levítico': 'LEV', 'levitico': 'LEV',
+                    'números': 'NUM', 'numeros': 'NUM',
+                    'deuteronomio': 'DEU',
+                    'josué': 'JOS', 'josue': 'JOS',
+                    'jueces': 'JDG',
+                    'rut': 'RUT',
+                    'samuel': 'SA', '1 samuel': '1SA', '2 samuel': '2SA',
+                    'reyes': 'KI', '1 reyes': '1KI', '2 reyes': '2KI',
+                    'crónicas': 'CH', 'cronicas': 'CH', '1 crónicas': '1CH', '2 crónicas': '2CH',
+                    'esdras': 'EZR',
+                    'nehemías': 'NEH', 'nehemias': 'NEH',
+                    'ester': 'EST',
+                    'job': 'JOB',
+                    'salmos': 'PSA', 'salmo': 'PSA',
+                    'proverbios': 'PRO',
+                    'eclesiastés': 'ECC', 'eclesiastes': 'ECC',
+                    'cantares': 'SNG',
+                    'isaías': 'ISA', 'isaias': 'ISA',
+                    'jeremías': 'JER', 'jeremias': 'JER',
+                    'lamentaciones': 'LAM',
+                    'ezequiel': 'EZK',
+                    'daniel': 'DAN',
+                    'oseas': 'HOS',
+                    'joel': 'JOL',
+                    'amós': 'AMO', 'amos': 'AMO',
+                    'abdías': 'OBA', 'abdias': 'OBA',
+                    'jonás': 'JON', 'jonas': 'JON',
+                    'miqueas': 'MIC',
+                    'nahúm': 'NAM', 'nahum': 'NAM',
+                    'habacuc': 'HAB',
+                    'sofonías': 'ZEP', 'sofonias': 'ZEP',
+                    'hageo': 'HAG',
+                    'zacarías': 'ZEC', 'zacarias': 'ZEC',
+                    'malaquías': 'MAL', 'malaquias': 'MAL',
+                    'mateo': 'MAT',
+                    'marcos': 'MRK',
+                    'lucas': 'LUK',
+                    'juan': 'JHN',
+                    'hechos': 'ACT',
+                    'romanos': 'ROM',
+                    'corintios': 'CO', '1 corintios': '1CO', '2 corintios': '2CO',
+                    'gálatas': 'GAL', 'galatas': 'GAL',
+                    'efesios': 'EPH',
+                    'filipenses': 'PHP',
+                    'colosenses': 'COL',
+                    'tesalonicenses': 'TH', '1 tesalonicenses': '1TH', '2 tesalonicenses': '2TH',
+                    'timoteo': 'TI', '1 timoteo': '1TI', '2 timoteo': '2TI',
+                    'tito': 'TIT',
+                    'filemón': 'PHM', 'filemon': 'PHM',
+                    'hebreos': 'HEB',
+                    'santiago': 'JAS',
+                    'pedro': 'PE', '1 pedro': '1PE', '2 pedro': '2PE',
+                    'juan': 'JN', '1 juan': '1JN', '2 juan': '2JN', '3 juan': '3JN',
+                    'judas': 'JUD',
+                    'apocalipsis': 'REV'
+                };
+                
+                // Normalizar nombre (quitar acentos, minúsculas)
+                const normalizado = nombre.normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase();
+                
+                // Buscar coincidencia exacta
+                if (mapeoLibros[normalizado]) return mapeoLibros[normalizado];
+                
+                // Extraer número si existe (ej. "1 Corintios" -> "1" y "Corintios")
+                const match = normalizado.match(/^(\d+)\s*(.+)$/); 
+                if (match && mapeoLibros[match[2]]) {
+                    return match[1] + mapeoLibros[match[2]];
+                }
+                
+                // Si no se encuentra, devolver el mismo nombre (para debug)
+                return nombre;
+            }
+        })();
+    </script>
+    
+    <!-- Cargar datos de perícopas primero -->
+    <script src="pericopas-datos-completo.js"></script>
+    <script>
+        // Verificar que las perícopas estén correctamente cargadas
+        console.log('[Perícopas] Estado de carga:', {
+            pericopesDisponibles: typeof PERICOPES_DATA !== 'undefined',
+            totalCapitulos: typeof PERICOPES_DATA !== 'undefined' ? Object.keys(PERICOPES_DATA).length : 0
+        });
+        
+        // Mostrar algunos ejemplos de perícopas cargadas
+        if (typeof PERICOPES_DATA !== 'undefined') {
+            // Mostrar un ejemplo de Tito capítulo 1
+            const titoCap1 = PERICOPES_DATA['TIT-1'] || [];
+            console.log('[Perícopas] Ejemplo de Tito 1:', titoCap1);
+            
+            // Mostrar libros disponibles (solo los primeros 5 para no saturar la consola)
+            const libros = Object.keys(PERICOPES_DATA);
+            console.log('[Perícopas] Total de capítulos con perícopas:', libros.length);
+            console.log('[Perícopas] Ejemplos de capítulos con perícopas:', libros.slice(0, 5));
+            
+            // Verificar si hay datos para el libro actual
+            function verificarPericopasDisponibles(libro, capitulo) {
+                const clave = `${libro}-${capitulo}`;
+                const tienePericopas = PERICOPES_DATA[clave] && PERICOPES_DATA[clave].length > 0;
+                console.log(`[Perícopas] Verificando ${clave}:`, tienePericopas ? 'Disponible' : 'No disponible');
+                return tienePericopas;
+            }
+            
+            // Hacer la función accesible globalmente
+            window.verificarPericopasDisponibles = verificarPericopasDisponibles;
+        } else {
+            console.error('[Perícopas] Error: No se pudo cargar el objeto PERICOPES_DATA');
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

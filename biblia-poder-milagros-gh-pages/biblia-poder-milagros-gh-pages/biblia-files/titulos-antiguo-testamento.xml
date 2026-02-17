@@ -1,0 +1,44 @@
+<titulos>
+  <libro nombre="Génesis">
+    <titulo nombre="La creación" capitulo="1" desde="1" hasta="31" />
+    <titulo nombre="El hombre en el Edén" capitulo="2" desde="1" hasta="25" />
+    <titulo nombre="La caída del hombre" capitulo="3" desde="1" hasta="24" />
+    <titulo nombre="Caín y Abel" capitulo="4" desde="1" hasta="26" />
+    <titulo nombre="Los descendientes de Adán" capitulo="5" desde="1" hasta="32" />
+    <titulo nombre="La corrupción de la humanidad" capitulo="6" desde="1" hasta="22" />
+    <titulo nombre="El diluvio" capitulo="7" desde="1" hasta="24" />
+    <titulo nombre="El fin del diluvio" capitulo="8" desde="1" hasta="22" />
+    <titulo nombre="Pacto de Dios con Noé" capitulo="9" desde="1" hasta="29" />
+    <titulo nombre="Los descendientes de Noé" capitulo="10" desde="1" hasta="32" />
+    <titulo nombre="La torre de Babel" capitulo="11" desde="1" hasta="32" />
+    <titulo nombre="Llamamiento de Abram" capitulo="12" desde="1" hasta="20" />
+    <!-- ...más títulos de Génesis... -->
+  </libro>
+  <libro nombre="Éxodo">
+    <titulo nombre="Israel oprimido en Egipto" capitulo="1" desde="1" hasta="22" />
+    <titulo nombre="Nacimiento de Moisés" capitulo="2" desde="1" hasta="10" />
+    <titulo nombre="Moisés huye de Egipto" capitulo="2" desde="11" hasta="25" />
+    <titulo nombre="La zarza ardiente" capitulo="3" desde="1" hasta="22" />
+    <titulo nombre="Moisés y Aarón ante Faraón" capitulo="5" desde="1" hasta="23" />
+    <!-- ...más títulos de Éxodo... -->
+  </libro>
+  <libro nombre="Levítico">
+    <titulo nombre="Leyes de los holocaustos" capitulo="1" desde="1" hasta="17" />
+    <titulo nombre="Ofrendas de cereal" capitulo="2" desde="1" hasta="16" />
+    <titulo nombre="Ofrendas de paz" capitulo="3" desde="1" hasta="17" />
+    <!-- ...más títulos de Levítico... -->
+  </libro>
+  <libro nombre="Números">
+    <titulo nombre="Censo de Israel" capitulo="1" desde="1" hasta="54" />
+    <titulo nombre="Los levitas" capitulo="3" desde="1" hasta="51" />
+    <titulo nombre="El voto nazareo" capitulo="6" desde="1" hasta="27" />
+    <!-- ...más títulos de Números... -->
+  </libro>
+  <libro nombre="Deuteronomio">
+    <titulo nombre="Moisés repasa la ley" capitulo="1" desde="1" hasta="46" />
+    <titulo nombre="Los diez mandamientos" capitulo="5" desde="1" hasta="33" />
+    <titulo nombre="La gran exhortación" capitulo="6" desde="1" hasta="25" />
+    <!-- ...más títulos de Deuteronomio... -->
+  </libro>
+  <!-- ...estructura lista para el resto del AT... -->
+</titulos>
