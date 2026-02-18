@@ -40,34 +40,6 @@
             padding: 0 20px;
             box-sizing: border-box;
         }
-        .logo-watermark {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 60px;
-            height: 60px;
-            background-image: url('icons/pymicon.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.8;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .top-signature {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Great Vibes', cursive;
-            font-weight: 600;
-            font-size: 1.6em;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
-        }
         #verse-text { font-size:1.5em; margin-bottom:15px; line-height:1.6; text-align:center; color: #fff!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5)!important; }
         #verse-ref {
             font-style: italic;
@@ -137,8 +109,8 @@
         /* Verse search selectors */
         #search-panel { text-align: center; margin: 20px 0; }
         #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
-        .signature { text-align: center; font-family: 'Great Vibes', cursive; font-weight: 600; font-size: 1.4em; margin: 10px 0; color: var(--text-color); letter-spacing: 0.5px; }
-        #verse-card .signature { position: absolute; bottom: 10px; left: 0; width: 100%; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); font-family: 'Great Vibes', cursive; font-weight: 600; font-size: 1.4em; }
+        .signature { text-align: center; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.2em; margin: 10px 0; color: var(--text-color); letter-spacing: 0.5px; }
+        #verse-card .signature { position: absolute; bottom: 10px; left: 0; width: 100%; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
         .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #f9f9f9; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
         .side-menu.active { left: 0; }
         .side-menu ul { list-style:none; padding:20px; margin:0; }
@@ -184,16 +156,15 @@
         <h2>Elegir fondo</h2>
         <div class="swiper-container" id="carousel">
             <div class="swiper-wrapper">
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"></div>
                 <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80"></div>
                 <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"></div>
                 <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=80"></div>
+                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"></div>
                 <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80"></div>
             </div>
         </div>
     </div>
@@ -215,7 +186,7 @@
             // Antiguo Testamento
             genesis: 'Génesis', exodus: 'Éxodo', leviticus: 'Levítico', numbers: 'Números', deuteronomy: 'Deuteronomio',
             joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel', kings1: '1 Reyes', kings2: '2 Reyes',
-            psalms: 'Salmos', proverbs: 'Proverbios', songofsongs: 'Cantares',
+            psalms: 'Salmos', proverbs: 'Proverbios',
             isaiah: 'Isaías', jeremiah: 'Jeremías', lamentations: 'Lamentaciones', ezekiel: 'Ezequiel', daniel: 'Daniel',
             hosea: 'Oseas', joel: 'Joel', amos: 'Amós', obadiah: 'Abdías', jonah: 'Jonás', micah: 'Miqueas', nahum: 'Nahúm',
             habakkuk: 'Habacuc', zephaniah: 'Sofonías', haggai: 'Hageo', zechariah: 'Zacarías', malachi: 'Malaquías',
@@ -256,27 +227,15 @@
             centeredSlides: true,
             loop: true,
             loopedSlides: 6,
-            simulateTouch: true,
-            allowTouchMove: true,
         });
 
-        swiper.on('init', () => {
-            loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg);
-            
-            // Agregar evento click a todas las imágenes
-            document.querySelectorAll('.bg-thumb').forEach(img => {
-                img.addEventListener('click', () => {
-                    console.log('URL de imagen clickeada:', img.dataset.bg);
-                    loadBg(img.dataset.bg);
-                });
-            });
-        });
-        
         swiper.on('slideChange', () => {
             const slide = swiper.slides[swiper.activeIndex];
             const img = slide.querySelector('.bg-thumb');
             loadBg(img.dataset.bg);
         });
+
+        swiper.on('init', () => loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg));
         swiper.init();
 
         function populateBookSelect() {
@@ -330,8 +289,7 @@
         }
 
         function updateVerse() {
-            const topSig = '<div class="top-signature">Biblia de Poder y Milagros</div>';
-            const logo = '<div class="logo-watermark"></div>';
+            const sig = '<div class="signature">Biblia de Poder y Milagros</div>';
             const name = getBookName(bookParam);
             const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===name);
             if (!bNode) { console.error('Book not found:', name); verseCard.textContent = 'Libro no encontrado'; return; }
@@ -340,7 +298,7 @@
             const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
             if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
             if (vNode) {
-                verseCard.innerHTML = `${topSig}<div id="text-box"><div id="verse-ref">${name} ${chapter}:${verse}</div><div id="verse-text">${vNode.textContent}</div></div>${logo}`;
+                verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>${sig}`;
             }
         }
 
@@ -394,8 +352,10 @@
                 versionSelect.addEventListener('change', () => { const p=new URLSearchParams(window.location.search); p.set('version', versionSelect.value); window.location.search=p.toString(); });
                 // Verse del día si no hay parámetros URL
                 if (!bookParam || !chapter || !verse) {
-                    // Verso por defecto si no hay parámetros
-                    verseCard.innerHTML = `<div class="top-signature">Biblia de Poder y Milagros</div><div id="text-box"><div id="verse-ref">Juan 3:16</div><div id="verse-text">Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</div></div><div class="logo-watermark"></div>`;
+                    const daily = getDailyVerse();
+                    bookParam = daily.slug;
+                    chapter = daily.chapter;
+                    verse = daily.verse;
                 }
                 // Populate book selector
                 populateBookSelect();
