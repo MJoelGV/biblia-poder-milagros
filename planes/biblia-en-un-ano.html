@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblia en un Año - Plan de Estudio</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="manifest" href="../manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.8em;
+            margin: 20px 0 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .plan-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .plan-description {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .progress-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 20px;
+            margin: 15px 0;
+            height: 25px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .progress-text {
+            text-align: center;
+            margin: 15px 0 5px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .day-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .day-card.today {
+            border: 2px solid #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+        .day-card.completed {
+            border-left: 4px solid #4CAF50;
+            background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+        }
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .day-number {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .day-complete {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+        }
+        .day-complete:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+        }
+        .day-card p {
+            margin: 8px 0 0;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .day-card a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .day-card a:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .day-card a::after {
+            content: '→';
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .day-card a:hover::after {
+            transform: translateX(3px);
+        }
+        .reading-plan {
+            margin-top: 20px;
+        }
+        .month-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .month-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .week {
+            margin-bottom: 30px;
+        }
+        .week:last-child {
+            margin-bottom: 0;
+        }
+        .week-title {
+            font-weight: 600;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .reading-day {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .reading-day:last-child {
+            border-bottom: none;
+        }
+        .day-checkbox {
+            margin-right: 10px;
+        }
+        .day-content {
+            flex-grow: 1;
+        }
+        .day-reference {
+            color: #3498db;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .day-reference:hover {
+            text-decoration: underline;
+        }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .back-button i {
+            margin-right: 5px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2.2em;
+                margin: 10px 0 20px;
+            }
+            .days-container {
+                grid-template-columns: 1fr;
+            }
+            .plan-header {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button class="close-menu" onclick="toggleMenu()">&times;</button>
+        </div>
+        <ul>
+            <li><a href="../index.html"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="../lectura.html"><i class="fas fa-bible"></i> Leer Biblia</a></li>
+            <li><a href="../pericopas-standalone.html"><i class="fas fa-book"></i> Perícopas</a></li>
+            <li><a href="../audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="../memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
+            <li><a href="../historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
+            <li><a href="../diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
+            <li><a href="../bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="../comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li class="active"><a href="index.html"><i class="fas fa-calendar-check"></i> Planes de Estudio</a></li>
+            <li><a href="../topics.html"><i class="fas fa-tags"></i> Temas</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        <a href="index.html" class="back-button"><i class="fas fa-arrow-left"></i> Volver a Planes</a>
+        
+        <h1>Biblia en un Año</h1>
+        
+        <div class="plan-header">
+            <p class="plan-description">
+                Este plan de lectura te guiará a través de toda la Biblia en 365 días. Cada día incluye pasajes del 
+                Antiguo y Nuevo Testamento, junto con una selección de Salmos o Proverbios. ¡Comienza tu viaje a través 
+                de la Palabra de Dios hoy mismo!
+            </p>
+        </div>
+        
+        <!-- Sección de progreso -->
+        <div class="progress-section">
+            <h2>Tu Progreso</h2>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p class="progress-text" id="progress-text">0 de 365 días completados (0%)</p>
+            <button class="day-complete" id="go-to-today" style="display: block; margin: 0 auto;">Ir al día de hoy</button>
+        </div>
+        
+        <!-- Plan de lectura -->
+        <div class="reading-plan" id="reading-plan">
+            <!-- El plan de lectura se generará con JavaScript -->
+            <div style="text-align: center; padding: 20px; color: #666;">
+                <p>Cargando plan de lectura...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Plan de lectura de la Biblia en un año
+        const readingPlan = [
+            // Mes 1: Enero
+            {
+                month: 'Enero',
+                weeks: [
+                    {
+                        title: 'Semana 1',
+                        days: [
+                            { day: 1, reference: 'Génesis 1-3', completed: false },
+                            { day: 2, reference: 'Génesis 4-6', completed: false },
+                            { day: 3, reference: 'Génesis 7-9', completed: false },
+                            { day: 4, reference: 'Génesis 10-12', completed: false },
+                            { day: 5, reference: 'Génesis 13-15', completed: false },
+                            { day: 6, reference: 'Génesis 16-18', completed: false },
+                            { day: 7, reference: 'Génesis 19-21', completed: false }
+                        ]
+                    },
+                    // ... más semanas ...
+                ]
+            }
+            // ... más meses ...
+        ];
+
+
+        // Función para alternar el menú
+        function toggleMenu() {
+            const menu = document.getElementById('side-menu');
+            if (menu.style.width === '250px') {
+                menu.style.width = '0';
+                document.body.style.overflow = 'auto';
+            } else {
+                menu.style.width = '250px';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Cerrar menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('side-menu');
+            const menuButton = document.querySelector('.menu-button');
+            if (event.target !== menu && event.target !== menuButton && !menu.contains(event.target)) {
+                menu.style.width = '0';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Cargar progreso guardado
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('bibliaEnUnAno');
+            if (savedProgress) {
+                return JSON.parse(savedProgress);
+            }
+            return { completedDays: [] };
+        }
+
+        // Guardar progreso
+        function saveProgress(progress) {
+            localStorage.setItem('bibliaEnUnAno', JSON.stringify(progress));
+            updateProgressBar(progress);
+        }
+
+        // Actualizar barra de progreso
+        function updateProgressBar(progress) {
+            const totalDays = 365; // Total de días en el plan
+            const completedDays = progress.completedDays.length;
+            const progressPercent = Math.round((completedDays / totalDays) * 100);
+            
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('progress-text').textContent = 
+                `${completedDays} de ${totalDays} días completados (${progressPercent}%)`;
+        }
+
+        // Marcar día como completado
+        function toggleDayCompleted(dayNumber) {
+            const progress = loadProgress();
+            const index = progress.completedDays.indexOf(dayNumber);
+            
+            if (index === -1) {
+                // Marcar como completado
+                progress.completedDays.push(dayNumber);
+            } else {
+                // Desmarcar
+                progress.completedDays.splice(index, 1);
+            }
+            
+            saveProgress(progress);
+            renderReadingPlan();
+        }
+
+        // Ir al día de hoy
+        function goToToday() {
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), 0, 1); // 1 de enero del año actual
+            const dayOfYear = Math.floor((today - startDate) / (24 * 60 * 60 * 1000)) + 1;
+            
+            const element = document.getElementById(`day-${dayOfYear}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('highlight');
+                setTimeout(() => {
+                    element.classList.remove('highlight');
+                }, 2000);
+            }
+        }
+
+        // Renderizar el plan de lectura
+        function renderReadingPlan() {
+            const progress = loadProgress();
+            const planContainer = document.getElementById('reading-plan');
+            let html = '';
+            
+            // Generar el plan mes por mes
+            readingPlan.forEach(month => {
+                html += `
+                    <div class="month-section">
+                        <h2 class="month-title">${month.month}</h2>
+                `;
+                
+                // Generar semanas
+                month.weeks.forEach((week, weekIndex) => {
+                    html += `
+                        <div class="week">
+                            <div class="week-title">${week.title}</div>
+                    `;
+                    
+                    // Generar días
+                    week.days.forEach(day => {
+                        const isCompleted = progress.completedDays.includes(day.day);
+                        const dayClass = isCompleted ? 'completed' : '';
+                        
+                        html += `
+                            <div class="day-card ${dayClass}" id="day-${day.day}">
+                                <div class="day-header">
+                                    <span class="day-number">Día ${day.day}</span>
+                                    <button class="day-complete" data-day="${day.day}">
+                                        ${isCompleted ? '✓ Completado' : 'Marcar como completado'}
+                                    </button>
+                                </div>
+                                <p>${day.reference}</p>
+                                <a href="../lectura.html?ref=${encodeURIComponent(day.reference)}" class="read-link">Leer ahora</a>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>'; // Cerrar semana
+                });
+                
+                html += '</div>'; // Cerrar mes
+            });
+            
+            planContainer.innerHTML = html;
+            
+            // Agregar event listeners a los botones
+            document.querySelectorAll('.day-complete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dayNumber = parseInt(this.getAttribute('data-day'));
+                    toggleDayCompleted(dayNumber);
+                });
+            });
+        }
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar barra de progreso
+            const progress = loadProgress();
+            updateProgressBar(progress);
+            
+            // Renderizar plan de lectura
+            renderReadingPlan();
+            
+            // Configurar botón "Ir al día de hoy"
+            document.getElementById('go-to-today').addEventListener('click', goToToday);
+        });
+    </script>
+</body>
+</html>
