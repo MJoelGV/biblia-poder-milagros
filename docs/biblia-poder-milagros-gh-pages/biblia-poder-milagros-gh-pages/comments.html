@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis comentarios - Biblia de Poder y Milagros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-color, #f9f9f9); color: #333; }
+        .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
+        .comment { max-width: 800px; margin: 20px auto; background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s ease; }
+        .comment:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .comment-header { font-weight: bold; margin-bottom: 8px; color: var(--primary-color, #4CAF50); }
+        .comment-link { text-align: right; margin-top: 10px; font-size: 0.8em; color: #9c27b0; font-style: italic; }    
+        .nav { text-align: center; margin-top: 10px; }
+        .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
+        /* Menú lateral */
+        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: var(--bg-color, #fff); box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
+        .side-menu.active { left: 0; }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle { background: none; border: none; font-size: 24px; color: white; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='temas.html'">Temas</li>
+        </ul>
+    </div>
+    <div class="header">
+        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+        <h1>Mis comentarios</h1>
+    </div>
+    <div id="comments-container"></div>
+    <script>
+        const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+        const container = document.getElementById('comments-container');
+        const keys = Object.keys(comments);
+        if (!keys.length) {
+            const div = document.createElement('div');
+            div.textContent = 'No tienes comentarios.';
+            container.appendChild(div);
+        } else {
+            keys.forEach(key => {
+                const [book, chapter, verse] = key.split('-');
+                const div = document.createElement('div');
+                div.className = 'comment';
+                
+                // Almacenar los datos del versículo para la navegación
+                div.dataset.book = book;
+                div.dataset.chapter = chapter;
+                div.dataset.verse = verse;
+                
+                const header = document.createElement('div');
+                header.className = 'comment-header';
+                header.textContent = `${book} ${chapter}:${verse}`;
+                
+                const text = document.createElement('div');
+                text.textContent = comments[key];
+                
+                const linkHint = document.createElement('div');
+                linkHint.className = 'comment-link';
+                linkHint.textContent = 'Clic para ir al versículo';
+                
+                div.appendChild(header);
+                div.appendChild(text);
+                div.appendChild(linkHint);
+                
+                // Añadir evento de clic para navegar al versículo
+                div.addEventListener('click', function() {
+                    window.location.href = `lectura.html?book=${this.dataset.book}&chapter=${this.dataset.chapter}&verse=${this.dataset.verse}`;
+                });
+                
+                container.appendChild(div);
+            });
+        }
+    </script>
+    <script>
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn) sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

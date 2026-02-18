@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temas Bíblicos - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .themes-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .theme-card {
+            background: var(--bg-color);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .theme-header {
+            padding: 20px;
+            background: rgba(76, 175, 80, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 0;
+        }
+
+        .subthemes-list {
+            padding: 15px;
+            background: var(--bg-color);
+        }
+
+        .subtheme-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: rgba(76, 175, 80, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subtheme-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateX(5px);
+        }
+
+        .subtheme-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .subtheme-item h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        /* Menú lateral */
+        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #f9f9f9; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
+        .side-menu.active { left: 0; }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle { background: none; border: none; font-size: 24px; color: #4CAF50; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        .side-menu-toggle:hover { background-color: rgba(76,175,80,0.1); border-radius: 50%; }
+
+        @media (max-width: 768px) {
+            .themes-container {
+                padding: 10px;
+            }
+
+            .theme-card {
+                margin: 10px;
+            }
+
+            .theme-header {
+                padding: 15px;
+            }
+
+            .subtheme-item {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li onclick="window.location.href='topics.html'">Temas</li>
+        </ul>
+    </div>
+
+    <div class="hero">
+        <div class="hero-content">
+            <div class="navigation-top">
+                <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            </div>
+            <h1>Temas Bíblicos</h1>
+            <p>Explora versículos bíblicos organizados por temas</p>
+        </div>
+    </div>
+
+    <div class="themes-container" id="themes-container"></div>
+
+    <script>
+        async function loadTemas() {
+            try {
+                const response = await fetch('biblia-files/temas-versiculos.xml');
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                const temas = xml.getElementsByTagName('tema');
+                displayTemas(temas);
+            } catch (error) {
+                console.error('Error loading temas:', error);
+            }
+        }
+
+        function displayTemas(temas) {
+            const container = document.getElementById('themes-container');
+            container.innerHTML = '';
+
+            Array.from(temas).forEach(tema => {
+                const temaName = tema.getAttribute('nombre');
+                const themeCard = document.createElement('div');
+                themeCard.className = 'theme-card';
+                
+                themeCard.innerHTML = `
+                    <div class="theme-header">
+                        <h2 class="theme-title">${temaName}</h2>
+                    </div>
+                    <div class="subthemes-list">
+                        ${Array.from(tema.getElementsByTagName('subtema'))
+                            .map(subtema => `
+                                <div class="subtheme-item" onclick="window.location.href='tema-versiculos.html?tema=${encodeURIComponent(temaName)}&subtema=${encodeURIComponent(subtema.getAttribute('nombre'))}'">
+                                    <h3>${subtema.getAttribute('nombre')}</h3>
+                                </div>
+                            `)
+                            .join('')}
+                    </div>
+                `;
+
+                container.appendChild(themeCard);
+            });
+        }
+
+        // Inicializar
+        loadTemas();
+    </script>
+    <script>
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        if (sideMenuToggleBtn) sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        document.addEventListener('click', e => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
