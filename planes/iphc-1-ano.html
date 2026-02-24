@@ -180,31 +180,6 @@
             background: #e3f2fd;
             font-weight: bold;
         }
-        
-        /* Resaltado especial para el día actual al cargar la página */
-        .day.today-highlight {
-            border-color: #e74c3c;
-            background: #ffebee;
-            font-weight: bold;
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
-            animation: pulse-highlight 2s ease-out;
-        }
-        
-        @keyframes pulse-highlight {
-            0% { 
-                transform: scale(1); 
-                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); 
-            }
-            50% { 
-                transform: scale(1.15); 
-                box-shadow: 0 0 20px 10px rgba(231, 76, 60, 0.4); 
-            }
-            100% { 
-                transform: scale(1.1); 
-                box-shadow: 0 0 15px 5px rgba(231, 76, 60, 0.2); 
-            }
-        }
         .day.future {
             color: #95a5a6;
             cursor: not-allowed;
@@ -1114,35 +1089,6 @@
             loadProgress();
             renderMonths();
             setupEventListeners();
-            
-            // Desplazarse automáticamente al día actual
-            scrollToToday();
-        }
-        
-        // Función para desplazarse al día actual
-        function scrollToToday() {
-            const now = new Date();
-            const currentMonth = now.getMonth() + 1; // JavaScript usa 0-11, nosotros usamos 1-12
-            const currentDay = now.getDate();
-            
-            // Buscar el elemento del día actual
-            const todayElement = document.querySelector(`.day[data-day="${currentDay}"][data-month="${currentMonth}"]`);
-            
-            if (todayElement) {
-                // Pequeño retraso para asegurar que el DOM esté completamente renderizado
-                setTimeout(() => {
-                    todayElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                    
-                    // Resaltar el día actual brevemente
-                    todayElement.classList.add('today-highlight');
-                    setTimeout(() => {
-                        todayElement.classList.remove('today-highlight');
-                    }, 2000);
-                }, 100);
-            }
         }
 
         // Función para cargar el progreso guardado
@@ -1427,114 +1373,19 @@
                     
                     // Función auxiliar para extraer libro y capítulo de una referencia
                     function parseReference(ref) {
-                        // Primero intentar con formato de rango de capítulos: "Libro X-Y"
-                        // Usar \w con la bandera u para capturar caracteres Unicode (acentos)
-                        let match = ref.match(/^(\d?\s*[\w\s\u00C0-\u017F]+?)\s*(\d+)(?:\s*[-–]\s*(\d+))?/u);
-                        if (match) {
-                            let [, book, startChapter, endChapter] = match;
-                            // Normalizar el nombre del libro según el formato usado en lectura.html
-                            book = normalizeBookName(book.trim());
-                            // Usar el primer capítulo del rango
-                            return { book, chapter: startChapter };
-                        }
-                        // Si no coincide, intentar con formato simple: "Libro X"
-                        match = ref.match(/^(\d?\s*[\w\s\u00C0-\u017F]+?)\s+(\d+)/u);
+                        // Primero intentar con el formato estándar
+                        let match = ref.match(/^(\d?\s*[\w\s]+?)\s*(\d+)(?::(\d+)(?:-(\d+))?)?/);
                         if (match) {
                             let [, book, chapter] = match;
-                            // Normalizar el nombre del libro según el formato usado en lectura.html
-                            book = normalizeBookName(book.trim());
-                            return { book, chapter };
+                            return { book: book.trim(), chapter };
+                        }
+                        // Si no coincide, intentar con otros formatos
+                        match = ref.match(/^([\w\s]+?)\s+(\d+)/);
+                        if (match) {
+                            let [, book, chapter] = match;
+                            return { book: book.trim(), chapter };
                         }
                         return null;
-                    }
-                    
-                    // Función para normalizar nombres de libros según el formato de lectura.html
-                    function normalizeBookName(bookName) {
-                        const bookMappings = {
-                            // Antiguo Testamento
-                            'génesis': 'Génesis', 'genesis': 'Génesis',
-                            'éxodo': 'Éxodo', 'exodo': 'Éxodo',
-                            'levítico': 'Levítico', 'levitico': 'Levítico',
-                            'números': 'Números', 'numeros': 'Números',
-                            'deuteronomio': 'Deuteronomio',
-                            'josué': 'Josué', 'josue': 'Josué',
-                            'jueces': 'Jueces',
-                            'rut': 'Rut',
-                            '1 samuel': '1 Samuel', '1 sam': '1 Samuel', '1samuel': '1 Samuel',
-                            '2 samuel': '2 Samuel', '2 sam': '2 Samuel', '2samuel': '2 Samuel',
-                            '1 reyes': '1 Reyes', '1 rey': '1 Reyes', '1reyes': '1 Reyes',
-                            '2 reyes': '2 Reyes', '2 rey': '2 Reyes', '2reyes': '2 Reyes',
-                            '1 crónicas': '1 Crónicas', '1 cronicas': '1 Crónicas', '1crónicas': '1 Crónicas',
-                            '2 crónicas': '2 Crónicas', '2 cronicas': '2 Crónicas', '2crónicas': '2 Crónicas',
-                            'esdras': 'Esdras',
-                            'nehemías': 'Nehemías', 'nehemias': 'Nehemías',
-                            'ester': 'Ester',
-                            'job': 'Job',
-                            'salmos': 'Salmos', 'salmo': 'Salmos',
-                            'proverbios': 'Proverbios',
-                            'eclesiastés': 'Eclesiastés', 'eclesiastes': 'Eclesiastés',
-                            'cantares': 'Cantares',
-                            'isaías': 'Isaías', 'isaias': 'Isaías',
-                            'jeremías': 'Jeremías', 'jeremias': 'Jeremías',
-                            'lamentaciones': 'Lamentaciones',
-                            'ezequiel': 'Ezequiel',
-                            'daniel': 'Daniel',
-                            'oseas': 'Oseas',
-                            'joel': 'Joel',
-                            'amós': 'Amós', 'amos': 'Amós',
-                            'abdías': 'Abdías', 'abdias': 'Abdías',
-                            'jonás': 'Jonás', 'jonas': 'Jonás',
-                            'miqueas': 'Miqueas',
-                            'nahúm': 'Nahúm', 'nahum': 'Nahúm',
-                            'habacuc': 'Habacuc',
-                            'sofonías': 'Sofonías', 'sofonias': 'Sofonías',
-                            'hageo': 'Hageo',
-                            'zacarías': 'Zacarías', 'zacarias': 'Zacarías',
-                            'malaquías': 'Malaquías', 'malaquias': 'Malaquías',
-                            
-                            // Nuevo Testamento
-                            'mateo': 'Mateo',
-                            'marcos': 'Marcos',
-                            'lucas': 'Lucas',
-                            'juan': 'Juan',
-                            'hechos': 'Hechos',
-                            'romanos': 'Romanos',
-                            '1 corintios': '1 Corintios', '1 cor': '1 Corintios', '1corintios': '1 Corintios',
-                            '2 corintios': '2 Corintios', '2 cor': '2 Corintios', '2corintios': '2 Corintios',
-                            'gálatas': 'Gálatas', 'galatas': 'Gálatas',
-                            'efesios': 'Efesios',
-                            'filipenses': 'Filipenses',
-                            'colosenses': 'Colosenses',
-                            '1 tesalonicenses': '1 Tesalonicenses', '1 tes': '1 Tesalonicenses', '1tesalonicenses': '1 Tesalonicenses',
-                            '2 tesalonicenses': '2 Tesalonicenses', '2 tes': '2 Tesalonicenses', '2tesalonicenses': '2 Tesalonicenses',
-                            '1 timoteo': '1 Timoteo', '1 tim': '1 Timoteo', '1timoteo': '1 Timoteo',
-                            '2 timoteo': '2 Timoteo', '2 tim': '2 Timoteo', '2timoteo': '2 Timoteo',
-                            'tito': 'Tito',
-                            'filemón': 'Filemón', 'filemon': 'Filemón',
-                            'hebreos': 'Hebreos',
-                            'santiago': 'Santiago',
-                            '1 pedro': '1 Pedro', '1 ped': '1 Pedro', '1pedro': '1 Pedro',
-                            '2 pedro': '2 Pedro', '2 ped': '2 Pedro', '2pedro': '2 Pedro',
-                            '1 juan': '1 Juan', '1 jn': '1 Juan', '1juan': '1 Juan',
-                            '2 juan': '2 Juan', '2 jn': '2 Juan', '2juan': '2 Juan',
-                            '3 juan': '3 Juan', '3 jn': '3 Juan', '3juan': '3 Juan',
-                            'judas': 'Judas',
-                            'apocalipsis': 'Apocalipsis'
-                        };
-                        
-                        // Normalizar el nombre (quitar acentos, minúsculas)
-                        let normalizado = bookName.normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .toLowerCase();
-                        
-                        // Buscar coincidencia exacta
-                        if (bookMappings[normalizado]) {
-                            return bookMappings[normalizado];
-                        }
-                        
-                        // Si no se encuentra, devolver el nombre original (para debug)
-                        console.warn('Libro no encontrado en mapeo:', bookName, 'normalizado:', normalizado);
-                        return bookName;
                     }
 
                     // Manejar clic en la referencia bíblica

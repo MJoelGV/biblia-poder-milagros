@@ -1,27 +1,21 @@
 {
   "name": "Biblia de Poder y Milagros",
   "short_name": "BibliaPYM",
-  "description": "Aplicación completa para el estudio de la Biblia con lectura offline, diccionario y herramientas de estudio",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "theme_color": "#4CAF50",
   "background_color": "#ffffff",
-  "lang": "es",
-  "categories": ["education", "reference", "utilities"],
   "icons": [
     {
       "src": "icons/pymicon.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icons/pymicon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
