@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes de Estudio - Biblia de Poder y Milagros</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="manifest" href="../manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.8em;
+            margin: 20px 0 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .welcome-text {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .plans-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .plan-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        .plan-image {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .plan-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+        }
+        .plan-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .plan-title {
+            font-size: 1.4em;
+            margin: 0 0 10px;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .plan-description {
+            color: #666;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .plan-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #777;
+        }
+        .plan-duration {
+            display: flex;
+            align-items: center;
+        }
+        .plan-duration i {
+            margin-right: 5px;
+            color: #3498db;
+        }
+        .start-button {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .start-button:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+        .no-plans {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 40px 20px;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2.2em;
+                margin: 10px 0 20px;
+            }
+            .plans-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <style>
+        /* Estilos para el menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: #2c3e50;
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .menu-header {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+            background: #1a252f;
+        }
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .side-menu li {
+            padding: 0;
+        }
+        .side-menu a {
+            display: block;
+            padding: 15px 25px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background 0.3s;
+            border-bottom: 1px solid #34495e;
+        }
+        .side-menu a:hover, .side-menu li.active a {
+            background: #34495e;
+            color: #3498db;
+        }
+        .side-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 18px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button class="close-menu" onclick="toggleMenu()">&times;</button>
+        </div>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Página principal</a></li>
+            <li><a href="lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
+            <li><a href="pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
+            <li><a href="audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
+            <li><a href="memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
+            <li><a href="historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
+            <li><a href="diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
+            <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
+            <li><a href="comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
+            <li class="active"><a href="planes/30-dias-con-jesus.html"><i class="fas fa-calendar-check"></i> 30 Días con Jesús</a></li>
+            <li><a href="topics.html"><i class="fas fa-tags"></i> Temas</a></li>
+        </ul>
+    </div>
+    
+    <!-- Botón para abrir el menú -->
+    <button class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </button>
+    
+    <!-- Overlay para cerrar el menú -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <h1>Planes de Estudio Bíblico</h1>
+        
+        <p class="welcome-text">
+            Explora nuestra colección de planes de estudio diseñados para ayudarte a profundizar en las Escrituras. 
+            Cada plan incluye lecturas diarias, reflexiones y la oportunidad de marcar tu progreso.
+        </p>
+        
+        <div class="plans-container">
+            <!-- Plan: 30 Días con Jesús -->
+            <div class="plan-card">
+                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                </div>
+                <div class="plan-content">
+                    <h3 class="plan-title">30 Días con Jesús</h3>
+                    <p class="plan-description">
+                        Un viaje de un mes a través de los evangelios para conocer más a Jesús, sus enseñanzas, 
+                        milagros y el impacto que tuvo en la vida de quienes lo conocieron.
+                    </p>
+                    <div class="plan-meta">
+                        <span class="plan-duration">
+                            <i class="far fa-calendar-alt"></i> 30 días
+                        </span>
+                        <a href="planes/30-dias-con-jesus.html" class="start-button">Comenzar</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan: Biblia en un Año -->
+            <div class="plan-card">
+                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                </div>
+                <div class="plan-content">
+                    <h3 class="plan-title">Biblia en un Año</h3>
+                    <p class="plan-description">
+                        Un plan de lectura cronológico que te llevará a través de toda la Biblia en un año, 
+                        combinando pasajes del Antiguo y Nuevo Testamento.
+                    </p>
+                    <div class="plan-meta">
+                        <span class="plan-duration">
+                            <i class="far fa-calendar-alt"></i> 365 días
+                        </span>
+                        <a href="planes/iphc-1-ano.html" class="start-button">Comenzar</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan: Proverbios - Sabiduría Diaria (Próximamente) -->
+            <div class="plan-card">
+                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1518655048521-f130dfeedf1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                </div>
+                <div class="plan-content">
+                    <h3 class="plan-title">Proverbios - Sabiduría Diaria</h3>
+                    <p class="plan-description">
+                        Un mes de sabiduría práctica del libro de Proverbios para guiar tus decisiones diarias 
+                        y tu relación con Dios y los demás.
+                    </p>
+                    <div class="plan-meta">
+                        <span class="plan-duration">
+                            <i class="far fa-calendar-alt"></i> 31 días
+                        </span>
+                        <button class="start-button" disabled>Próximamente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para alternar el menú
+        function toggleMenu() {
+            const sideMenu = document.getElementById('side-menu');
+            const overlay = document.getElementById('overlay');
+            
+            sideMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Prevenir el desplazamiento del cuerpo cuando el menú está abierto
+            document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
+        }
+        
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const sideMenu = document.getElementById('side-menu');
+            const menuButton = document.querySelector('.menu-toggle');
+            
+            if (!sideMenu.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
+                sideMenu.classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Cerrar el menú al hacer clic en un enlace
+        document.querySelectorAll('.side-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                toggleMenu();
+            });
+        });
+    </script>
+</body>
+</html>
