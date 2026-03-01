@@ -1,0 +1,4445 @@
+<!DOCTYPE html>
+<!-- Build timestamp: 2025-04-25T21:20:00Z -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lectura - Biblia de Poder y Milagros</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- corregido path para iOS icon -->
+    <link rel="apple-touch-icon" href="../icons/pymicon.png">
+    <style>
+        /* Estilos para el botón flotante de notas */
+        .floating-notes-btn {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            width: 40px !important;
+            height: 40px !important;
+            background: rgba(76, 175, 80, 0.15) !important;
+            backdrop-filter: blur(5px) !important;
+            border: 1.5px solid rgba(76, 175, 80, 0.6) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 18px !important;
+            color: #4CAF50 !important;
+            cursor: grab !important;
+            z-index: 9999 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease !important;
+            user-select: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .floating-notes-btn:hover {
+            transform: scale(1.05);
+            background: rgba(76, 175, 80, 0.25);
+            border-color: rgba(76, 175, 80, 0.8);
+        }
+
+        .floating-notes-btn:active {
+            cursor: grabbing;
+        }
+
+        /* Estilos para el modal personalizado */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 80%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .custom-modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .custom-modal-button.confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .custom-modal-button.cancel {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .custom-modal-button:hover {
+            opacity: 0.9;
+        }
+
+        /* Estilos para el panel de notas */
+        .notes-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .notes-panel.active {
+            right: 0;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .notes-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 8px 15px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .note-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .note-form input,
+        .note-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .note-form textarea {
+            flex: 1;
+            min-height: 200px;
+            resize: none;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .note-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #eee;
+        }
+
+        .note-item:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .note-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .note-preview {
+            color: #666;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .note-actions .btn {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .close-notes {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+        :root {
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --verse-font-size: 16px;
+            --menu-bg: rgba(0, 0, 0, 0.6);
+            --menu-blur: blur(10px);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #45a049;
+            --text-color: #fff;
+            --bg-color: #121212;
+            --menu-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        .controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .controls.hidden {
+            transform: translateY(-100%);
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .home-icon {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-icon:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .select-css {
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .select-css:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .select-css option {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 8px;
+        }
+
+        .search-wrapper { display: inline-flex; align-items: center; }
+        .search-wrapper .search-input { display: none; }
+        .search-wrapper.active .search-input { 
+            display: inline-block;
+            max-width: 180px;
+            opacity: 1;
+            margin-left: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .pericopes-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .pericopes-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+
+        /* Animación para botón de comparación - NUEVA FUNCIÓN */
+        #compare-toggle.new-feature {
+            animation: pulse-glow 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        #compare-toggle.new-feature::after {
+            content: "NUEVO";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            animation: bounce 1.5s ease-in-out infinite;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+                transform: scale(1.02);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-4px);
+            }
+            60% {
+                transform: translateY(-2px);
+            }
+        }
+
+        /* Controles de fuente */
+        .font-controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 8px;
+        }
+        
+        .font-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .font-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* Asegurar contraste en modo oscuro */
+        [data-theme="dark"] .font-button {
+            background: #4a6b57;
+        }
+
+        .chapter-content {
+            max-width: 1200px;
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        /* Vista de comparación - FORZAR siempre lado a lado */
+        body.comparison-view .chapter-content {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 1px !important;
+            max-width: none !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            position: fixed !important;
+            top: 50px !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            height: calc(100vh - 50px) !important;
+            overflow-y: auto !important;
+        }
+        
+        /* Responsive para móvil en comparación */
+        @media (max-width: 768px) {
+            body.comparison-view .chapter-content {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0 !important;
+                padding: 0 !important;
+                min-height: 100vh !important;
+                top: 45px !important;
+                height: calc(100vh - 45px) !important;
+            }
+            
+            body.comparison-view .version-column {
+                padding: 0 !important;
+                font-size: 0.8em !important;
+                margin: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            
+            body.comparison-view .verse {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 1em !important;
+                line-height: 1.1 !important;
+                display: block !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+            }
+            
+            body.comparison-view .verse-number {
+                font-size: 0.9em !important;
+                min-width: 16px !important;
+                margin-right: 2px !important;
+                padding: 0 !important;
+                display: inline !important;
+                float: left !important;
+                line-height: 1.1 !important;
+            }
+            
+            body.comparison-view .verse-text {
+                font-size: 1em !important;
+                margin-left: 0 !important;
+                padding: 0 !important;
+                display: inline !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* Forzar orientación horizontal en comparación móvil */
+            @media screen and (orientation: portrait) and (max-width: 768px) {
+                /* Ocultar contenido en portrait */
+                body.comparison-view .chapter-content {
+                    display: none !important;
+                }
+            }
+            
+            /* Mostrar contenido solo en horizontal */
+            @media screen and (orientation: landscape) and (max-width: 768px) {
+                body.comparison-view::before,
+                body.comparison-view::after {
+                    display: none !important;
+                }
+                
+                body.comparison-view .chapter-content {
+                    display: grid !important;
+                }
+                
+                /* Ocultar botones de búsqueda y perícopas en horizontal para ahorrar espacio */
+                body.comparison-view .pericopes-button,
+                body.comparison-view .search-wrapper {
+                    display: none !important;
+                }
+            }
+        }
+        
+        /* Ajustes para tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            body.comparison-view .chapter-content {
+                gap: 20px !important;
+                padding: 15px !important;
+            }
+            
+            /* Ocultar botones de búsqueda y perícopas en tablets horizontal */
+            @media (orientation: landscape) {
+                body.comparison-view .pericopes-button,
+                body.comparison-view .search-wrapper {
+                    display: none !important;
+                }
+            }
+        }
+        
+        body.comparison-view .version-column {
+            position: relative;
+            background: var(--bg-color);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        body.comparison-view .version-label {
+            position: sticky;
+            top: 80px;
+            background: var(--bg-color);
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        body.comparison-view .verse {
+            margin-bottom: 0.8em;
+            padding: 0.4em;
+            line-height: 1.6;
+            border-radius: 4px;
+            transition: background-color 1s ease;
+            min-height: 60px; /* Alinear versículos entre columnas */
+        }
+        
+        body.comparison-view .verse-number {
+            display: inline-block;
+            width: 30px;
+            font-weight: bold;
+            color: var(--primary-color);
+            vertical-align: top;
+        }
+        
+        body.comparison-view .verse-text {
+            display: inline-block;
+            width: calc(100% - 40px);
+            vertical-align: top;
+        }
+
+        /* Vista de comparación para pantallas grandes */
+        @media (min-width: 768px) {
+            .comparison-view .chapter-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                max-width: 1400px;
+                padding: 0 30px;
+            }
+            
+            .comparison-view .version-column {
+                position: relative;
+                background: var(--bg-color);
+                border: 1px solid rgba(76, 175, 80, 0.2);
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .comparison-view .version-label {
+                position: sticky;
+                top: 80px;
+                background: var(--bg-color);
+                padding: 10px;
+                text-align: center;
+                font-weight: bold;
+                color: var(--primary-color);
+                border: 1px solid var(--primary-color);
+                border-radius: 8px;
+                margin-bottom: 15px;
+                z-index: 100;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .comparison-view .verse {
+                margin-bottom: 0.8em;
+                padding: 0.4em;
+                line-height: 1.6;
+                border-radius: 4px;
+                transition: background-color 1s ease;
+                min-height: 60px; /* Alinear versículos entre columnas */
+            }
+            
+            .comparison-view .verse-number {
+                display: inline-block;
+                width: 30px;
+                font-weight: bold;
+                color: var(--primary-color);
+                vertical-align: top;
+            }
+            
+            .comparison-view .verse-text {
+                display: inline-block;
+                width: calc(100% - 40px);
+                vertical-align: top;
+            }
+        }
+
+        /* Forzar comparación lado a lado en tablets y escritorio */
+        @media (min-width: 1024px) {
+            .comparison-view .chapter-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        /* Forzar comparación lado a lado en tablets en modo horizontal */
+        @media (min-width: 768px) and (orientation: landscape) {
+            .comparison-view .chapter-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                padding: 0 20px;
+            }
+            
+            .comparison-view .version-column {
+                padding: 10px;
+            }
+        }
+
+        /* En móviles mantener vista normal */
+        @media (max-width: 767px) {
+            .comparison-view .chapter-content {
+                display: block;
+                max-width: 1200px;
+                margin: 120px auto 80px;
+                padding: 0 20px;
+            }
+            
+            .comparison-view .version-column {
+                margin-bottom: 30px;
+            }
+        }
+
+        /* Botón de comparación */
+        .compare-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .compare-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+
+        .compare-toggle.active {
+            background: #2e7d32;
+        }
+
+        /* Selector de segunda versión */
+        .compare-version-selector {
+            display: none;
+            margin-left: 8px;
+        }
+
+        .comparison-view .compare-version-selector {
+            display: inline-block;
+        }
+
+        .chapter-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0 30px 0;
+            padding: 10px;
+        }
+
+        .verse {
+            margin-bottom: 0.8em;
+            padding: 0.4em;
+            line-height: 1.6;
+            border-radius: 4px;
+            transition: background-color 1s ease;
+        }
+
+        .verse:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .verse.highlighted {
+            background-color: rgba(76, 175, 80, 0.15);
+        }
+        /* Dark mode: highlighted verse text white for readability */
+        [data-theme="dark"] .verse.highlighted {
+            color: #fff !important;
+            background-color: rgba(76, 175, 80, 0.3) !important;
+            border: 1px solid rgba(76, 175, 80, 0.5) !important;
+        }
+        .verse.bookmarked { background: #fffa8c; }
+        .verse.comment { 
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+        }
+        .verse.comment::after {
+            content: '💬';
+            position: absolute;
+            right: 5px;
+            top: 2px;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+        .verse.memorized { background: #c6f4d6; }
+        /* Dark mode: texto negro para bookmarked y memorized */
+        [data-theme="dark"] .verse.bookmarked,
+        [data-theme="dark"] .verse.memorized {
+            color: #000;
+        }
+
+        .verse-number {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 0.5em;
+            font-size: 0.9em;
+        }
+
+        .verse-text {
+            font-size: var(--verse-font-size);
+            line-height: 1.6;
+        }
+
+        .navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--menu-bg);
+            backdrop-filter: var(--menu-blur);
+            color: white;
+            padding: 12px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .navigation-bottom.hidden {
+            transform: translateY(100%);
+        }
+
+        .nav-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #chapter-select {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .chapter-grid, .verse-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .chapter-grid.active, .verse-grid.active {
+            display: flex;
+        }
+        .chapter-grid .grid-content, .verse-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        /* Header for modal grids */
+        .chapter-grid .grid-header, .verse-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .close-grid {
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        /* Botón de título: línea única con indicador */
+        .chapter-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .chapter-btn:hover,
+        .chapter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chapter-btn::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-left: 8px;
+        }
+
+        .chapter-btn.active::after {
+            opacity: 1;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        #search-results-count {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .search-results {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        /* Botón cerrar resultados de búsqueda */
+        .search-results .close-search {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .search-results .close-search:hover {
+            color: var(--primary-color);
+        }
+
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .result-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .result-book {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Modal para comentarios */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1300;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1301;
+            max-width: 90%; width: 300px;
+        }
+        .modal textarea {
+            width: 100%; height: 100px; resize: vertical;
+        }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+        }
+        .modal-actions button {
+            padding: 6px 12px;
+        }
+
+        /* Verso marcado y menú contextual */
+        .verse-menu {
+            display: none;
+            position: absolute;
+            background: var(--bg-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1200;
+            padding: 8px;
+        }
+        .verse-menu ul { list-style: none; margin: 0; padding: 0; }
+        .verse-menu li {
+            padding: 8px; cursor: pointer;
+        }
+        .verse-menu li:hover { background: rgba(0,0,0,0.05); }
+        /* Responsive: wrap controls and selectors on small screens */
+        @media (max-width: 768px) {
+            .top-row, .navigation {
+                flex-wrap: wrap;
+            }
+            /* Reduce spacing on mobile */
+            .top-row > *, .navigation > * {
+                margin: 3px 5px;
+            }
+            .navigation {
+                margin: 8px 0;
+            }
+            /* Allow selectors and input to shrink and limit width */
+            .select-css, .search-input {
+                max-width: 80px;
+                flex: 0 1 auto;
+            }
+        }
+        /* Responsive: menú más compacto en móviles */
+        @media (max-width: 600px) {
+            .controls { padding: 8px; }
+            .controls .home-icon,
+            .controls .theme-toggle {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                padding: 4px;
+            }
+            .selector-row {
+                padding: 8px;
+                top: 48px; /* altura de controls reducida */
+            }
+            #version-selector {
+                width: 180px;
+                min-width: 150px;
+            }
+            #book-select {
+                width: 120px;
+                min-width: 100px;
+            }
+        }
+        /* Extra controls (hidden por defecto) */
+        .extra-controls {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 20px;
+        }
+        .extra-controls.active {
+            display: flex;
+        }
+        /* Main menu toggle button */
+        .main-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-menu-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: var(--bg-color);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 1001;
+        }
+        .side-menu.active {
+            left: 0;
+        }
+        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
+        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+        .side-menu ul li:last-child { border-bottom: none; }
+        .side-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
+        
+        /* Outline grid styling */
+        .outline-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .outline-grid.active {
+            display: flex;
+        }
+        .outline-grid .grid-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+        }
+        .outline-grid .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        /* Verse grid styling and hide dropdowns */
+        #chapter-select, #verse-select {
+            display: none !important;
+        }
+
+        /* Mostrar grid de capítulos cuando esté activo */
+        .chapter-grid.active { display: flex; }
+        
+        /* Estilos para mensajes de carga y error */
+        .loading, .error-message {
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            margin: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .error-message p {
+            margin: 10px 0;
+        }
+        
+        [data-theme="dark"] .loading {
+            color: #e0e0e0;
+            background-color: #2d2d2d;
+        }
+        
+        [data-theme="dark"] .error-message {
+            color: #f5c6cb;
+            background-color: #721c24;
+            border-color: #f5c6cb;
+        }
+    </style>
+    <script>
+        // Inicializar strongsData como un objeto vacío
+        let strongsData = {};
+        // Intentar cargar strongs.json, pero no es crítico si falla
+        fetch('strongs.json')
+          .then(res => res.ok ? res.json() : {})
+          .then(data => { 
+              strongsData = data; 
+              console.log('Datos de Strong cargados correctamente');
+          })
+          .catch(err => {
+              console.warn('No se pudo cargar strongs.json. Las anotaciones de Strong no estarán disponibles.');
+          });
+    </script>
+    <!-- texto actualizado -->
+    <div id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">Descargar esta App</div>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div id="side-menu" class="side-menu">
+        <ul>
+            <li onclick="window.location.href='index.html'">Página principal</li>
+            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
+            <li onclick="window.location.href='audio.html'">Escuchar</li>
+            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
+            <li onclick="window.location.href='historias.html'">Historias</li>
+            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
+            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
+            <li onclick="window.location.href='comments.html'">Comentarios</li>
+            <li id="chapter-menu-toggle">Capítulos</li>
+        </ul>
+    </div>
+    <div class="controls" id="controls">
+        <div class="top-row">
+            <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
+            <select id="book-select" class="select-css"></select>
+            <select id="version-selector" class="select-css">
+                <option value="Reina-Valera-1960" selected>Reina-Valera 1960</option>
+                <option value="TLA">Traducción en Lenguaje Actual</option>
+                <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
+                <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
+                <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
+            </select>
+            <button id="pericopes-button" class="pericopes-button" title="Perícopas del capítulo" style="display: none;">Perícopas</button>
+            <button id="compare-toggle" class="compare-toggle" title="Comparar con otra versión" onclick="toggleComparison()">Comparar</button>
+            <select id="compare-version-selector" class="compare-version-selector select-css">
+                <option value="">Seleccionar versión</option>
+                <option value="Reina-Valera-1960">Reina-Valera 1960</option>
+                <option value="TLA">Traducción en Lenguaje Actual</option>
+                <option value="Dios-Habla-Hoy">Dios Habla Hoy</option>
+                <option value="La-Biblia-de-Las-Americas">La Biblia de las Américas</option>
+                <option value="Nueva-Traduccion-Viviente">Nueva Traducción Viviente</option>
+            </select>
+            <div class="search-wrapper">
+                <button id="search-button" class="search-button">🔍</button>
+                <input id="search-input" class="search-input" placeholder="Buscar versículo" />
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" title="Cambiar tema">🌙</button>
+            <button id="main-menu-toggle" class="main-menu-toggle">⋮</button>
+        </div>
+        <div id="extra-controls" class="extra-controls">
+            <div class="font-controls">
+                <button id="decrease-font" class="font-button" onclick="adjustFontSize(-1)" title="Disminuir tamaño de fuente">A-</button>
+                <button id="increase-font" class="font-button" onclick="adjustFontSize(1)" title="Aumentar tamaño de fuente">A+</button>
+                <button id="reset-font" class="font-button" title="Restablecer tamaño de fuente">↺</button>
+            </div>
+        </div>
+    </div> <!-- cierre .controls -->
+
+    <!-- Overlay de resultados de búsqueda -->
+    <div id="search-results" class="search-results">
+        <div class="search-results-header">
+            <div id="search-results-count">0 resultados</div>
+            <button id="close-search" class="close-search">&times;</button>
+        </div>
+        <div id="results-content"></div>
+    </div>
+
+    <!-- Menú contextual para versículos -->
+    <div id="verse-menu" class="verse-menu">
+        <ul>
+            <li id="menu-toggle-bookmark">Marcar versículo</li>
+            <li id="menu-add-comment">Agregar comentario</li>
+            <li id="menu-memorize-verse">Memorizar versículo</li>
+            <li id="menu-copy-verse">Copiar versículo</li>
+        </ul>
+    </div>
+
+    <!-- Modal de comentarios -->
+    <div id="comment-backdrop" class="modal-backdrop"></div>
+    <div id="comment-modal" class="modal">
+        <h3>Comentario</h3>
+        <textarea id="modal-comment-input"></textarea>
+        <div class="modal-actions">
+            <button id="modal-save-btn">Guardar</button>
+            <button id="modal-cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="chapter-grid" id="chapter-grid"></div>
+    <div class="verse-grid" id="verse-grid"></div>
+    <div class="outline-grid" id="outline-grid"></div>
+    <!-- outline-grid removed temporarily until feature complete -->
+    <div class="chapter-content" id="chapter-content">
+        <div id="verses"></div>
+    </div> <!-- cierre .chapter-content -->
+
+    <div class="navigation-bottom" id="navigation-bottom">
+        <button class="nav-button" id="prev-button">← Anterior</button>
+        <button class="nav-button" id="chapter-button">Capítulo <span id="current-chapter-button">1</span></button>
+        <button class="nav-button" id="next-button">Siguiente →</button>
+    </div>
+
+    <div id="strongs-backdrop" class="modal-backdrop"></div>
+    <div id="strongs-modal" class="modal">
+        <div id="strongs-content"></div>
+        <button id="strongs-close">Cerrar</button>
+    </div>
+
+    <script>
+        // Variables globales para el sistema de notas
+        let notes = [];
+        let currentNoteId = null; // Variable para rastrear la nota que se está editando
+        const NOTES_STORAGE_KEY = 'bible_notes';
+
+        // Variables globales para el sistema de confirmación
+        let customConfirm;
+        
+        // Inicializar el sistema de confirmación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sistema de confirmación personalizado
+            customConfirm = (function() {
+                const modal = document.getElementById('customConfirmModal');
+                const message = document.getElementById('customConfirmMessage');
+                const confirmBtn = document.getElementById('customConfirmOk');
+                const cancelBtn = document.getElementById('customConfirmCancel');
+                
+                if (!modal || !message || !confirmBtn || !cancelBtn) {
+                    console.error('Error: No se encontraron todos los elementos del modal de confirmación');
+                    return function() { return Promise.resolve(false); };
+                }
+                
+                return function(msg) {
+                    return new Promise((resolve) => {
+                        message.textContent = msg;
+                        modal.style.display = 'flex';
+                        
+                        const handleConfirm = () => {
+                            modal.style.display = 'none';
+                            confirmBtn.removeEventListener('click', handleConfirm);
+                            cancelBtn.removeEventListener('click', handleCancel);
+                            resolve(true);
+                        };
+                        
+                        const handleCancel = () => {
+                            modal.style.display = 'none';
+                            confirmBtn.removeEventListener('click', handleConfirm);
+                            cancelBtn.removeEventListener('click', handleCancel);
+                            resolve(false);
+                        };
+                        
+                        confirmBtn.addEventListener('click', handleConfirm);
+                        cancelBtn.addEventListener('click', handleCancel);
+                    });
+                };
+            })();
+        });
+
+        // Función para mostrar mensajes personalizados
+        async function showConfirm(message) {
+            if (!customConfirm) {
+                // Si el modal no está listo, usar confirm nativo
+                console.warn('Modal no inicializado, usando confirm nativo');
+                return confirm(message);
+            }
+            return await customConfirm(message);
+        }
+
+        let xmlDoc = null;
+        let currentBook = '';
+        let currentChapter = 1;
+        let currentVerse = 0;
+        let currentVersion = 'Reina-Valera-1960';
+        const audioPlayer = null;
+        let playlist = [];
+        let trackIndex = 0;
+        
+        // Variables para perícopas
+        let currentPericopaStart = 0;
+        let currentPericopaEnd = 0;
+        let currentPericopaTitle = '';
+        
+        // Función para cargar perícopa específica
+        function loadPericopa(title, startVerse, endVerse) {
+            console.log('🎯 loadPericopa llamada con:', { title, startVerse, endVerse });
+            currentPericopaTitle = title;
+            currentPericopaStart = startVerse;
+            currentPericopaEnd = endVerse;
+            currentVerse = startVerse; // Empezar desde el versículo inicial de la perícopa
+            loadChapter(); // Recargar capítulo con la información de la perícopa
+        }
+        
+        // Hacer la función accesible globalmente para las perícopas
+        window.loadPericopa = loadPericopa;
+
+        // Controlar la visibilidad de los menús al hacer scroll
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        let lastTouchY = 0;
+        let touchStartY = 0;
+        let menuVisible = true;
+
+        // Cargar preferencia de tema SOLO UNA VEZ
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Función para manejar el scroll
+        function handleScroll() {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    const scrollingDown = currentScrollY > lastScrollY;
+                    
+                    // Solo cambiamos la visibilidad si el scroll es significativo
+                    if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                        menuVisible = !scrollingDown;
+                        document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                        document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        // Función para manejar el toque
+        function handleTouch(e) {
+            const currentY = e.touches[0].clientY;
+            
+            if (e.type === 'touchstart') {
+                touchStartY = currentY;
+                lastTouchY = currentY;
+                return;
+            }
+            
+            const deltaY = currentY - lastTouchY;
+            
+            // Solo cambiamos la visibilidad si el movimiento es significativo
+            if (Math.abs(deltaY) > 30) {
+                menuVisible = deltaY > 0;
+                document.getElementById('controls').classList.toggle('hidden', !menuVisible);
+                document.getElementById('navigation-bottom').classList.toggle('hidden', !menuVisible);
+            }
+            
+            lastTouchY = currentY;
+        }
+
+        // Event listeners para scroll y touch
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        document.addEventListener('touchstart', handleTouch, { passive: true });
+        document.addEventListener('touchmove', handleTouch, { passive: true });
+
+        // Mostrar menús al tocar cerca de ellos
+        document.addEventListener('touchstart', (e) => {
+            const touchY = e.touches[0].clientY;
+            const windowHeight = window.innerHeight;
+            
+            // Si el toque está cerca del borde superior o inferior
+            if (touchY < 50 || touchY > windowHeight - 50) {
+                menuVisible = true;
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('navigation-bottom').classList.remove('hidden');
+            }
+        }, { passive: true });
+
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.getElementById('theme-toggle');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            button.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Event listeners para los botones de navegación
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentChapter > 1) {
+                currentChapter--;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+        document.getElementById('next-button').addEventListener('click', () => {
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            if (currentChapter < totalChapters) {
+                currentChapter++;
+                loadChapter();
+                updateControls();
+                updateURL();
+                window.scrollTo({ top:0, behavior:'smooth' });
+            }
+        });
+
+        // Función para cargar capítulos
+        async function loadChapters() {
+            const book = document.getElementById('book-select').value;
+            if (!book) return;
+
+            const chapters = xmlDoc.querySelector(`b[n="${book}"]`).getElementsByTagName('c');
+            const chapterSelect = document.getElementById('chapter-select');
+            chapterSelect.innerHTML = '<option value="" disabled selected>Selecciona un capítulo</option>' +
+                Array.from(chapters).map((_, index) => `
+                    <option value="${index + 1}" ${currentChapter === index + 1 ? 'selected' : ''}>
+                        Capítulo ${index + 1}
+                    </option>
+                `).join('');
+        }
+
+        // Función para cargar capítulo
+        async function loadChapter() {
+            const versesContainer = document.getElementById('verses');
+            versesContainer.innerHTML = '<div class="loading">Cargando...</div>';
+
+            try {
+                const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
+                if (!chapter) throw new Error('No se encontró el capítulo');
+
+                let html = '';
+                
+                // Si hay una perícopa activa, mostrar su título antes de los versículos
+                if (currentPericopaTitle && currentPericopaStart > 0 && currentPericopaEnd > 0) {
+                    console.log('🎯 Mostrando título de perícopa:', currentPericopaTitle, 'versículos', currentPericopaStart, '-', currentPericopaEnd);
+                    html = `
+                        <div class="pericopa-title" style="
+                            background: linear-gradient(135deg, #4CAF50, #45a049);
+                            color: white;
+                            padding: 12px 20px;
+                            margin: 0 0 20px 0;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            font-size: 1.1em;
+                            text-align: center;
+                            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+                            display: block !important;
+                            visibility: visible !important;
+                            z-index: 1000 !important;
+                        ">
+                            ${currentPericopaTitle} (Versículos ${currentPericopaStart}-${currentPericopaEnd})
+                        </div>
+                    `;
+                    console.log('🎯 HTML generado:', html);
+                }
+                
+                html += `
+                    <div class="chapter-title">
+                        ${currentBook} - Capítulo ${currentChapter}
+                    </div>
+                `;
+                
+                const verses = chapter.getElementsByTagName('v');
+                html += Array.from(verses).map(verse => {
+                    const verseNum = verse.getAttribute('n');
+                    const isHighlighted = parseInt(verseNum) === currentVerse;
+                    return `
+                        <div class="verse ${isHighlighted ? 'highlighted' : ''}" 
+                             data-verse="${verseNum}"
+                             onclick="highlightVerse(this)">
+                            <span class="verse-number">${verseNum}</span>
+                            <span class="verse-text">${
+                                Array.from(verse.childNodes)
+                                    .filter(n => n.nodeType === Node.TEXT_NODE)
+                                    .map(n => n.textContent)
+                                    .join('').trim()
+                            }</span>
+                        </div>
+                    `;
+                }).join('');
+
+                versesContainer.innerHTML = html;
+
+                // Desplazarse al versículo si está especificado
+                if (currentVerse > 0) {
+                    const verseElement = versesContainer.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                    if (verseElement) {
+                        setTimeout(() => {
+                            // Asegurarse de que el versículo esté visible
+                            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Resaltar el versículo
+                            verseElement.classList.add('highlighted');
+                            // Quitar el resaltado después de 3 segundos
+                            setTimeout(() => verseElement.classList.remove('highlighted'), 3000);
+                        }, 100);
+                    } else {
+                        console.warn(`No se encontró el versículo ${currentVerse}`);
+                    }
+                }
+                
+                // Agregar botón de perícopas después de cargar el capítulo
+                try {
+                    agregarBotonPericopas();
+                } catch (error) {
+                    console.error('Error al agregar botón de perícopas:', error);
+                }
+            } catch (error) {
+                console.error('Error loading chapter:', error);
+                versesContainer.innerHTML = `<div class="error">Error al cargar el capítulo: ${error.message}</div>`;
+            }
+        }
+
+        // Función para actualizar controles
+        function updateControls() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            
+            if (!currentBook) {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
+
+            const totalChapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c').length;
+            
+            prevButton.disabled = currentChapter <= 1;
+            nextButton.disabled = currentChapter >= totalChapters;
+            
+            // Actualizar texto del botón de capítulo
+            document.getElementById('current-chapter-button').textContent = currentChapter;
+        }
+
+        // Función para actualizar URL
+        function updateURL() {
+            const url = new URL(window.location);
+            url.searchParams.set('book', currentBook);
+            url.searchParams.set('chapter', currentChapter);
+            window.history.pushState({}, '', url);
+        }
+
+        // Función para cargar la Biblia
+        async function loadBible(version) {
+            try {
+                // Mostrar indicador de carga
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'loading';
+                loadingDiv.textContent = 'Cargando versión ' + version + '...';
+                document.getElementById('verses').innerHTML = '';
+                document.getElementById('verses').appendChild(loadingDiv);
+                
+                // Intentar cargar la versión solicitada
+                const url = `biblia-files/${version}.xmm`;
+                console.log('[BIBLIA] Intentando cargar:', url);
+                
+                let response;
+                try {
+                    response = await fetch(url);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                } catch (firstError) {
+                    console.log('[BIBLIA] Primera carga fallida, intentando ruta alternativa...');
+                    // Si falla, intentar con la ruta completa
+                    const fullUrl = window.location.href.replace(/\/lectura\.html.*$/, '') + '/biblia-files/' + version + '.xmm';
+                    console.log('[BIBLIA] Intentando con ruta completa:', fullUrl);
+                    response = await fetch(fullUrl);
+                    if (!response.ok) {
+                        throw new Error('No se pudo cargar el archivo: ' + url + ' (Error: ' + firstError.message + ')' + 
+                                      ' ni ' + fullUrl + ' (HTTP ' + response.status + ')');
+                    }
+                }
+                
+                const xmlText = await response.text();
+                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
+                // Verificar que el XML se haya parseado correctamente
+                if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                    throw new Error('Error al analizar el archivo XML');
+                }
+                
+                currentVersion = version;
+                
+                // Actualizar el selector de versiones
+                const versionSelect = document.getElementById('version-selector');
+                if (versionSelect) {
+                    versionSelect.value = version;
+                }
+                
+                console.log('[BIBLIA] Versión cargada correctamente:', version);
+                return true;
+                
+            } catch (error) {
+                console.error('[BIBLIA] Error al cargar la Biblia:', error);
+                
+                // Mostrar mensaje de error al usuario
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <p>No se pudo cargar la versión seleccionada.</p>
+                    <p>Detalles: ${error.message}</p>
+                    <p>Por favor, intente con otra versión o recargue la página.</p>
+                `;
+                
+                const versesEl = document.getElementById('verses');
+                if (versesEl) {
+                    versesEl.innerHTML = '';
+                    versesEl.appendChild(errorDiv);
+                }
+                
+                // Intentar cargar una versión por defecto si es posible
+                if (version !== 'Reina-Valera-1960' && document.getElementById('version-selector')) {
+                    console.log('[BIBLIA] Intentando cargar Reina-Valera-1960 como respaldo...');
+                    document.getElementById('version-selector').value = 'Reina-Valera-1960';
+                    return loadBible('Reina-Valera-1960');
+                }
+                
+                return false;
+            }
+        }
+
+        // Event listener para el selector de versiones
+        document.getElementById('version-selector').addEventListener('change', async (e) => {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Cargando versión...';
+            document.getElementById('verses').innerHTML = '';
+            document.getElementById('verses').appendChild(loadingDiv);
+            
+            await loadBible(e.target.value);
+            setupBookSelector();
+            if (currentBook) {
+                document.getElementById('book-select').value = currentBook;
+                loadChapters();
+                loadChapter();
+                updateControls();
+            }
+        });
+
+        // Configurar selector de libros
+        function setupBookSelector() {
+            const books = xmlDoc.getElementsByTagName('b');
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.innerHTML = '<option value="">Selecciona un libro</option>';
+            
+            Array.from(books).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.getAttribute('n');
+                option.textContent = book.getAttribute('n');
+                bookSelect.appendChild(option);
+            });
+        }
+
+        // Función para cargar desde URL y carga por defecto del primer libro
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const bookParam = params.get('book');
+            const chapterParam = params.get('chapter');
+            const verseParam = params.get('verse');
+
+            if (bookParam) {
+                currentBook = bookParam;
+                currentChapter = chapterParam ? parseInt(chapterParam) : 1;
+                currentVerse = verseParam ? parseInt(verseParam) : 0;
+            } else {
+                // Cargar primer libro por defecto
+                const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
+                currentBook = firstBookElem.getAttribute('n');
+                currentChapter = 1;
+                currentVerse = 0;
+            }
+
+            // Actualizar selector de libros y cargar capítulo
+            const bookSelect = document.getElementById('book-select');
+            bookSelect.value = currentBook;
+            loadChapters();
+            loadChapter();
+            updateControls();
+        }
+
+        // Iniciar la aplicación
+        async function init() {
+            try {
+                console.log('[Init] Iniciando carga de la Biblia...');
+                console.log(`[Init] Cargando versión: ${currentVersion}`);
+                await loadBible(currentVersion);
+                setupBookSelector();
+                loadFromUrl();
+                console.log('[Init] Aplicación inicializada correctamente');
+            } catch (error) {
+                console.error('[Init] Error durante la inicialización:', error);
+                document.getElementById('verses').innerHTML = `
+                    <div class="error">
+                        <p>Error al cargar la Biblia. Por favor, recarga la página.</p>
+                        <p>${error.message}</p>
+                    </div>`;
+            }
+        }
+
+        init();
+
+        // Deshabilitado Service Worker para evitar caché en lectura.html
+        // if('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('service-worker.js');
+        // }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+        document.getElementById('install-button').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
+    <script>
+        // Cargar tamaño de fuente guardado
+        const savedSize = localStorage.getItem('verseFontSize');
+        const defaultSize = 16; // Tamaño de fuente predeterminado
+        const minSize = 12;     // Tamaño mínimo de fuente
+        const maxSize = 24;     // Tamaño máximo de fuente
+        const step = 2;         // Incremento/decremento de tamaño
+        
+        // Función para actualizar el tamaño de fuente mostrado
+        function updateFontSizeDisplay(size) {
+            const sizeDisplay = document.querySelector('.font-size-display');
+            if (sizeDisplay) {
+                sizeDisplay.textContent = `${size}px`;
+            }
+        }
+        
+        // Inicializar tamaño de fuente
+        if (savedSize) {
+            const size = parseFloat(savedSize);
+            if (!isNaN(size) && size >= minSize && size <= maxSize) {
+                document.documentElement.style.setProperty('--verse-font-size', size + 'px');
+                updateFontSizeDisplay(size);
+            } else {
+                // Si el valor guardado no es válido, usar el valor predeterminado
+                document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+                localStorage.setItem('verseFontSize', defaultSize);
+                updateFontSizeDisplay(defaultSize);
+            }
+        } else {
+            // Usar valor predeterminado si no hay valor guardado
+            document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+            updateFontSizeDisplay(defaultSize);
+        }
+        
+        // Ajustar tamaño de fuente globalmente
+        function adjustFontSize(delta) {
+            const root = document.documentElement;
+            const current = parseFloat(getComputedStyle(root).getPropertyValue('--verse-font-size'));
+            // Calcular nuevo tamaño con límites
+            let newSize = current + (delta * step);
+            newSize = Math.max(minSize, Math.min(newSize, maxSize));
+            
+            // Aplicar solo si hubo cambio
+            if (newSize !== current) {
+                root.style.setProperty('--verse-font-size', newSize + 'px');
+                localStorage.setItem('verseFontSize', newSize);
+                updateFontSizeDisplay(newSize);
+                
+                // Si estamos en modo comparación, actualizar también el tamaño de fuente allí
+                if (document.body.classList.contains('comparison-view')) {
+                    console.log('Ajustando fuente en modo comparación a:', newSize + 'px');
+                    
+                    // Actualizar versículos en ambas columnas con !important
+                    const comparisonVerses = document.querySelectorAll('#verses-primary .verse-text, #verses-comparison .verse-text');
+                    comparisonVerses.forEach(verse => {
+                        verse.style.fontSize = newSize + 'px !important';
+                        verse.setAttribute('style', verse.getAttribute('style') + '; font-size: ' + newSize + 'px !important;');
+                    });
+                    
+                    // También actualizar los números de versículo en comparación
+                    const comparisonNumbers = document.querySelectorAll('#verses-primary .verse-number, #verses-comparison .verse-number');
+                    comparisonNumbers.forEach(number => {
+                        const numberSize = (newSize * 0.9) + 'px';
+                        number.style.fontSize = numberSize + ' !important';
+                        number.setAttribute('style', number.getAttribute('style') + '; font-size: ' + numberSize + ' !important;');
+                    });
+                    
+                    console.log('Actualizados', comparisonVerses.length, 'versículos y', comparisonNumbers.length, 'números');
+                }
+            }
+        }
+        
+        // Función para restablecer el tamaño de fuente
+        function resetFontSize() {
+            document.documentElement.style.setProperty('--verse-font-size', defaultSize + 'px');
+            localStorage.setItem('verseFontSize', defaultSize);
+            updateFontSizeDisplay(defaultSize);
+            
+            // Si estamos en modo comparación, restablecer también allí
+            if (document.body.classList.contains('comparison-view')) {
+                console.log('Restableciendo fuente en modo comparación a:', defaultSize + 'px');
+                
+                // Restablecer versículos en ambas columnas con !important
+                const comparisonVerses = document.querySelectorAll('#verses-primary .verse-text, #verses-comparison .verse-text');
+                comparisonVerses.forEach(verse => {
+                    verse.style.fontSize = defaultSize + 'px !important';
+                    verse.setAttribute('style', verse.getAttribute('style') + '; font-size: ' + defaultSize + 'px !important;');
+                });
+                
+                // Restablecer los números de versículo en comparación
+                const comparisonNumbers = document.querySelectorAll('#verses-primary .verse-number, #verses-comparison .verse-number');
+                comparisonNumbers.forEach(number => {
+                    const numberSize = (defaultSize * 0.9) + 'px';
+                    number.style.fontSize = numberSize + ' !important';
+                    number.setAttribute('style', number.getAttribute('style') + '; font-size: ' + numberSize + ' !important;');
+                });
+                
+                console.log('Restablecidos', comparisonVerses.length, 'versículos y', comparisonNumbers.length, 'números');
+            }
+        }
+        
+        // Añadir manejadores de eventos una vez que el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejador para el botón de reinicio
+            const resetBtn = document.getElementById('reset-font');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetFontSize);
+            }
+            
+            // Manejadores para los botones de tamaño de fuente
+            const decreaseBtn = document.getElementById('decrease-font');
+            const increaseBtn = document.getElementById('increase-font');
+            
+            if (decreaseBtn) {
+                decreaseBtn.addEventListener('click', () => adjustFontSize(-1));
+            }
+            if (increaseBtn) {
+                increaseBtn.addEventListener('click', () => adjustFontSize(1));
+            }
+        });
+    </script>
+    <script>
+        // Toggle side menu
+        const menuToggle = document.getElementById('main-menu-toggle');
+        const extraControls = document.getElementById('extra-controls');
+        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        
+        if (menuToggle && extraControls) {
+            menuToggle.addEventListener('click', () => extraControls.classList.toggle('active'));
+        }
+        if (sideMenuToggleBtn && sideMenu) {
+            sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
+        }
+        // Cerrar menú lateral al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
+                sideMenu.classList.remove('active');
+            }
+        });
+        // Agregar listener al item de capítulos
+        const chapterMenuToggle = document.getElementById('chapter-menu-toggle');
+        if (chapterMenuToggle) chapterMenuToggle.addEventListener('click', () => {
+            showChapterGrid();
+            sideMenu.classList.remove('active');
+        });
+    </script>
+    <script>
+        // Chapter & verse grid selection
+        function showChapterGrid() {
+            const grid = document.getElementById('chapter-grid');
+            const chapters = xmlDoc.querySelector(`b[n="${currentBook}"]`).getElementsByTagName('c');
+            const chapterButtons = Array.from(chapters).map((_, i) =>
+                `<button class="chapter-btn" data-chap="${i+1}">Capítulo ${i+1}</button>`
+            ).join('');
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Capítulo</span><span class="close-grid" data-target="chapter-grid">&times;</span>
+                </div>
+                ${chapterButtons}
+            </div>`;
+            grid.classList.add('active');
+        }
+        function showVerseGrid() {
+            const grid = document.getElementById('verse-grid');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            const buttons = Array.from(verses)
+                .map(v => `<button class="chapter-btn" data-verse="${v.getAttribute('n')}">Versículo ${v.getAttribute('n')}</button>`)
+                .join('');
+            grid.innerHTML = `<div class="grid-content">
+                <div class="grid-header">
+                    <span>Selecciona Versículo</span><span class="close-grid" data-target="verse-grid">&times;</span>
+                </div>
+                ${buttons}
+            </div>`;
+            grid.classList.add('active');
+        }
+        // Handle chapter button click
+        document.getElementById('chapter-grid').addEventListener('click', e => {
+            const chap = e.target.dataset.chap;
+            if (!chap) return;
+            currentChapter = parseInt(chap, 10);
+            document.getElementById('chapter-grid').classList.remove('active');
+            updateControls();
+            showVerseGrid();
+        });
+        // Handle verse button click
+        document.getElementById('verse-grid').addEventListener('click', e => {
+            if (!e.target.dataset.verse) return;
+            currentVerse = parseInt(e.target.dataset.verse);
+            document.getElementById('verse-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+        });
+        // Close modal grids
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('close-grid')) {
+                document.getElementById(e.target.dataset.target).classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        // Bind botón 'Capítulo' inferior al grid principal
+        document.getElementById('chapter-button').addEventListener('click', showChapterGrid);
+        // Bind selector de libro para abrir grid de capítulos
+        document.getElementById('book-select').addEventListener('change', e => {
+            currentBook = e.target.value;
+            currentChapter = 1;
+            updateControls();
+            updateURL();
+            showChapterGrid();
+        });
+    </script>
+    <script>
+        // Populate verse-select with verses of current chapter
+        function populateVerseSelect() {
+            const verseSelect = document.getElementById('verse-select');
+            const verses = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`).getElementsByTagName('v');
+            verseSelect.innerHTML = '<option value="" disabled selected>Selecciona un versículo</option>';
+            Array.from(verses).forEach(v => {
+                const num = v.getAttribute('n');
+                const opt = document.createElement('option');
+                opt.value = num;
+                opt.textContent = 'Versículo ' + num;
+                verseSelect.appendChild(opt);
+            });
+            verseSelect.disabled = false;
+        }
+        // Handle verse selection
+        document.getElementById('verse-select').addEventListener('change', (e) => {
+            currentVerse = parseInt(e.target.value);
+            loadChapter();
+            updateControls();
+            updateURL();
+        });
+    </script>
+    <script>
+        // Obtiene los temas directamente del XML
+        function getOutlines(book, chapter) {
+            const nodes = xmlDoc.querySelectorAll(`b[n="${book}"] c[n="${chapter}"] o`);
+            return Array.from(nodes).map(o => ({
+                title: o.getAttribute('title'),
+                start: parseInt(o.getAttribute('start'), 10),
+                end: parseInt(o.getAttribute('end'), 10)
+            }));
+        }
+
+        // Muestra modal de temas
+        function showOutlineGrid() {
+            const grid = document.getElementById('outline-grid');
+            const outlines = getOutlines(currentBook, currentChapter);
+            const header = `<div class="grid-header"><span>Temas ${currentBook} ${currentChapter}</span><span class="close-grid" data-target="outline-grid">&times;</span></div>`;
+            if (outlines.length === 0) {
+                grid.innerHTML = `<div class="grid-content">${header}<div style="padding:10px;text-align:center;">No hay temas disponibles</div></div>`;
+            } else {
+                const buttons = outlines.map(o =>
+                    `<button class="chapter-btn" data-start="${o.start}" data-end="${o.end}">${o.title}</button>`
+                ).join('');
+                grid.innerHTML = `<div class="grid-content">${header}${buttons}</div>`;
+            }
+            grid.classList.add('active');
+        }
+        // Maneja selección de tema
+        document.getElementById('outline-grid').addEventListener('click', e => {
+            if (!e.target.dataset.start) return;
+            const start = parseInt(e.target.dataset.start, 10);
+            currentVerse = start;
+            document.getElementById('outline-grid').classList.remove('active');
+            loadChapter(); updateControls(); updateURL();
+            setTimeout(() => {
+                const el = document.querySelector(`.verse[data-verse="${start}"]`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        });
+        // Listener Botón Temas
+        document.getElementById('outline-button').addEventListener('click', showOutlineGrid);
+    </script>
+    <script>
+        // Annotate strong numbers - Función segura que no falla si no hay datos
+        function annotateStrongNumbers() {
+            try {
+                const verseEls = document.querySelectorAll('.verse-text');
+                if (!strongsData || Object.keys(strongsData).length === 0) {
+                    console.log('No hay datos de Strong disponibles para anotaciones');
+                    return;
+                }
+                
+                const wordMap = {};
+                for (const code in strongsData) {
+                    const entry = strongsData[code];
+                    if (entry && entry.word) {
+                        wordMap[entry.word.toLowerCase()] = code;
+                    }
+                }
+                
+                verseEls.forEach(el => {
+                    el.innerHTML = el.textContent.replace(/\b(\w+)\b/g, (match) => {
+                        const code = wordMap[match.toLowerCase()];
+                        return code ? `<span class="strong-word" data-strong="${code}">${match}</span>` : match;
+                    });
+                });
+            } catch (error) {
+                console.error('Error al anotar números de Strong:', error);
+            }
+        }
+        document.body.addEventListener('click', e => {
+            const sw = e.target.closest('.strong-word');
+            if (!sw) return;
+            const info = strongsData[sw.dataset.strong];
+            if (!info) return;
+            document.getElementById('strongs-content').innerHTML = '<strong>' + info.word + ' (' + sw.dataset.strong + ')</strong><br>' +
+                'Translit: ' + info.translit + '<br>' +
+                'Def: ' + info.meaning;
+            document.getElementById('strongs-backdrop').style.display = 'block';
+            document.getElementById('strongs-modal').style.display = 'block';
+        });
+        document.getElementById('strongs-close').addEventListener('click', () => {
+            document.getElementById('strongs-backdrop').style.display = 'none';
+            document.getElementById('strongs-modal').style.display = 'none';
+        });
+        const origLoadChapter = window.loadChapter;
+        window.loadChapter = async function() {
+            await origLoadChapter();
+            annotateStrongNumbers();
+            applySavedStates();
+        };
+        // Reaplicar marcas guardadas: marcados, comentarios y memorizados
+        function applySavedStates() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            document.querySelectorAll('#verses .verse').forEach(v => {
+                const key = `${currentBook}-${currentChapter}-${v.dataset.verse}`;
+                if (bookmarks.includes(key)) v.classList.add('bookmarked');
+                if (comments[key]) v.classList.add('comment');
+                if (memorized.includes(key)) v.classList.add('memorized');
+            });
+            
+            // Cargar perícopas automáticamente después de cargar versículos
+            setTimeout(() => {
+                if (window.mostrarPericopas) {
+                    window.mostrarPericopas();
+                }
+            }, 1000);
+        }
+    </script>
+    <script>
+        // Búsqueda de versículos en toda la Biblia y resaltado de término
+        const searchWrapper = document.querySelector('.search-wrapper');
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const resultsContent = document.getElementById('results-content');
+        const closeSearchBtn = document.getElementById('close-search');
+        // Escapar texto para RegExp
+        function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\\]\\]/g, '\\\\$&'); }
+        searchButton.addEventListener('click', () => {
+            searchWrapper.classList.toggle('active');
+            if (searchWrapper.classList.contains('active')) searchInput.focus();
+        });
+
+        // Manejador para el botón de perícopas
+        document.getElementById('pericopes-button').addEventListener('click', () => {
+            mostrarPericopas();
+        });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                const rawQuery = searchInput.value.trim();
+                if (!rawQuery) return;
+                const query = rawQuery.toLowerCase();
+                resultsContent.innerHTML = '';
+                // Buscar en todo xmlDoc (toda la Biblia)
+                const verses = Array.from(xmlDoc.querySelectorAll('b c v'));
+                // Modificado para buscar solo palabras completas
+                const regex = new RegExp(`\\b${escapeRegExp(query)}\\b`, 'gi');
+                const matches = verses.filter(v => {
+                    // Buscar solo palabras completas usando límites de palabra \b
+                    return new RegExp(`\\b${escapeRegExp(query)}\\b`, 'i').test(v.textContent);
+                });
+                const resultsCount = document.getElementById('search-results-count');
+                resultsCount.textContent = `${matches.length} ${matches.length === 1 ? 'resultado' : 'resultados'}`;
+                
+                if (matches.length) {
+                    matches.forEach(v => {
+                        const verseNum = v.getAttribute('n');
+                        const chapterNum = v.parentNode.getAttribute('n');
+                        const bookName = v.parentNode.parentNode.getAttribute('n');
+                        const text = v.textContent;
+                        // Resaltar término
+                        const highlighted = text.replace(regex, match => `<mark>${match}</mark>`);
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `<div class="result-book">${bookName} ${chapterNum}:${verseNum}</div><div class="result-text">${highlighted}</div>`;
+                        item.addEventListener('click', () => {
+                            searchResults.classList.remove('active');
+                            // Navegar a capítulo y versículo
+                            currentBook = bookName;
+                            currentChapter = parseInt(chapterNum);
+                            currentVerse = parseInt(verseNum);
+                            document.getElementById('book-select').value = currentBook;
+                            loadChapters(); loadChapter(); updateControls(); updateURL();
+                            setTimeout(() => {
+                                const el = document.querySelector(`.verse[data-verse="${currentVerse}"]`);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        });
+                        resultsContent.appendChild(item);
+                    });
+                    searchResults.classList.add('active');
+                } else {
+                    resultsCount.textContent = '0 resultados';
+                    alert('No se encontraron resultados');
+                }
+            }
+        });
+        closeSearchBtn.addEventListener('click', () => {
+            searchResults.classList.remove('active');
+        });
+    </script>
+    <script>
+        // Menú contextual al hacer doble clic en versículo
+        const verseContainer = document.getElementById('verses');
+        const verseMenu = document.getElementById('verse-menu');
+        let activeVerseEl = null;
+        // Función para mostrar el menú contextual
+        function showVerseMenu(verseEl, x, y) {
+            if (!verseEl) return;
+            activeVerseEl = verseEl;
+            
+            // Verificar si el versículo ya tiene un comentario
+            const verseNum = verseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const hasComment = !!comments[key];
+            
+            // Actualizar el texto del botón de comentario
+            const commentBtn = document.getElementById('menu-add-comment');
+            commentBtn.textContent = hasComment ? 'Ver/Editar Comentario' : 'Agregar Comentario';
+            
+            // Posicionar y mostrar el menú
+            verseMenu.style.left = `${x}px`;
+            verseMenu.style.top = `${y}px`;
+            verseMenu.style.display = 'block';
+        }
+
+        // Mostrar menú contextual al hacer clic derecho en un versículo
+        verseContainer.addEventListener('contextmenu', (e) => {
+            const verseEl = e.target.closest('.verse');
+            if (!verseEl) return;
+            e.preventDefault();
+            showVerseMenu(verseEl, e.clientX, e.clientY);
+        });
+
+        // Mostrar menú contextual al hacer doble clic en un versículo
+        verseContainer.addEventListener('dblclick', (e) => {
+            const verseEl = e.target.closest('.verse');
+            if (!verseEl) return;
+            e.preventDefault();
+            const rect = verseEl.getBoundingClientRect();
+            showVerseMenu(verseEl, rect.left + window.scrollX + 10, rect.top + window.scrollY + 10);
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#verse-menu')) {
+                verseMenu.style.display = 'none';
+            }
+        });
+        document.getElementById('menu-toggle-bookmark').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('bookmarked');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            if (activeVerseEl.classList.contains('bookmarked')) {
+                if (!bookmarks.includes(key)) bookmarks.push(key);
+            } else {
+                bookmarks = bookmarks.filter(k => k !== key);
+            }
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            verseMenu.style.display = 'none';
+        });
+        // Función para abrir el modal de comentarios
+        function openCommentModal(verseEl) {
+            if (!verseEl) return;
+            activeVerseEl = verseEl;
+            const verseNum = verseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            const existingComment = comments[key] || '';
+            
+            // Actualizar el título del modal
+            const modalTitle = document.querySelector('#comment-modal h3');
+            modalTitle.textContent = existingComment ? 'Editar Comentario' : 'Agregar Comentario';
+            
+            // Cargar el comentario existente si existe
+            document.getElementById('modal-comment-input').value = existingComment;
+            
+            // Mostrar el modal
+            document.getElementById('comment-backdrop').style.display = 'block';
+            document.getElementById('comment-modal').style.display = 'block';
+            verseMenu.style.display = 'none';
+            
+            // Enfocar el textarea
+            document.getElementById('modal-comment-input').focus();
+        }
+        
+        // Manejador para el botón de agregar/editar comentario
+        document.getElementById('menu-add-comment').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            openCommentModal(activeVerseEl);
+        });
+        
+        // Manejador para el botón de guardar comentario
+        document.getElementById('modal-save-btn').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            
+            const comment = document.getElementById('modal-comment-input').value.trim();
+            const verseNum = activeVerseEl.dataset.verse;
+            const key = `${currentBook}-${currentChapter}-${verseNum}`;
+            const comments = JSON.parse(localStorage.getItem('comments') || '{}');
+            
+            if (comment) {
+                // Actualizar o agregar comentario
+                activeVerseEl.classList.add('comment');
+                activeVerseEl.dataset.comment = comment;
+                comments[key] = comment;
+                // Actualizar el título del botón si es necesario
+                document.querySelector('#menu-add-comment').textContent = 'Editar Comentario';
+            } else {
+                // Eliminar comentario si está vacío
+                delete comments[key];
+                activeVerseEl.classList.remove('comment');
+                delete activeVerseEl.dataset.comment;
+                // Actualizar el título del botón
+                document.querySelector('#menu-add-comment').textContent = 'Agregar Comentario';
+            }
+            
+            // Guardar cambios
+            localStorage.setItem('comments', JSON.stringify(comments));
+            
+            // Cerrar modal
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-backdrop').style.display = 'none';
+            document.getElementById('modal-comment-input').value = '';
+        });
+        document.getElementById('menu-memorize-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            activeVerseEl.classList.toggle('memorized');
+            const key = currentBook + '-' + currentChapter + '-' + activeVerseEl.dataset.verse;
+            let memorized = JSON.parse(localStorage.getItem('memorized') || '[]');
+            if (activeVerseEl.classList.contains('memorized')) {
+                if (!memorized.includes(key)) memorized.push(key);
+            } else {
+                memorized = memorized.filter(k => k !== key);
+            }
+            localStorage.setItem('memorized', JSON.stringify(memorized));
+            verseMenu.style.display = 'none';
+        });
+        document.getElementById('menu-copy-verse').addEventListener('click', () => {
+            if (!activeVerseEl) return;
+            const text = activeVerseEl.querySelector('.verse-text').textContent;
+            navigator.clipboard.writeText(text);
+            verseMenu.style.display = 'none';
+        });
+    </script>
+    <!-- SOLUCION FINAL: Perícopas 100% en español con datos completos -->
+    <script src="pericopas-datos-completo.js?v=20250519-2031"></script>
+    
+    <script>
+        // Sistema simplificado de perícopas en español
+        (function() {
+            // Desactivar cualquier sistema anterior
+            if (window.initPericopesInterface) window.initPericopesInterface = function() {};
+            if (window.showPericopes) window.showPericopes = function() {};
+            
+            // Variables globales para los elementos del formulario
+            let noteTitle, noteContent;
+            
+            // Cargar borrador de nota si existe
+            function loadDraftNote() {
+                // Asegurarse de que los elementos del formulario estén disponibles
+                noteTitle = document.getElementById('note-title');
+                noteContent = document.getElementById('note-content');
+                
+                if (!noteTitle || !noteContent) {
+                    console.error('No se encontraron los elementos del formulario de notas');
+                    return;
+                }
+                
+                const draft = localStorage.getItem('bible-note-draft');
+                if (draft) {
+                    try {
+                        const { title, content } = JSON.parse(draft);
+                        noteTitle.value = title || '';
+                        noteContent.value = content || '';
+                    } catch (e) {
+                        console.error('Error al cargar el borrador de la nota:', e);
+                        localStorage.removeItem('bible-note-draft'); // Limpiar borrador corrupto
+                    }
+                }
+            }
+            
+            // Guardar borrador de nota
+            function saveDraftNote() {
+                try {
+                    // Asegurarse de que los elementos del formulario estén disponibles
+                    if (!noteTitle) noteTitle = document.getElementById('note-title');
+                    if (!noteContent) noteContent = document.getElementById('note-content');
+                    
+                    if (noteTitle && noteContent) {
+                        const draft = {
+                            title: noteTitle.value || '',
+                            content: noteContent.value || ''
+                        };
+                        localStorage.setItem('bible-note-draft', JSON.stringify(draft));
+                    }
+                } catch (e) {
+                    console.error('Error al guardar el borrador de la nota:', e);
+                }
+            }
+            
+            // Inicializar el sistema de notas
+            document.addEventListener('DOMContentLoaded', function() {
+                // Cargar borrador al iniciar
+                loadDraftNote();
+                
+                // Guardar borrador cada vez que se escriba en los campos
+                if (noteTitle) {
+                    noteTitle.addEventListener('input', saveDraftNote);
+                }
+                if (noteContent) {
+                    noteContent.addEventListener('input', saveDraftNote);
+                }
+                console.log('Inicializando perícopas 100% en español');
+                
+                // Procesar parámetros de URL para navegación directa
+                setTimeout(function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const libro = urlParams.get('book');
+                    const capitulo = urlParams.get('chapter');
+                    const versiculo = urlParams.get('verse');
+                    
+                    if (libro && capitulo) {
+                        console.log(`Intentando navegar a ${libro} ${capitulo}:${versiculo || '1'}`);
+                        cargarCapitulo(libro, capitulo, versiculo);
+                    }
+                }, 500);
+                
+                // Función para cargar perícopas automáticamente
+                function cargarPericopasAutomaticamente() {
+                    if (typeof PERICOPES_DATA !== 'undefined' && currentBook && currentChapter) {
+                        const clave = `${currentBook}-${currentChapter}`;
+                        const pericopas = PERICOPES_DATA[clave];
+                        
+                        if (pericopas && pericopas.length > 0) {
+                            console.log('🎯 Cargando perícopas automáticamente:', pericopas.length, 'perícopas');
+                            
+                            // Esperar un poco para que los versículos se carguen
+                            setTimeout(() => {
+                                pericopas.forEach(p => {
+                                    const startVerse = parseInt(p.startVerseId);
+                                    const endVerse = parseInt(p.endVerseId);
+                                    
+                                    // Encontrar todos los versículos del rango y añadir el subtítulo
+                                    const versesInRange = Array.from(document.querySelectorAll('.verse')).filter(v => {
+                                        const verseNum = parseInt(v.dataset.verse);
+                                        return verseNum >= startVerse && verseNum <= endVerse;
+                                    });
+                                    
+                                    if (versesInRange.length > 0) {
+                                        // Añadir subtítulo antes del primer versículo del rango
+                                        const firstVerse = versesInRange[0];
+                                        const subtitleDiv = document.createElement('div');
+                                        subtitleDiv.className = 'pericopa-subtitle';
+                                        subtitleDiv.style.cssText = `
+                                            background: linear-gradient(135deg, #4CAF50, #45a049);
+                                            color: white;
+                                            padding: 8px 16px;
+                                            margin: 0 0 10px 0;
+                                            border-radius: 6px;
+                                            font-weight: bold;
+                                            font-size: 0.9em;
+                                            text-align: left;
+                                            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+                                            display: block;
+                                            width: fit-content;
+                                        `;
+                                        subtitleDiv.textContent = `${p.title} (Versículos ${p.startVerseId}-${p.endVerseId})`;
+                                        
+                                        // Insertar el subtítulo antes del primer versículo
+                                        firstVerse.parentNode.insertBefore(subtitleDiv, firstVerse);
+                                        
+                                        console.log(`🎯 Perícopa "${p.title}" añadida como subtítulo antes del versículo ${p.startVerseId}`);
+                                    }
+                                });
+                            }, 500);
+                        }
+                    }
+                }
+                
+                // Cargar automáticamente la primera perícopa del capítulo
+                cargarPericopasAutomaticamente();
+                
+                const observer = new MutationObserver(function() {
+                    // agregarBotonPericopas(); // Comentado - no necesitamos el botón
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            });
+            
+            // Función para agregar botón de perícopas (no usada pero para evitar errores)
+            function agregarBotonPericopas() {
+                // No hacemos nada, el botón está oculto
+                console.log('🎯 agregarBotonPericopas llamado (no-op)');
+            }
+            
+            // Función para cargar capítulos
+            function cargarCapitulo(libro, capitulo, versiculo) {
+                // Simular clics en selectores
+                const selectorLibro = document.querySelector('select.book-select');
+                const selectorCapitulo = document.querySelector('select.chapter-select');
+                
+                if (selectorLibro && selectorCapitulo) {
+                    // Seleccionar libro
+                    for (let i = 0; i < selectorLibro.options.length; i++) {
+                        if (selectorLibro.options[i].textContent.includes(libro)) {
+                            selectorLibro.selectedIndex = i;
+                            selectorLibro.dispatchEvent(new Event('change'));
+                            break;
+                        }
+                    }
+                    
+                    // Esperar un momento y seleccionar capítulo
+                    setTimeout(() => {
+                        for (let i = 0; i < selectorCapitulo.options.length; i++) {
+                            if (selectorCapitulo.options[i].value == capitulo) {
+                                selectorCapitulo.selectedIndex = i;
+                                selectorCapitulo.dispatchEvent(new Event('change'));
+                                break;
+                            }
+                        }
+                        
+                        // Esperar a que cargue el capítulo y navegar al versículo
+                        if (versiculo) {
+                            setTimeout(() => {
+                                const elementoVersiculo = document.querySelector(`.verse[data-verse="${versiculo}"]`);
+                                if (elementoVersiculo) {
+                                    elementoVersiculo.scrollIntoView({ behavior: 'smooth' });
+                                    elementoVersiculo.classList.add('highlight');
+                                    setTimeout(() => elementoVersiculo.classList.remove('highlight'), 2000);
+                                }
+                            }, 500);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Función para mostrar perícopas
+            window.mostrarPericopas = function() {
+                console.log('[Perícopas] Iniciando búsqueda de perícopas...');
+                
+                // Obtener libro y capítulo actuales
+                const titulo = document.querySelector('.chapter-title');
+                if (!titulo) {
+                    console.error('[Perícopas] No se pudo encontrar el título del capítulo');
+                    return;
+                }
+                
+                const tituloTexto = titulo.textContent.trim();
+                console.log('[Perícopas] Título del capítulo:', tituloTexto);
+                
+                // Intentar con el formato "Libro - Capítulo X" primero
+                let match = tituloTexto.match(/(.+?)\s*-\s*Capítulo\s*(\d+)/i);
+                
+                // Si no coincide, intentar con el formato anterior por si acaso
+                if (!match) {
+                    match = tituloTexto.match(/([A-Za-z\u00C0-\u00FF\s]+)\s+(\d+)/);
+                }
+                
+                if (!match) {
+                    console.error('[Perícopas] No se pudo extraer libro y capítulo del título');
+                    return;
+                }
+                
+                let nombreLibro = match[1].trim();
+                const capitulo = match[2];
+                
+                // Si el nombre del libro está vacío, usar la variable global currentBook
+                if (!nombreLibro && window.currentBook) {
+                    nombreLibro = window.currentBook;
+                    console.log('[Perícopas] Usando currentBook como nombre del libro:', nombreLibro);
+                }
+                
+                const libroKey = obtenerCodigoLibro(nombreLibro);
+                
+                console.log('[Perícopas] Datos extraídos:', { 
+                    nombreLibro, 
+                    capitulo, 
+                    libroKey,
+                    currentBook: window.currentBook // Variable global que debería existir
+                });
+                
+                // Verificar si PERICOPES_DATA está disponible
+                if (typeof window.PERICOPES_DATA === 'undefined') {
+                    console.error('[Perícopas] Error: PERICOPES_DATA no está definido');
+                    alert('Error: No se pudieron cargar los datos de perícopas');
+                    return;
+                }
+                
+                // Intentar con el código del libro y también con el nombre del libro actual
+                const clavesABuscar = [
+                    `${libroKey}-${capitulo}`,
+                    `${window.currentBook || ''}-${capitulo}`.toUpperCase()
+                ];
+                
+                console.log('[Perícopas] Buscando perícopas con claves:', clavesABuscar);
+                
+                let pericopas = [];
+                let claveEncontrada = '';
+                
+                // Buscar en todas las claves posibles
+                for (const clave of clavesABuscar) {
+                    if (window.PERICOPES_DATA[clave]) {
+                        pericopas = window.PERICOPES_DATA[clave];
+                        claveEncontrada = clave;
+                        break;
+                    }
+                }
+                
+                console.log('[Perícopas] Resultados de búsqueda:', {
+                    claveEncontrada,
+                    cantidadPericopas: pericopas.length,
+                    muestrasClaves: Object.keys(window.PERICOPES_DATA).slice(0, 5)
+                });
+                
+                if (pericopas.length === 0) {
+                    const mensaje = `No hay perícopas disponibles para ${nombreLibro} ${capitulo} (${libroKey}-${capitulo})`;
+                    console.warn('[Perícopas]', mensaje);
+                    alert(mensaje);
+                    return;
+                }
+                
+                // Si hay perícopas disponibles, mostrarlas como subtítulos antes de sus versículos
+                if (pericopas.length > 0) {
+                    console.log('[Perícopas] Mostrando perícopas como subtítulos');
+                    
+                    // Primero, mostrar todas las perícopas como subtítulos
+                    pericopas.forEach(p => {
+                        const startVerse = parseInt(p.startVerseId);
+                        const endVerse = parseInt(p.endVerseId);
+                        
+                        // Encontrar todos los versículos del rango y añadir el subtítulo
+                        const versesInRange = Array.from(document.querySelectorAll('.verse')).filter(v => {
+                            const verseNum = parseInt(v.dataset.verse);
+                            return verseNum >= startVerse && verseNum <= endVerse;
+                        });
+                        
+                        if (versesInRange.length > 0) {
+                            // Añadir subtítulo antes del primer versículo del rango
+                            const firstVerse = versesInRange[0];
+                            const subtitleDiv = document.createElement('div');
+                            subtitleDiv.className = 'pericopa-subtitle';
+                            subtitleDiv.style.cssText = `
+                                color: #4CAF50;
+                                padding: 8px 16px;
+                                margin: 0 0 10px 0;
+                                border-radius: 6px;
+                                font-weight: bold;
+                                font-size: 1em;
+                                text-align: center;
+                                display: block;
+                                width: fit-content;
+                                margin-left: auto;
+                                margin-right: auto;
+                            `;
+                            subtitleDiv.textContent = `${p.title}`;
+                            
+                            // Insertar el subtítulo antes del primer versículo
+                            firstVerse.parentNode.insertBefore(subtitleDiv, firstVerse);
+                            
+                            console.log(`🎯 Perícopa "${p.title}" añadida como subtítulo antes del versículo ${p.startVerseId}`);
+                        }
+                    });
+                    
+                    // No mostrar modal, solo los subtítulos
+                    return;
+                }
+                
+                // Crear modal si no existe
+                crearModalPericopas();
+                
+                // Actualizar contenido
+                const contenido = document.getElementById('pericopes-content');
+                contenido.innerHTML = '';
+                pericopas.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'pericope-item';
+                    div.innerHTML = `
+                        <div class="pericope-title">${p.title}</div>
+                        <div class="pericope-verses">Versículos ${p.verses}</div>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('pericopes-modal').style.display = 'none';
+                        document.getElementById('pericopes-backdrop').style.display = 'none';
+                        
+                        // Usar la nueva función loadPericopa para cargar la perícopa específica
+                        if (window.loadPericopa) {
+                            console.log('🎯 Llamando loadPericopa con:', p.title, p.startVerseId, p.endVerseId);
+                            window.loadPericopa(p.title, parseInt(p.startVerseId), parseInt(p.endVerseId));
+                            console.log('✅ Perícopa cargada - Variables actualizadas:', {
+                                title: currentPericopaTitle,
+                                start: currentPericopaStart,
+                                end: currentPericopaEnd,
+                                verse: currentVerse
+                            });
+                        } else {
+                            // Fallback: navegación tradicional
+                            console.log('⚠️ loadPericopa no disponible, usando fallback');
+                            const verso = document.querySelector(`.verse[data-verse="${p.startVerseId}"]`);
+                            if (verso) {
+                                verso.scrollIntoView({ behavior: 'smooth' });
+                                verso.classList.add('highlight');
+                                setTimeout(() => verso.classList.remove('highlight'), 2000);
+                            }
+                        }
+                    };
+                    contenido.appendChild(div);
+                });
+                
+                // Mostrar modal
+                document.getElementById('pericopes-modal').style.display = 'block';
+                document.getElementById('pericopes-backdrop').style.display = 'block';
+            };
+            
+            // Función para crear modal de perícopas
+            function crearModalPericopas() {
+                if (document.getElementById('pericopes-modal')) return;
+                
+                // Estilos
+                const estilos = document.createElement('style');
+                estilos.textContent = `
+                    #pericopes-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                      background-color: rgba(0,0,0,0.5); z-index: 9998; }
+                    #pericopes-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                      background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                      z-index: 9999; max-width: 90%; width: 500px; max-height: 80vh; overflow-y: auto; }
+                    #pericopes-header { display: flex; justify-content: space-between; align-items: center;
+                      margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+                    #pericopes-title { font-size: 18px; font-weight: bold; }
+                    #pericopes-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+                    .pericope-item { padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;
+                      border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+                    .pericope-item:hover { background-color: #eaeaea; }
+                    .pericope-title { font-weight: bold; margin-bottom: 5px; }
+                    .pericope-verses { font-size: 12px; color: #666; }
+                    #pericopas-boton { display: inline-block; background-color: var(--primary-color, #4CAF50);
+                      color: white; padding: 6px 12px; border-radius: 4px; margin: 10px 0; cursor: pointer; }
+                    .verse.highlight { background-color: #ffff99; transition: background-color 1s; }
+                `;
+                document.head.appendChild(estilos);
+                
+                // Backdrop
+                const backdrop = document.createElement('div');
+                backdrop.id = 'pericopes-backdrop';
+                backdrop.style.display = 'none';
+                backdrop.onclick = () => {
+                    document.getElementById('pericopes-modal').style.display = 'none';
+                    backdrop.style.display = 'none';
+                };
+                document.body.appendChild(backdrop);
+                
+                // Modal
+                const modal = document.createElement('div');
+                modal.id = 'pericopes-modal';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div id="pericopes-header">
+                        <div id="pericopes-title">Perícopas del capítulo</div>
+                        <button id="pericopes-close">&times;</button>
+                    </div>
+                    <div id="pericopes-content"></div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Botón cerrar
+                document.getElementById('pericopes-close').onclick = () => {
+                    modal.style.display = 'none';
+                    backdrop.style.display = 'none';
+                };
+            }
+            
+            // Función para agregar botón de perícopas
+            function agregarBotonPericopas() {
+                console.log('[Perícopas] Iniciando agregarBotonPericopas');
+                
+                // Verificar si ya existe el botón
+                if (document.getElementById('pericopas-boton')) {
+                    console.log('[Perícopas] El botón ya existe');
+                    return;
+                }
+                
+                // Verificar si los datos de perícopas están disponibles
+                console.log('[Perícopas] Verificando datos de perícopas...');
+                if (typeof PERICOPES_DATA === 'undefined') {
+                    console.warn('[Perícopas] Los datos de perícopas no están disponibles (PERICOPES_DATA no está definido)');
+                    console.log('[Perícopas] Verificando si window.PERICOPES_DATA existe:', typeof window.PERICOPES_DATA);
+                    return;
+                }
+                
+                console.log('[Perícopas] Datos de perícopas disponibles:', Object.keys(PERICOPES_DATA).length > 0);
+                console.log('[Perícopas] Muestra de claves de perícopas:', Object.keys(PERICOPES_DATA).slice(0, 5));
+                
+                // Obtener libro y capítulo actual
+                const libroActual = document.getElementById('book-select')?.value;
+                const capituloActual = parseInt(document.getElementById('chapter-select')?.value) || 1;
+                
+                if (!libroActual) return;
+                
+                // Obtener el código del libro
+                const codigoLibro = window.obtenerCodigoLibro?.(libroActual);
+                if (!codigoLibro) {
+                    console.warn('[Perícopas] No se pudo obtener el código del libro:', libroActual);
+                    return;
+                }
+                
+                const clavePericopa = `${codigoLibro}-${capituloActual}`;
+                const pericopas = PERICOPES_DATA[clavePericopa];
+                
+                // Si no hay perícopas para este capítulo, no mostrar el botón
+                if (!pericopas || pericopas.length === 0) {
+                    console.log(`[Perícopas] No hay perícopas para ${clavePericopa}`);
+                    console.log(`[Perícopas] Claves disponibles en PERICOPES_DATA:`, Object.keys(PERICOPES_DATA));
+                    return;
+                }
+                
+                console.log(`[Perícopas] Encontradas ${pericopas.length} perícopas para ${clavePericopa}:`, pericopas);
+                
+                // Crear el botón
+                const boton = document.createElement('button');
+                boton.id = 'pericopas-boton';
+                boton.className = 'pericopas-btn';
+                boton.innerHTML = '📖 Ver perícopas del capítulo';
+                
+                // Añadir estilos al botón
+                const style = document.createElement('style');
+                style.textContent = `
+                    .pericopas-btn {
+                        display: block;
+                        margin: 15px auto;
+                        padding: 8px 16px;
+                        background-color: var(--primary-color, #4CAF50);
+                        color: white;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:hover {
+                        background-color: #45a049;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    .pericopas-btn:active {
+                        transform: translateY(0);
+                    }
+                    .pericopas-container {
+                        margin: 20px 0;
+                        padding: 15px;
+                        background-color: rgba(76, 175, 80, 0.1);
+                        border-radius: 8px;
+                        border-right: 4px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item {
+                        margin: 15px 0;
+                        padding: 12px;
+                        background: white;
+                        border-radius: 6px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        border-left: 3px solid var(--primary-color, #4CAF50);
+                    }
+                    .pericopa-item h4 {
+                        margin: 0 0 8px 0;
+                        color: #2c3e50;
+                        font-size: 1.1em;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 5px;
+                    }
+                    .pericopa-item p {
+                        margin: 8px 0 0 0;
+                        color: #34495e;
+                        font-size: 0.95em;
+                        line-height: 1.6;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Función para mostrar/ocultar las perícopas
+                function togglePericopas() {
+                    let contenedor = document.getElementById('pericopas-container');
+                    
+                    // Si ya existe, alternar visibilidad
+                    if (contenedor) {
+                        if (contenedor.style.display === 'none') {
+                            contenedor.style.display = 'block';
+                            boton.textContent = 'Ocultar perícopas';
+                        } else {
+                            contenedor.style.display = 'none';
+                            boton.textContent = '📖 Ver perícopas del capítulo';
+                        }
+                        return;
+                    }
+                    
+                    // Si no existe, crear el contenedor
+                    contenedor = document.createElement('div');
+                    contenedor.id = 'pericopas-container';
+                    contenedor.className = 'pericopas-container';
+                    
+                    // Agregar título
+                    const titulo = document.createElement('h3');
+                    titulo.textContent = `Perícopas de ${libroActual} ${capituloActual}`;
+                    titulo.style.marginTop = '0';
+                    titulo.style.color = 'var(--primary-color, #4CAF50)';
+                    contenedor.appendChild(titulo);
+                    
+                    // Agregar cada perícopa
+                    pericopas.forEach((pericopa, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'pericopa-item';
+                        
+                        const tituloPericopa = document.createElement('h4');
+                        tituloPericopa.textContent = pericopa.title || `Perícopa ${index + 1}`;
+                        
+                        // Convertir saltos de línea en párrafos
+                        const contenido = document.createElement('div');
+                        const parrafos = (pericopa.text || '').split('\n').filter(p => p.trim() !== '');
+                        
+                        if (parrafos.length > 0) {
+                            parrafos.forEach(parrafo => {
+                                if (parrafo.trim() !== '') {
+                                    const p = document.createElement('p');
+                                    p.textContent = parrafo.trim();
+                                    contenido.appendChild(p);
+                                }
+                            });
+                        } else {
+                            const p = document.createElement('p');
+                            p.textContent = pericopa.text || '';
+                            contenido.appendChild(p);
+                        }
+                        
+                        item.appendChild(tituloPericopa);
+                        item.appendChild(contenido);
+                        contenedor.appendChild(item);
+                    });
+                    
+                    // Insertar después del título del capítulo
+                    const tituloCap = document.querySelector('h2');
+                    if (tituloCap) {
+                        tituloCap.insertAdjacentElement('afterend', contenedor);
+                    } else {
+                        // Si no hay título, insertar al principio del contenedor de versículos
+                        const versContainer = document.getElementById('verses');
+                        if (versContainer) {
+                            versContainer.insertBefore(contenedor, versContainer.firstChild);
+                        }
+                    }
+                    
+                    boton.textContent = 'Ocultar perícopas';
+                }
+                
+                // Asignar evento al botón
+                boton.onclick = togglePericopas;
+                
+                // Insertar el botón después del título del capítulo
+                const tituloCap = document.querySelector('h2');
+                if (tituloCap) {
+                    tituloCap.insertAdjacentElement('afterend', boton);
+                } else {
+                    // Si no hay título, insertar al principio del contenedor de versículos
+                    const versContainer = document.getElementById('verses');
+                    if (versContainer) {
+                        versContainer.insertBefore(boton, versContainer.firstChild);
+                    }
+                }
+                
+                console.log(`[Perícopas] Botón agregado para ${clavePericopa} (${pericopas.length} perícopas)`);
+            }
+            
+            // Obtener código de libro
+            function obtenerCodigoLibro(nombre) {
+                const mapeoLibros = {
+                    'génesis': 'GEN', 'genesis': 'GEN',
+                    'éxodo': 'EXO', 'exodo': 'EXO',
+                    'levítico': 'LEV', 'levitico': 'LEV',
+                    'números': 'NUM', 'numeros': 'NUM',
+                    'deuteronomio': 'DEU',
+                    'josué': 'JOS', 'josue': 'JOS',
+                    'jueces': 'JDG',
+                    'rut': 'RUT',
+                    'samuel': 'SA', '1 samuel': '1SA', '2 samuel': '2SA',
+                    'reyes': 'KI', '1 reyes': '1KI', '2 reyes': '2KI',
+                    'crónicas': 'CH', 'cronicas': 'CH', '1 crónicas': '1CH', '2 crónicas': '2CH',
+                    'esdras': 'EZR',
+                    'nehemías': 'NEH', 'nehemias': 'NEH',
+                    'ester': 'EST',
+                    'job': 'JOB',
+                    'salmos': 'PSA', 'salmo': 'PSA',
+                    'proverbios': 'PRO',
+                    'eclesiastés': 'ECC', 'eclesiastes': 'ECC',
+                    'cantares': 'SNG',
+                    'isaías': 'ISA', 'isaias': 'ISA',
+                    'jeremías': 'JER', 'jeremias': 'JER',
+                    'lamentaciones': 'LAM',
+                    'ezequiel': 'EZK',
+                    'daniel': 'DAN',
+                    'oseas': 'HOS',
+                    'joel': 'JOL',
+                    'amós': 'AMO', 'amos': 'AMO',
+                    'abdías': 'OBA', 'abdias': 'OBA',
+                    'jonás': 'JON', 'jonas': 'JON',
+                    'miqueas': 'MIC',
+                    'nahúm': 'NAM', 'nahum': 'NAM',
+                    'habacuc': 'HAB',
+                    'sofonías': 'ZEP', 'sofonias': 'ZEP',
+                    'hageo': 'HAG',
+                    'zacarías': 'ZEC', 'zacarias': 'ZEC',
+                    'malaquías': 'MAL', 'malaquias': 'MAL',
+                    'mateo': 'MAT',
+                    'marcos': 'MRK',
+                    'lucas': 'LUK',
+                    'juan': 'JHN',
+                    '1 juan': '1JN', '2 juan': '2JN', '3 juan': '3JN',
+                    'hechos': 'ACT',
+                    'romanos': 'ROM',
+                    'corintios': 'CO', '1 corintios': '1CO', '2 corintios': '2CO',
+                    'gálatas': 'GAL', 'galatas': 'GAL',
+                    'efesios': 'EPH',
+                    'filipenses': 'PHP',
+                    'colosenses': 'COL',
+                    'tesalonicenses': 'TH', '1 tesalonicenses': '1TH', '2 tesalonicenses': '2TH',
+                    'timoteo': 'TI', '1 timoteo': '1TI', '2 timoteo': '2TI',
+                    'tito': 'TIT',
+                    'filemón': 'PHM', 'filemon': 'PHM',
+                    'hebreos': 'HEB',
+                    'santiago': 'JAS',
+                    'pedro': 'PE', '1 pedro': '1PE', '2 pedro': '2PE',
+                    // 'juan' ya está mapeado a 'JHN' más arriba
+                    'judas': 'JUD',
+                    'apocalipsis': 'REV'
+                };
+                
+                // Normalizar nombre (quitar acentos, minúsculas)
+                const normalizado = nombre.normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase();
+                
+                // Buscar coincidencia exacta
+                if (mapeoLibros[normalizado]) return mapeoLibros[normalizado];
+                
+                // Extraer número si existe (ej. "1 Corintios" -> "1" y "Corintios")
+                const match = normalizado.match(/^(\d+)\s*(.+)$/); 
+                if (match && mapeoLibros[match[2]]) {
+                    return match[1] + mapeoLibros[match[2]];
+                }
+                
+                // Si no se encuentra, devolver el mismo nombre (para debug)
+                return nombre;
+            }
+        })();
+    </script>
+    
+    <!-- Cargar datos de perícopas primero -->
+    <script src="pericopas-datos-completo.js"></script>
+    <script>
+        // Verificar que las perícopas estén correctamente cargadas
+        console.log('[Perícopas] Estado de carga:', {
+            pericopesDisponibles: typeof PERICOPES_DATA !== 'undefined',
+            totalCapitulos: typeof PERICOPES_DATA !== 'undefined' ? Object.keys(PERICOPES_DATA).length : 0
+        });
+        
+        // Mostrar algunos ejemplos de perícopas cargadas
+        if (typeof PERICOPES_DATA !== 'undefined') {
+            // Mostrar un ejemplo de Tito capítulo 1
+            const titoCap1 = PERICOPES_DATA['TIT-1'] || [];
+            console.log('[Perícopas] Ejemplo de Tito 1:', titoCap1);
+            
+            // Mostrar libros disponibles (solo los primeros 5 para no saturar la consola)
+            const libros = Object.keys(PERICOPES_DATA);
+            console.log('[Perícopas] Total de capítulos con perícopas:', libros.length);
+            console.log('[Perícopas] Ejemplos de capítulos con perícopas:', libros.slice(0, 5));
+            
+            // Verificar si hay datos para el libro actual
+            function verificarPericopasDisponibles(libro, capitulo) {
+                const clave = `${libro}-${capitulo}`;
+                const tienePericopas = PERICOPES_DATA[clave] && PERICOPES_DATA[clave].length > 0;
+                console.log(`[Perícopas] Verificando ${clave}:`, tienePericopas ? 'Disponible' : 'No disponible');
+                return tienePericopas;
+            }
+            
+            // Hacer la función accesible globalmente
+            window.verificarPericopasDisponibles = verificarPericopasDisponibles;
+        } else {
+            console.error('[Perícopas] Error: No se pudo cargar el objeto PERICOPES_DATA');
+        }
+    </script>
+    <script src="app.js"></script>
+    
+    <!-- Botón flotante y panel de notas -->
+    <div class="floating-notes-btn" id="floating-notes-btn">
+        ✏️
+    </div>
+
+    <div class="notes-panel" id="notes-panel">
+        <div class="notes-header">
+            <h3>Mis Notas</h3>
+            <button class="close-notes" id="close-notes">&times;</button>
+        </div>
+        
+        <div class="notes-tabs">
+            <button class="tab-btn active" data-tab="quick-note">Nota Rápida</button>
+            <button class="tab-btn" data-tab="all-notes">Todas las Notas</button>
+        </div>
+        
+        <!-- Pestaña de Nota Rápida -->
+        <div class="tab-content active" id="quick-note">
+            <div class="note-form">
+                <input type="text" id="note-title" placeholder="Título de la nota" class="form-control">
+                <textarea id="note-content" placeholder="Escribe tu nota aquí..." class="form-control"></textarea>
+                <div class="note-actions">
+                    <button class="btn btn-primary" id="save-note">Guardar Nota</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pestaña de Todas las Notas -->
+        <div class="tab-content" id="all-notes">
+            <div class="notes-list" id="notes-list">
+                <!-- Las notas se cargarán aquí dinámicamente -->
+                <div class="no-notes">No hay notas guardadas aún.</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Script para la funcionalidad de notas -->
+    <script>
+        // Forzar visibilidad del botón flotante
+        document.addEventListener('DOMContentLoaded', function() {
+            const floatingBtn = document.getElementById('floating-notes-btn');
+            if (floatingBtn) {
+                // Forzar estilos para asegurar visibilidad
+                floatingBtn.style.cssText = `
+                    position: fixed !important;
+                    bottom: 20px !important;
+                    right: 20px !important;
+                    width: 40px !important;
+                    height: 40px !important;
+                    background: rgba(76, 175, 80, 0.15) !important;
+                    backdrop-filter: blur(5px) !important;
+                    border: 1.5px solid rgba(76, 175, 80, 0.6) !important;
+                    border-radius: 50% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    font-size: 18px !important;
+                    color: #4CAF50 !important;
+                    cursor: grab !important;
+                    z-index: 9999 !important;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+                    transition: all 0.3s ease !important;
+                    user-select: none !important;
+                    -webkit-tap-highlight-color: transparent !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                `;
+                console.log('Botón flotante forzado a ser visible');
+            }
+        });
+        
+        // Código JavaScript para la funcionalidad de notas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const floatingBtn = document.getElementById('floating-notes-btn');
+            const notesPanel = document.getElementById('notes-panel');
+            const closeNotes = document.getElementById('close-notes');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const saveNoteBtn = document.getElementById('save-note');
+            const noteTitle = document.getElementById('note-title');
+            const noteContent = document.getElementById('note-content');
+            const notesList = document.getElementById('notes-list');
+            
+            // Variables para el sistema de notas
+            let currentNoteId = null; // Variable para rastrear la nota que se está editando
+            let notes = JSON.parse(localStorage.getItem('bible-notes')) || [];
+            const DRAFT_NOTE_KEY = 'bible-note-draft';
+            
+            // Limpiar borrador de nota
+            function clearDraftNote() {
+                try {
+                    localStorage.removeItem(DRAFT_NOTE_KEY);
+                } catch (e) {
+                    console.error('Error al limpiar el borrador de la nota:', e);
+                }
+            }
+            
+            // Mostrar/ocultar panel de notas
+            function toggleNotesPanel() {
+                notesPanel.classList.toggle('active');
+                if (notesPanel.classList.contains('active')) {
+                    renderNotesList();
+                }
+            }
+            
+            // Cambiar entre pestañas
+            function switchTab(e) {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Actualizar botones de pestaña
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Mostrar contenido de la pestaña seleccionada
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
+                
+                // Si es la pestaña de todas las notas, actualizar la lista
+                if (tabId === 'all-notes') {
+                    renderNotesList();
+                }
+            }
+            
+            // Guardar nota
+            async function saveNote() {
+                // Asegurarse de que tenemos referencias a los elementos del formulario
+                if (!noteTitle) noteTitle = document.getElementById('note-title');
+                if (!noteContent) noteContent = document.getElementById('note-content');
+                
+                // Verificar que los elementos del formulario existan
+                if (!noteTitle || !noteContent) {
+                    console.error('Error: No se encontraron los campos del formulario de notas');
+                    showNotification('Error: No se pudo acceder al formulario de notas');
+                    return;
+                }
+                
+                const title = noteTitle.value.trim() || 'Nota sin título';
+                const content = noteContent.value.trim();
+                let reference;
+                
+                try {
+                    reference = getCurrentReference();
+                } catch (error) {
+                    console.error('Error al obtener la referencia:', error);
+                    reference = 'Referencia no disponible';
+                }
+                
+                const now = new Date().toISOString();
+                
+                console.log('Guardando nota:', { title, content, reference, currentNoteId });
+                
+                // Validar contenido
+                if (!content) {
+                    showNotification('Por favor ingresa el contenido de la nota');
+                    return;
+                }
+                
+                try {
+                    // Si estamos editando una nota existente
+                    if (currentNoteId) {
+                        const index = notes.findIndex(n => n.id === currentNoteId);
+                        if (index !== -1) {
+                            notes[index] = {
+                                ...notes[index],
+                                title,
+                                content,
+                                updatedAt: now
+                            };
+                            console.log('Nota actualizada:', notes[index]);
+                        }
+                    } else {
+                        // Crear nueva nota
+                        const newNote = {
+                            id: Date.now(),
+                            title,
+                            content,
+                            reference,
+                            createdAt: now,
+                            updatedAt: now
+                        };
+                        notes.unshift(newNote);
+                        console.log('Nueva nota creada:', newNote);
+                    }
+                    
+                    // Guardar en localStorage
+                    saveNotes();
+                    
+                    // Mostrar mensaje de éxito
+                    showNotification('Nota guardada correctamente');
+                    
+                    // Limpiar formulario y borrador
+                    noteTitle.value = '';
+                    noteContent.value = '';
+                    currentNoteId = null;
+                    clearDraftNote(); // Limpiar el borrador guardado
+                    
+                    // Cambiar a la pestaña de todas las notas
+                    const allNotesTab = document.querySelector('.tab-btn[data-tab="all-notes"]');
+                    if (allNotesTab) allNotesTab.click();
+                    
+                } catch (error) {
+                    console.error('Error al guardar la nota:', error);
+                    showNotification('Error al guardar la nota. Por favor, inténtalo de nuevo.');
+                }
+            }
+            
+            // Obtener referencia actual
+            function getCurrentReference() {
+                try {
+                    // Intenta obtener la referencia actual de la página
+                    const referenceElement = document.querySelector('.current-reference');
+                    if (referenceElement) {
+                        return referenceElement.textContent.trim() || 'Referencia no disponible';
+                    }
+                    
+                    // Si no se encuentra un elemento con la clase current-reference,
+                    // intenta obtener la referencia del título de la página
+                    const titleElement = document.querySelector('h1, h2, h3');
+                    if (titleElement) {
+                        return titleElement.textContent.trim() || 'Referencia no disponible';
+                    }
+                    
+                    // Si no se puede determinar la referencia, devolver un valor por defecto
+                    return 'Referencia no disponible';
+                } catch (error) {
+                    console.error('Error al obtener la referencia actual:', error);
+                    return 'Referencia no disponible';
+                }
+            }
+            
+            // Función para mostrar diálogo de confirmación
+            function showConfirm(message) {
+                return new Promise((resolve) => {
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 2000;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        max-width: 80%;
+                        text-align: center;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                    `;
+                    
+                    const messageEl = document.createElement('p');
+                    messageEl.textContent = message;
+                    messageEl.style.marginBottom = '20px';
+                    
+                    const buttonsContainer = document.createElement('div');
+                    buttonsContainer.style.display = 'flex';
+                    buttonsContainer.style.justifyContent = 'center';
+                    buttonsContainer.style.gap = '10px';
+                    
+                    const confirmButton = document.createElement('button');
+                    confirmButton.textContent = 'Sí';
+                    confirmButton.style.padding = '8px 20px';
+                    confirmButton.style.background = '#4CAF50';
+                    confirmButton.style.color = 'white';
+                    confirmButton.style.border = 'none';
+                    confirmButton.style.borderRadius = '4px';
+                    confirmButton.style.cursor = 'pointer';
+                    
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'No';
+                    cancelButton.style.padding = '8px 20px';
+                    cancelButton.style.background = '#f44336';
+                    cancelButton.style.color = 'white';
+                    cancelButton.style.border = 'none';
+                    cancelButton.style.borderRadius = '4px';
+                    cancelButton.style.cursor = 'pointer';
+                    
+                    confirmButton.onclick = () => {
+                        document.body.removeChild(modal);
+                        resolve(true);
+                    };
+                    
+                    cancelButton.onclick = () => {
+                        document.body.removeChild(modal);
+                        resolve(false);
+                    };
+                    
+                    buttonsContainer.appendChild(confirmButton);
+                    buttonsContainer.appendChild(cancelButton);
+                    
+                    modalContent.appendChild(messageEl);
+                    modalContent.appendChild(buttonsContainer);
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                });
+            }
+            
+            // Función para mostrar notificaciones
+            function showNotification(message, duration = 3000) {
+                // Crear el elemento de notificación si no existe
+                let notification = document.getElementById('notification-toast');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.id = 'notification-toast';
+                    notification.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background-color: #4CAF50;
+                        color: white;
+                        padding: 12px 24px;
+                        border-radius: 4px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 1000;
+                        opacity: 0;
+                        transition: opacity 0.3s ease-in-out;
+                        max-width: 90%;
+                        text-align: center;
+                    `;
+                    document.body.appendChild(notification);
+                }
+                
+                // Establecer el mensaje
+                notification.textContent = message;
+                
+                // Mostrar la notificación
+                notification.style.opacity = '1';
+                
+                // Ocultar después de la duración especificada
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    // Eliminar después de la animación
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, duration);
+            }
+            
+            // Guardar notas en localStorage
+            function saveNotes() {
+                localStorage.setItem('bible-notes', JSON.stringify(notes));
+                renderNotesList();
+            }
+            
+            // Renderizar lista de notas
+            function renderNotesList() {
+                if (notes.length === 0) {
+                    notesList.innerHTML = '<div class="no-notes">No hay notas guardadas aún.</div>';
+                    return;
+                }
+                
+                notesList.innerHTML = notes.map(note => `
+                    <div class="note-item" data-id="${note.id}">
+                        <div class="note-title">${note.title}</div>
+                        <div class="note-preview">${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</div>
+                        <div class="note-actions">
+                            <button class="btn btn-secondary edit-note" data-id="${note.id}">Editar</button>
+                            <button class="btn btn-danger delete-note" data-id="${note.id}">Eliminar</button>
+                            <button class="btn btn-secondary download-note" data-id="${note.id}">Descargar</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Agregar eventos a los botones de las notas
+                document.querySelectorAll('.edit-note').forEach(btn => {
+                    btn.addEventListener('click', editNote);
+                });
+                
+                document.querySelectorAll('.delete-note').forEach(btn => {
+                    btn.addEventListener('click', deleteNote);
+                });
+                
+                document.querySelectorAll('.download-note').forEach(btn => {
+                    btn.addEventListener('click', downloadNote);
+                });
+                
+                // Hacer clic en una nota para ver su contenido
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.addEventListener('click', viewNote);
+                });
+            }
+            
+            // Editar nota
+            function editNote(e) {
+                e.stopPropagation();
+                const noteId = this.getAttribute('data-id');
+                const note = notes.find(n => n.id === noteId);
+                
+                if (note) {
+                    // Llenar el formulario con los datos de la nota
+                    noteTitle.value = note.title;
+                    noteContent.value = note.content;
+                    
+                    // Cambiar a la pestaña de edición
+                    document.querySelector('.tab-btn[data-tab="quick-note"]').click();
+                    
+                    // Desplazarse al formulario
+                    notesPanel.scrollTop = 0;
+                }
+            }
+            
+            // Eliminar nota
+            async function deleteNote(e) {
+                try {
+                    e.stopPropagation();
+                    const noteItem = e.target.closest('.note-item');
+                    if (!noteItem) {
+                        console.error('No se pudo encontrar el elemento de la nota');
+                        return;
+                    }
+                    
+                    // Asegurarse de que el ID sea un número para comparación correcta
+                    const noteId = parseInt(noteItem.dataset.id);
+                    console.log('Eliminando nota ID:', noteId, 'Tipo:', typeof noteId);
+                    
+                    const confirmDelete = await showConfirm('¿Estás seguro de que quieres eliminar esta nota?');
+                    if (confirmDelete) {
+                        // Convertir el ID a número para la comparación
+                        notes = notes.filter(note => note.id !== noteId);
+                        saveNotes();
+                        renderNotesList();
+                        
+                        // Si estábamos editando la nota que se eliminó, limpiar el formulario
+                        if (currentNoteId === noteId) {
+                            if (noteTitle) noteTitle.value = '';
+                            if (noteContent) noteContent.value = '';
+                            currentNoteId = null;
+                        }
+                        
+                        console.log('Nota eliminada. Notas restantes:', notes);
+                        showNotification('Nota eliminada correctamente');
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar la nota:', error);
+                }
+            }
+            
+            // Descargar nota
+            function downloadNote(e) {
+                e.stopPropagation();
+                const noteId = parseInt(this.getAttribute('data-id'));
+                const note = notes.find(n => n.id === noteId);
+                
+                if (note) {
+                    const blob = new Blob([`# ${note.title}\n\n${note.content}`], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${note.title.replace(/[^\w\s]/gi, '')}.md`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+            }
+            
+            // Ver nota completa
+            function viewNote(e) {
+                // Evitar que se active al hacer clic en los botones
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    return;
+                }
+                
+                const noteId = parseInt(this.getAttribute('data-id'));
+                const note = notes.find(n => n.id === noteId);
+                
+                if (note) {
+                    // Mostrar la nota en un modal o en el área de edición
+                    noteTitle.value = note.title;
+                    noteContent.value = note.content;
+                    
+                    // Cambiar a la pestaña de edición
+                    document.querySelector('.tab-btn[data-tab="quick-note"]').click();
+                }
+            }
+            
+            // Hacer el botón flotante arrastrable
+            function makeDraggable(element) {
+                let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
+                let isDragging = false;
+                
+                // Estilos iniciales
+                element.style.position = 'fixed';
+                element.style.cursor = 'grab';
+                
+                // Posición inicial (centrado verticalmente a la derecha)
+                const initialPos = {
+                    top: (window.innerHeight - element.offsetHeight) / 2,
+                    right: 20
+                };
+                
+                // Cargar posición guardada o usar posición inicial
+                const savedPos = JSON.parse(localStorage.getItem('floating-btn-pos'));
+                const position = savedPos || initialPos;
+                
+                // Aplicar posición
+                element.style.top = `${position.top}px`;
+                element.style.right = `${position.right}px`;
+                
+                // Guardar posición inicial si no existe
+                if (!savedPos) {
+                    localStorage.setItem('floating-btn-pos', JSON.stringify(initialPos));
+                }
+                
+                // Función para iniciar arrastre
+                function startDrag(e) {
+                    e.preventDefault();
+                    
+                    // Obtener posición táctil o del mouse
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    if (!clientX || !clientY) return;
+                    
+                    // Obtener posición inicial
+                    mouseX = clientX;
+                    mouseY = clientY;
+                    
+                    // Obtener posición actual del elemento
+                    posX = element.offsetLeft;
+                    posY = element.offsetTop;
+                    
+                    isDragging = true;
+                    element.style.cursor = 'grabbing';
+                    
+                    // Prevenir el scroll en dispositivos táctiles
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Agregar eventos de arrastre
+                    document.addEventListener('mousemove', dragElement);
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchmove', dragElement, { passive: false });
+                    document.addEventListener('touchend', stopDrag);
+                }
+                
+                // Iniciar arrastre
+                element.addEventListener('mousedown', startDrag);
+                element.addEventListener('touchstart', startDrag, { passive: true });
+                
+                // Función de arrastre
+                function dragElement(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    
+                    // Obtener posición táctil o del mouse
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    if (!clientX || !clientY) return;
+                    
+                    // Calcular nueva posición
+                    const dx = clientX - mouseX;
+                    const dy = clientY - mouseY;
+                    
+                    // Calcular límites
+                    const maxX = window.innerWidth - element.offsetWidth;
+                    const maxY = window.innerHeight - element.offsetHeight;
+                    
+                    // Calcular nuevas coordenadas
+                    let newLeft = posX + dx;
+                    let newTop = posY + dy;
+                    
+                    // Asegurar que el elemento no salga de los límites
+                    newLeft = Math.max(0, Math.min(newLeft, maxX));
+                    newTop = Math.max(0, Math.min(newTop, maxY));
+                    
+                    // Aplicar nueva posición
+                    element.style.left = `${newLeft}px`;
+                    element.style.top = `${newTop}px`;
+                    element.style.right = 'auto';
+                    
+                    // Guardar posición
+                    savePosition(newLeft, newTop);
+                }
+                
+                // Detener arrastre
+                function stopDrag() {
+                    if (!isDragging) return;
+                    
+                    isDragging = false;
+                    element.style.cursor = 'grab';
+                    document.body.style.overflow = '';
+                    
+                    // Remover todos los listeners de arrastre
+                    document.removeEventListener('mousemove', dragElement);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchmove', dragElement);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+                
+                // Guardar posición
+                function savePosition(left, top) {
+                    // Calcular posición relativa a la derecha para guardar
+                    const right = window.innerWidth - (left + element.offsetWidth);
+                    const pos = { top, right };
+                    localStorage.setItem('floating-btn-pos', JSON.stringify(pos));
+                }
+                
+                // Manejar redimensionamiento de la ventana
+                window.addEventListener('resize', function() {
+                    const saved = JSON.parse(localStorage.getItem('floating-btn-pos'));
+                    if (saved) {
+                        // Asegurar que el botón siga siendo visible al redimensionar
+                        const maxRight = Math.max(0, window.innerWidth - element.offsetWidth);
+                        const maxTop = Math.max(0, window.innerHeight - element.offsetHeight);
+                        
+                        const newRight = Math.min(saved.right, maxRight);
+                        const newTop = Math.min(saved.top, maxTop);
+                        
+                        element.style.right = `${newRight}px`;
+                        element.style.top = `${newTop}px`;
+                        element.style.left = 'auto';
+                    }
+                });
+            }
+            
+            // Event listeners originales
+            floatingBtn.addEventListener('click', toggleNotesPanel);
+            closeNotes.addEventListener('click', toggleNotesPanel);
+            saveNoteBtn.addEventListener('click', saveNote);
+            
+            // Agregar manejadores para las pestañas
+            tabButtons.forEach(button => {
+                button.addEventListener('click', switchTab);
+            });
+            
+            // Hacer el botón arrastrable
+            makeDraggable(floatingBtn);
+            
+            // Soporte táctil mejorado
+            floatingBtn.addEventListener('touchend', function(e) {
+                // Si no hubo movimiento significativo, abrir el panel
+                if (!isDragging) {
+                    toggleNotesPanel();
+                }
+                isDragging = false;
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Inicializar el panel de notas
+            renderNotesList();
+            
+            // Cerrar el panel al hacer clic fuera de él
+            document.addEventListener('click', (e) => {
+                if (!notesPanel.contains(e.target) && !floatingBtn.contains(e.target)) {
+                    notesPanel.classList.remove('active');
+                }
+            });
+            
+            // Cerrar con la tecla Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && notesPanel.classList.contains('active')) {
+                    notesPanel.classList.remove('active');
+                }
+            });
+            
+            console.log('Sistema de notas cargado correctamente');
+        });
+
+        // Funcionalidad de comparación de versiones
+        let comparisonMode = false;
+        let comparisonXmlDoc = null;
+        let comparisonVersion = '';
+
+        function toggleComparison() {
+            console.log('toggleComparison() llamado');
+            
+            const compareToggle = document.getElementById('compare-toggle');
+            const compareSelector = document.getElementById('compare-version-selector');
+            const body = document.body;
+            const chapterContent = document.querySelector('.chapter-content');
+            
+            console.log('Elementos encontrados:', {
+                compareToggle: !!compareToggle,
+                compareSelector: !!compareSelector,
+                body: !!body,
+                chapterContent: !!chapterContent
+            });
+            
+            if (!compareToggle || !compareSelector || !body || !chapterContent) {
+                console.error('Faltan elementos necesarios para la comparación');
+                alert('Error: No se encontraron los elementos necesarios para la comparación');
+                return;
+            }
+            
+            comparisonMode = !comparisonMode;
+            console.log('comparisonMode cambiado a:', comparisonMode);
+            
+            if (comparisonMode) {
+                // Activar modo comparación - OCULTAR TODO INMEDIATAMENTE
+                body.classList.add('comparison-view');
+                compareToggle.classList.add('active');
+                compareSelector.style.display = 'inline-block';
+                
+                // FORZAR ROTACIÓN HORIZONTAL MÚLTIPLES MÉTODOS
+                console.log('Intentando forzar rotación horizontal...');
+                
+                // Método 1: screen.orientation.lock
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').then(() => {
+                        console.log('✅ Rotación forzada con screen.orientation.lock');
+                    }).catch(err => {
+                        console.log('❌ screen.orientation.lock falló:', err);
+                    });
+                }
+                
+                // Método 2: screen.lockOrientation (más antiguo)
+                if (screen.lockOrientation) {
+                    try {
+                        screen.lockOrientation('landscape');
+                        console.log('✅ Rotación forzada con screen.lockOrientation');
+                    } catch (err) {
+                        console.log('❌ screen.lockOrientation falló:', err);
+                    }
+                }
+                
+                // Método 3: requestFullscreen con orientación
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen({ navigationUI: 'hide' }).then(() => {
+                        if (screen.orientation && screen.orientation.lock) {
+                            setTimeout(() => {
+                                screen.orientation.lock('landscape').then(() => {
+                                    console.log('✅ Rotación forzada después de fullscreen');
+                                }).catch(err => {
+                                    console.log('❌ Rotación post-fullscreen falló:', err);
+                                });
+                            }, 1000);
+                        }
+                    }).catch(err => {
+                        console.log('❌ requestFullscreen falló:', err);
+                    });
+                }
+                
+                // Ocultar el contenido actual INMEDIATAMENTE
+                chapterContent.style.display = 'none';
+                
+                // Mostrar mensaje de carga
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'comparison-loading';
+                loadingDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: var(--bg-color);
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    text-align: center;
+                `;
+                loadingDiv.innerHTML = '<p>Cargando comparación...</p>';
+                document.body.appendChild(loadingDiv);
+                
+                console.log('Modo comparación activado, esperando selección de versión...');
+                
+                // Si ya hay una versión seleccionada, cargarla
+                if (compareSelector.value) {
+                    console.log('Versión ya seleccionada:', compareSelector.value);
+                    loadComparisonVersion(compareSelector.value);
+                } else {
+                    console.log('No hay versión seleccionada, esperando...');
+                    // Si no hay versión seleccionada, ocultar el mensaje y mostrar selector
+                    setTimeout(() => {
+                        const loading = document.getElementById('comparison-loading');
+                        if (loading) loading.remove();
+                    }, 500);
+                }
+            } else {
+                // Desactivar modo comparación
+                console.log('Desactivando modo comparación');
+                body.classList.remove('comparison-view');
+                compareToggle.classList.remove('active');
+                compareSelector.style.display = 'none';
+                comparisonXmlDoc = null;
+                comparisonVersion = '';
+                
+                // Eliminar el grid de comparación
+                const comparisonGrid = document.getElementById('comparison-grid');
+                if (comparisonGrid) {
+                    comparisonGrid.remove();
+                }
+                
+                // Eliminar mensaje de carga si existe
+                const loading = document.getElementById('comparison-loading');
+                if (loading) {
+                    loading.remove();
+                }
+                
+                // Restaurar el contenedor original completamente
+                const versesContainer = document.getElementById('verses');
+                if (versesContainer) {
+                    const chapterContent = versesContainer.parentElement;
+                    chapterContent.style.display = '';
+                    chapterContent.style.visibility = '';
+                    chapterContent.style.height = '';
+                    chapterContent.style.overflow = '';
+                    chapterContent.style.padding = '';
+                    chapterContent.style.margin = '';
+                }
+                
+                // Recargar capítulo normal
+                if (typeof loadChapter === 'function') {
+                    loadChapter();
+                }
+            }
+        }
+
+        // Event listener para el selector de versión de comparación
+        document.getElementById('compare-version-selector').addEventListener('change', async (e) => {
+            if (comparisonMode && e.target.value) {
+                await loadComparisonVersion(e.target.value);
+            }
+        });
+
+        async function loadComparisonVersion(version) {
+            try {
+                // Evitar comparar la misma versión
+                const currentVersion = document.getElementById('version-selector').value;
+                if (version === currentVersion) {
+                    alert('Selecciona una versión diferente para comparar');
+                    return;
+                }
+                
+                comparisonVersion = version;
+                
+                // Cargar la segunda versión
+                const url = `biblia-files/${version}.xmm`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                
+                const xmlText = await response.text();
+                comparisonXmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+                
+                // Depuración: mostrar libros disponibles
+                const books = comparisonXmlDoc.getElementsByTagName('b');
+                const bookNames = Array.from(books).map(b => b.getAttribute('n')).slice(0, 5); // Primeros 5 libros
+                console.log(`Libros disponibles en ${version}:`, bookNames, '...');
+                console.log(`Buscando libro actual: "${currentBook}"`);
+                
+                // Recargar el capítulo en modo comparación
+                loadChapterComparison();
+                
+            } catch (error) {
+                console.error('Error cargando versión de comparación:', error);
+                alert('Error al cargar la versión de comparación: ' + error.message);
+            }
+        }
+
+        function loadChapterComparison() {
+            if (!comparisonMode || !comparisonXmlDoc) return;
+            
+            const currentVersionName = document.getElementById('version-selector').value;
+            const comparisonVersionName = comparisonVersion;
+            
+            // Eliminar mensaje de carga si existe
+            const loading = document.getElementById('comparison-loading');
+            if (loading) {
+                loading.remove();
+            }
+            
+            // Eliminar grid anterior si existe
+            const existingGrid = document.getElementById('comparison-grid');
+            if (existingGrid) {
+                existingGrid.remove();
+            }
+            
+            // Ocultar el contenedor original inmediatamente
+            const versesContainer = document.getElementById('verses');
+            const chapterContent = versesContainer.parentElement;
+            
+            // Crear el grid en la misma posición que el contenido original
+            const comparisonGrid = document.createElement('div');
+            comparisonGrid.id = 'comparison-grid';
+            comparisonGrid.style.cssText = `
+                position: relative;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                width: 100vw;
+                max-width: none;
+                margin: 0;
+                padding: 0 20px;
+                box-sizing: border-box;
+                left: 0;
+                top: 0;
+                z-index: 1;
+            `;
+            
+            // Generar HTML para ambas versiones al mismo tiempo
+            console.log('Generando HTML para ambas versiones...');
+            const primaryHTML = generateVersesHTML(xmlDoc, currentVersionName);
+            const comparisonHTML = generateVersesHTML(comparisonXmlDoc, comparisonVersionName);
+            
+            console.log('HTML generado, creando grid...');
+            
+            comparisonGrid.innerHTML = `
+                <div class="chapter-header" style="grid-column: 1 / -1; text-align: center; margin-bottom: 30px; padding-top: 15px;">
+                    <h2 style="color: var(--text-color); margin: 0; font-size: 1.5em; padding: 10px 0;">${currentBook} ${currentChapter}</h2>
+                    <button onclick="forceRotation()" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
+                        🔄 Forzar Rotación Horizontal
+                    </button>
+                </div>
+                <div class="version-column" style="background: var(--bg-color); border: 1px solid rgba(76, 175, 80, 0.2); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="version-label" style="position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: var(--bg-color); padding: 6px 12px; text-align: center; font-weight: bold; color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 6px; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 0.8em; white-space: nowrap;">${currentVersionName}</div>
+                    <div id="verses-primary" style="margin-top: 20px;">${primaryHTML}</div>
+                </div>
+                <div class="version-column" style="background: var(--bg-color); border: 1px solid rgba(76, 175, 80, 0.2); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="version-label" style="position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: var(--bg-color); padding: 6px 12px; text-align: center; font-weight: bold; color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 6px; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 0.8em; white-space: nowrap;">${comparisonVersionName}</div>
+                    <div id="verses-comparison" style="margin-top: 20px;">${comparisonHTML}</div>
+                </div>
+            `;
+            
+            // Reemplazar el contenedor original con el grid de comparación
+            chapterContent.parentNode.insertBefore(comparisonGrid, chapterContent);
+            chapterContent.style.display = 'none';
+            chapterContent.style.visibility = 'hidden';
+            chapterContent.style.height = '0';
+            chapterContent.style.overflow = 'hidden';
+            chapterContent.style.padding = '0';
+            chapterContent.style.margin = '0';
+            
+            console.log('Grid añadido en posición original');
+            console.log('Versículos primarios:', document.getElementById('verses-primary')?.children.length || 0);
+            console.log('Versículos comparación:', document.getElementById('verses-comparison')?.children.length || 0);
+        }
+
+        function generateVersesHTML(xmlDoc, versionName) {
+            // Buscar el libro de forma más flexible
+            let bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
+            
+            if (!bookNode) {
+                const books = xmlDoc.getElementsByTagName('b');
+                for (let book of books) {
+                    const bookName = book.getAttribute('n');
+                    if (bookName && bookName.toLowerCase() === currentBook.toLowerCase()) {
+                        bookNode = book;
+                        break;
+                    }
+                }
+            }
+            
+            if (!bookNode) {
+                return `<p class="error-message">Libro "${currentBook}" no encontrado en ${versionName}</p>`;
+            }
+            
+            let chapterNode = Array.from(bookNode.getElementsByTagName('c')).find(c => c.getAttribute('n') === currentChapter.toString());
+            
+            if (!chapterNode) {
+                return `<p class="error-message">Capítulo ${currentChapter} no encontrado en ${versionName}</p>`;
+            }
+            
+            const verses = Array.from(chapterNode.getElementsByTagName('v'));
+            let html = '';
+            
+            verses.forEach(v => {
+                const verseNum = v.getAttribute('n');
+                const verseText = v.textContent.trim();
+                const isHighlighted = verseNum == currentVerse;
+                
+                html += `
+                    <div class="verse ${isHighlighted ? 'highlighted' : ''}" data-verse="${verseNum}">
+                        <span class="verse-number">${verseNum}</span><span class="verse-text">${verseText}</span>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function loadVersesForComparison(containerId, xmlDoc) {
+            const container = document.getElementById(containerId);
+            
+            console.log(`Cargando versículos para ${containerId}...`);
+            
+            // Buscar el libro de forma más flexible
+            let bookNode = xmlDoc.querySelector(`b[n="${currentBook}"]`);
+            
+            // Si no encuentra con el nombre exacto, intentar con variaciones
+            if (!bookNode) {
+                const books = xmlDoc.getElementsByTagName('b');
+                for (let book of books) {
+                    const bookName = book.getAttribute('n');
+                    if (bookName && bookName.toLowerCase() === currentBook.toLowerCase()) {
+                        bookNode = book;
+                        console.log(`Libro encontrado por case-insensitive: "${bookName}"`);
+                        break;
+                    }
+                }
+            }
+            
+            // Intentar con nombres normalizados (quitar acentos y espacios)
+            if (!bookNode) {
+                const normalizeString = (str) => str.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Quitar acentos
+                    .replace(/\s+/g, ''); // Quitar espacios
+                
+                const normalizedCurrent = normalizeString(currentBook);
+                const books = xmlDoc.getElementsByTagName('b');
+                
+                for (let book of books) {
+                    const bookName = book.getAttribute('n');
+                    if (bookName) {
+                        const normalizedBook = normalizeString(bookName);
+                        if (normalizedBook === normalizedCurrent) {
+                            bookNode = book;
+                            console.log(`Libro encontrado por normalización: "${bookName}" -> "${normalizedBook}"`);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Último intento: buscar por similitud de palabras
+            if (!bookNode) {
+                const books = xmlDoc.getElementsByTagName('b');
+                const currentWords = currentBook.toLowerCase().split(' ');
+                
+                for (let book of books) {
+                    const bookName = book.getAttribute('n');
+                    if (bookName) {
+                        const bookWords = bookName.toLowerCase().split(' ');
+                        
+                        // Verificar si comparten palabras clave
+                        const commonWords = currentWords.filter(word => 
+                            word.length > 2 && bookWords.some(bWord => bWord.includes(word) || word.includes(bWord))
+                        );
+                        
+                        if (commonWords.length > 0) {
+                            bookNode = book;
+                            console.log(`Libro encontrado por similitud de palabras: "${bookName}" (comunes: ${commonWords.join(', ')})`);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (!bookNode) {
+                // Listar todos los libros disponibles para depuración
+                const allBooks = Array.from(xmlDoc.getElementsByTagName('b')).map(b => b.getAttribute('n'));
+                console.log(`Todos los libros disponibles:`, allBooks);
+                container.innerHTML = `<p class="error-message">Libro "${currentBook}" no encontrado en esta versión</p>`;
+                console.error('Libro no encontrado:', currentBook, 'en documento XML:', xmlDoc);
+                return;
+            }
+            
+            let chapterNode = Array.from(bookNode.getElementsByTagName('c')).find(c => c.getAttribute('n') === currentChapter.toString());
+            
+            if (!chapterNode) {
+                // Listar todos los capítulos disponibles para depuración
+                const allChapters = Array.from(bookNode.getElementsByTagName('c')).map(c => c.getAttribute('n'));
+                console.log(`Capítulos disponibles en "${bookNode.getAttribute('n')}":`, allChapters);
+                console.log(`Buscando capítulo "${currentChapter}" (tipo: ${typeof currentChapter})`);
+                
+                // Intentar convertir a string y buscar de nuevo
+                chapterNode = Array.from(bookNode.getElementsByTagName('c')).find(c => c.getAttribute('n') === currentChapter.toString());
+                if (chapterNode) {
+                    console.log('Capítulo encontrado como string');
+                } else {
+                    container.innerHTML = `<p class="error-message">Capítulo ${currentChapter} no encontrado</p>`;
+                    console.error('Capítulo no encontrado:', currentChapter, 'en libro:', currentBook);
+                    return;
+                }
+            }
+            
+            const verses = Array.from(chapterNode.getElementsByTagName('v'));
+            console.log(`Encontrados ${verses.length} versículos para ${containerId}`);
+            
+            let html = '';
+            
+            verses.forEach(v => {
+                const verseNum = v.getAttribute('n');
+                const verseText = v.textContent.trim();
+                const isHighlighted = verseNum == currentVerse;
+                
+                html += `
+                    <div class="verse ${isHighlighted ? 'highlighted' : ''}" data-verse="${verseNum}">
+                        <span class="verse-number">${verseNum}</span><span class="verse-text">${verseText}</span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            console.log(`Cargados ${verses.length} versículos para ${containerId}`);
+        }
+
+        // Modificar la función loadChapter original para soporte de comparación
+        const originalLoadChapter = window.loadChapter;
+        window.loadChapter = function() {
+            if (comparisonMode) {
+                loadChapterComparison();
+            } else if (originalLoadChapter) {
+                originalLoadChapter();
+            }
+        };
+
+        // Función para forzar rotación manualmente
+        function forceRotation() {
+            console.log('🔄 Forzando rotación horizontal manualmente...');
+            
+            // Intentar múltiples métodos
+            const promises = [];
+            
+            // Método 1: screen.orientation.lock
+            if (screen.orientation && screen.orientation.lock) {
+                promises.push(
+                    screen.orientation.lock('landscape')
+                        .then(() => console.log('✅ Rotación forzada con screen.orientation.lock'))
+                        .catch(err => console.log('❌ screen.orientation.lock falló:', err))
+                );
+            }
+            
+            // Método 2: requestFullscreen + lock
+            if (document.documentElement.requestFullscreen) {
+                promises.push(
+                    document.documentElement.requestFullscreen({ navigationUI: 'hide' })
+                        .then(() => {
+                            console.log('✅ Fullscreen activado');
+                            // Intentar bloquear orientación después de fullscreen
+                            setTimeout(() => {
+                                if (screen.orientation && screen.orientation.lock) {
+                                    screen.orientation.lock('landscape')
+                                        .then(() => console.log('✅ Rotación forzada después de fullscreen'))
+                                        .catch(err => console.log('❌ Rotación post-fullscreen falló:', err));
+                                }
+                            }, 500);
+                        })
+                        .catch(err => console.log('❌ requestFullscreen falló:', err))
+                );
+            }
+            
+            // Mostrar mensaje al usuario
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #4CAF50;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: fadeInOut 3s ease-in-out;
+            `;
+            message.textContent = '🔄 Intentando forzar rotación horizontal...';
+            document.body.appendChild(message);
+            
+            setTimeout(() => message.remove(), 3000);
+            
+            // Ejecutar todas las promesas
+            Promise.allSettled(promises);
+        }
+        
+        // Añadir estilos para animación del mensaje
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Modal personalizado para confirmaciones -->
+    <div id="customConfirmModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <p id="customConfirmMessage">¿Estás seguro?</p>
+            <div class="custom-modal-buttons">
+                <button id="customConfirmCancel" class="custom-modal-button cancel">Cancelar</button>
+                <button id="customConfirmOk" class="custom-modal-button confirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animación para nueva función de comparación
+        document.addEventListener('DOMContentLoaded', function() {
+            const compareToggle = document.getElementById('compare-toggle');
+            
+            // Activar animación si es la primera vez que ve la función
+            if (!localStorage.getItem('comparisonFeatureSeen')) {
+                compareToggle.classList.add('new-feature');
+                
+                // Quitar la animación después de la primera interacción
+                const removeAnimation = () => {
+                    compareToggle.classList.remove('new-feature');
+                    localStorage.setItem('comparisonFeatureSeen', 'true');
+                    console.log('Animación de nueva función removida');
+                };
+                
+                // Quitar animación al hacer clic
+                compareToggle.addEventListener('click', removeAnimation, { once: true });
+                
+                // O quitar después de 10 segundos si no interactúa
+                setTimeout(() => {
+                    if (compareToggle.classList.contains('new-feature')) {
+                        removeAnimation();
+                    }
+                }, 10000);
+                
+                console.log('Animación de nueva función activada');
+            }
+        });
+    </script>
+</body>
+</html>
