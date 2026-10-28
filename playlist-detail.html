@@ -306,11 +306,63 @@
             opacity: 0.8;
         }
         
-        /* YouTube player oculto */
-        #youtubePlayer {
-            display: none;
+        /* Reproductor de YouTube visible (necesario para ver el botón "Omitir anuncio").
+           Compacto por defecto, del tamaño mínimo que permite YouTube (200x200) */
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
+        .player-row .player-content {
+            flex: 1;
+            min-width: 0;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .player-row .player-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-wrap {
+            flex: 0 0 200px;
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+        .video-wrap iframe, #youtubePlayer {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border: 0;
+        }
+        .audio-player.expanded .player-row { flex-direction: column; align-items: stretch; }
+        .audio-player.expanded .video-wrap {
+            flex: none;
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            min-height: 200px;
+            aspect-ratio: 16 / 9;
+            margin: 0 auto;
+        }
+        .player-btn.small { width: 34px; height: 34px; font-size: 15px; }
+        @media (max-width: 440px) {
+            .audio-player { padding: 12px; }
+            .player-row { gap: 10px; }
+            .player-row .player-controls { gap: 6px; flex-wrap: wrap; }
+            .player-row .player-btn { width: 34px; height: 34px; font-size: 15px; }
+            .player-row .player-btn.play-pause { width: 40px; height: 40px; }
+            .player-row .progress-container { flex-wrap: wrap; gap: 4px 8px; }
+            .player-row .progress-bar { flex: 1 1 100%; }
+            .player-row .player-title { font-size: 0.95em; }
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -441,6 +493,8 @@
     
     <!-- Reproductor flotante -->
     <div class="audio-player" id="audioPlayer">
+        <div class="player-row">
+        <div class="video-wrap"><div id="youtubePlayer"></div></div>
         <div class="player-content">
             <div class="player-info">
                 <h3 class="player-title" id="playerTitle">Selecciona un video</h3>
@@ -450,6 +504,7 @@
                 <button class="player-btn" id="prevBtn">⏮</button>
                 <button class="player-btn play-pause" id="playPauseBtn">▶</button>
                 <button class="player-btn" id="nextBtn">⏭</button>
+                <button class="player-btn small" id="sizeBtn" title="Agrandar video" aria-label="Agrandar video">⤢</button>
             </div>
             <div class="progress-container">
                 <div class="progress-bar">
@@ -459,10 +514,9 @@
                 <span class="time" id="duration">0:00</span>
             </div>
         </div>
+        </div>
     </div>
     
-    <!-- YouTube player oculto para audio -->
-    <div id="youtubePlayer"></div>
     
     <script>
         // Variables globales
@@ -710,6 +764,8 @@
             
             // Mostrar reproductor
             audioPlayer.classList.add('active');
+            // Dejar espacio abajo para que el reproductor no tape la lista
+            setTimeout(ajustarEspacio, 350);
             
             // Cargar y reproducir video en YouTube player (solo audio)
             if (youtubePlayer) {
@@ -723,13 +779,26 @@
             setupMediaSession(title, params.name || 'Predicaciones');
         }
         
+        // Agrandar o achicar el video
+        function ajustarEspacio() {
+            if (audioPlayer.classList.contains('active')) document.body.style.paddingBottom = audioPlayer.offsetHeight + 'px';
+        }
+        document.getElementById('sizeBtn').addEventListener('click', () => {
+            const grande = audioPlayer.classList.toggle('expanded');
+            const b = document.getElementById('sizeBtn');
+            b.textContent = grande ? '⤡' : '⤢';
+            b.title = b.ariaLabel = grande ? 'Achicar video' : 'Agrandar video';
+            setTimeout(ajustarEspacio, 50);
+        });
+        window.addEventListener('resize', ajustarEspacio);
+
         // Configurar YouTube Player
         function onYouTubeIframeAPIReady() {
             console.log('YouTube API ready, creando player...');
             
             youtubePlayer = new YT.Player('youtubePlayer', {
-                height: '0',
-                width: '0',
+                height: '100%',
+                width: '100%',
                 videoId: '',
                 events: {
                     'onReady': onPlayerReady,
@@ -738,9 +807,9 @@
                 },
                 playerVars: {
                     'autoplay': 0,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'fs': 0,
+                    'controls': 1,
+                    'playsinline': 1,
+                    'fs': 1,
                     'modestbranding': 1,
                     'rel': 0,
                     'showinfo': 0
