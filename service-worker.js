@@ -1,12 +1,12 @@
 // Service Worker for offline support
-const SW_VERSION = 'v15';
+const SW_VERSION = 'v16';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v15';
+const CACHE_NAME = 'biblia-app-cache-v16';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v15';
+const STATIC_CACHE = 'biblia-static-v16';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v15';
+const DYNAMIC_CACHE = 'biblia-dynamic-v16';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
 
@@ -467,24 +467,6 @@ function syncBibleData() {
 }
 
 // Notificaciones push (opcional)
-self.addEventListener('push', event => {
-  const options = {
-    body: event.data ? event.data.text() : 'Nueva actualización disponible',
-    icon: '/icons/pymicon.png',
-    badge: '/icons/pymicon.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification('Biblia de Poder y Milagros', options)
-  );
-});
-
-
 // ---------- Capítulo del día: notificaciones ----------
 self.addEventListener('push', event => {
   let datos = {};
