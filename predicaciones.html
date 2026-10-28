@@ -335,6 +335,18 @@
             }
         }
     </style>
+
+    <script>
+        // Imagen de respaldo cuando una miniatura no carga
+        window.imgRespaldo = function (img) {
+            img.onerror = null;
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180" viewBox="0 0 300 180">' +
+                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs>' +
+                '<rect width="300" height="180" fill="url(#g)"/>' +
+                '<polygon points="130,65 130,115 172,90" fill="white" opacity="0.9"/></svg>';
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        };
+    </script>
 </head>
 <body>
     <!-- Menú hamburguesa -->
@@ -457,7 +469,7 @@
                 
                 div.innerHTML = `
                     <img src="${thumbnail}" alt="${playlist.snippet.title}" class="playlist-thumbnail" 
-                         onerror="this.src='https://picsum.photos/seed/fallback${playlist.id || index}/300/180.jpg'; this.onerror='this.src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='180' viewBox='0 0 300 180'%3E%3Crect width='300' height='180' fill='%23764ba2'/%3E%3Ctext x='150' y='90' font-family='Arial' font-size='16' fill='white' text-anchor='middle'%3EPlaylist%3C/text%3E%3C/svg%3E';">
+                         onerror="imgRespaldo(this)">
                     <div class="playlist-info">
                         <h3 class="playlist-title">${playlist.snippet.title}</h3>
                         <p class="playlist-count">${playlist.contentDetails?.itemCount || 0} videos</p>

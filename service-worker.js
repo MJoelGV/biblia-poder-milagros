@@ -1,90 +1,69 @@
 // Service Worker for offline support
-const SW_VERSION = 'v12';
+const SW_VERSION = 'v13';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v12';
+const CACHE_NAME = 'biblia-app-cache-v13';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v12';
+const STATIC_CACHE = 'biblia-static-v13';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v12';
+const DYNAMIC_CACHE = 'biblia-dynamic-v13';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
 
 // Recursos esenciales para funcionamiento básico (descarga inmediata)
 const ESSENTIAL_URLS = [
-  '/',
-  '/index.html',
-  '/lectura.html',
-  '/predicaciones.html',
-  '/playlist-detail.html',
-  '/favoritos.html',
-  '/manifest.json',
-  '/css/menu-styles.css',
-  '/js/menu.js',
-  '/js/search.js',
-  '/icons/pymicon.png',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/diccionario.xml',
+  './',
+  './index.html',
+  './lectura.html',
+  './predicaciones.html',
+  './playlist-detail.html',
+  './manifest.json',
+  './css/menu-styles.css',
+  './js/menu.js',
+  './js/search.js',
+  './icons/pymicon.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './diccionario.xml',
   // Todas las páginas de la app
-  '/audio.html',
-  '/memorizados.html',
-  '/historias.html',
-  '/bookmarks.html',
-  '/comments.html',
-  '/temas.html',
-  '/topics.html',
-  '/share.html',
-  '/diccionario.html',
+  './audio.html',
+  './memorizados.html',
+  './historias.html',
+  './bookmarks.html',
+  './comments.html',
+  './temas.html',
+  './topics.html',
+  './share.html',
+  './diccionario.html',
   // CSS y JS adicionales
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/pericopas.js',
-  '/js/temas.js',
-  '/js/diccionario.js',
-  '/js/audio.js',
-  '/js/memorizados.js',
-  '/js/historias.js',
-  '/js/bookmarks.js',
-  '/js/comments.js',
   // Nuevas páginas de predicaciones
-  '/js/youtube-api.js',
-  '/js/youtube-player.js'
+  './js/youtube-api.js',
+  './js/youtube-player.js'
 ];
 
 // Recursos bíblicos completos (descarga progresiva)
 const BIBLE_DATA_URLS = [
-  '/biblia-files/Reina-Valera-1960.xmm',
-  '/biblia-files/Dios-Habla-Hoy.xmm',
-  '/biblia-files/La-Biblia-de-Las-Americas.xmm',
-  '/biblia-files/Nueva-Traduccion-Viviente.xmm',
-  '/biblia-files/TLA.xmm',
-  '/pericopas-datos-completo.js',
-  '/biblia-files/temas-versiculos.xml',
-  '/biblia-files/titulos-antiguo-testamento.xml'
+  './biblia-files/Reina-Valera-1960.xmm',
+  './biblia-files/Dios-Habla-Hoy.xmm',
+  './biblia-files/La-Biblia-de-Las-Americas.xmm',
+  './biblia-files/Nueva-Traduccion-Viviente.xmm',
+  './biblia-files/TLA.xmm',
+  './pericopas-datos-completo.js',
+  './biblia-files/temas-versiculos.xml',
+  './biblia-files/titulos-antiguo-testamento.xml'
 ];
 
 // Muestras de audio para demostración (solo algunos capítulos populares)
 const AUDIO_SAMPLE_URLS = [
   // Eliminamos muestras de audio para reducir tamaño
   // Si quieres algunas muestras, descomenta las siguientes líneas:
-  // '/audio/genesis_01.mp3',
-  // '/audio/psalm_23.mp3'
+  // './audio/genesis_01.mp3',
+  // './audio/psalm_23.mp3'
 ];
 
 // Recursos adicionales (descarga lazy)
 const ADDITIONAL_URLS = [
   // Ya están incluidas en ESSENTIAL_URLS, pero mantenemos por compatibilidad
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/pericopas.js',
-  '/js/temas.js',
-  '/js/diccionario.js',
-  '/js/audio.js',
-  '/js/memorizados.js',
-  '/js/historias.js',
-  '/js/bookmarks.js',
-  '/js/comments.js'
 ];
 
 // Recursos externos para cachear
@@ -102,7 +81,7 @@ self.addEventListener('install', event => {
     caches.open(STATIC_CACHE)
       .then(cache => {
         console.log('Caching essential resources...');
-        return cache.addAll(ESSENTIAL_URLS);
+        return Promise.all(ESSENTIAL_URLS.map(u => cache.add(u).catch(err => console.warn('No se pudo guardar:', u, err))));
       })
       .then(() => {
         console.log('Essential resources cached successfully');
@@ -255,6 +234,8 @@ self.addEventListener('activate', event => {
 // Estrategias de caché avanzadas
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  // Las imágenes y datos de otros sitios (YouTube, Unsplash, etc.) van directo a la red
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   
   // Estrategia: Cache First para recursos estáticos
   if (isStaticResource(event.request)) {
@@ -266,19 +247,19 @@ self.addEventListener('fetch', event => {
         })
     );
   }
-  // Estrategia: Cache First para páginas HTML (prioridad absoluta offline)
+  // Estrategia: Red primero para páginas HTML (así siempre llegan las actualizaciones),
+  // y si no hay internet se usa la copia guardada
   else if (isHTMLPage(event.request)) {
     event.respondWith(
-      caches.open(STATIC_CACHE)
-        .then(cache => cache.match(event.request))
-        .then(response => {
-          // Si está en caché, usarlo inmediatamente
-          if (response) {
-            return response;
-          }
-          // Si no está en caché, intentar fetch
-          return fetchAndCache(event.request, STATIC_CACHE);
-        })
+      fetch(event.request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(STATIC_CACHE).then(cache => cache.put(event.request, copy));
+        }
+        return response;
+      }).catch(() => caches.open(STATIC_CACHE)
+        .then(cache => cache.match(event.request, { ignoreSearch: true }))
+        .then(r => r || caches.match('./index.html')))
     );
   }
   // Estrategia: Cache First con fallback para datos bíblicos
@@ -351,7 +332,7 @@ function isStaticResource(request) {
          url.pathname.includes('.jpg') ||
          url.pathname.includes('.jpeg') ||
          url.pathname.includes('.svg') ||
-         url.pathname === '/manifest.json';
+         url.pathname.endsWith('/manifest.json');
 }
 
 function isDataResource(request) {
