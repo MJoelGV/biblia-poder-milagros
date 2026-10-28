@@ -1,0 +1,85 @@
+name: Capítulo del día
+
+on:
+  schedule:
+    - cron: '0 12 * * *'   # 12:00 UTC = 7:00 a.m. en Houston (6:00 a.m. en horario de invierno)
+  workflow_dispatch:       # permite enviarlo a mano desde la pestaña Actions
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar firebase-admin
+        run: npm install firebase-admin@12.7.0 --no-save --no-audit --no-fund
+      - name: Enviar capítulo del día
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          cat > enviar.cjs <<'FIN'
+          // Envía el "Capítulo del día" a todos los suscritos
+          const NT = [['Mateo',28],['Marcos',16],['Lucas',24],['Juan',21],['Hechos',28],['Romanos',16],['1 Corintios',16],['2 Corintios',13],
+            ['Gálatas',6],['Efesios',6],['Filipenses',4],['Colosenses',4],['1 Tesalonicenses',5],['2 Tesalonicenses',3],['1 Timoteo',6],
+            ['2 Timoteo',4],['Tito',3],['Filemón',1],['Hebreos',13],['Santiago',5],['1 Pedro',5],['2 Pedro',3],['1 Juan',5],['2 Juan',1],
+            ['3 Juan',1],['Judas',1],['Apocalipsis',22]];
+          const LISTA = NT.flatMap(([libro, n]) => Array.from({ length: n }, (_, i) => ({ libro, cap: i + 1 })));
+          const BIBLIA_URL = 'https://raw.githubusercontent.com/MJoelGV/biblia-poder-milagros/Original/biblia-files/Reina-Valera-1960.xmm';
+
+          function capituloDeHoy(fecha = new Date()) {
+            // Fecha de hoy en Houston (hora central)
+            const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' })
+              .format(fecha).split('-').map(Number);
+            const dias = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(2026, 10, 1)) / 86400000); // 1 nov 2026 = Mateo 1
+            return LISTA[((dias % LISTA.length) + LISTA.length) % LISTA.length];
+          }
+
+          function primerVersiculo(xml, libro, cap) {
+            const ib = xml.indexOf(`<b n="${libro}"`); if (ib < 0) return '';
+            const ic = xml.indexOf(`<c n="${cap}"`, ib); if (ic < 0) return '';
+            const m = xml.slice(ic, ic + 5000).match(/<v n="1"[^>]*>([\s\S]*?)<\/v>/);
+            if (!m) return '';
+            const t = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+            return t.length > 110 ? t.slice(0, 107).replace(/\s+\S*$/, '') + '…' : t;
+          }
+
+          async function main() {
+            const { libro, cap } = capituloDeHoy();
+            let texto = '';
+            try { texto = primerVersiculo(await (await fetch(BIBLIA_URL)).text(), libro, cap); } catch (e) { console.warn('Sin versículo:', e.message); }
+            const title = `📖 Capítulo del día: ${libro} ${cap}`;
+            const body = texto ? `«${texto}»` : 'Toca para leer el capítulo de hoy.';
+            const link = `lectura.html?book=${encodeURIComponent(libro)}&chapter=${cap}`;
+            console.log(title, '|', body, '|', link);
+            if (process.env.SOLO_PRUEBA) return;
+
+            const admin = require('firebase-admin');
+            admin.initializeApp({ credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) });
+            const db = admin.firestore();
+            const snap = await db.collection('tokens').get();
+            const tokens = snap.docs.map(d => d.id);
+            console.log(`Suscritos: ${tokens.length}`);
+            let enviados = 0, borrados = 0;
+            for (let i = 0; i < tokens.length; i += 500) {
+              const lote = tokens.slice(i, i + 500);
+              const res = await admin.messaging().sendEach(lote.map(token => ({
+                token,
+                data: { title, body, link, tag: 'capitulo-del-dia' },
+                webpush: { headers: { Urgency: 'normal', TTL: '43200' } }
+              })));
+              for (let j = 0; j < res.responses.length; j++) {
+                const r = res.responses[j];
+                if (r.success) { enviados++; continue; }
+                const code = r.error && r.error.code;
+                if (code === 'messaging/registration-token-not-registered' || code === 'messaging/invalid-argument' || code === 'messaging/invalid-registration-token') {
+                  await db.collection('tokens').doc(lote[j]).delete(); borrados++;
+                } else console.warn('Error:', code);
+              }
+            }
+            console.log(`Enviados: ${enviados}. Suscripciones vencidas borradas: ${borrados}.`);
+          }
+          main().catch(e => { console.error(e); process.exit(1); });
+
+          FIN
+          node enviar.cjs
