@@ -44,6 +44,28 @@ jobs:
             return t.length > 110 ? t.slice(0, 107).replace(/\s+\S*$/, '') + '…' : t;
           }
 
+          // Lee la clave aunque el celular haya convertido los "\n" en saltos de línea reales al copiarla
+          function leerCuenta(texto) {
+            let limpio = '', enCadena = false, escape = false;
+            for (const ch of String(texto).trim()) {
+              if (enCadena) {
+                if (escape) { limpio += ch; escape = false; continue; }
+                if (ch === '\\') { limpio += ch; escape = true; continue; }
+                if (ch === '"') { enCadena = false; limpio += ch; continue; }
+                if (ch === '\n') { limpio += '\\n'; continue; }
+                if (ch === '\r') continue;
+                if (ch < ' ') { limpio += ' '; continue; }
+                limpio += ch;
+              } else {
+                if (ch === '"') enCadena = true;
+                limpio += ch;
+              }
+            }
+            const cuenta = JSON.parse(limpio);
+            if (cuenta.private_key) cuenta.private_key = cuenta.private_key.replace(/\\n/g, '\n');
+            return cuenta;
+          }
+
           async function main() {
             const { libro, cap } = capituloDeHoy();
             let texto = '';
@@ -55,7 +77,7 @@ jobs:
             if (process.env.SOLO_PRUEBA) return;
 
             const admin = require('firebase-admin');
-            admin.initializeApp({ credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) });
+            admin.initializeApp({ credential: admin.credential.cert(leerCuenta(process.env.FIREBASE_SERVICE_ACCOUNT)) });
             const db = admin.firestore();
             const snap = await db.collection('tokens').get();
             const tokens = snap.docs.map(d => d.id);
