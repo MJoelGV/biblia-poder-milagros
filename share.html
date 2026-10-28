@@ -299,7 +299,21 @@
             if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
             if (vNode) {
                 verseCard.innerHTML = `<div id="text-box"><div id="verse-text">${vNode.textContent}</div><div id="verse-ref">${name} ${chapter}:${verse}</div></div>${sig}`;
+                syncUrl();
             }
+        }
+
+        // Mantiene la dirección (URL) al día con el versículo que se está viendo
+        function currentParams() {
+            const p = new URLSearchParams(window.location.search);
+            p.set('book', getBookName(bookParam));
+            p.set('chapter', chapter);
+            p.set('verse', verse);
+            p.set('version', versionParam);
+            return p;
+        }
+        function syncUrl() {
+            try { history.replaceState(null, '', window.location.pathname + '?' + currentParams().toString()); } catch (e) {}
         }
 
         // Handlers for dynamic selection
@@ -349,7 +363,7 @@
                 await loadXml();
                 // Populate version dropdown and handle changes
                 populateVersionSelect();
-                versionSelect.addEventListener('change', () => { const p=new URLSearchParams(window.location.search); p.set('version', versionSelect.value); window.location.search=p.toString(); });
+                versionSelect.addEventListener('change', () => { const p=currentParams(); p.set('version', versionSelect.value); window.location.search=p.toString(); });
                 // Verse del día si no hay parámetros URL
                 if (!bookParam || !chapter || !verse) {
                     const daily = getDailyVerse();
