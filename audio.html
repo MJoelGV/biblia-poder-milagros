@@ -19,8 +19,8 @@
         .player-header { font-size: 1.2em; margin: 20px 0 10px; }
         .seek-slider { width: calc(100% - 40px); accent-color: #1DB954; margin: 0 20px; }
         .time-display { display: flex; justify-content: space-between; width: calc(100% - 40px); font-size: 0.9em; margin: 10px 20px; }
-        .player-buttons { display: flex !important; justify-content: center; align-items: center; gap: 30px; visibility: visible !important; opacity: 1 !important; }
-        .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; display: block !important; visibility: visible !important; }
+        .player-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; }
+        .player-button { background: none; border: none; color: #fff; font-size: 2em; width: 60px; height: 60px; cursor: pointer; }
         .player-button:hover { color: #1DB954; }
         /* Menú lateral */
         .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #121212; color: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.5); transition: left 0.3s ease; z-index: 1001; }
@@ -30,37 +30,6 @@
         .side-menu ul li:hover { background: rgba(255,255,255,0.1); }
         .side-menu-toggle { background: none; border: none; font-size: 2em; color: #fff; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
         .side-menu-toggle:hover { background-color: rgba(255,255,255,0.1); border-radius: 50%; }
-        
-        /* Forzar visibilidad de botones */
-        #prev-reading, #play-pause, #next-reading {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            z-index: 9999 !important;
-            width: 60px !important;
-            height: 60px !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 50% !important;
-            border: 2px solid rgba(255, 255, 255, 0.3) !important;
-        }
-        
-        #prev-reading:hover, #play-pause:hover, #next-reading:hover {
-            background: rgba(255, 255, 255, 0.2) !important;
-            border-color: rgba(255, 255, 255, 0.5) !important;
-        }
-        
-        /* Forzar contenedor de botones */
-        .player-buttons {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            z-index: 9999 !important;
-            background: rgba(0, 0, 0, 0.3) !important;
-            padding: 15px !important;
-            border-radius: 15px !important;
-        }
     </style>
 </head>
 <body>
@@ -94,27 +63,16 @@
     </div>
     <div class="audio-container" style="margin-top:80px; padding:20px;">
         <div class="main" style="width:100%;">
-            <!-- Player controls -->
-            <div id="player-controls" style="display:flex; flex-direction:column; align-items:center; padding:20px; background:rgba(0,0,0,0.8); border-radius:10px; min-height:400px;">
-                <div class="audio-cover" style="width:150px; height:150px; border-radius:50%; overflow:hidden; margin-bottom:15px; background:#fff;">
-                    <img src="logo-blanco.png" alt="Cover" style="width:100%; height:100%; object-fit:contain;">
-                </div>
-                <h3 id="now-playing" style="color:#fff; margin:10px 0; text-shadow:0 0 5px rgba(255,255,255,0.5);">Selecciona un libro para comenzar</h3>
-                <input type="range" id="seek-slider" style="width:100%; margin:10px 0;" min="0" max="100" value="0" step="0.1">
-                <div class="time-display" style="display:flex; justify-content:space-between; width:100%; color:#fff; margin-bottom:15px;">
-                    <span id="current-time">0:00</span>
-                    <span id="duration">0:00</span>
-                </div>
-                <div class="player-buttons" style="display:flex !important; justify-content:center; align-items:center; gap:30px; visibility:visible !important; opacity:1 !important;">
-                    <button id="prev-reading" class="player-button" style="background:none; border:none; color:#fff; font-size:2em; cursor:pointer; padding:10px; text-shadow:0 0 5px rgba(255,255,255,0.5); display:block !important; visibility:visible !important;" title="Anterior">
-                        <i class="fas fa-backward"></i>
-                    </button>
-                    <button id="play-pause" class="player-button" style="background:none; border:none; color:#fff; font-size:2.5em; cursor:pointer; padding:10px; text-shadow:0 0 5px rgba(255,255,255,0.5); display:block !important; visibility:visible !important;" title="Play/Pause">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <button id="next-reading" class="player-button" style="background:none; border:none; color:#fff; font-size:2em; cursor:pointer; padding:10px; text-shadow:0 0 5px rgba(255,255,255,0.5); display:block !important; visibility:visible !important;" title="Siguiente">
-                        <i class="fas fa-forward"></i>
-                    </button>
+            <!-- chapters list hidden in favor of chapter-select -->
+            <div id="player-controls">
+                <div class="audio-cover"><img src="logo-blanco.png" alt="Cover"></div>
+                <h3 id="now-playing"></h3>
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0" step="0.1">
+                <div class="time-display"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
+                <div class="player-buttons">
+                    <button id="prev-reading" class="player-button" title="Anterior"><i class="fas fa-backward"></i></button>
+                    <button id="play-pause" class="player-button" title="Play/Pause"><i class="fas fa-play"></i></button>
+                    <button id="next-reading" class="player-button" title="Siguiente"><i class="fas fa-forward"></i></button>
                 </div>
                 <audio id="audio-player" playsinline style="display:none;"></audio>
             </div>
@@ -124,6 +82,16 @@
         // Configuración de rutas
         const AUDIO_BASE_PATH = window.location.hostname === 'localhost' ? '' : '/biblia-poder-milagros';
         
+        // Deshabilitar service worker temporalmente
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                    console.log('ServiceWorker unregistered');
+                }
+            });
+        }
+
         // Mapa de códigos a nombres completos global
         const bookDisplayNames = {
             'genesis': 'Génesis', 'exodus': 'Éxodo', 'lev': 'Levítico', 'num': 'Números', 'deu': 'Deuteronomio',
@@ -143,14 +111,28 @@
             '1pet': '1 Pedro', '2pet': '2 Pedro', '1joh': '1 Juan', '2joh': '2 Juan', '3joh': '3 Juan',
             'jude': 'Judas', 'rev': 'Apocalipsis'
         };
-
+        // Mapa de metadatos de libros para descripción (autor, fecha, tema, descripción, temas clave)
+        const bookMeta = {
+            'genesis': {
+                author: 'Moisés',
+                date: '1445-1405 a.C.',
+                theme: 'Los orígenes y el pacto de Dios',
+                description: 'El libro del Génesis narra la creación del mundo, la caída del hombre, el diluvio universal y las historias de los patriarcas Abraham, Isaac y Jacob. Establece los fundamentos de la relación entre Dios y la humanidad.',
+                keyTopics: ['La Creación', 'El Diluvio', 'Abraham y el Pacto', 'José en Egipto']
+            },
+            'tit': {
+                author: 'Pablo',
+                date: 'c. 63-65 d.C.',
+                theme: 'Organización de la Iglesia y Conducta Cristiana',
+                description: 'La carta a Tito contiene instrucciones pastorales para el liderazgo de la iglesia en Creta y la conducta de los creyentes.',
+                keyTopics: ['Liderazgo Pastoral', 'Carácter Cristiano', 'Vida en Comunidad']
+            }
+        };
         const audioPlayer = document.getElementById('audio-player');
         console.log('Audio page script loaded');
-        
         // Get book <select>
         const bookSelect = document.getElementById('book-select');
         const chapterSelect = document.getElementById('chapter-select');
-        
         // Orden canónico de los libros
         const bibleOrder = ['genesis','exodus','lev','num','deu','joshua','judges','ruth','1sam','2sam','1kin','2kin','1chron','2chron','ezra','nehemiah','esther','job','psalm','proverbs','ecc','song','wisdom','sirach','isaiah','jere','lam','ezek','dan','hosea','joel','amos','oba','jonah','micah','nahum','habak','haggai','zeph','zech','mal','matt','mark','luke','john','acts','romans','1cor','2cor','gal','eph','phil','phi','col','1the','2the','1tim','2tim','tit','heb','jam','1pet','2pet','1joh','2joh','3joh','jude','rev'];
 
@@ -160,18 +142,11 @@
                 const res = await fetch('audio/manifest.json');
                 if (!res.ok) throw new Error(res.statusText);
                 const manifest = await res.json();
-                
                 // Store manifest globally
                 manifestData = manifest;
-                
-                // Get book <select>
-                const bookSelect = document.getElementById('book-select');
-                const chapterSelect = document.getElementById('chapter-select');
-                
-                // Populate native book <select> en orden bíblico
+                // Populate native book <select>
                 const codes = [...new Set(manifest.map(item => item.name))];
                 codes.sort((a,b) => bibleOrder.indexOf(a) - bibleOrder.indexOf(b));
-                
                 // Clear existing options
                 bookSelect.innerHTML = '<option disabled selected>Selecciona un libro</option>';
                 codes.forEach(code => {
@@ -180,16 +155,13 @@
                     opt.textContent = bookDisplayNames[code] || code;
                     bookSelect.appendChild(opt);
                 });
-                
                 // On book selection, populate chapter-select and play first
                 bookSelect.onchange = () => {
                     const code = bookSelect.value;
                     localStorage.setItem('audio-last-book', code);
-                    
                     const chapters = manifestData
                         .filter(item => item.name === code)
                         .sort((a, b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]));
-                    
                     chapterSelect.disabled = false;
                     chapterSelect.innerHTML = '<option disabled selected>Selecciona un capítulo</option>';
                     chapters.forEach(item => {
@@ -199,11 +171,10 @@
                         opt.textContent = (bookDisplayNames[code] || code) + ' ' + num;
                         chapterSelect.appendChild(opt);
                     });
-                    
                     if (chapters.length > 0) {
                         const first = chapters[0];
-                        const num = first.file.match(/_(\d+)/)[1];
-                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `${AUDIO_BASE_PATH}/audio/${first.file}`, code, first.file);
+                        const num = first.file.match(/_\d+/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `${AUDIO_BASE_PATH}/audio/${first.file}`);
                     }
                     
                     // Guardar la función onchange en una variable para evitar duplicados
@@ -213,125 +184,151 @@
                     
                     const onChapterChange = (e) => {
                         const file = e.target.value;
-                        console.log('Cambio de capítulo:', file);
-                        if (!file) {
-                            console.error('No se seleccionó ningún archivo');
-                            return;
-                        }
+                        if (!file) return;
                         
                         localStorage.setItem('audio-last-book', code);
                         localStorage.setItem('audio-last-file', file);
-                        const num = file.match(/_(\d+)/)[1];
-                        const bookName = bookDisplayNames[code] || code;
-                        const audioPath = `${AUDIO_BASE_PATH}/audio/${file}`;
-                        
-                        console.log('Reproduciendo:', bookName, num, audioPath);
-                        playCustom(`${bookName} ${num}`, audioPath, code, file);
+                        const num = file.match(/_\d+/)[1];
+                        playCustom(`${bookDisplayNames[code] || code} ${num}`, `${AUDIO_BASE_PATH}/audio/${file}`);
                     };
                     
-                    chapterSelect.addEventListener('change', onChapterChange);
                     chapterSelect._onchange = onChapterChange;
+                    chapterSelect.addEventListener('change', onChapterChange);
                 };
-                
-                // Restore last selection if exists
+                // Auto-load last listened book and chapter
                 const lastBook = localStorage.getItem('audio-last-book');
                 const lastFile = localStorage.getItem('audio-last-file');
-                const lastPosition = localStorage.getItem('audio-last-position');
-                
-                if (lastBook && lastFile) {
+                if (lastBook && codes.includes(lastBook)) {
                     bookSelect.value = lastBook;
                     bookSelect.onchange();
                     if (lastFile) {
-                        setTimeout(() => {
+                        const optValues = Array.from(chapterSelect.options).map(o => o.value);
+                        if (optValues.includes(lastFile)) {
                             chapterSelect.value = lastFile;
-                            chapterSelect.dispatchEvent(new Event('change'));
-                            // Restaurar posición y reproducir automáticamente
-                            if (lastPosition) {
-                                setTimeout(() => {
-                                    audioPlayer.currentTime = parseFloat(lastPosition);
-                                    // Auto-reproducir después de restaurar posición
-                                    audioPlayer.play().then(() => {
-                                        document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
-                                    }).catch(err => {
-                                        console.log('Auto-play bloqueado, esperando interacción del usuario');
-                                    });
-                                }, 1000);
-                            } else {
-                                // Auto-reproducir incluso sin posición guardada
-                                setTimeout(() => {
-                                    audioPlayer.play().then(() => {
-                                        document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
-                                    }).catch(err => {
-                                        console.log('Auto-play bloqueado, esperando interacción del usuario');
-                                    });
-                                }, 500);
-                            }
-                        }, 100);
+                            chapterSelect.onchange();
+                        }
                     }
                 }
-            } catch (e) {
-                console.error('Error cargando libros:', e);
-                alert('Error cargando lista de libros. Por favor, recarga la página.');
+            } catch (err) {
+                console.error(err);
             }
         }
 
-        // Variables globales para el reproductor
-        let manifestData, currentPlaylist = [], currentTrackIndex = 0;
-
-        // Función para reproducir audio
-        function playCustom(name, src, bookCode, chapterFile) {
-            document.getElementById('now-playing').textContent = name;
-            audioPlayer.src = src;
+        // Reproducción de libro (solo MP3)
+        function playBook(bookName, bookNode) {
+            document.getElementById('now-playing').textContent = 'Escuchando ' + bookName;
+            document.getElementById('player-controls').style.display = 'flex';
+            const chapters = Array.from(bookNode.getElementsByTagName('c'));
+            const playlist = chapters.map(c => {
+                const chap = c.getAttribute('n');
+                // Usar el formato correcto de nombre de archivo: 1chron_01.mp3
+                const bookCode = getBookCode(bookName);
+                return `${AUDIO_BASE_PATH}/audio/${bookCode}_${chap.padStart(2, '0')}.mp3`;
+            });
+            trackIndex = 0;
+            audioPlayer.style.display = '';
+            audioPlayer.src = playlist[trackIndex];
             audioPlayer.play().catch(err => console.error('Error MP3:', err));
             document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
-
-            // Actualizar currentPlaylist para navegación
-            if (bookCode && manifestData) {
-                currentPlaylist = manifestData
-                    .filter(item => item.name === bookCode)
-                    .sort((a, b) => parseInt(a.file.match(/_(\d+)/)[1]) - parseInt(b.file.match(/_(\d+)/)[1]))
-                    .map(item => `${AUDIO_BASE_PATH}/audio/${item.file}`);
-                currentTrackIndex = currentPlaylist.findIndex(path => path === src);
+            
+            // Guardar la playlist actual para navegación
+            currentPlaylist = playlist;
+            currentTrackName = bookName;
+        }
+        
+        // Función auxiliar para obtener el código corto del libro
+        function getBookCode(bookName) {
+            // Mapeo de nombres de libros a códigos cortos
+            const bookMap = {
+                'Génesis': 'genesis', 'Éxodo': 'exodus', 'Levítico': 'lev', 'Números': 'num', 'Deuteronomio': 'deu',
+                'Josué': 'joshua', 'Jueces': 'judges', 'Rut': 'ruth', '1 Samuel': '1sam', '2 Samuel': '2sam',
+                '1 Reyes': '1kin', '2 Reyes': '2kin', '1 Crónicas': '1chron', '2 Crónicas': '2chron', 'Esdras': 'ezra',
+                'Nehemías': 'nehemiah', 'Ester': 'esther', 'Job': 'job', 'Salmos': 'psalm', 'Proverbios': 'proverbs',
+                'Eclesiastés': 'ecc', 'Cantares': 'song', 'Isaías': 'isaiah', 'Jeremías': 'jere', 'Lamentaciones': 'lam',
+                'Ezequiel': 'ezek', 'Daniel': 'dan', 'Oseas': 'hosea', 'Joel': 'joel', 'Amós': 'amos',
+                'Abdías': 'oba', 'Jonás': 'jonah', 'Miqueas': 'micah', 'Nahúm': 'nahum', 'Habacuc': 'habak',
+                'Sofonías': 'zeph', 'Hageo': 'haggai', 'Zacarías': 'zech', 'Malaquías': 'mal',
+                'Mateo': 'matt', 'Marcos': 'mark', 'Lucas': 'luke', 'Juan': 'john', 'Hechos': 'acts',
+                'Romanos': 'rom', '1 Corintios': '1cor', '2 Corintios': '2cor', 'Gálatas': 'gal', 'Efesios': 'eph',
+                'Filipenses': 'phi', 'Colosenses': 'col', '1 Tesalonicenses': '1the', '2 Tesalonicenses': '2the', '1 Timoteo': '1tim',
+                '2 Timoteo': '2tim', 'Tito': 'titus', 'Filemón': 'phil', 'Hebreos': 'heb', 'Santiago': 'jam',
+                '1 Pedro': '1pet', '2 Pedro': '2pet', '1 Juan': '1joh', '2 Juan': '2joh', '3 Juan': '3joh',
+                'Judas': 'jude', 'Apocalipsis': 'rev'
+            };
+            
+            // Buscar el código del libro
+            for (const [name, code] of Object.entries(bookMap)) {
+                if (name === bookName) {
+                    return code;
+                }
             }
+            return bookName.toLowerCase();
         }
 
-        // Controles de navegación
+        function playCustom(name, src) {
+            console.log('playCustom src:', src);
+            // Construir playlist completo del libro
+            const fileName = src.split('/').pop();
+            const [code] = fileName.replace('.mp3','').split(/[-_]/);
+            
+            // Filtrar y ordenar los capítulos del libro
+            const chapters = manifestData
+                .filter(item => item.name === code.toLowerCase())
+                .sort((a, b) => {
+                    const numA = parseInt(a.file.match(/_\d+/)[0].substring(1));
+                    const numB = parseInt(b.file.match(/_\d+/)[0].substring(1));
+                    return numA - numB;
+                });
+                
+            // Crear la lista de reproducción con las rutas correctas
+            playlist = chapters.map(item => `${AUDIO_BASE_PATH}/audio/${item.file}`);
+            trackIndex = playlist.indexOf(src);
+            
+            // Mostrar y reproducir en cadena
+            document.getElementById('now-playing').textContent = 'Escuchando ' + name;
+            document.getElementById('player-controls').style.display = 'flex';
+            audioPlayer.style.display = '';
+            audioPlayer.src = playlist[trackIndex];
+            audioPlayer.play().catch(err => console.error('Error MP3:', err));
+            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            currentPlaylist = playlist;
+            currentTrackName = name;
+        }
+
+        // Función para reproducir track y actualizar indicador
+        function playTrack(index) {
+            const src = playlist[index];
+            audioPlayer.src = src;
+            const fileName = src.split('/').pop().replace('.mp3','');
+            const parts = fileName.includes('-') ? fileName.split('-') : fileName.split('_');
+            const code = parts[0], chap = parts[1];
+            document.getElementById('now-playing').textContent = `Escuchando ${bookDisplayNames[code]} ${chap}`;
+            audioPlayer.play();
+            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+        }
+
+        // Controles pausa y stop
         document.getElementById('prev-reading').onclick = () => {
-            if (currentTrackIndex > 0) {
-                currentTrackIndex--;
-                const prevSrc = currentPlaylist[currentTrackIndex];
-                const fileName = prevSrc.split('/').pop().replace('.mp3','');
-                const parts = fileName.split('_');
-                const code = parts[0];
-                const chapNum = parts[1]; // Obtener el número del capítulo
-                
-                const bookCode = localStorage.getItem('audio-last-book');
-                playCustom(`${bookDisplayNames[code] || code} ${chapNum}`, prevSrc, bookCode, fileName + '.mp3');
-                
-                // Actualizar selector de capítulos
-                const chapterSelect = document.getElementById('chapter-select');
-                chapterSelect.value = fileName + '.mp3';
-            }
+            if (trackIndex > 0) { trackIndex--; playTrack(trackIndex); }
         };
-        
         document.getElementById('next-reading').onclick = () => {
-            if (currentTrackIndex < currentPlaylist.length - 1) {
-                currentTrackIndex++;
-                const nextSrc = currentPlaylist[currentTrackIndex];
-                const fileName = nextSrc.split('/').pop().replace('.mp3','');
-                const parts = fileName.split('_');
-                const code = parts[0];
-                const chapNum = parts[1]; // Obtener el número del capítulo
-                
-                const bookCode = localStorage.getItem('audio-last-book');
-                playCustom(`${bookDisplayNames[code] || code} ${chapNum}`, nextSrc, bookCode, fileName + '.mp3');
-                
-                // Actualizar selector de capítulos
-                const chapterSelect = document.getElementById('chapter-select');
-                chapterSelect.value = fileName + '.mp3';
-            }
+            if (trackIndex < playlist.length - 1) { trackIndex++; playTrack(trackIndex); }
         };
-        
+        const stopBtn = document.getElementById('stop-reading');
+        if (stopBtn) {
+            stopBtn.onclick = () => {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                document.getElementById('player-controls').style.display = 'none';
+            };
+        }
+        // MP3 cambia track
+        audioPlayer.addEventListener('ended', () => {
+            if (trackIndex < playlist.length - 1) {
+                trackIndex++;
+                playTrack(trackIndex);
+            }
+        });
         // Play/Pause toggle
         const playPauseBtn = document.getElementById('play-pause');
         playPauseBtn.onclick = () => {
@@ -343,95 +340,56 @@
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             }
         };
-        
         // Seek slider and time update
         const seekSlider = document.getElementById('seek-slider');
         const currentTimeEl = document.getElementById('current-time');
         const durationEl = document.getElementById('duration');
-        
         function formatTime(sec) {
             const m = Math.floor(sec/60);
             const s = String(Math.floor(sec%60)).padStart(2, '0');
             return `${m}:${s}`;
         }
-        
         audioPlayer.addEventListener('loadedmetadata', () => {
             if (isFinite(audioPlayer.duration) && !isNaN(audioPlayer.duration)) {
                 seekSlider.max = Math.floor(audioPlayer.duration);
                 durationEl.textContent = formatTime(audioPlayer.duration);
+                // Restore saved position
+                const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    const time = parseFloat(saved);
+                    if (!isNaN(time)) {
+                        audioPlayer.currentTime = Math.min(time, audioPlayer.duration - 1);
+                    }
+                }
+            } else {
+                console.error('No se pudo cargar la duración del audio:', audioPlayer.src);
+                durationEl.textContent = '0:00';
             }
         });
         
-        audioPlayer.addEventListener('timeupdate', () => {
-            seekSlider.value = audioPlayer.currentTime;
-            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
-            // Guardar posición actual
-            localStorage.setItem('audio-last-position', audioPlayer.currentTime.toString());
-        });
-        
-        seekSlider.oninput = () => {
-            audioPlayer.currentTime = seekSlider.value;
-        };
-        
-        // Auto-avanzar al siguiente capítulo
-        audioPlayer.addEventListener('ended', () => {
-            if (currentTrackIndex < currentPlaylist.length - 1) {
-                document.getElementById('next-reading').click();
-            }
-        });
-        
-        // Manejar errores
+        // Manejar errores de carga de audio
         audioPlayer.addEventListener('error', (e) => {
             console.error('Error al cargar el audio:', e);
+            console.error('Código de error:', audioPlayer.error ? audioPlayer.error.code : 'desconocido');
             console.error('Ruta del audio:', audioPlayer.src);
             alert('Error al cargar el audio. Por favor, verifica la consola para más detalles.');
         });
-        
+        audioPlayer.addEventListener('timeupdate', () => {
+            seekSlider.value = audioPlayer.currentTime;
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            // Save current position
+            const key = 'audio-pos-' + audioPlayer.src.split('/').pop();
+            localStorage.setItem(key, audioPlayer.currentTime);
+        });
+        seekSlider.oninput = () => {
+            audioPlayer.currentTime = seekSlider.value;
+        };
         // Iniciar lista y reproducción
+        let manifestData, playlist = [], trackIndex = 0, currentBookName, currentBookNode;
         loadBooks();
-        
-        // Forzar visibilidad de botones
-        setTimeout(() => {
-            const buttons = document.querySelectorAll('#prev-reading, #play-pause, #next-reading');
-            const container = document.querySelector('.player-buttons');
-            
-            if (buttons.length > 0) {
-                console.log('Forzando visibilidad de botones...');
-                
-                // Forzar cada botón individualmente
-                buttons.forEach(btn => {
-                    btn.style.display = 'block !important';
-                    btn.style.visibility = 'visible !important';
-                    btn.style.opacity = '1 !important';
-                    btn.style.position = 'relative !important';
-                    btn.style.zIndex = '9999 !important';
-                    btn.style.width = '60px !important';
-                    btn.style.height = '60px !important';
-                    btn.style.background = 'rgba(255, 255, 255, 0.1) !important';
-                    btn.style.border = '2px solid rgba(255, 255, 255, 0.3) !important';
-                    btn.style.borderRadius = '50% !important';
-                });
-                
-                // Forzar contenedor
-                if (container) {
-                    container.style.display = 'flex !important';
-                    container.style.visibility = 'visible !important';
-                    container.style.opacity = '1 !important';
-                    container.style.position = 'relative !important';
-                    container.style.zIndex = '9999 !important';
-                    container.style.background = 'rgba(0, 0, 0, 0.3) !important';
-                    container.style.padding = '15px !important';
-                    container.style.borderRadius = '15px !important';
-                }
-                
-                console.log('Botones forzados:', buttons.length, 'Contenedor:', !!container);
-            } else {
-                console.error('No se encontraron los botones');
-            }
-        }, 1000);
     </script>
     <script>
-        // Menu functionality
         const menuBtn = document.getElementById('side-menu-toggle');
         const sideMenu = document.getElementById('side-menu');
         if (menuBtn) menuBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));

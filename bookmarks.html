@@ -68,19 +68,6 @@
         // Cargar la Biblia (usamos Reina-Valera 1960 por defecto)
         async function loadBible() {
             try {
-                // Primero intentar desde caché (offline)
-                if ('caches' in window) {
-                    const cache = await caches.open('biblia-data-v7');
-                    const cachedResponse = await cache.match('biblia-files/Reina-Valera-1960.xmm');
-                    if (cachedResponse) {
-                        const xmlText = await cachedResponse.text();
-                        xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                        displayBookmarks();
-                        return;
-                    }
-                }
-                
-                // Si no está en caché, intentar desde red
                 const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
                 if (!response.ok) {
                     throw new Error('No se pudo cargar el archivo de la Biblia');
