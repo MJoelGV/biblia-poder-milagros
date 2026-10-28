@@ -1,12 +1,12 @@
 // Service Worker for offline support
-const SW_VERSION = 'v13';
+const SW_VERSION = 'v14';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v13';
+const CACHE_NAME = 'biblia-app-cache-v14';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v13';
+const STATIC_CACHE = 'biblia-static-v14';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v13';
+const DYNAMIC_CACHE = 'biblia-dynamic-v14';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
 
@@ -74,31 +74,20 @@ const EXTERNAL_RESOURCES = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('Installing Service Worker v6...');
-  
-  // Cache esencial inmediato
+  console.log('Installing Service Worker', SW_VERSION);
+  // Activar la versión nueva de inmediato, sin esperar a cerrar la app
+  self.skipWaiting();
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then(cache => {
-        console.log('Caching essential resources...');
-        return Promise.all(ESSENTIAL_URLS.map(u => cache.add(u).catch(err => console.warn('No se pudo guardar:', u, err))));
-      })
+      .then(cache => Promise.all(ESSENTIAL_URLS.map(u => cache.add(u).catch(err => console.warn('No se pudo guardar:', u, err)))))
       .then(() => {
-        console.log('Essential resources cached successfully');
-        // Iniciar descarga progresiva de datos bíblicos en background
-        return progressiveCacheBibleData();
-      })
-      .then(() => {
-        console.log('Service Worker v6 installed successfully');
-        return self.skipWaiting();
-      })
-      .catch(error => {
-        console.error('Service Worker installation failed:', error);
+        console.log('Essential resources cached');
+        // Las Biblias se descargan en segundo plano, sin frenar la actualización
+        progressiveCacheBibleData().catch(err => console.warn('Descarga de Biblias incompleta:', err));
       })
   );
 });
 
-// Descarga progresiva de datos bíblicos grandes
 function progressiveCacheBibleData() {
   console.log('Starting progressive Bible data download...');
   
