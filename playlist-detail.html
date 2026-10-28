@@ -522,7 +522,7 @@
                     
                     console.log(`Cargando página de videos... (Total actual: ${allVideos.length})`);
                     
-                    const response = await fetch(url);
+                    const response = await fetch(url, { cache: 'no-store' });
                     
                     if (!response.ok) {
                         throw new Error(`Error HTTP: ${response.status}`);
@@ -547,47 +547,24 @@
                         await new Promise(resolve => setTimeout(resolve, 100));
                     }
                     
-                } while (nextPageToken && allVideos.length < 200); // Límite de 200 para evitar sobrecarga
+                } while (nextPageToken && allVideos.length < 2000); // Trae todas las páginas (límite de seguridad muy alto)
                 
                 console.log(`Total de videos cargados: ${allVideos.length}`);
                 
                 if (allVideos.length > 0) {
-                    // Obtener fechas de publicación reales de los videos (en lotes para no sobrecargar la API)
-                    const videosWithRealDates = await Promise.all(
-                        allVideos.map(async (item, index) => {
-                            const videoId = item.snippet?.resourceId?.videoId || item.snippet?.videoId;
-                            if (videoId) {
-                                try {
-                                    // Pequeña pausa entre llamadas para no exceder cuotas
-                                    if (index > 0 && index % 10 === 0) {
-                                        await new Promise(resolve => setTimeout(resolve, 200));
-                                    }
-                                    
-                                    // Obtener detalles del video para la fecha real de publicación
-                                    const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`);
-                                    if (videoResponse.ok) {
-                                        const videoData = await videoResponse.json();
-                                        if (videoData.items && videoData.items.length > 0) {
-                                            const videoSnippet = videoData.items[0].snippet;
-                                            return {
-                                                ...item,
-                                                realPublishedAt: videoSnippet.publishedAt,
-                                                realTitle: videoSnippet.title
-                                            };
-                                        }
-                                    }
-                                } catch (error) {
-                                    console.warn('No se pudo obtener fecha real del video:', videoId, error);
-                                }
-                            }
-                            // Fallback: usar la fecha de la playlist si no se puede obtener la fecha real
-                            return {
-                                ...item,
-                                realPublishedAt: item.snippet.publishedAt,
-                                realTitle: item.snippet.title
-                            };
+                    // La fecha real de publicación ya viene en contentDetails.videoPublishedAt,
+                    // así que no hace falta pedir cada video por separado (ahorra cuota de YouTube).
+                    // Se omiten los videos privados o eliminados.
+                    const videosWithRealDates = allVideos
+                        .filter(item => {
+                            const t = (item.snippet?.title || '').toLowerCase();
+                            return t !== 'private video' && t !== 'deleted video';
                         })
-                    );
+                        .map(item => ({
+                            ...item,
+                            realPublishedAt: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt,
+                            realTitle: item.snippet?.title
+                        }));
                     
                     // Ordenar videos por fecha de publicación real (más reciente primero)
                     const sortedVideos = videosWithRealDates.sort((a, b) => {
