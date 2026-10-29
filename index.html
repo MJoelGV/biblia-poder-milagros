@@ -24,10 +24,16 @@
   <header class="top">
     <span class="logo">Biblia de Poder y Milagros</span>
     <div class="top-actions">
-      <a class="icon-btn" href="lectura.html" aria-label="Abrir la Biblia"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+      <button class="icon-btn" type="button" id="btn-buscar" aria-label="Buscar en la Biblia" aria-expanded="false" aria-controls="buscador"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
       <a class="avatar" id="avatar" href="mas.html" aria-label="Mi cuenta y más opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a>
     </div>
   </header>
+
+  <form id="buscador" class="card" action="lectura.html" method="get" role="search" hidden style="padding:12px;flex-direction:row;align-items:center;gap:8px">
+    <label for="q" class="sr">Buscar en la Biblia</label>
+    <input id="q" name="q" type="search" placeholder="Busca una palabra o frase, por ejemplo: amor" autocomplete="off" required minlength="2" style="flex:1;min-width:0;height:44px;border-radius:22px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:0 16px;font:inherit;font-size:16px">
+    <button class="btn" type="submit" style="height:44px;padding:0 18px">Buscar</button>
+  </form>
 
   <section class="hello">
     <small id="fecha"></small>
@@ -170,6 +176,13 @@
     document.getElementById('ios-install-close').addEventListener('click', cerrar);
     modal.addEventListener('click', e => { if (e.target === modal) cerrar(); });
   }
+
+  // Buscador
+  const bb = document.getElementById('btn-buscar'), fb = document.getElementById('buscador');
+  bb.addEventListener('click', () => {
+    fb.hidden = !fb.hidden; bb.setAttribute('aria-expanded', String(!fb.hidden));
+    if (!fb.hidden) document.getElementById('q').focus();
+  });
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.error);
 })();

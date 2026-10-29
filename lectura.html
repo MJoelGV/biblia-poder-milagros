@@ -6352,5 +6352,22 @@
         });
     </script>
     <script type="module" src="cuenta.js"></script>
+
+    <script>
+    // Búsqueda que viene de la portada (lectura.html?q=palabra)
+    (function () {
+      const q = new URLSearchParams(location.search).get('q');
+      if (!q) return;
+      let intentos = 0;
+      const t = setInterval(() => {
+        intentos++;
+        const i = document.getElementById('search-input'), b = document.getElementById('search-button');
+        let listo = false;
+        try { listo = typeof xmlDoc !== 'undefined' && !!xmlDoc; } catch (e) {}
+        if (i && b && listo) { clearInterval(t); i.value = q; b.click(); }
+        if (intentos > 80) clearInterval(t);
+      }, 250);
+    })();
+    </script>
 </body>
 </html>

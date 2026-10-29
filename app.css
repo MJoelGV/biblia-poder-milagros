@@ -95,3 +95,6 @@ h2.sec { margin: 0; font-size: 18px; font-weight: 700; }
 .ios-step p { margin: 0 0 8px; color: var(--text); line-height: 1.45; }
 .ios-image { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
 #dont-show-again { margin-top: 18px; display: flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 14px; }
+
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+#buscador[hidden] { display:none; }
