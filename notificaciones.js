@@ -19,6 +19,14 @@ function esIOS() { return plataforma() === 'ios'; }
 function instaladaEnInicio() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
+const CLAVE_HORA = 'capituloHora';
+function leerHora() { try { const h = parseInt(localStorage.getItem(CLAVE_HORA), 10); return h >= 0 && h <= 23 ? h : 7; } catch (e) { return 7; } }
+function guardarHora(h) { try { localStorage.setItem(CLAVE_HORA, String(h)); } catch (e) {} }
+function zona() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Chicago'; } catch (e) { return 'America/Chicago'; } }
+function textoHora(h) { const ampm = h < 12 ? 'a.m.' : 'p.m.'; const h12 = h % 12 === 0 ? 12 : h % 12; return `${h12}:00 ${ampm}`; }
+function datosToken(token) {
+  return { token, plataforma: plataforma(), hora: leerHora(), tz: zona(), updatedAt: serverTimestamp() };
+}
 function leerToken() { try { return localStorage.getItem(CLAVE_LOCAL); } catch (e) { return null; } }
 function guardarToken(t) { try { t ? localStorage.setItem(CLAVE_LOCAL, t) : localStorage.removeItem(CLAVE_LOCAL); } catch (e) {} }
 
@@ -30,7 +38,7 @@ function pintar(nuevo, mensaje) {
   estado = nuevo;
   if (!m) return;
   m.tile.disabled = nuevo === 'cargando';
-  if (nuevo === 'activo') m.set('Activado · cada mañana', true);
+  if (nuevo === 'activo') m.set(`Activado · ${textoHora(leerHora())}`, true);
   else if (nuevo === 'cargando') m.set(mensaje || 'Un momento…', false);
   else m.set('Toca para activar', false);
   if (nuevo === 'bloqueado' && mensaje) m.mostrar(mensaje, [{ texto: 'Entendido', tipo: 'sec', accion: () => m.ocultar() }]);
@@ -57,13 +65,12 @@ async function activar() {
     const registro = await navigator.serviceWorker.ready;
     const token = await getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: registro });
     if (!token) throw new Error('No se obtuvo token');
-    await setDoc(doc(db, 'tokens', token), {
-      token, plataforma: plataforma(), createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-    });
+    await setDoc(doc(db, 'tokens', token), { ...datosToken(token), createdAt: serverTimestamp() }, { merge: true });
     guardarToken(token);
     pintar('activo');
+    mostrarAjustes('¡Listo! Ya estás suscrito. Elige a qué hora quieres recibir el capítulo del día:');
     registro.showNotification('¡Listo! 📖', {
-      body: 'Desde mañana recibirás el capítulo del día.',
+      body: 'Recibirás el capítulo del día a la hora que elijas.',
       icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'capitulo-del-dia-bienvenida'
     });
   } catch (e) {
@@ -85,13 +92,30 @@ async function desactivar() {
   pintar('inactivo');
 }
 
+function mostrarAjustes(intro) {
+  const opciones = [];
+  for (let h = 4; h <= 22; h++) opciones.push(`<option value="${h}"${h === leerHora() ? ' selected' : ''}>${textoHora(h)}</option>`);
+  m.mostrar(`${intro || 'Cada día te llega una notificación con un capítulo del Nuevo Testamento. Al tocarla se abre la lectura.'}
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-weight:600">¿A qué hora?
+      <select id="cdd-hora" style="min-height:44px;border-radius:12px;padding:0 12px;font:inherit;font-size:16px;background:var(--bg,#F6F8F5);color:var(--text,#15201A);border:1px solid var(--border,#E3E9E4)">${opciones.join('')}</select>
+    </label>`, [
+    { texto: 'Listo', accion: () => m.ocultar() },
+    { texto: 'Desactivar', tipo: 'sec', accion: desactivar }
+  ]);
+  const sel = m.panel.querySelector('#cdd-hora');
+  sel.addEventListener('change', async () => {
+    const h = parseInt(sel.value, 10);
+    guardarHora(h);
+    pintar('activo'); mostrarAjustes('Hora guardada ✓ Te llegará cada día a esta hora.');
+    const token = leerToken();
+    if (token) { try { await setDoc(doc(db, 'tokens', token), datosToken(token), { merge: true }); } catch (e) { console.warn('Hora:', e); } }
+  });
+}
+
 if (m) m.tile.addEventListener('click', () => {
   if (estado === 'activo') {
     if (!m.panel.hidden) return m.ocultar();
-    m.mostrar('Cada mañana te llega una notificación con un capítulo del Nuevo Testamento para leer. Al tocarla se abre la lectura.', [
-      { texto: 'Desactivar', tipo: 'sec', accion: desactivar },
-      { texto: 'Cerrar', tipo: 'sec', accion: () => m.ocultar() }
-    ]);
+    mostrarAjustes();
   } else if (estado !== 'cargando') activar();
 });
 
@@ -105,11 +129,18 @@ if (m) m.tile.addEventListener('click', () => {
   }
   pintar('activo');
   try {
+    const hoyLocal = new Date().toDateString();
+    if (localStorage.getItem('capituloSync') !== hoyLocal) {
+      await setDoc(doc(db, 'tokens', token), datosToken(token), { merge: true });
+      localStorage.setItem('capituloSync', hoyLocal);
+    }
+  } catch (e) { console.warn('Capítulo del día (sync):', e); }
+  try {
     if (!(await isSupported())) return;
     const registro = await navigator.serviceWorker.ready;
     const nuevo = await getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: registro });
     if (nuevo && nuevo !== token) {
-      await setDoc(doc(db, 'tokens', nuevo), { token: nuevo, plataforma: plataforma(), createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      await setDoc(doc(db, 'tokens', nuevo), { ...datosToken(nuevo), createdAt: serverTimestamp() }, { merge: true });
       try { await deleteDoc(doc(db, 'tokens', token)); } catch (e) {}
       guardarToken(nuevo);
     }
