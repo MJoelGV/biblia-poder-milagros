@@ -1,42 +1,43 @@
-// Mosaicos de la página principal (Capítulo del día y Mi cuenta), con el mismo estilo de vidrio de la portada
+// Mosaicos de Capítulo del día y Mi cuenta (usan los colores del tema claro u oscuro)
 const CSS = `
-  #extras-inicio { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; max-width:800px; margin:16px auto 0; padding:0 20px; box-sizing:border-box; }
-  .xi-tile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-width:0; padding:12px 8px; border-radius:16px;
-    background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.8); color:#fff; font:inherit; text-align:center; cursor:pointer; text-shadow:1px 1px 2px rgba(0,0,0,.6);
-    transition:transform .15s ease, background .2s ease; -webkit-tap-highlight-color:transparent; }
-  .xi-tile:active { transform:scale(.97); }
-  .xi-tile:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+  #extras-inicio { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; }
+  .xi-tile { display:flex; align-items:center; gap:14px; min-width:0; min-height:72px; padding:12px 16px; border-radius:18px;
+    background:var(--surface,#fff); border:1px solid var(--border,#E3E9E4); color:var(--text,#15201A); font:inherit; text-align:left;
+    cursor:pointer; transition:transform .15s ease; -webkit-tap-highlight-color:transparent; width:100%; }
+  .xi-tile:active { transform:scale(.98); }
+  .xi-tile:focus-visible { outline:2px solid var(--accent,#2E7D32); outline-offset:2px; }
   .xi-tile[disabled] { opacity:.7; cursor:default; }
-  .xi-ico { width:42px; height:42px; flex-shrink:0; border-radius:50%; display:grid; place-items:center;
-    background:rgba(255,255,255,.16); font-size:19px; overflow:hidden; text-shadow:none; }
+  .xi-ico { width:44px; height:44px; flex-shrink:0; border-radius:22px; display:grid; place-items:center;
+    background:var(--accent-soft,#E6F2E7); color:var(--accent,#2E7D32); font-size:18px; overflow:hidden; }
   .xi-ico img { width:100%; height:100%; object-fit:cover; }
-  .xi-tile.on .xi-ico { background:#4CAF50; }
-  .xi-txt { min-width:0; max-width:100%; display:flex; flex-direction:column; align-items:center; }
-  .xi-t { font-weight:700; font-size:1em; line-height:1.2; overflow-wrap:anywhere; }
-  .xi-s { font-size:.8em; opacity:.85; line-height:1.25; margin-top:2px; }
-  .xi-tile.on .xi-s { opacity:1; color:#b9f6ca; }
-  .xi-panel { grid-column:1 / -1; padding:12px 14px; text-shadow:none; border-radius:14px; background:rgba(0,0,0,.55);
-    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.2);
-    color:#fff; font-size:.88em; line-height:1.45; text-align:left; }
+  .xi-tile.on .xi-ico { background:var(--accent-fill,#2E7D32); color:var(--on-accent,#fff); }
+  .xi-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .xi-t { font-weight:700; font-size:16px; line-height:1.25; }
+  .xi-s { font-size:14px; color:var(--text-2,#5B6B62); line-height:1.3; }
+  .xi-tile.on .xi-s { color:var(--accent,#2E7D32); }
+  .xi-tile::after { content:''; width:9px; height:9px; flex-shrink:0; border-right:2px solid var(--text-2,#5B6B62); border-top:2px solid var(--text-2,#5B6B62); transform:rotate(45deg); margin-right:4px; }
+  .xi-panel { grid-column:1 / -1; padding:14px 16px; border-radius:16px; background:var(--surface,#fff); border:1px solid var(--border,#E3E9E4);
+    color:var(--text,#15201A); font-size:15px; line-height:1.5; text-align:left; }
   .xi-panel[hidden] { display:none; }
-  .xi-acciones { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .xi-btn { border:0; border-radius:999px; padding:8px 14px; font:inherit; font-size:.92em; font-weight:700; cursor:pointer;
-    background:#fff; color:#222; }
-  .xi-btn.sec { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.35); }
-  .xi-btn.peligro { background:rgba(229,57,53,.18); color:#ffcdd2; border:1px solid rgba(229,57,53,.5); }
-  @media (max-width:360px) { #extras-inicio { grid-template-columns:1fr; } }
+  .xi-acciones { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .xi-btn { min-height:44px; border:0; border-radius:22px; padding:0 18px; font:inherit; font-size:15px; font-weight:700; cursor:pointer;
+    background:var(--accent-fill,#2E7D32); color:var(--on-accent,#fff); }
+  .xi-btn.sec { background:transparent; color:var(--text,#15201A); border:1px solid var(--border,#E3E9E4); }
+  .xi-btn.peligro { background:transparent; color:#C62828; border:1px solid #EF9A9A; }
+  :root[data-theme="dark"] .xi-btn.peligro { color:#FF8A80; border-color:#7F3B3B; }
 `;
 
 export function contenedorInicio() {
-  const ancla = document.getElementById('proverb-link');
-  if (!ancla) return null;
   let c = document.getElementById('extras-inicio');
+  if (c && c.dataset.listo) return c;
   if (!c) {
-    const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+    const ancla = document.getElementById('proverb-link');
+    if (!ancla) return null;
     c = document.createElement('div'); c.id = 'extras-inicio';
     ancla.parentNode.insertBefore(c, ancla.nextSibling);
   }
+  const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+  c.dataset.listo = '1';
   return c;
 }
 

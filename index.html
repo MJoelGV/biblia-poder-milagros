@@ -1,596 +1,180 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblia de Poder y Milagros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
-    <!-- PWA manifest and meta -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icons/pymicon.png">
-    <meta name="application-name" content="BibliaPYM">
-    <meta name="apple-mobile-web-app-title" content="BibliaPYM">
-    <meta name="theme-color" content="#4CAF50">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icons/pymicon.png">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-        }
-
-        .background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                        url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80') center/cover;
-        }
-
-        .hero {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            z-index: 1;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            padding: 20px;
-        }
-
-        h1 {
-            font-family: 'Great Vibes', cursive;
-            font-size: 4em;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .proverb-card {
-            cursor: pointer;
-            display: block;
-            text-decoration: none;
-            color: white;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .proverb-card p { color: white; }
-        .proverb-card .reference { color: white; }
-
-        .proverb-text {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .reference {
-            font-style: italic;
-            margin-top: 10px;
-        }
-
-        /* Navegación con iconos en grid */
-        .navigation-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
-            gap: 12px;
-            padding: 0 20px;
-        }
-        .nav-button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            border: 1px solid rgba(255,255,255,0.8);
-            border-radius: 16px;
-            color: white;
-            text-decoration: none;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            transition: transform 0.2s ease;
-        }
-        .nav-button:hover {
-            transform: translateY(-2px);
-        }
-        .nav-button .icon {
-            font-size: 2rem;
-            margin-bottom: 4px;
-            background: none;
-            box-shadow: none;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            color: white;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Animación para el botón de Planes de Estudio */
-        .nav-button.plan-button {
-            position: relative;
-            overflow: visible;
-            animation: pulse 2s 3s 3, bounce 1s 9s 3;
-        }
-        
-        .nav-button.plan-button::after {
-            content: '¡Nuevo!';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #ff5722;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-            animation: fadeIn 0.5s 1s forwards;
-            opacity: 0;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-        
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-        
-        .highlight {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            animation: highlightPulse 2s infinite;
-        }
-        
-        @keyframes highlightPulse {
-            0% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 0.2; transform: scale(1.1); }
-            100% { opacity: 0.5; transform: scale(1); }
-        }
-        @media (max-width: 480px) {
-            body { overflow: auto; }
-            .hero { height: auto; padding: 40px 0; }
-            .hero h1 { font-size: 2.5em; margin-bottom: 20px; }
-            .navigation-buttons { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 10px; }
-        }
-        @media (min-width: 481px) and (max-width: 768px) {
-            .navigation-buttons { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .navigation-buttons { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-            .proverb-card {
-                margin: 20px;
-                padding: 20px;
-            }
-
-            .navigation-buttons {
-                margin: 30px 20px;
-            }
-
-            .nav-button {
-                width: auto;
-                max-width: none;
-                padding: 6px 2px;
-            }
-        }
-
-        /* Menú lateral */
-        .side-menu {position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; color: #333;}
-        .side-menu.active {left: 0;}
-        .side-menu ul {list-style: none; padding: 20px; margin: 0;}
-        .side-menu ul li {padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer;}
-        .side-menu ul li:last-child {border-bottom: none;}
-        .side-menu-toggle {background: none; border: none; font-size: 24px; color: #fff; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px;}
-        .side-menu-toggle:hover {background-color: rgba(0,0,0,0.05); border-radius: 50%;}
-        
-        /* Estilos para el modal de instalación iOS */
-        #ios-install-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        #ios-install-content {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        
-        #ios-install-close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        #ios-install-content h2 {
-            color: #4CAF50;
-            margin-top: 0;
-            text-align: center;
-        }
-        
-        .ios-step {
-            margin: 20px 0;
-            display: flex;
-            align-items: flex-start;
-        }
-        
-        .ios-step-number {
-            background: #4CAF50;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-        
-        .ios-step-content {
-            flex-grow: 1;
-        }
-        
-        .ios-image {
-            width: 100%;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        
-        #dont-show-again {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #555;
-        }
-        
-        #dont-show-again input {
-            margin-right: 8px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<title>Biblia de Poder y Milagros</title>
 </head>
 <body>
-    <!-- Menú lateral -->
-    <div id="side-menu" class="side-menu">
-        <ul>
-            <li onclick="window.location.href='index.html'">Página principal</li>
-            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
-            <li onclick="window.location.href='pericopas-standalone.html'">Perícopas Bíblicas</li>
-            <li onclick="window.location.href='audio.html'">Escuchar</li>
-            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
-            <li onclick="window.location.href='historias.html'">Historias</li>
-            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
-            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
-            <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='topics.html'">Temas</li>
-            <li onclick="window.location.href='planes-estudio.html'">Planes de Estudio</li>
-        </ul>
+<main class="page">
+
+  <header class="top">
+    <span class="logo">Biblia de Poder y Milagros</span>
+    <div class="top-actions">
+      <a class="icon-btn" href="lectura.html" aria-label="Abrir la Biblia"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+      <a class="avatar" id="avatar" href="mas.html" aria-label="Mi cuenta y más opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a>
     </div>
-    <div class="background"></div>
-    <div class="hero">
-        <div class="hero-content">
-            <h1>Biblia de Poder y Milagros</h1>
-            <a id="proverb-link" class="proverb-card" href="#">
-                <p id="proverb-text">Cargando proverbio del día...</p>
-                <p id="proverb-reference" class="reference"></p>
-            </a>
-            <div class="navigation-buttons">
-                <a href="lectura.html" id="read-more-link" class="nav-button"><i class="fas fa-bible icon"></i><span>Leer Biblia</span></a>
-                <a href="planes-estudio.html" class="nav-button plan-button" style="background: linear-gradient(135deg, #4CAF50, #45a049);">
-                    <div class="highlight"></div>
-                    <i class="fas fa-book icon"></i>
-                    <span>Planes de Estudio</span>
-                </a>
-                <a href="audio.html" class="nav-button"><i class="fas fa-headphones icon"></i><span>Escuchar</span></a>
-                <a href="predicaciones.html" class="nav-button" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                    <i class="fas fa-microphone icon"></i>
-                    <span>Predicaciones</span>
-                </a>
-                <a href="memorizados.html" class="nav-button"><i class="fas fa-graduation-cap icon"></i><span>Memorizados</span></a>
-                <a href="historias.html" class="nav-button"><i class="fas fa-book-open icon"></i><span>Historias</span></a>
-                <a href="diccionario.html" class="nav-button"><i class="fas fa-book-atlas icon"></i><span>Diccionario</span></a>
-                <a href="bookmarks.html" class="nav-button"><i class="fas fa-bookmark icon"></i><span>Marcados</span></a>
-                <a href="comments.html" class="nav-button"><i class="fas fa-comment-alt icon"></i><span>Comentarios</span></a>
-                <a href="topics.html" class="nav-button"><i class="fas fa-tags icon"></i><span>Temas</span></a>
-                <a href="pericopas-standalone.html" class="nav-button" style="border-color: #9c27b0;"><i class="fas fa-book icon" style="color: #9c27b0;"></i><span>Perícopas</span></a>
-                <a href="#" id="share-button" class="nav-button" style="border-color: #ff9800;"><i class="fas fa-share-alt icon" style="color: #ff9800;"></i><span>Compartir</span></a>
-            </div>
-        </div>
+  </header>
+
+  <section class="hello">
+    <small id="fecha"></small>
+    <h1 id="saludo">Bienvenido</h1>
+  </section>
+
+  <section class="card" aria-labelledby="cont-label">
+    <span class="label" id="cont-label">Continuar leyendo</span>
+    <div>
+      <div class="big" id="cont-titulo">Juan 1</div>
+      <div class="meta" id="cont-meta">Un buen lugar para comenzar</div>
     </div>
-    <!-- Install button and SW registration -->
-    <button id="install-button" style="display:none;position:fixed;bottom:80px;right:20px;padding:10px 20px;background:#4CAF50;color:#fff;border:none;border-radius:20px;z-index:1000;">descargar biblia de Poder y Milagros</button>
-    
-    <!-- Modal de instalación para iOS -->
-    <div id="ios-install-modal">
-        <div id="ios-install-content">
-            <span id="ios-install-close">&times;</span>
-            <h2>¡Instala la Biblia en tu iPhone!</h2>
-            <p>Sigue estos sencillos pasos para agregar la Biblia de Poder y Milagros a tu pantalla de inicio:</p>
-            
-            <div class="ios-step">
-                <div class="ios-step-number">1</div>
-                <div class="ios-step-content">
-                    <p>Presiona el botón <strong>Compartir</strong> (el ícono de caja con flecha hacia arriba) en la parte inferior de la pantalla.</p>
-                    <img src="images/1.jpg" alt="Paso 1: Presionar el botón Compartir" class="ios-image">
-                </div>
-            </div>
-            
-            <div class="ios-step">
-                <div class="ios-step-number">2</div>
-                <div class="ios-step-content">
-                    <p>Desliza hacia arriba y selecciona <strong>Agregar a Inicio</strong>.</p>
-                    <img src="images/2.jpg" alt="Paso 2: Seleccionar Agregar a Inicio" class="ios-image">
-                </div>
-            </div>
-            
-            <div class="ios-step">
-                <div class="ios-step-number">3</div>
-                <div class="ios-step-content">
-                    <p>Presiona <strong>Agregar</strong> en la esquina superior derecha para confirmar.</p>
-                    <img src="images/4.jpg" alt="Paso 3: Presionar el botón Agregar" class="ios-image">
-                </div>
-            </div>
-            
-            <div class="ios-step">
-                <div class="ios-step-number">4</div>
-                <div class="ios-step-content">
-                    <p>¡Listo! El ícono de la Biblia de Poder y Milagros aparecerá en tu pantalla de inicio.</p>
-                    <img src="images/3.jpg" alt="Paso 4: Ícono en la pantalla de inicio" class="ios-image">
-                </div>
-            </div>
-            
-            <div id="dont-show-again">
-                <input type="checkbox" id="hide-ios-install">
-                <label for="hide-ios-install">No volver a mostrar este mensaje</label>
-            </div>
-        </div>
+    <a class="btn" id="cont-btn" href="lectura.html?book=Juan&chapter=1"><span id="cont-btn-txt">Comenzar a leer</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+  </section>
+
+  <section class="card verse" aria-labelledby="vd-label">
+    <span class="label" id="vd-label">Versículo del día</span>
+    <p id="vd-texto"></p>
+    <span class="ref" id="vd-ref"></span>
+    <div class="verse-actions">
+      <a id="vd-compartir" href="share.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</a>
+      <a id="vd-leer" href="lectura.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Leer capítulo</a>
     </div>
-    <script>
-        // Cargar versículo del día
-        async function loadDailyVerse() {
-            try {
-                const baseUrl = window.location.pathname.includes('biblia-poder-milagros') ? '/biblia-poder-milagros/' : '/';
-                const response = await fetch(`${baseUrl}biblia-files/Reina-Valera-1960.xmm`);
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                const verses = xmlDoc.getElementsByTagName('v');
-                const total = verses.length;
-                // Selección aleatoria diaria, cacheada en localStorage
-                const todayDate = new Date().toISOString().slice(0,10);
-                let idx;
-                const storedDate = localStorage.getItem('dailyVerseDate');
-                const storedIdx = localStorage.getItem('dailyVerseIndex');
-                if (storedDate === todayDate && storedIdx !== null) {
-                    idx = parseInt(storedIdx, 10);
-                } else {
-                    idx = Math.floor(Math.random() * total);
-                    localStorage.setItem('dailyVerseDate', todayDate);
-                    localStorage.setItem('dailyVerseIndex', idx);
-                }
-                const verseEl = verses[idx];
-                const verseNum = verseEl.getAttribute('n');
-                const chapterEl = verseEl.parentNode;
-                const chapterNum = chapterEl.getAttribute('n');
-                const bookEl = chapterEl.parentNode;
-                const bookName = bookEl.getAttribute('n');
-                document.getElementById('proverb-text').textContent = verseEl.textContent;
-                document.getElementById('proverb-reference').textContent = `${bookName} ${chapterNum}:${verseNum}`;
-                const readUrl = `${baseUrl}lectura.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
-                const shareUrl = `${baseUrl}share.html?book=${encodeURIComponent(bookName)}&chapter=${chapterNum}&verse=${verseNum}`;
-                document.getElementById('read-more-link').href = readUrl;
-                document.getElementById('proverb-link').href = shareUrl;
-            } catch (error) {
-                console.error('Error al cargar el versículo del día:', error);
-                document.getElementById('proverb-text').textContent = 'Error al cargar el versículo del día';
-            }
-        }
-        // Cargar el versículo cuando la página esté lista
-        loadDailyVerse();
-        
-        // Detectar si es un dispositivo iOS
-        function isIOS() {
-            return [
-                'iPad Simulator',
-                'iPhone Simulator',
-                'iPod Simulator',
-                'iPad',
-                'iPhone',
-                'iPod'
-            ].includes(navigator.platform) ||
-            (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
-        }
-        
-        // Mostrar el modal de instalación para iOS
-        function showIosInstallModal() {
-            // Verificar si el usuario ya ha optado por no ver el mensaje
-            if (localStorage.getItem('hideIosInstall') === 'true') {
-                return;
-            }
-            
-            const modal = document.getElementById('ios-install-modal');
-            const closeBtn = document.getElementById('ios-install-close');
-            const dontShowAgain = document.getElementById('hide-ios-install');
-            
-            // Mostrar el modal
-            modal.style.display = 'flex';
-            
-            // Manejar el cierre del modal
-            closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-                // Guardar preferencia si el usuario lo solicitó
-                if (dontShowAgain.checked) {
-                    localStorage.setItem('hideIosInstall', 'true');
-                }
-            });
-            
-            // Cerrar al hacer clic fuera del contenido
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                    if (dontShowAgain.checked) {
-                        localStorage.setItem('hideIosInstall', 'true');
-                    }
-                }
-            });
-        }
-        
-        // Mostrar el modal solo si es un dispositivo iOS y no es una PWA instalada
-        if (isIOS() && !window.navigator.standalone) {
-            // Esperar un momento para asegurar que el DOM esté listo
-            setTimeout(showIosInstallModal, 2000);
-        }
-        
-        // Controlar la animación del botón de Planes de Estudio
-        document.addEventListener('DOMContentLoaded', () => {
-            const planButton = document.querySelector('.nav-button.plan-button');
-            if (!planButton) return;
-            
-            const hasSeenAnimation = localStorage.getItem('hasSeenPlanButtonAnimation');
-            
-            // Si es la primera vez o ha pasado un día desde la última vez
-            if (!hasSeenAnimation || (Date.now() - parseInt(hasSeenAnimation, 10)) > 24 * 60 * 60 * 1000) {
-                // Mostrar la animación
-                planButton.classList.add('animate');
-                
-                // Guardar la fecha actual
-                localStorage.setItem('hasSeenPlanButtonAnimation', Date.now().toString());
-                
-                // Eliminar las clases de animación después de que terminen
-                setTimeout(() => {
-                    planButton.classList.remove('animate');
-                }, 15000); // 15 segundos de animación total
-            } else {
-                // Si ya ha visto la animación, mantener solo el indicador "Nuevo"
-                planButton.classList.add('seen-before');
-            }
-            
-            // Opcional: Eliminar el indicador "Nuevo" después de hacer clic
-            planButton.addEventListener('click', () => {
-                planButton.classList.remove('animate', 'pulse', 'bounce');
-                const highlight = planButton.querySelector('.highlight');
-                if (highlight) highlight.style.display = 'none';
-            });
-        });
-    </script>
-    <script>
-        if('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(() => console.log('SW registered'))
-                .catch(console.error);
-        }
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault(); deferredPrompt = e;
-            document.getElementById('install-button').style.display = 'block';
-        });
-        document.getElementById('install-button').addEventListener('click', async () => {
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            document.getElementById('install-button').style.display = 'none';
-            deferredPrompt = null;
-        });
-    </script>
-    <script>
-        // Toggle side-menu
-        const sideMenuToggleBtnIdx = document.getElementById('side-menu-toggle');
-        const sideMenuIdx = document.getElementById('side-menu');
-        if (sideMenuToggleBtnIdx) {
-            sideMenuToggleBtnIdx.addEventListener('click', () => sideMenuIdx.classList.toggle('active'));
-        }
-        document.addEventListener('click', e => {
-            if (sideMenuIdx.classList.contains('active') && !sideMenuIdx.contains(e.target) && !sideMenuToggleBtnIdx.contains(e.target)) {
-                sideMenuIdx.classList.remove('active');
-            }
-        });
-        
-        // Funcionalidad de compartir
-        document.getElementById('share-button').addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            // Obtener la URL actual (para compartir la PWA)
-            const shareUrl = window.location.href.split('?')[0]; // Eliminar parámetros de consulta si los hay
-            
-            // Texto personalizado para compartir
-            const shareTitle = 'Biblia de Poder y Milagros';
-            const shareText = 'Quiero compartir contigo esta maravillosa Biblia de Poder y Milagros. ¡Descárgala y lleva la Palabra de Dios contigo a todas partes!';
-            
-            // Verificar si el navegador soporta la API Web Share
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: shareTitle,
-                        text: shareText,
-                        url: shareUrl
-                    });
-                    console.log('¡Contenido compartido con éxito!');
-                } catch (error) {
-                    console.error('Error al compartir:', error);
-                    alert('No se pudo compartir. Por favor, intenta de nuevo más tarde.');
-                }
-            } else {
-                // Fallback para navegadores que no soportan Web Share API
-                // Mostrar un mensaje con la URL para copiar manualmente
-                alert('Tu navegador no soporta la función de compartir. Copia este enlace: ' + shareUrl);
-                
-                // Intentar copiar al portapapeles si es posible
-                try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert('¡Enlace copiado al portapapeles!');
-                } catch (clipboardError) {
-                    console.error('No se pudo copiar al portapapeles:', clipboardError);
-                }
-            }
-        });
-    </script>
-    <script type="module" src="notificaciones.js"></script>
-    <script type="module" src="cuenta.js"></script>
+  </section>
+
+  <div id="extras-inicio"></div>
+
+  <button class="banner install" id="install-button" type="button" style="width:100%;text-align:left;cursor:pointer;font:inherit">
+    <span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span>
+    <span class="t"><b>Instalar la app</b><span class="meta">Ábrela desde tu pantalla de inicio</span></span>
+    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </button>
+
+  <section style="display:flex;flex-direction:column;gap:12px" aria-labelledby="exp">
+    <h2 class="sec" id="exp">Explorar</h2>
+    <div class="grid2">
+      <a class="tile" href="audio.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Escuchar</a>
+      <a class="tile" href="memorizados.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/></svg>Memorizados</a>
+      <a class="tile" href="historias.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>Historias</a>
+      <a class="tile" href="diccionario.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><circle cx="11.5" cy="9.5" r="3"/><path d="m15.5 13.5-1.8-1.8"/></svg>Diccionario</a>
+    </div>
+  </section>
+
+  <a class="banner" href="predicaciones.html">
+    <span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg></span>
+    <span class="t"><b>Predicaciones</b><span class="meta">Mensajes de la iglesia en video</span></span>
+    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </a>
+
+</main>
+
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
+
+<div id="ios-install-modal" role="dialog" aria-modal="true" aria-labelledby="ios-titulo">
+  <div id="ios-install-content">
+    <button id="ios-install-close" type="button" aria-label="Cerrar">&times;</button>
+    <h2 id="ios-titulo">Instala la Biblia en tu iPhone</h2>
+    <p class="meta">Agrégala a tu pantalla de inicio en cuatro pasos:</p>
+    <div class="ios-step"><div class="ios-step-number">1</div><div><p>Toca el botón <strong>Compartir</strong> (el cuadro con una flecha hacia arriba) en la parte de abajo de Safari.</p><img src="images/1.jpg" alt="Botón Compartir de Safari" class="ios-image" loading="lazy"></div></div>
+    <div class="ios-step"><div class="ios-step-number">2</div><div><p>Desliza hacia arriba y elige <strong>Agregar a inicio</strong>.</p><img src="images/2.jpg" alt="Opción Agregar a inicio" class="ios-image" loading="lazy"></div></div>
+    <div class="ios-step"><div class="ios-step-number">3</div><div><p>Toca <strong>Agregar</strong> arriba a la derecha.</p><img src="images/4.jpg" alt="Botón Agregar" class="ios-image" loading="lazy"></div></div>
+    <div class="ios-step"><div class="ios-step-number">4</div><div><p>¡Listo! El ícono aparecerá en tu pantalla de inicio.</p><img src="images/3.jpg" alt="Ícono de la app en la pantalla de inicio" class="ios-image" loading="lazy"></div></div>
+    <label id="dont-show-again"><input type="checkbox" id="hide-ios-install"> No volver a mostrar este mensaje</label>
+  </div>
+</div>
+
+<script>
+(function () {
+  const VERSIONES = { 'Reina-Valera-1960': 'Reina-Valera 1960', 'TLA': 'Lenguaje Actual', 'Dios-Habla-Hoy': 'Dios Habla Hoy', 'La-Biblia-de-Las-Americas': 'La Biblia de las Américas', 'Nueva-Traduccion-Viviente': 'Nueva Traducción Viviente' };
+  const leer = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const enlace = (pag, b, c, v) => `${pag}?book=${encodeURIComponent(b)}&chapter=${c}` + (v ? `&verse=${v}` : '');
+
+  // Fecha y saludo
+  const hoy = new Date();
+  const fecha = hoy.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('fecha').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  const h = hoy.getHours();
+  const saludoBase = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  function saludar(nombre) {
+    document.getElementById('saludo').textContent = nombre ? `${saludoBase}, ${nombre.split(' ')[0]}` : saludoBase;
+  }
+  saludar('');
+
+  // Continuar leyendo
+  function pintarContinuar() {
+    let u = null;
+    try { u = JSON.parse(leer('ultimaLectura') || 'null'); } catch (e) {}
+    if (!u || !u.book) return;
+    document.getElementById('cont-titulo').textContent = `${u.book} ${u.chapter}`;
+    document.getElementById('cont-meta').textContent = VERSIONES[u.version] || 'Reina-Valera 1960';
+    document.getElementById('cont-btn').href = enlace('lectura.html', u.book, u.chapter);
+    document.getElementById('cont-btn-txt').textContent = 'Seguir leyendo';
+  }
+  pintarContinuar();
+  window.addEventListener('pageshow', pintarContinuar);
+
+  // Versículo del día (el mismo para todos cada día)
+  const LISTA = [["Salmos", 46, 1, "Dios es nuestro amparo y fortaleza, Nuestro pronto auxilio en las tribulaciones."], ["Juan", 3, 16, "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna."], ["Filipenses", 4, 13, "Todo lo puedo en Cristo que me fortalece."], ["Jeremías", 29, 11, "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis."], ["Josué", 1, 9, "Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas."], ["Isaías", 41, 10, "No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia."], ["Proverbios", 3, 5, "Fíate de Jehová de todo tu corazón, Y no te apoyes en tu propia prudencia."], ["Proverbios", 3, 6, "Reconócelo en todos tus caminos, Y él enderezará tus veredas."], ["Romanos", 8, 28, "Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados."], ["Mateo", 11, 28, "Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar."], ["Salmos", 23, 1, "Jehová es mi pastor; nada me faltará."], ["Salmos", 27, 1, "Jehová es mi luz y mi salvación; ¿de quién temeré? Jehová es la fortaleza de mi vida; ¿de quién he de atemorizarme?"], ["Isaías", 40, 31, "pero los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán."], ["2 Corintios", 5, 17, "De modo que si alguno está en Cristo, nueva criatura es; las cosas viejas pasaron; he aquí todas son hechas nuevas."], ["Filipenses", 4, 6, "Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias."], ["Filipenses", 4, 7, "Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús."], ["Salmos", 37, 5, "Encomienda a Jehová tu camino, Y confía en él; y él hará."], ["Mateo", 6, 33, "Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas."], ["Juan", 14, 6, "Jesús le dijo: Yo soy el camino, y la verdad, y la vida; nadie viene al Padre, sino por mí."], ["Juan", 14, 27, "La paz os dejo, mi paz os doy; yo no os la doy como el mundo la da. No se turbe vuestro corazón, ni tenga miedo."], ["Romanos", 12, 2, "No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento, para que comprobéis cuál sea la buena voluntad de Dios, agradable y perfecta."], ["Gálatas", 2, 20, "Con Cristo estoy juntamente crucificado, y ya no vivo yo, mas vive Cristo en mí; y lo que ahora vivo en la carne, lo vivo en la fe del Hijo de Dios, el cual me amó y se entregó a sí mismo por mí."], ["Efesios", 2, 8, "Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios;"], ["Hebreos", 11, 1, "Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve."], ["Santiago", 1, 5, "Y si alguno de vosotros tiene falta de sabiduría, pídala a Dios, el cual da a todos abundantemente y sin reproche, y le será dada."], ["1 Pedro", 5, 7, "echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros."], ["Salmos", 91, 1, "El que habita al abrigo del Altísimo Morará bajo la sombra del Omnipotente."], ["Salmos", 91, 2, "Diré yo a Jehová: Esperanza mía, y castillo mío; Mi Dios, en quien confiaré."], ["Salmos", 121, 1, "Alzaré mis ojos a los montes; ¿De dónde vendrá mi socorro?"], ["Salmos", 121, 2, "Mi socorro viene de Jehová, Que hizo los cielos y la tierra."], ["Lamentaciones", 3, 22, "Por la misericordia de Jehová no hemos sido consumidos, porque nunca decayeron sus misericordias."], ["Lamentaciones", 3, 23, "Nuevas son cada mañana; grande es tu fidelidad."], ["Isaías", 26, 3, "Tú guardarás en completa paz a aquel cuyo pensamiento en ti persevera; porque en ti ha confiado."], ["Mateo", 5, 16, "Así alumbre vuestra luz delante de los hombres, para que vean vuestras buenas obras, y glorifiquen a vuestro Padre que están los cielos."], ["Juan", 8, 12, "Otra vez Jesús les habló, diciendo: Yo soy la luz del mundo; el que me sigue, no andará en tinieblas, sino que tendrá la luz de la vida."], ["Juan", 15, 5, "Yo soy la vid, vosotros los pámpanos; el que permanece en mí, y yo en él, éste lleva mucho fruto; porque separados de mí nada podéis hacer."], ["Romanos", 5, 8, "Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros."], ["Romanos", 10, 9, "que si confesares con tu boca que Jesús es el Señor, y creyeres en tu corazón que Dios le levantó de los muertos, serás salvo."], ["Romanos", 15, 13, "Y el Dios de esperanza os llene de todo gozo y paz en el creer, para que abundéis en esperanza por el poder del Espíritu Santo."], ["1 Corintios", 13, 4, "El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece;"], ["1 Corintios", 16, 14, "Todas vuestras cosas sean hechas con amor."], ["2 Corintios", 12, 9, "Y me ha dicho: Bástate mi gracia; porque mi poder se perfecciona en la debilidad. Por tanto, de buena gana me gloriaré más bien en mis debilidades, para que repose sobre mí el poder de Cristo."], ["Gálatas", 5, 22, "Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe,"], ["Efesios", 3, 20, "Y a Aquel que es poderoso para hacer todas las cosas mucho más abundantemente de lo que pedimos o entendemos, según el poder que actúa en nosotros,"], ["Efesios", 6, 10, "Por lo demás, hermanos míos, fortaleceos en el Señor, y en el poder de su fuerza."], ["Filipenses", 1, 6, "estando persuadido de esto, que el que comenzó en vosotros la buena obra, la perfeccionará hasta el día de Jesucristo;"], ["Colosenses", 3, 23, "Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres;"], ["1 Tesalonicenses", 5, 16, "Estad siempre gozosos."], ["1 Tesalonicenses", 5, 17, "Orad sin cesar."], ["1 Tesalonicenses", 5, 18, "Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros en Cristo Jesús."], ["2 Timoteo", 1, 7, "Porque no nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio."], ["Hebreos", 4, 16, "Acerquémonos, pues, confiadamente al trono de la gracia, para alcanzar misericordia y hallar gracia para el oportuno socorro."], ["Hebreos", 13, 8, "Jesucristo es el mismo ayer, y hoy, y por los siglos."], ["Santiago", 4, 8, "Acercaos a Dios, y él se acercará a vosotros. Pecadores, limpiad las manos; y vosotros los de doble ánimo, purificad vuestros corazones."], ["1 Juan", 4, 19, "Nosotros le amamos a él, porque él nos amó primero."], ["1 Juan", 1, 9, "Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad."], ["Apocalipsis", 21, 4, "Enjugará Dios toda lágrima de los ojos de ellos; y ya no habrá muerte, ni habrá más llanto, ni clamor, ni dolor; porque las primeras cosas pasaron."], ["Salmos", 16, 11, "Me mostrarás la senda de la vida; En tu presencia hay plenitud de gozo; Delicias a tu diestra para siempre."], ["Salmos", 18, 2, "Jehová, roca mía y castillo mío, y mi libertador; Dios mío, fortaleza mía, en él confiaré; Mi escudo, y la fuerza de mi salvación, mi alto refugio."], ["Salmos", 30, 5, "Porque un momento será su ira, Pero su favor dura toda la vida. Por la noche durará el lloro, Y a la mañana vendrá la alegría."], ["Salmos", 34, 8, "Gustad, y ved que es bueno Jehová; Dichoso el hombre que confía en él."], ["Salmos", 37, 4, "Deléitate asimismo en Jehová, Y él te concederá las peticiones de tu corazón."], ["Salmos", 55, 22, "Echa sobre Jehová tu carga, y él te sustentará; No dejará para siempre caído al justo."], ["Salmos", 62, 1, "En Dios solamente está acallada mi alma; De él viene mi salvación."], ["Salmos", 103, 2, "Bendice, alma mía, a Jehová, Y no olvides ninguno de sus beneficios."], ["Salmos", 118, 24, "Este es el día que hizo Jehová; Nos gozaremos y alegraremos en él."], ["Salmos", 119, 105, "Lámpara es a mis pies tu palabra, Y lumbrera a mi camino."], ["Salmos", 139, 14, "Te alabaré; porque formidables, maravillosas son tus obras; Estoy maravillado, Y mi alma lo sabe muy bien."], ["Salmos", 145, 18, "Cercano está Jehová a todos los que le invocan, A todos los que le invocan de veras."], ["Salmos", 147, 3, "El sana a los quebrantados de corazón, Y venda sus heridas."], ["Proverbios", 16, 3, "Encomienda a Jehová tus obras, Y tus pensamientos serán afirmados."], ["Proverbios", 18, 10, "Torre fuerte es el nombre de Jehová; A él correrá el justo, y será levantado."], ["Isaías", 43, 2, "Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán. Cuando pases por el fuego, no te quemarás, ni la llama arderá en ti."], ["Isaías", 54, 10, "Porque los montes se moverán, y los collados temblarán, pero no se apartará de ti mi misericordia, ni el pacto de mi paz se quebrantará, dijo Jehová, el que tiene misericordia de ti."], ["Isaías", 55, 8, "Porque mis pensamientos no son vuestros pensamientos, ni vuestros caminos mis caminos, dijo Jehová."], ["Jeremías", 33, 3, "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces."], ["Sofonías", 3, 17, "Jehová está en medio de ti, poderoso, él salvará; se gozará sobre ti con alegría, callará de amor, se regocijará sobre ti con cánticos."], ["Miqueas", 6, 8, "Oh hombre, él te ha declarado lo que es bueno, y qué pide Jehová de ti: solamente hacer justicia, y amar misericordia, y humillarte ante tu Dios."], ["Habacuc", 3, 19, "Jehová el Señor es mi fortaleza, El cual hace mis pies como de ciervas, Y en mis alturas me hace andar. Al jefe de los cantores, sobre mis instrumentos de cuerdas."], ["Mateo", 7, 7, "Pedid, y se os dará; buscad, y hallaréis; llamad, y se os abrirá."], ["Mateo", 19, 26, "Y mirándolos Jesús, les dijo: Para los hombres esto es imposible; mas para Dios todo es posible."], ["Mateo", 28, 20, "enseñándoles que guarden todas las cosas que os he mandado; y he aquí yo estoy con vosotros todos los días, hasta el fin del mundo. Amén."], ["Marcos", 9, 23, "Jesús le dijo: Si puedes creer, al que cree todo le es posible."], ["Marcos", 11, 24, "Por tanto, os digo que todo lo que pidiereis orando, creed que lo recibiréis, y os vendrá."], ["Lucas", 1, 37, "porque nada hay imposible para Dios."], ["Juan", 1, 5, "La luz en las tinieblas resplandece, y las tinieblas no prevalecieron contra ella."], ["Juan", 10, 10, "El ladrón no viene sino para hurtar y matar y destruir; yo he venido para que tengan vida, y para que la tengan en abundancia."], ["Juan", 11, 25, "Le dijo Jesús: Yo soy la resurrección y la vida; el que cree en mí, aunque esté muerto, vivirá."], ["Juan", 16, 33, "Estas cosas os he hablado para que en mí tengáis paz. En el mundo tendréis aflicción; pero confiad, yo he vencido al mundo."], ["Hechos", 1, 8, "pero recibiréis poder, cuando haya venido sobre vosotros el Espíritu Santo, y me seréis testigos en Jerusalén, en toda Judea, en Samaria, y hasta lo último de la tierra."], ["Romanos", 8, 31, "¿Qué, pues, diremos a esto? Si Dios es por nosotros, ¿quién contra nosotros?"], ["Romanos", 8, 37, "Antes, en todas estas cosas somos más que vencedores por medio de aquel que nos amó."], ["Romanos", 8, 38, "Por lo cual estoy seguro de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir,"], ["Romanos", 12, 12, "gozosos en la esperanza; sufridos en la tribulación; constantes en la oración;"], ["1 Corintios", 10, 13, "No os ha sobrevenido ninguna tentación que no sea humana; pero fiel es Dios, que no os dejará ser tentados más de lo que podéis resistir, sino que dará también juntamente con la tentación la salida, para que podáis soportar."], ["2 Corintios", 4, 16, "Por tanto, no desmayamos; antes aunque este nuestro hombre exterior se va desgastando, el interior no obstante se renueva de día en día."], ["Efesios", 4, 32, "Antes sed benignos unos con otros, misericordiosos, perdonándoos unos a otros, como Dios también os perdonó a vosotros en Cristo."], ["Filipenses", 4, 19, "Mi Dios, pues, suplirá todo lo que os falta conforme a sus riquezas en gloria en Cristo Jesús."], ["Colosenses", 3, 15, "Y la paz de Dios gobierne en vuestros corazones, a la que asimismo fuisteis llamados en un solo cuerpo; y sed agradecidos."], ["2 Tesalonicenses", 3, 3, "Pero fiel es el Señor, que os afirmará y guardará del mal."], ["Hebreos", 10, 23, "Mantengamos firme, sin fluctuar, la profesión de nuestra esperanza, porque fiel es el que prometió."], ["Hebreos", 12, 1, "Por tanto, nosotros también, teniendo en derredor nuestro tan grande nube de testigos, despojémonos de todo peso y del pecado que nos asedia, y corramos con paciencia la carrera que tenemos por delante,"], ["Santiago", 1, 12, "Bienaventurado el varón que soporta la tentación; porque cuando haya resistido la prueba, recibirá la corona de vida, que Dios ha prometido a los que le aman."], ["1 Pedro", 2, 9, "Mas vosotros sois linaje escogido, real sacerdocio, nación santa, pueblo adquirido por Dios, para que anunciéis las virtudes de aquel que os llamó de las tinieblas a su luz admirable;"], ["1 Juan", 4, 18, "En el amor no hay temor, sino que el perfecto amor echa fuera el temor; porque el temor lleva en sí castigo. De donde el que teme, no ha sido perfeccionado en el amor."], ["Deuteronomio", 31, 6, "Esforzaos y cobrad ánimo; no temáis, ni tengáis miedo de ellos, porque Jehová tu Dios es el que va contigo; no te dejará, ni te desamparará."], ["Deuteronomio", 31, 8, "Y Jehová va delante de ti; él estará contigo, no te dejará, ni te desamparará; no temas ni te intimides."], ["Números", 6, 24, "Jehová te bendiga, y te guarde;"], ["Números", 6, 25, "Jehová haga resplandecer su rostro sobre ti, y tenga de ti misericordia;"], ["Números", 6, 26, "Jehová alce sobre ti su rostro, y ponga en ti paz.”"], ["Éxodo", 14, 14, "Jehová peleará por vosotros, y vosotros estaréis tranquilos."], ["Éxodo", 15, 2, "Jehová es mi fortaleza y mi cántico, Y ha sido mi salvación. Este es mi Dios, y lo alabaré; Dios de mi padre, y lo enalteceré."], ["Nehemías", 8, 10, "Luego les dijo: Id, comed grosuras, y bebed vino dulce, y enviad porciones a los que no tienen nada preparado; porque día santo es a nuestro Señor; no os entristezcáis, porque el gozo de Jehová es vuestra fuerza."], ["Salmos", 4, 8, "En paz me acostaré, y asimismo dormiré; Porque solo tú, Jehová, me haces vivir confiado."], ["Salmos", 9, 10, "En ti confiarán los que conocen tu nombre, Por cuanto tú, oh Jehová, no desamparaste a los que te buscaron."], ["Salmos", 19, 14, "Sean gratos los dichos de mi boca y la meditación de mi corazón delante de ti, Oh Jehová, roca mía, y redentor mío."], ["Salmos", 28, 7, "Jehová es mi fortaleza y mi escudo; En él confió mi corazón, y fui ayudado, Por lo que se gozó mi corazón, Y con mi cántico le alabaré."], ["Salmos", 32, 8, "Te haré entender, y te enseñaré el camino en que debes andar; Sobre ti fijaré mis ojos."], ["Salmos", 40, 1, "Pacientemente esperé a Jehová, Y se inclinó a mí, y oyó mi clamor."], ["Salmos", 42, 11, "¿Por qué te abates, oh alma mía, Y por qué te turbas dentro de mí? Espera en Dios; porque aún he de alabarle, Salvación mía y Dios mío."], ["Salmos", 56, 3, "En el día que temo, Yo en ti confío."], ["Salmos", 73, 26, "Mi carne y mi corazón desfallecen; Mas la roca de mi corazón y mi porción es Dios para siempre."], ["Salmos", 84, 11, "Porque sol y escudo es Jehová Dios; Gracia y gloria dará Jehová. No quitará el bien a los que andan en integridad."], ["Salmos", 100, 5, "Porque Jehová es bueno; para siempre es su misericordia, Y su verdad por todas las generaciones."], ["Salmos", 107, 1, "Alabad a Jehová, porque él es bueno; Porque para siempre es su misericordia."], ["Salmos", 126, 3, "Grandes cosas ha hecho Jehová con nosotros; Estaremos alegres."], ["Isaías", 9, 6, "Porque un niño nos es nacido, hijo nos es dado, y el principado sobre su hombro; y se llamará su nombre Admirable, Consejero, Dios Fuerte, Padre Eterno, Príncipe de Paz."], ["Isaías", 12, 2, "He aquí Dios es salvación mía; me aseguraré y no temeré; porque mi fortaleza y mi canción es JAH Jehová, quien ha sido salvación para mí."], ["Isaías", 30, 15, "Porque así dijo Jehová el Señor, el Santo de Israel: En descanso y en reposo seréis salvos; en quietud y en confianza será vuestra fortaleza. Y no quisisteis,"], ["Isaías", 53, 5, "Mas él herido fue por nuestras rebeliones, molido por nuestros pecados; el castigo de nuestra paz fue sobre él, y por su llaga fuimos nosotros curados."], ["Ezequiel", 36, 26, "Os daré corazón nuevo, y pondré espíritu nuevo dentro de vosotros; y quitaré de vuestra carne el corazón de piedra, y os daré un corazón de carne."], ["Joel", 2, 25, "Y os restituiré los años que comió la oruga, el saltón, el revoltón y la langosta, mi gran ejército que envié contra vosotros."], ["Mateo", 5, 9, "Bienaventurados los pacificadores, porque ellos serán llamados hijos de Dios."], ["Mateo", 6, 34, "Así que, no os afanéis por el día de mañana, porque el día de mañana traerá su afán. Basta a cada día su propio mal."], ["Juan", 13, 34, "Un mandamiento nuevo os doy: Que os améis unos a otros; como yo os he amado, que también os améis unos a otros."], ["Juan", 20, 29, "Jesús le dijo: Porque me has visto, Tomás, creíste; bienaventurados los que no vieron, y creyeron."], ["Romanos", 6, 23, "Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro."], ["Gálatas", 6, 9, "No nos cansemos, pues, de hacer bien; porque a su tiempo segaremos, si no desmayamos."], ["Efesios", 2, 10, "Porque somos hechura suya, creados en Cristo Jesús para buenas obras, las cuales Dios preparó de antemano para que anduviésemos en ellas."], ["1 Juan", 5, 14, "Y esta es la confianza que tenemos en él, que si pedimos alguna cosa conforme a su voluntad, él nos oye."]];
+  const dia = Math.floor((Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()) - Date.UTC(2026, 0, 1)) / 86400000);
+  const [b, c, v, t] = LISTA[((dia % LISTA.length) + LISTA.length) % LISTA.length];
+  document.getElementById('vd-texto').textContent = t;
+  document.getElementById('vd-ref').textContent = `${b} ${c}:${v}`;
+  document.getElementById('vd-compartir').href = enlace('share.html', b, c, v);
+  document.getElementById('vd-leer').href = enlace('lectura.html', b, c, v);
+
+  // Foto o inicial de la cuenta en el encabezado
+  window.addEventListener('cuenta-cambio', e => {
+    const a = document.getElementById('avatar');
+    const u = e.detail;
+    if (!u) return;
+    saludar(u.nombre);
+    if (u.foto) { const img = document.createElement('img'); img.src = u.foto; img.alt = ''; img.referrerPolicy = 'no-referrer'; a.replaceChildren(img); }
+    else if (u.nombre) a.textContent = u.nombre.charAt(0).toUpperCase();
+  });
+
+  // Instalar (Android / computadora)
+  let pedido = null;
+  const btnInst = document.getElementById('install-button');
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedido = e; btnInst.classList.add('show'); });
+  btnInst.addEventListener('click', async () => {
+    if (!pedido) return;
+    pedido.prompt(); await pedido.userChoice; pedido = null; btnInst.classList.remove('show');
+  });
+
+  // Instrucciones para iPhone
+  const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+  if (esIOS && !window.navigator.standalone && leer('hideIosInstall') !== 'true') {
+    const modal = document.getElementById('ios-install-modal');
+    const cerrar = () => {
+      modal.style.display = 'none';
+      if (document.getElementById('hide-ios-install').checked) { try { localStorage.setItem('hideIosInstall', 'true'); } catch (e) {} }
+    };
+    setTimeout(() => { modal.style.display = 'flex'; }, 2000);
+    document.getElementById('ios-install-close').addEventListener('click', cerrar);
+    modal.addEventListener('click', e => { if (e.target === modal) cerrar(); });
+  }
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.error);
+})();
+</script>
+<script type="module" src="notificaciones.js"></script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>

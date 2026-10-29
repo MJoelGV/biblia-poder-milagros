@@ -11,7 +11,7 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from 'h
 const CLAVES = [
   'bookmarks', 'comments', 'memorized', 'bible-notes',
   '30diasConJesucristo', 'bibleReadingProgress', 'bibliaEnUnAno', 'completedDays', 'iphcReadingProgress',
-  'theme', 'verseFontSize'
+  'theme', 'verseFontSize', 'ultimaLectura'
 ];
 const META = 'cuenta-sync-meta';     // cuándo cambió cada dato en este celular
 const UID_LOCAL = 'cuenta-uid';      // de quién son los datos de este celular
@@ -156,8 +156,8 @@ async function borrarCuenta() {
 }
 
 // ---------- Mosaico "Mi cuenta" en la página principal ----------
-const m = document.getElementById('proverb-link')
-  ? crearMosaico('xi-cuenta', '<i class="fas fa-cloud" aria-hidden="true"></i>', 'Mi cuenta')
+const m = (document.getElementById('extras-inicio') || document.getElementById('proverb-link'))
+  ? crearMosaico('xi-cuenta', '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.3 12.5 3.5 3.5 0 0 0 6.5 19z"/></svg>', 'Mi cuenta')
   : null;
 
 function escapar(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
@@ -167,12 +167,12 @@ function pintar(estado, msg) {
   if (estado === 'dentro' && usuario) {
     const nombre = (usuario.displayName || usuario.email || 'Mi cuenta').split(' ')[0];
     m.tile.querySelector('.xi-t').textContent = nombre;
-    m.icono(usuario.photoURL ? `<img src="${usuario.photoURL}" alt="" referrerpolicy="no-referrer">` : '<i class="fas fa-user" aria-hidden="true"></i>');
+    m.icono(usuario.photoURL ? `<img src="${usuario.photoURL}" alt="" referrerpolicy="no-referrer">` : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>');
     m.set(msg || 'Guardado en la nube', true);
   } else {
     m.tile.querySelector('.xi-t').textContent = 'Mi cuenta';
-    m.icono('<i class="fas fa-cloud" aria-hidden="true"></i>');
-    m.set(msg || 'Toca para entrar', false);
+    m.icono('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.3 12.5 3.5 3.5 0 0 0 6.5 19z"/></svg>');
+    m.set(msg || 'Guarda tus notas en la nube', false);
   }
   if (estado === 'error') m.mostrar(escapar(msg), [{ texto: 'Entendido', tipo: 'sec', accion: () => m.ocultar() }]);
 }
@@ -198,6 +198,7 @@ getRedirectResult(auth).catch(e => console.warn('Inicio de sesión:', e.code));
 
 onAuthStateChanged(auth, async u => {
   usuario = u;
+  window.dispatchEvent(new CustomEvent('cuenta-cambio', { detail: u ? { nombre: u.displayName || '', foto: u.photoURL || '', correo: u.email || '' } : null }));
   if (!u) { pintar('fuera'); return; }
   pintar('dentro', 'Sincronizando…');
   try {

@@ -2085,6 +2085,8 @@
             try {
                 const chapter = xmlDoc.querySelector(`b[n="${currentBook}"] c[n="${currentChapter}"]`);
                 if (!chapter) throw new Error('No se encontró el capítulo');
+                // Recordar dónde se quedó la persona, para "Continuar leyendo" en la portada
+                try { localStorage.setItem('ultimaLectura', JSON.stringify({ book: currentBook, chapter: currentChapter, version: currentVersion, t: Date.now() })); } catch (e) {}
 
                 let html = '';
                 
@@ -2295,6 +2297,12 @@
                 currentBook = bookParam;
                 currentChapter = chapterParam ? parseInt(chapterParam) : 1;
                 currentVerse = verseParam ? parseInt(verseParam) : 0;
+            } else if ((() => { try { const u = JSON.parse(localStorage.getItem('ultimaLectura') || 'null'); return u && u.book && xmlDoc.querySelector(`b[n="${u.book}"]`); } catch (e) { return false; } })()) {
+                // Sin enlace: abrir donde la persona se quedó la última vez
+                const u = JSON.parse(localStorage.getItem('ultimaLectura'));
+                currentBook = u.book;
+                currentChapter = parseInt(u.chapter, 10) || 1;
+                currentVerse = 0;
             } else {
                 // Cargar primer libro por defecto
                 const firstBookElem = xmlDoc.getElementsByTagName('b')[0];
