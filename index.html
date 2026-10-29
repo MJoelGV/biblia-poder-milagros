@@ -103,11 +103,17 @@
     </div>
   </section>
 
-  <a class="banner" href="predicaciones.html">
-    <span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg></span>
-    <span class="t"><b>Predicaciones</b><span class="meta">Mensajes de la iglesia en video</span></span>
-    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-  </a>
+  <section id="predicas" style="display:flex;flex-direction:column;gap:12px" aria-labelledby="pr-t">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+      <h2 class="sec" id="pr-t">Predicaciones recientes</h2>
+      <a href="predicaciones.html" style="font-size:14px;font-weight:600;padding:10px 0">Ver todas</a>
+    </div>
+    <div id="pr-lista" class="pr-lista">
+      <div class="pr-item cargando"><span class="pr-mini"></span><span class="pr-txt"><span class="pr-linea"></span><span class="pr-linea corta"></span></span></div>
+      <div class="pr-item cargando"><span class="pr-mini"></span><span class="pr-txt"><span class="pr-linea"></span><span class="pr-linea corta"></span></span></div>
+      <div class="pr-item cargando"><span class="pr-mini"></span><span class="pr-txt"><span class="pr-linea"></span><span class="pr-linea corta"></span></span></div>
+    </div>
+  </section>
 
 </main>
 
@@ -202,6 +208,63 @@
     document.getElementById('ios-install-close').addEventListener('click', cerrar);
     modal.addEventListener('click', e => { if (e.target === modal) cerrar(); });
   }
+
+
+  // Predicaciones recientes del canal (se guardan 2 horas para no gastar la cuota de YouTube)
+  (async function predicas() {
+    const KEY = 'AIzaSyA5B2vj3m6lMWRrMrF7LP7xD3PsPVTjBzM';
+    const SUBIDAS = 'UUh2_5mMqBEFlYdxg81Rys_Q';
+    const lista = document.getElementById('pr-lista');
+    const hace = f => {
+      const d = Math.floor((Date.now() - new Date(f).getTime()) / 86400000);
+      if (d <= 0) return 'Hoy'; if (d === 1) return 'Ayer'; if (d < 7) return `Hace ${d} días`;
+      if (d < 30) { const s = Math.floor(d / 7); return s === 1 ? 'Hace 1 semana' : `Hace ${s} semanas`; }
+      return new Date(f).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+    const pintar = items => {
+      lista.replaceChildren();
+      items.forEach(v => {
+        const a = document.createElement('a');
+        a.className = 'pr-item';
+        a.href = `playlist-detail.html?id=${SUBIDAS}&name=${encodeURIComponent('Últimas predicaciones')}&v=${v.id}`;
+        const mini = document.createElement('span'); mini.className = 'pr-mini';
+        const img = document.createElement('img'); img.src = `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`; img.alt = ''; img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        const play = document.createElement('span'); play.className = 'pr-play'; play.setAttribute('aria-hidden', 'true');
+        play.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+        mini.append(img, play);
+        const txt = document.createElement('span'); txt.className = 'pr-txt';
+        const t = document.createElement('span'); t.className = 'pr-titulo'; t.textContent = v.titulo;
+        const f = document.createElement('span'); f.className = 'meta'; f.textContent = hace(v.fecha);
+        txt.append(t, f);
+        a.append(mini, txt);
+        lista.appendChild(a);
+      });
+    };
+    let guardado = null;
+    try { guardado = JSON.parse(localStorage.getItem('predicasRecientes') || 'null'); } catch (e) {}
+    if (guardado && guardado.items && guardado.items.length) pintar(guardado.items);
+    if (guardado && Date.now() - guardado.t < 2 * 3600 * 1000) return;
+    try {
+      const r = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=8&playlistId=${SUBIDAS}&key=${KEY}`);
+      if (!r.ok) throw new Error('YouTube ' + r.status);
+      const data = await r.json();
+      const items = (data.items || [])
+        .filter(x => !/^(private|deleted) video$/i.test(x.snippet?.title || ''))
+        .map(x => ({ id: x.contentDetails?.videoId || x.snippet?.resourceId?.videoId, titulo: x.snippet?.title || '', fecha: x.contentDetails?.videoPublishedAt || x.snippet?.publishedAt }))
+        .filter(x => x.id)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0, 3);
+      if (!items.length) throw new Error('Sin videos');
+      try { localStorage.setItem('predicasRecientes', JSON.stringify({ t: Date.now(), items })); } catch (e) {}
+      pintar(items);
+    } catch (e) {
+      console.warn('Predicaciones recientes:', e);
+      if (!guardado) {
+        lista.innerHTML = '<a class="banner" href="predicaciones.html"><span class="t"><b>Ver predicaciones</b><span class="meta">Mensajes de la iglesia en video</span></span></a>';
+      }
+    }
+  })();
 
   // Buscador
   const bb = document.getElementById('btn-buscar'), fb = document.getElementById('buscador');

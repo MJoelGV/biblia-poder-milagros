@@ -635,6 +635,23 @@
                     
                     videosData = sortedVideos;
                     renderVideos(sortedVideos);
+
+                    // Si viene de la portada con un video elegido (&v=ID), abrirlo en el reproductor
+                    const vElegido = new URLSearchParams(location.search).get('v');
+                    if (vElegido) {
+                        const idx = sortedVideos.findIndex(x => (x.snippet?.resourceId?.videoId || x.contentDetails?.videoId) === vElegido);
+                        if (idx >= 0) {
+                            let intentos = 0;
+                            const espera = setInterval(() => {
+                                intentos++;
+                                if (typeof youtubePlayer !== 'undefined' && youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
+                                    clearInterval(espera);
+                                    playVideo(idx, vElegido, sortedVideos[idx].realTitle || sortedVideos[idx].snippet?.title || '');
+                                }
+                                if (intentos > 60) clearInterval(espera);
+                            }, 250);
+                        }
+                    }
                     
                     // Actualizar información con el total real
                     document.getElementById('playlistInfo').textContent = `${sortedVideos.length} videos encontrados (ordenados por fecha de publicación)`;
