@@ -19,26 +19,52 @@
 <title>Biblia de Poder y Milagros</title>
 </head>
 <body>
+<div id="intro" aria-hidden="true">
+  <div class="intro-texto"><span class="l1">Biblia de Poder</span><span class="l2">y Milagros</span></div>
+</div>
+<script>
+(function () {
+  const intro = document.getElementById('intro');
+  let vista = false;
+  try { vista = sessionStorage.getItem('introVista') === '1'; } catch (e) {}
+  const sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (vista || sinMovimiento) { intro.remove(); return; }
+  try { sessionStorage.setItem('introVista', '1'); } catch (e) {}
+  let n = 0;
+  intro.querySelectorAll('.intro-texto span').forEach(linea => {
+    const texto = linea.textContent; linea.textContent = '';
+    for (const ch of texto) {
+      const s = document.createElement('i');
+      s.textContent = ch === ' ' ? '\u00a0' : ch;
+      s.style.animationDelay = (n++ * 70) + 'ms';
+      linea.appendChild(s);
+    }
+  });
+  const cerrar = () => {
+    if (intro.classList.contains('fuera')) return;
+    intro.classList.add('fuera');
+    setTimeout(() => intro.remove(), 1200);
+  };
+  // Empezar cuando la letra manuscrita ya cargó (o a los 0.7 s como máximo)
+  let total = n * 70 + 900;
+  const empezar = () => { if (intro.classList.contains('listo')) return; intro.classList.add('listo'); setTimeout(cerrar, total + 700); };
+  if (document.fonts && document.fonts.load) document.fonts.load('60px "Great Vibes"').then(empezar, empezar);
+  setTimeout(empezar, 700);
+  intro.addEventListener('click', cerrar);
+})();
+</script>
 <main class="page">
 
   <header class="top">
-    <span class="logo">Biblia de Poder y Milagros</span>
+    <div class="hello">
+      <small id="fecha"></small>
+      <h1 id="saludo">Bienvenido</h1>
+    </div>
     <div class="top-actions">
       <button class="icon-btn" type="button" id="btn-buscar" aria-label="Buscar en la Biblia" aria-expanded="false" aria-controls="buscador"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
       <a class="avatar" id="avatar" href="mas.html" aria-label="Mi cuenta y más opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a>
     </div>
   </header>
-
-  <form id="buscador" class="card" action="lectura.html" method="get" role="search" hidden style="padding:12px;flex-direction:row;align-items:center;gap:8px">
-    <label for="q" class="sr">Buscar en la Biblia</label>
-    <input id="q" name="q" type="search" placeholder="Busca una palabra o frase, por ejemplo: amor" autocomplete="off" required minlength="2" style="flex:1;min-width:0;height:44px;border-radius:22px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:0 16px;font:inherit;font-size:16px">
-    <button class="btn" type="submit" style="height:44px;padding:0 18px">Buscar</button>
-  </form>
-
-  <section class="hello">
-    <small id="fecha"></small>
-    <h1 id="saludo">Bienvenido</h1>
-  </section>
 
   <section class="card" aria-labelledby="cont-label">
     <span class="label" id="cont-label">Continuar leyendo</span>
