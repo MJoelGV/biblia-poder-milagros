@@ -140,6 +140,7 @@
     if (v) requestAnimationFrame(() => irAVersiculo(v));
     else if (!opciones.mantenerScroll) window.scrollTo({ top: 0, behavior: 'auto' });
     $('barra').classList.remove('oculta');
+    document.body.classList.remove('leyendo');
   }
 
   function irAVersiculo(v) {
@@ -170,11 +171,16 @@
   $('fin').addEventListener('click', e => { const a = e.target.closest('[data-ir]'); if (a) { e.preventDefault(); ir(parseInt(a.dataset.ir, 10)); } });
 
   // ---------- Barra que se esconde al leer ----------
+  // Al leer hacia abajo se esconden la barra de arriba, la de abajo y las flechas;
+  // al subir un poco o llegar al final del capítulo, vuelven a aparecer.
   let ultimoY = 0;
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     if (Math.abs(y - ultimoY) < 8) return;
-    $('barra').classList.toggle('oculta', y > ultimoY && y > 90);
+    const alFinal = window.innerHeight + y >= document.documentElement.scrollHeight - 140;
+    const esconder = y > ultimoY && y > 90 && !alFinal;
+    $('barra').classList.toggle('oculta', esconder);
+    document.body.classList.toggle('leyendo', esconder);
     ultimoY = y;
   }, { passive: true });
 

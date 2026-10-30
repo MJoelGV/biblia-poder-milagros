@@ -48,6 +48,11 @@ body.lectura { background: var(--surface); }
 .fin a small { color: var(--text-2); font-weight: 500; font-size: 12px; }
 .fin a.sig { text-align: right; }
 
+/* Modo lectura: al deslizar hacia abajo se esconde la barra de abajo y las flechas */
+.lectura .tabbar { transition: transform .28s ease; }
+.lectura.leyendo .tabbar { transform: translateY(110%); }
+.lectura.leyendo .fab { opacity: 0; transform: translateY(24px); pointer-events: none; }
+
 /* Flechas flotantes */
 .fab { position: fixed; z-index: 30; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); width: 48px; height: 48px; border-radius: 24px; background: var(--surface); border: 1px solid var(--border);
   box-shadow: 0 4px 14px rgba(0,0,0,.14); display: grid; place-items: center; color: var(--text); cursor: pointer; padding: 0; transition: opacity .25s, transform .25s; }
