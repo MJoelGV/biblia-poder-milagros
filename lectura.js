@@ -290,7 +290,8 @@
         break;
       }
       case 'compartir':
-        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${encodeURIComponent(version)}`;
+        // La página de compartir usa claves cortas para las versiones
+        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv' })[version] || 'rv1960'}`;
         break;
       case 'nota':
         cerrarUltimo();
