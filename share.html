@@ -149,8 +149,13 @@
         .swiper-slide-prev .bg-thumb {
             transform: scale(0.8);
         }
-        #download-btn { display:block; margin:20px auto; padding:10px 20px; background:var(--primary-color);
-            color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:16px; }
+        #acciones-img { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:20px auto 6px; padding:0 16px; }
+        #acciones-img button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px;
+            border-radius:24px; font-size:16px; font-weight:700; cursor:pointer; border:none; }
+        #share-btn { background:var(--primary-color); color:#fff; }
+        #download-btn { background:transparent; color:var(--primary-color); border:2px solid var(--primary-color) !important; }
+        #acciones-img button:disabled { opacity:.6; cursor:default; }
+        #share-aviso { text-align:center; min-height:1.3em; margin:0 16px 16px; font-size:14px; opacity:.85; }
         /* Verse search selectors */
         #search-panel { text-align: center; margin: 20px 0; }
         #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
@@ -216,7 +221,11 @@
             </div>
         </div>
     </div>
-    <button id="download-btn">Descargar imagen</button>
+    <div id="acciones-img">
+      <button id="share-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir imagen</button>
+      <button id="download-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar</button>
+    </div>
+    <p id="share-aviso" role="status" aria-live="polite"></p>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
@@ -272,14 +281,25 @@
         const chapterSelect = document.getElementById('chapter-select');
         const verseSelect = document.getElementById('verse-select');
 
+        let ultimoFondo = '';
         async function loadBg(url) {
-            const res = await fetch(url);
-            const blob = await res.blob();
-            return new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(blob);
-            }).then(dataUrl => { verseCard.style.backgroundImage = `url('${dataUrl}')`; });
+            if (!url) return;
+            ultimoFondo = url;
+            // Mostrar la imagen de inmediato y luego convertirla para que se pueda descargar
+            verseCard.style.backgroundImage = `url('${url}')`;
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                if (ultimoFondo === url) verseCard.style.backgroundImage = `url('${dataUrl}')`;
+            } catch (e) {
+                console.warn('Fondo:', e);
+            }
         }
 
         const swiper = new Swiper('#carousel', {
@@ -290,10 +310,12 @@
             loopedSlides: 6,
             simulateTouch: true,
             allowTouchMove: true,
+            init: false, // se inicia abajo, después de preparar los eventos (en iPhone no cargaba el fondo inicial)
         });
 
         swiper.on('init', () => {
-            loadBg(swiper.slides[swiper.activeIndex].querySelector('.bg-thumb').dataset.bg);
+            const primera = swiper.slides[swiper.activeIndex] && swiper.slides[swiper.activeIndex].querySelector('.bg-thumb');
+            loadBg(primera ? primera.dataset.bg : document.querySelector('.bg-thumb').dataset.bg);
             
             // Agregar evento click a todas las imágenes
             document.querySelectorAll('.bg-thumb').forEach(img => {
@@ -579,46 +601,96 @@
             }
         })();
 
-        downloadBtn.addEventListener('click', () => {
-            // Configuración simple y efectiva
-            const scale = 2; // 2x resolución
+        // ---------- Crear la imagen de la tarjeta ----------
+        function crearImagen() {
             const options = {
-                scale: scale,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                onclone: function(clonedDoc) {
-                    // Asegurar que la imagen del logo se cargue bien
+                scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false,
+                onclone: function (clonedDoc) {
                     const logo = clonedDoc.querySelector('.logo-watermark');
-                    if (logo) {
-                        // Forzar que la imagen se vea nítida
-                        logo.style.imageRendering = 'auto';
-                        logo.style.width = '80px';
-                        logo.style.height = '80px';
-                        logo.style.opacity = '0.9';
-                    }
+                    if (logo) { logo.style.imageRendering = 'auto'; logo.style.width = '80px'; logo.style.height = '80px'; logo.style.opacity = '0.9'; }
                 }
             };
-            
-            html2canvas(verseCard, options).then(canvas => {
+            return html2canvas(verseCard, options).catch(() => html2canvas(verseCard, { scale: 2, backgroundColor: '#ffffff' }));
+        }
+        const nombreArchivo = () => `versiculo-${bookParam}-${chapter}-${verse}.png`;
+        const aviso = document.getElementById('share-aviso');
+        const shareBtn = document.getElementById('share-btn');
+
+        downloadBtn.addEventListener('click', async () => {
+            downloadBtn.disabled = true;
+            try {
+                const canvas = await crearImagen();
                 const link = document.createElement('a');
-                link.download = `versiculo-${bookParam}-${chapter}-${verse}.png`;
+                link.download = nombreArchivo();
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-            }).catch(error => {
-                console.error('Error:', error);
-                // Fallback simple
-                html2canvas(verseCard, {
-                    scale: 2,
-                    backgroundColor: '#ffffff'
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `versiculo-${bookParam}-${chapter}-${verse}.png`;
-                    link.href = canvas.toDataURL();
-                    link.click();
-                });
-            });
+            } catch (e) { console.error(e); aviso.textContent = 'No se pudo crear la imagen. Inténtalo de nuevo.'; }
+            downloadBtn.disabled = false;
+        });
+
+        // ---------- Compartir ----------
+        // La imagen se prepara por adelantado cada vez que cambia la tarjeta, porque el iPhone
+        // solo permite abrir el menú de compartir justo después de tocar el botón.
+        let imagenLista = null, preparando = null, version = 0, temporizador = null;
+        function prepararImagen() {
+            const mia = ++version;
+            imagenLista = null;
+            preparando = crearImagen()
+                .then(canvas => new Promise(res => canvas.toBlob(res, 'image/png', 1.0)))
+                .then(blob => {
+                    if (!blob || mia !== version) return null;
+                    imagenLista = new File([blob], nombreArchivo(), { type: 'image/png' });
+                    return imagenLista;
+                })
+                .catch(e => { console.warn('Preparar imagen:', e); return null; });
+            return preparando;
+        }
+        new MutationObserver(() => {
+            clearTimeout(temporizador);
+            imagenLista = null;
+            temporizador = setTimeout(prepararImagen, 900);
+        }).observe(verseCard, { attributes: true, attributeFilter: ['style'], childList: true, subtree: true, characterData: true });
+        setTimeout(prepararImagen, 1500);
+
+        function referencia() {
+            const r = verseCard.querySelector('#verse-ref');
+            return r ? r.textContent.trim() : '';
+        }
+        async function compartirArchivo(archivo) {
+            const datos = { files: [archivo], title: referencia(), text: `${referencia()} · Biblia de Poder y Milagros` };
+            if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                await navigator.share(datos);
+                return true;
+            }
+            return false;
+        }
+        shareBtn.addEventListener('click', async () => {
+            aviso.textContent = '';
+            try {
+                if (imagenLista) {
+                    if (await compartirArchivo(imagenLista)) return;
+                } else {
+                    shareBtn.disabled = true;
+                    aviso.textContent = 'Preparando la imagen…';
+                    const archivo = await (preparando && version ? preparando : prepararImagen()) || await prepararImagen();
+                    shareBtn.disabled = false;
+                    if (!archivo) throw new Error('Sin imagen');
+                    try {
+                        if (await compartirArchivo(archivo)) { aviso.textContent = ''; return; }
+                    } catch (e) {
+                        if (e && e.name === 'NotAllowedError') { aviso.textContent = 'La imagen ya está lista. Toca "Compartir imagen" otra vez.'; return; }
+                        throw e;
+                    }
+                }
+                // Este navegador no permite compartir imágenes: se descarga
+                aviso.textContent = 'Tu navegador no permite compartir imágenes directamente; se descargará para que la compartas.';
+                downloadBtn.click();
+            } catch (e) {
+                shareBtn.disabled = false;
+                if (e && e.name === 'AbortError') { aviso.textContent = ''; return; }
+                console.error('Compartir:', e);
+                aviso.textContent = 'No se pudo compartir. Prueba con "Descargar".';
+            }
         });
     </script>
     <script>
