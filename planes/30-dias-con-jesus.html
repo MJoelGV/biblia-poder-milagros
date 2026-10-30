@@ -89,6 +89,7 @@
   <a href="../mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
 </div></nav>
 
+<script src="../audio-biblia.js"></script>
 <script>
 (function () {
   const plan30Dias = [
@@ -147,7 +148,7 @@
     if (sig) {
       caja.innerHTML = `<small>${n === 0 ? 'Empieza aquí' : 'Tu siguiente lectura'}</small>
         <b>Día ${sig.day}: ${esc(sig.title)}</b><span class="ref">${esc(sig.reference)}</span>
-        <div class="fila-btns"><a class="btn" href="${enlace(sig)}" data-leer="${sig.day}">Leer ahora</a><button class="btn sec" type="button" data-marcar="${sig.day}">Ya lo leí</button></div>`;
+        <div class="fila-btns"><a class="btn" href="${enlace(sig)}" data-leer="${sig.day}">Leer ahora</a><a class="btn sec" href="${window.AudioBiblia ? window.AudioBiblia.enlace(libroDe(sig), sig.capitulo, '../') : '../audio.html'}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Escuchar</a><button class="btn sec" type="button" data-marcar="${sig.day}">Ya lo leí</button></div>`;
     } else {
       caja.innerHTML = '<p class="fiesta">🎉 ¡Completaste los 30 días con Jesús! Que lo aprendido siga dando fruto.</p>';
     }
