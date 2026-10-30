@@ -75,7 +75,7 @@
 (function () {
   const leer = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const T30 = ['El Nacimiento de Jesús','El Bautismo de Jesús','Las Tentaciones en el Desierto','Las Bienaventuranzas','La Sal de la Tierra','El Sermón del Monte','La Oración del Señor','La Pesca Milagrosa','La Fe del Centurión','Jesús Calma la Tormenta','La Hija de Jairo','La Alimentación de los 5,000','Jesús Camina sobre el Agua','La Confesión de Pedro','La Transfiguración','El Hijo Pródigo','El Buen Samaritano','Zaqueo el Recaudador','Jesús y los Niños','El Joven Rico','La Entrada Triunfal','La Última Cena','Jesús en Getsemaní','El Juicio de Jesús','La Crucifixión','La Resurrección','Jesús y Tomás','La Pesca Milagrosa (después de la Resurrección)','La Gran Comisión','La Ascensión'];
+  const T30 = ["El Verbo se hizo carne", "El nacimiento de Jesús", "Jesús en el templo a los 12 años", "El bautismo de Jesús", "Las tentaciones en el desierto", "Las bodas de Caná", "Jesús y Nicodemo", "La mujer samaritana", "El llamado de los primeros discípulos", "Las Bienaventuranzas y la sal de la tierra", "La oración del Señor", "No os afanéis", "La casa sobre la roca", "La fe del centurión", "Jesús calma la tormenta", "La hija de Jairo y la mujer que tocó su manto", "La alimentación de los cinco mil", "Jesús camina sobre el agua", "La confesión de Pedro", "La transfiguración", "El buen samaritano", "El hijo pródigo", "La resurrección de Lázaro", "Zaqueo", "La entrada triunfal", "La última cena y el lavamiento de pies", "Getsemaní", "La crucifixión", "La resurrección", "La Gran Comisión"];
   function pie(id, hechos, total, sigTxt, boton) {
     const el = document.querySelector('#' + id + ' .plan-pie');
     const pct = Math.round(hechos / total * 100);
@@ -86,7 +86,7 @@
     if (hechos > 0) document.getElementById(id).insertAdjacentHTML('afterbegin', '<span class="etq">En curso</span>');
   }
   // 30 días con Jesús
-  const p30 = leer('30diasConJesucristo'), h30 = new Set(((p30 && p30.diasCompletados) || []).map(Number));
+  const p30 = leer('30diasConJesucristo'), h30 = new Set(((p30 && p30.version === 2 && p30.diasCompletados) || []).map(Number));
   const sig30 = T30.findIndex((t, i) => !h30.has(i + 1));
   pie('p30', h30.size, 30, sig30 >= 0 ? `Día ${sig30 + 1}: ${T30[sig30]}` : '', sig30 < 0 ? '¡Completado! Ver el plan' : '');
   // Biblia en un año (año actual)
