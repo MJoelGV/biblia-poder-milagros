@@ -12,7 +12,7 @@ const CLAVES = [
   'bookmarks', 'comments', 'memorized', 'bible-notes',
   '30diasConJesucristo', 'bibleReadingProgress', 'bibliaEnUnAno', 'completedDays', 'iphcReadingProgress',
   'theme', 'verseFontSize', 'ultimaLectura',
-  'bookmarkColors', 'lecturaVersion', 'lecturaComparar', 'mostrarPericopas'
+  'bookmarkColors', 'lecturaVersion', 'lecturaComparar', 'mostrarPericopas', 'proverbiosPlan'
 ];
 const MAX_NUBE = 800000; // Firebase admite ~1 MB por persona; las notas con muchas fotos se quedan solo en el celular
 const META = 'cuenta-sync-meta';     // cuándo cambió cada dato en este celular

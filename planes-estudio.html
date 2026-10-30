@@ -1,365 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planes de Estudio - Biblia de Poder y Milagros</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="manifest" href="../manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #2c3e50;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            font-family: 'Great Vibes', cursive;
-            color: #2c3e50;
-            text-align: center;
-            font-size: 2.8em;
-            margin: 20px 0 10px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-        }
-        .welcome-text {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto 30px;
-            color: #555;
-            font-size: 1.1em;
-            line-height: 1.6;
-        }
-        .plans-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-        .plan-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-        }
-        .plan-image {
-            height: 160px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        .plan-image::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
-        }
-        .plan-content {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .plan-title {
-            font-size: 1.4em;
-            margin: 0 0 10px;
-            color: #2c3e50;
-            font-weight: 700;
-        }
-        .plan-description {
-            color: #666;
-            margin-bottom: 20px;
-            flex: 1;
-        }
-        .plan-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-            font-size: 0.9em;
-            color: #777;
-        }
-        .plan-duration {
-            display: flex;
-            align-items: center;
-        }
-        .plan-duration i {
-            margin-right: 5px;
-            color: #3498db;
-        }
-        .start-button {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: none;
-            text-align: center;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-        .start-button:hover {
-            background: linear-gradient(135deg, #45a049, #3d8b40);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-            text-decoration: none;
-            color: white;
-        }
-        .no-plans {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 40px 20px;
-            color: #666;
-            font-style: italic;
-        }
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            h1 {
-                font-size: 2.2em;
-                margin: 10px 0 20px;
-            }
-            .plans-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-    <style>
-        /* Estilos para el menú lateral */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100%;
-            background: #2c3e50;
-            color: white;
-            transition: left 0.3s ease;
-            z-index: 1000;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-            overflow-y: auto;
-        }
-        .side-menu.active {
-            left: 0;
-        }
-        .menu-header {
-            padding: 20px;
-            display: flex;
-            justify-content: flex-end;
-            background: #1a252f;
-        }
-        .close-menu {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .side-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .side-menu li {
-            padding: 0;
-        }
-        .side-menu a {
-            display: block;
-            padding: 15px 25px;
-            color: #ecf0f1;
-            text-decoration: none;
-            transition: background 0.3s;
-            border-bottom: 1px solid #34495e;
-        }
-        .side-menu a:hover, .side-menu li.active a {
-            background: #34495e;
-            color: #3498db;
-        }
-        .side-menu i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1001;
-            font-size: 18px;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }
-        .overlay.active {
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<title>Planes de lectura · Biblia de Poder y Milagros</title>
+<style>
+.ph h1 { margin: 0 0 6px; font-size: 28px; }
+.ph p { margin: 0; color: var(--text-2); font-size: 15px; line-height: 1.5; }
+.plan { display: flex; flex-direction: column; border-radius: 22px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; color: var(--text); }
+.plan-top { position: relative; padding: 18px 18px 16px; display: flex; gap: 14px; align-items: center; }
+.plan-ico { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; flex-shrink: 0; color: #fff; }
+.plan-top h2 { margin: 0 0 2px; font-size: 18px; line-height: 1.25; }
+.plan-top small { color: var(--text-2); font-size: 13px; font-weight: 600; }
+.plan-desc { margin: 0; padding: 0 18px; color: var(--text-2); font-size: 15px; line-height: 1.5; }
+.plan-pie { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+.mini-barra { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+.mini-barra i { display: block; height: 100%; border-radius: 4px; background: var(--accent-fill); width: 0; transition: width .8s cubic-bezier(.2,.8,.2,1); }
+.avance { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-2); font-weight: 600; }
+.siguiente { font-size: 14px; color: var(--text); background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; line-height: 1.4; }
+.siguiente b { color: var(--accent); display: block; font-size: 12px; }
+.plan.empezado { border-color: var(--accent); }
+.etq { position: absolute; top: 14px; right: 14px; background: var(--accent-fill); color: var(--on-accent); font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .mini-barra i { transition: none; } }
+</style>
 </head>
 <body>
-    <!-- Menú lateral -->
-    <div id="side-menu" class="side-menu">
-        <div class="menu-header">
-            <button class="close-menu" onclick="toggleMenu()">&times;</button>
-        </div>
-        <ul>
-            <li><a href="index.html"><i class="fas fa-home"></i> Página principal</a></li>
-            <li><a href="lectura.html"><i class="fas fa-book"></i> Leer Biblia</a></li>
-            <li><a href="pericopas-standalone.html"><i class="fas fa-list"></i> Perícopas Bíblicas</a></li>
-            <li><a href="audio.html"><i class="fas fa-headphones"></i> Escuchar</a></li>
-            <li><a href="memorizados.html"><i class="fas fa-graduation-cap"></i> Memorizados</a></li>
-            <li><a href="historias.html"><i class="fas fa-book-open"></i> Historias</a></li>
-            <li><a href="diccionario.html"><i class="fas fa-books"></i> Diccionario</a></li>
-            <li><a href="bookmarks.html"><i class="fas fa-bookmark"></i> Marcados</a></li>
-            <li><a href="comments.html"><i class="fas fa-comment-alt"></i> Comentarios</a></li>
-            <li class="active"><a href="planes/30-dias-con-jesus.html"><i class="fas fa-calendar-check"></i> 30 Días con Jesús</a></li>
-            <li><a href="topics.html"><i class="fas fa-tags"></i> Temas</a></li>
-        </ul>
-    </div>
-    
-    <!-- Botón para abrir el menú -->
-    <button class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </button>
-    
-    <!-- Overlay para cerrar el menú -->
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<main class="page">
+  <header class="ph">
+    <h1>Planes de lectura</h1>
+    <p>Lee la Biblia con un rumbo. Cada plan guarda tu avance, y con tu cuenta lo ves en cualquier dispositivo.</p>
+  </header>
 
-    <div class="container">
-        <h1>Planes de Estudio Bíblico</h1>
-        
-        <p class="welcome-text">
-            Explora nuestra colección de planes de estudio diseñados para ayudarte a profundizar en las Escrituras. 
-            Cada plan incluye lecturas diarias, reflexiones y la oportunidad de marcar tu progreso.
-        </p>
-        
-        <div class="plans-container">
-            <!-- Plan: 30 Días con Jesús -->
-            <div class="plan-card">
-                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                </div>
-                <div class="plan-content">
-                    <h3 class="plan-title">30 Días con Jesús</h3>
-                    <p class="plan-description">
-                        Un viaje de un mes a través de los evangelios para conocer más a Jesús, sus enseñanzas, 
-                        milagros y el impacto que tuvo en la vida de quienes lo conocieron.
-                    </p>
-                    <div class="plan-meta">
-                        <span class="plan-duration">
-                            <i class="far fa-calendar-alt"></i> 30 días
-                        </span>
-                        <a href="planes/30-dias-con-jesus.html" class="start-button">Comenzar</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Plan: Biblia en un Año -->
-            <div class="plan-card">
-                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                </div>
-                <div class="plan-content">
-                    <h3 class="plan-title">Biblia en un Año</h3>
-                    <p class="plan-description">
-                        Un plan de lectura cronológico que te llevará a través de toda la Biblia en un año, 
-                        combinando pasajes del Antiguo y Nuevo Testamento.
-                    </p>
-                    <div class="plan-meta">
-                        <span class="plan-duration">
-                            <i class="far fa-calendar-alt"></i> 365 días
-                        </span>
-                        <a href="planes/iphc-1-ano.html" class="start-button">Comenzar</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Plan: Proverbios - Sabiduría Diaria (Próximamente) -->
-            <div class="plan-card">
-                <div class="plan-image" style="background-image: url('https://images.unsplash.com/photo-1518655048521-f130dfeedf1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                </div>
-                <div class="plan-content">
-                    <h3 class="plan-title">Proverbios - Sabiduría Diaria</h3>
-                    <p class="plan-description">
-                        Un mes de sabiduría práctica del libro de Proverbios para guiar tus decisiones diarias 
-                        y tu relación con Dios y los demás.
-                    </p>
-                    <div class="plan-meta">
-                        <span class="plan-duration">
-                            <i class="far fa-calendar-alt"></i> 31 días
-                        </span>
-                        <button class="start-button" disabled>Próximamente</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <a class="plan" href="planes/30-dias-con-jesus.html" id="p30">
+    <div class="plan-top"><span class="plan-ico" style="background:#C2185B"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></span><div><h2>30 días con Jesús</h2><small>30 días · lecturas cortas</small></div></div>
+    <p class="plan-desc">Un recorrido por los evangelios para conocer la vida, las enseñanzas y los milagros de Jesús.</p>
+    <div class="plan-pie"></div>
+  </a>
 
-    <script>
-        // Función para alternar el menú
-        function toggleMenu() {
-            const sideMenu = document.getElementById('side-menu');
-            const overlay = document.getElementById('overlay');
-            
-            sideMenu.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Prevenir el desplazamiento del cuerpo cuando el menú está abierto
-            document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
-        }
-        
-        // Cerrar el menú al hacer clic fuera de él
-        document.addEventListener('click', function(event) {
-            const sideMenu = document.getElementById('side-menu');
-            const menuButton = document.querySelector('.menu-toggle');
-            
-            if (!sideMenu.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
-                sideMenu.classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
+  <a class="plan" href="planes/iphc-1-ano.html" id="p365">
+    <div class="plan-top"><span class="plan-ico" style="background:#2E7D32"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg></span><div><h2>La Biblia en un año</h2><small>365 días · plan IPHC</small></div></div>
+    <p class="plan-desc">Toda la Biblia en un año, combinando pasajes del Antiguo y del Nuevo Testamento cada día.</p>
+    <div class="plan-pie"></div>
+  </a>
 
-        // Cerrar el menú al hacer clic en un enlace
-        document.querySelectorAll('.side-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                toggleMenu();
-            });
-        });
-    </script>
+  <a class="plan" href="planes/proverbios.html" id="ppro">
+    <div class="plan-top"><span class="plan-ico" style="background:#B7791F"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span><div><h2>Proverbios: sabiduría diaria</h2><small>31 días · un capítulo al día</small></div></div>
+    <p class="plan-desc">Un capítulo de Proverbios por cada día del mes: el día 1, Proverbios 1; el día 2, Proverbios 2… Sabiduría práctica para tus decisiones.</p>
+    <div class="plan-pie"></div>
+  </a>
+</main>
+
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
+
+<script>
+(function () {
+  const leer = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const T30 = ['El Nacimiento de Jesús','El Bautismo de Jesús','Las Tentaciones en el Desierto','Las Bienaventuranzas','La Sal de la Tierra','El Sermón del Monte','La Oración del Señor','La Pesca Milagrosa','La Fe del Centurión','Jesús Calma la Tormenta','La Hija de Jairo','La Alimentación de los 5,000','Jesús Camina sobre el Agua','La Confesión de Pedro','La Transfiguración','El Hijo Pródigo','El Buen Samaritano','Zaqueo el Recaudador','Jesús y los Niños','El Joven Rico','La Entrada Triunfal','La Última Cena','Jesús en Getsemaní','El Juicio de Jesús','La Crucifixión','La Resurrección','Jesús y Tomás','La Pesca Milagrosa (después de la Resurrección)','La Gran Comisión','La Ascensión'];
+  function pie(id, hechos, total, sigTxt, boton) {
+    const el = document.querySelector('#' + id + ' .plan-pie');
+    const pct = Math.round(hechos / total * 100);
+    if (hechos > 0) document.getElementById(id).classList.add('empezado');
+    el.innerHTML = (hechos > 0 ? `<div class="avance"><span>${hechos} de ${total} días</span><span>${pct}%</span></div><div class="mini-barra"><i data-w="${pct}"></i></div>` : '')
+      + (sigTxt ? `<div class="siguiente"><b>${hechos > 0 ? 'Sigue con' : 'Empieza con'}</b>${esc(sigTxt)}</div>` : '')
+      + `<span class="btn">${boton || (hechos > 0 ? 'Continuar' : 'Comenzar')}${'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>'}</span>`;
+    if (hechos > 0) document.getElementById(id).insertAdjacentHTML('afterbegin', '<span class="etq">En curso</span>');
+  }
+  // 30 días con Jesús
+  const p30 = leer('30diasConJesucristo'), h30 = new Set(((p30 && p30.diasCompletados) || []).map(Number));
+  const sig30 = T30.findIndex((t, i) => !h30.has(i + 1));
+  pie('p30', h30.size, 30, sig30 >= 0 ? `Día ${sig30 + 1}: ${T30[sig30]}` : '', sig30 < 0 ? '¡Completado! Ver el plan' : '');
+  // Biblia en un año (año actual)
+  const anio = new Date().getFullYear(), cd = leer('completedDays') || {};
+  const h365 = Object.keys(cd).filter(k => k.startsWith(anio + '-') && cd[k]).length;
+  const dias = (new Date(anio, 1, 29).getDate() === 29) ? 366 : 365;
+  const hoy = new Date();
+  pie('p365', h365, dias, `Lectura de hoy, ${hoy.getDate()} de ${hoy.toLocaleDateString('es', { month: 'long' })}`);
+  // Proverbios
+  const pp = leer('proverbiosPlan'), hp = new Set(((pp && pp.hechos) || []).map(Number));
+  pie('ppro', hp.size, 31, `Proverbios ${hoy.getDate()} (el de hoy)`);
+  requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('.mini-barra i').forEach(i => { i.style.width = i.dataset.w + '%'; }), 120));
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+})();
+</script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>
