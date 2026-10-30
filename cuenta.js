@@ -11,8 +11,10 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from 'h
 const CLAVES = [
   'bookmarks', 'comments', 'memorized', 'bible-notes',
   '30diasConJesucristo', 'bibleReadingProgress', 'bibliaEnUnAno', 'completedDays', 'iphcReadingProgress',
-  'theme', 'verseFontSize', 'ultimaLectura'
+  'theme', 'verseFontSize', 'ultimaLectura',
+  'bookmarkColors', 'lecturaVersion', 'lecturaComparar', 'mostrarPericopas'
 ];
+const MAX_NUBE = 800000; // Firebase admite ~1 MB por persona; las notas con muchas fotos se quedan solo en el celular
 const META = 'cuenta-sync-meta';     // cuándo cambió cada dato en este celular
 const UID_LOCAL = 'cuenta-uid';      // de quién son los datos de este celular
 
@@ -50,7 +52,12 @@ function marcarCambio(k) {
 async function subirPendientes() {
   if (!usuario || !pendientes.size) return;
   const m = leerMeta(), datos = {};
-  for (const k of pendientes) datos[k] = { v: leer(k), t: m[k] || Date.now() };
+  for (const k of pendientes) {
+    const v = leer(k);
+    if (v && v.length > MAX_NUBE) { console.warn('Demasiado grande para la nube, se queda en este celular:', k); continue; }
+    datos[k] = { v, t: m[k] || Date.now() };
+  }
+  if (!Object.keys(datos).length) { pendientes = new Set(); return; }
   pendientes = new Set();
   try {
     await setDoc(doc(db, 'users', usuario.uid), { datos, actualizado: serverTimestamp() }, { merge: true });
@@ -93,14 +100,14 @@ async function sincronizar(u) {
     if (primeraVez) {
       const unido = combinar(local, n ? n.v : null);
       if (unido !== local) { escribir(k, unido); cambio = true; }
-      if (unido !== null && (!n || unido !== n.v)) subir[k] = { v: unido, t: Date.now() };
+      if (unido !== null && unido.length <= MAX_NUBE && (!n || unido !== n.v)) subir[k] = { v: unido, t: Date.now() };
       meta[k] = (subir[k] && subir[k].t) || (n && n.t) || meta[k] || 0;
     } else {
       const tl = meta[k] || 0, tn = (n && n.t) || 0;
       if (tn > tl) {
         if (n.v !== local) { escribir(k, n.v); cambio = true; }
         meta[k] = tn;
-      } else if (tl > tn) {
+      } else if (tl > tn && !(local && local.length > MAX_NUBE)) {
         subir[k] = { v: local, t: tl };
       }
     }
