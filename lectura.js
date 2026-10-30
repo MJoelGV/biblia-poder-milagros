@@ -110,7 +110,7 @@
     const cerrar = () => { if (abierto) { html += '</p>'; abierto = false; } };
     for (const x of lista) {
       const p = peris.find(pp => pp.desde === x.n);
-      if (p) { cerrar(); html += `<h2 class="peri">${esc(p.titulo)}</h2>`; }
+      if (p) { cerrar(); html += `<h2 class="peri"><button type="button" data-peri="${x.n}" aria-label="${esc(p.titulo)}. Ver todas las perícopas de ${esc(b)}">${esc(p.titulo)}</button></h2>`; }
       if (comparando) cerrar();
       abrir();
       const k = `${b}-${c}-${x.n}`;
@@ -376,17 +376,33 @@
     const y = window.scrollY; mostrar(libro, capitulo, 0, { mantenerScroll: true }); window.scrollTo(0, y);
     abrir('hoja-aa');
   });
-  $('aa-ver-peri').addEventListener('click', () => {
+  function abrirPericopas(cTocado, vTocado) {
     let html = '';
     const total = numCaps(libro);
     for (let c = 1; c <= total; c++) {
-      pericopasDe(libro, c).forEach(p => { html += `<button class="peri-item" type="button" data-c="${c}" data-v="${p.desde}"><small>${esc(libro)} ${c}:${p.desde}</small>${esc(p.titulo)}</button>`; });
+      const lista = pericopasDe(libro, c);
+      if (!lista.length) continue;
+      html += `<div class="peri-cap">Capítulo ${c}</div>`;
+      lista.forEach(p => {
+        const tocada = c === cTocado && p.desde === vTocado;
+        html += `<button class="peri-item${c === capitulo ? ' actual' : ''}${tocada ? ' tocada' : ''}" type="button" data-c="${c}" data-v="${p.desde}"${tocada ? ' aria-current="true"' : ''}><small>${esc(libro)} ${c}:${p.desde}</small>${esc(p.titulo)}</button>`;
+      });
     }
     $('ppe-t').textContent = `Perícopas de ${libro}`;
     $('ppe-lista').innerHTML = html || '<p class="res-n">Este libro no tiene perícopas registradas.</p>';
     cerrarTodo();
     abrir('p-peri');
-  });
+    // Llevar la lista hasta la perícopa tocada (o al capítulo que se está leyendo)
+    setTimeout(() => {
+      const obj = $('ppe-lista').querySelector('.peri-item.tocada') || $('ppe-lista').querySelector('.peri-item.actual');
+      if (obj) { const caja = $('ppe-lista'); caja.scrollTop = obj.offsetTop - caja.offsetTop - 60; }
+    }, 60);
+  }
+  $('aa-ver-peri').addEventListener('click', () => abrirPericopas(capitulo, 0));
+  $('texto').addEventListener('click', e => {
+    const b = e.target.closest('[data-peri]');
+    if (b) { e.stopPropagation(); abrirPericopas(capitulo, parseInt(b.dataset.peri, 10)); }
+  }, true);
   $('ppe-lista').addEventListener('click', e => {
     const b = e.target.closest('[data-c]'); if (!b) return;
     mostrar(libro, parseInt(b.dataset.c, 10), parseInt(b.dataset.v, 10));
@@ -430,11 +446,30 @@
 
   // ---------- Buscar ----------
   const normal = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let modoBusqueda = leer('busquedaModo', 'exacta') === 'contiene' ? 'contiene' : 'exacta';
+  function pintarModo() {
+    document.querySelectorAll('[data-modo]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.modo === modoBusqueda)));
+    $('pb-ayuda').textContent = modoBusqueda === 'exacta'
+      ? 'Busca la palabra completa: «amor» no mostrará «amorreo».'
+      : 'Busca esas letras dentro de cualquier palabra: «amor» también mostrará «amorreo» y «amoroso».';
+  }
+  document.querySelectorAll('[data-modo]').forEach(b => b.addEventListener('click', () => {
+    modoBusqueda = b.dataset.modo; guardar('busquedaModo', modoBusqueda); pintarModo();
+    if ($('pb-q').value.trim().length >= 2) buscar($('pb-q').value);
+  }));
+  pintarModo();
+  const escRe = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   function buscar(q) {
     q = q.trim();
     const res = $('pb-res');
     if (q.length < 2) { res.innerHTML = ''; return; }
     const nq = normal(q);
+    // Palabra exacta: lo buscado no puede estar pegado a otras letras
+    const re = modoBusqueda === 'exacta' ? new RegExp(`(^|[^a-z0-9])(${escRe(nq).replace(/\s+/g, '\\s+')})(?=[^a-z0-9]|$)`) : null;
+    const posicion = t => {
+      if (!re) { const i = t.indexOf(nq); return i < 0 ? null : [i, nq.length]; }
+      const m = re.exec(t); return m ? [m.index + m[1].length, m[2].length] : null;
+    };
     const hallados = [];
     let total = 0;
     for (const nb of doc.getElementsByTagName('b')) {
@@ -442,7 +477,7 @@
       for (const nc of nb.getElementsByTagName('c')) {
         for (const nv of nc.getElementsByTagName('v')) {
           const t = textoV(nv);
-          if (normal(t).includes(nq)) {
+          if (posicion(normal(t))) {
             total++;
             if (hallados.length < 300) hallados.push({ b, c: nc.getAttribute('n'), v: nv.getAttribute('n'), t });
           }
@@ -450,9 +485,10 @@
       }
     }
     const marcar = t => {
-      const nt = normal(t), i = nt.indexOf(nq);
-      if (i < 0) return esc(t);
-      return esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length));
+      const pos = posicion(normal(t));
+      if (!pos) return esc(t);
+      const [i, n] = pos;
+      return esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + n)) + '</mark>' + esc(t.slice(i + n));
     };
     res.innerHTML = `<p class="res-n">${total === 0 ? 'No se encontraron versículos.' : total === 1 ? '1 versículo encontrado' : `${total} versículos encontrados` + (total > 300 ? ' (se muestran los primeros 300)' : '')}</p>`
       + hallados.map(h => `<button class="res" type="button" data-b="${esc(h.b)}" data-c="${h.c}" data-v="${h.v}"><b>${esc(h.b)} ${h.c}:${h.v}</b><span>${marcar(h.t)}</span></button>`).join('');

@@ -23,6 +23,10 @@ body.lectura { background: var(--surface); }
 .texto p { margin: 0 0 14px; }
 .peri { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); margin: 22px 0 6px; line-height: 1.4; }
 .peri:first-of-type { margin-top: 4px; }
+.peri button { all: unset; cursor: pointer; display: inline; border-radius: 4px; }
+.peri button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.peri button::after { content: ''; display: inline-block; width: 7px; height: 7px; margin-left: 8px; vertical-align: 2px;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); opacity: .6; }
 .v { cursor: pointer; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color .3s; -webkit-tap-highlight-color: transparent; }
 .vn { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: .58em; font-weight: 700; color: var(--accent); vertical-align: super; margin: 0 3px 0 2px; line-height: 0; }
 .vi { display: inline-grid; place-items: center; width: 1.2em; height: 1.2em; vertical-align: -.15em; color: var(--accent); margin-right: 2px; border: 0; background: none; padding: 0; cursor: pointer; }
@@ -114,6 +118,9 @@ body.lectura { background: var(--surface); }
 .res mark { background: var(--hl-amarillo); color: inherit; border-radius: 3px; }
 .peri-item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border); background: none; color: var(--text); font: inherit; font-size: 15px; padding: 12px 2px; cursor: pointer; }
 .peri-item small { color: var(--text-2); display: block; font-size: 13px; }
+.peri-item.actual { color: var(--accent); font-weight: 700; }
+.peri-item.tocada { background: var(--accent-soft); border-radius: 12px; padding-left: 10px; padding-right: 10px; }
+.peri-cap { position: sticky; top: -12px; background: var(--surface); padding: 14px 2px 6px; font-size: 13px; font-weight: 700; color: var(--text-2); z-index: 1; }
 
 /* Notas */
 .n-tit { width: 100%; height: 48px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 17px; font-weight: 700; padding: 0 14px; }
