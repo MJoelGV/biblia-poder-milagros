@@ -17,11 +17,12 @@ body.lectura { background: var(--surface); }
 
 /* Texto */
 .lector { max-width: 680px; margin: 0 auto; padding: calc(84px + env(safe-area-inset-top, 0px)) 24px calc(170px + env(safe-area-inset-bottom, 0px)); }
-.cap-t { font-family: 'Literata', Georgia, serif; font-weight: 600; font-size: 30px; line-height: 1.2; margin: 6px 0 18px; }
+.cap-t { font-family: 'Literata', Georgia, serif; font-weight: 600; font-size: calc(var(--vfs) * 1.5); line-height: 1.2; margin: 6px 0 18px; }
 .cap-t small { display: block; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
 .texto { font-family: 'Literata', Georgia, serif; font-size: var(--vfs); line-height: 1.75; color: var(--text); }
 .texto p { margin: 0 0 14px; }
-.peri { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); margin: 22px 0 6px; line-height: 1.4; }
+/* El título de la perícopa crece junto con el tamaño de letra elegido (un poco más grande que el texto) */
+.peri { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: calc(var(--vfs) * 1.05); font-weight: 700; color: var(--accent); margin: 1.1em 0 .3em; line-height: 1.35; }
 .peri:first-of-type { margin-top: 4px; }
 .peri button { all: unset; cursor: pointer; display: inline; border-radius: 4px; }
 .peri button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
