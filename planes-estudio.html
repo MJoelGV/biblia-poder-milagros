@@ -50,6 +50,12 @@
     <div class="plan-pie"></div>
   </a>
 
+  <a class="plan" href="planes/parabolas.html" id="ppar">
+    <div class="plan-top"><span class="plan-ico" style="background:#5E35B1"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22V12"/><path d="M12 12C12 7 8 4 4 4c0 5 3 8 8 8z"/><path d="M12 15c0-4 3-7 8-7 0 4-3 7-8 7z"/></svg></span><div><h2>Las parábolas de Jesús</h2><small>33 días · una parábola al día</small></div></div>
+    <p class="plan-desc">Del sembrador al buen pastor: las historias con que Jesús enseñó sobre el Reino de Dios, una por día.</p>
+    <div class="plan-pie"></div>
+  </a>
+
   <a class="plan" href="planes/iphc-1-ano.html" id="p365">
     <div class="plan-top"><span class="plan-ico" style="background:#2E7D32"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg></span><div><h2>La Biblia en un año</h2><small>365 días · plan IPHC</small></div></div>
     <p class="plan-desc">Toda la Biblia en un año, combinando pasajes del Antiguo y del Nuevo Testamento cada día.</p>
@@ -89,6 +95,11 @@
   const p30 = leer('30diasConJesucristo'), h30 = new Set(((p30 && p30.version === 2 && p30.diasCompletados) || []).map(Number));
   const sig30 = T30.findIndex((t, i) => !h30.has(i + 1));
   pie('p30', h30.size, 30, sig30 >= 0 ? `Día ${sig30 + 1}: ${T30[sig30]}` : '', sig30 < 0 ? '¡Completado! Ver el plan' : '');
+  // Parábolas
+  const TPAR = ["El sembrador", "El trigo y la cizaña", "La semilla de mostaza y la levadura", "La semilla que crece sola", "El tesoro escondido y la perla de gran precio", "La red", "La casa sobre la roca", "Los dos deudores", "El buen samaritano", "El amigo a medianoche", "El rico insensato", "Los siervos que esperan a su señor", "La higuera estéril", "La gran cena", "Calcular el costo", "La oveja perdida", "La moneda perdida", "El hijo pródigo", "El mayordomo infiel", "El rico y Lázaro", "Los siervos inútiles", "La viuda y el juez injusto", "El fariseo y el publicano", "El siervo que no quiso perdonar", "Los obreros de la viña", "Las minas", "Los dos hijos", "Los labradores malvados", "La fiesta de bodas", "Las diez vírgenes", "Los talentos", "Las ovejas y los cabritos", "El buen pastor"];
+  const ppar = leer('parabolasPlan'), hpar = new Set(((ppar && ppar.diasCompletados) || []).map(Number));
+  const sigPar = TPAR.findIndex((t, i) => !hpar.has(i + 1));
+  pie('ppar', hpar.size, TPAR.length, sigPar >= 0 ? `Día ${sigPar + 1}: ${TPAR[sigPar]}` : '', sigPar < 0 ? '¡Completado! Ver el plan' : '');
   // Biblia en un año (año actual)
   const anio = new Date().getFullYear(), cd = leer('completedDays') || {};
   const h365 = Object.keys(cd).filter(k => k.startsWith(anio + '-') && cd[k]).length;
