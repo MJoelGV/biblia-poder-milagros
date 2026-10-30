@@ -137,6 +137,8 @@
     url.searchParams.delete('verse'); url.searchParams.delete('q'); url.searchParams.delete('version');
     history.replaceState(null, '', url);
 
+    // Si se está escuchando, el audio sigue al capítulo que se abrió
+    if (escuchando && (audioPos.b !== b || audioPos.c !== c)) cargarAudio(b, c, true);
     if (v) requestAnimationFrame(() => irAVersiculo(v));
     else if (!opciones.mantenerScroll) window.scrollTo({ top: 0, behavior: 'auto' });
     $('barra').classList.remove('oculta');
@@ -637,6 +639,60 @@
       pdf.save(`${titulo.replace(/[^\wáéíóúñü -]/gi, '').trim() || 'nota'}.pdf`);
     } catch (e) { console.error(e); avisar('No se pudo crear el PDF'); }
   });
+
+  // ---------- Escuchar el capítulo ----------
+  const audioEl = $('mini-audio');
+  let escuchando = false, audioPos = {};
+  const ICO_PLAY = svg('<path d="M7 4v16l13-8z" fill="currentColor"/>', 20);
+  const ICO_PAUSA = svg('<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>', 20);
+  function cargarAudio(b, c, reproducir) {
+    const src = window.AudioBiblia && window.AudioBiblia.archivo(b, c);
+    if (!src) { avisar('Este capítulo no tiene audio'); return; }
+    audioPos = { b, c };
+    audioEl.src = src;
+    $('mini-tit').textContent = `${b} ${c}`;
+    $('mini-mas').href = window.AudioBiblia.enlace(b, c).replace('&play=1', '');
+    guardar('audio-last-book', src.split('/').pop().split('_')[0]);
+    guardar('audio-last-file', src.split('/').pop());
+    guardar('audio-last-position', '0');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: `${b} ${c}`, artist: 'Biblia de Poder y Milagros', album: 'Biblia en audio',
+        artwork: [{ src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }, { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }] });
+    }
+    if (reproducir) audioEl.play().catch(() => avisar('No se pudo reproducir el audio'));
+  }
+  function empezarAEscuchar() {
+    escuchando = true;
+    $('mini').hidden = false; $('btn-escuchar').hidden = true;
+    document.body.classList.add('con-mini');
+    cargarAudio(libro, capitulo, true);
+  }
+  function dejarDeEscuchar() {
+    escuchando = false; audioEl.pause(); audioEl.removeAttribute('src'); audioEl.load();
+    $('mini').hidden = true; $('btn-escuchar').hidden = false;
+    document.body.classList.remove('con-mini');
+  }
+  $('btn-escuchar').addEventListener('click', empezarAEscuchar);
+  $('mini-cerrar').addEventListener('click', dejarDeEscuchar);
+  $('mini-play').addEventListener('click', () => { audioEl.paused ? audioEl.play().catch(() => {}) : audioEl.pause(); });
+  const pintarPlay = () => { const p = audioEl.paused; $('mini-play').innerHTML = p ? ICO_PLAY : ICO_PAUSA; $('mini-play').setAttribute('aria-label', p ? 'Reproducir' : 'Pausar'); };
+  audioEl.addEventListener('play', pintarPlay); audioEl.addEventListener('pause', pintarPlay);
+  pintarPlay();
+  let ultimoAudio = 0;
+  audioEl.addEventListener('timeupdate', () => {
+    if (audioEl.duration) $('mini-prog').style.width = (audioEl.currentTime / audioEl.duration * 100) + '%';
+    if (Date.now() - ultimoAudio > 4000) { ultimoAudio = Date.now(); guardar('audio-last-position', String(audioEl.currentTime)); }
+  });
+  // Al terminar el capítulo, la página avanza y sigue sonando el siguiente
+  audioEl.addEventListener('ended', () => { const n = vecino(1); if (n) mostrar(n.b, n.c); else dejarDeEscuchar(); });
+  audioEl.addEventListener('error', () => { if (escuchando && audioEl.getAttribute('src')) avisar('No se pudo cargar el audio. Revisa tu conexión.'); });
+  if ('mediaSession' in navigator) {
+    const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) {} };
+    h('play', () => audioEl.play()); h('pause', () => audioEl.pause());
+    h('previoustrack', () => { if (escuchando) ir(-1); }); h('nexttrack', () => { if (escuchando) ir(1); });
+    h('seekbackward', () => { audioEl.currentTime = Math.max(0, audioEl.currentTime - 15); });
+    h('seekforward', () => { audioEl.currentTime = Math.min(audioEl.duration || 0, audioEl.currentTime + 15); });
+  }
 
   // ---------- Inicio ----------
   aplicarLetra();

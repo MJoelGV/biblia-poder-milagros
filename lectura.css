@@ -153,3 +153,23 @@ body.lectura { background: var(--surface); }
   .hoja, .velo, .pantalla, .lbar, .accion, .aviso { transition: none !important; }
   .v.destello { animation: none; background-color: var(--accent-soft); }
 }
+
+/* Escuchar el capítulo desde la lectura */
+.escuchar-pill { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  height: 44px; padding: 0 18px; border-radius: 22px; border: 0; background: var(--accent-fill); color: var(--on-accent); font: inherit; font-size: 15px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 18px rgba(46,125,50,.3); cursor: pointer; transition: opacity .25s, transform .25s; white-space: nowrap; }
+.escuchar-pill[hidden] { display: none; }
+.lectura.leyendo .escuchar-pill { opacity: 0; transform: translate(-50%, 24px); pointer-events: none; }
+.mini { position: fixed; z-index: 35; left: 12px; right: 12px; margin: 0 auto; max-width: 640px; bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 8px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0,0,0,.16); transition: bottom .28s ease; }
+.mini[hidden] { display: none; }
+.lectura.leyendo .mini { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+.mini-b { width: 44px; height: 44px; border-radius: 22px; border: 0; background: transparent; color: var(--text); display: grid; place-items: center; cursor: pointer; flex-shrink: 0; padding: 0; }
+#mini-play { background: var(--accent-fill); color: var(--on-accent); }
+.mini-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 4px; }
+.mini-t b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-barra { height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.mini-barra i { display: block; height: 100%; width: 0; background: var(--accent-fill); }
+.con-mini .fab { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
+.lectura.leyendo.con-mini .fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }

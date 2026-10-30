@@ -278,7 +278,11 @@
     const pb = params.get('book');
     if (pb) {
       const i = LIBROS.findIndex(b => normal(b) === normal(pb));
-      if (i >= 0) { cargar(i, parseInt(params.get('chapter') || '1', 10) || 1); return; }
+      if (i >= 0) {
+        cargar(i, parseInt(params.get('chapter') || '1', 10) || 1);
+        if (params.get('play') === '1') audio.play().catch(() => { $('ahora-sub').textContent = 'Toca ▶ para empezar a escuchar'; $('b-play').focus(); });
+        return;
+      }
     }
     const lb = leer('audio-last-book', ''), lf = leer('audio-last-file', '');
     const i = CODIGOS.indexOf(lb), mm = lf.match(/_(\d+)\.mp3$/);
