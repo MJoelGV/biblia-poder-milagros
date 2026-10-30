@@ -86,7 +86,7 @@
     cerrarTodo();
     const vi = verInfo(version);
     $('txt-pasaje').textContent = `${b} ${c}`;
-    $('txt-version').textContent = vi.corto;
+    $('txt-version').textContent = comparar && comparar !== version ? `${vi.corto} + ${verInfo(comparar).corto}` : vi.corto;
     $('cap-ver').textContent = vi.nombre;
     $('cap-nombre').textContent = `${b} ${c}`;
     document.title = `${b} ${c} · Biblia de Poder y Milagros`;
@@ -342,7 +342,20 @@
   // ---------- Versión ----------
   $('btn-version').addEventListener('click', () => {
     $('hver-lista').innerHTML = VERSIONES.map(x => `<button type="button" data-ver="${x.id}"><span>${esc(x.nombre)} <small style="color:var(--text-2)">${x.corto}</small></span>${x.id === version ? `<span style="color:var(--accent)">${svg(ICO_OK, 20)}</span>` : ''}</button>`).join('');
+    pintarChipsComparar();
     abrir('hoja-ver');
+  });
+  function pintarChipsComparar() {
+    const op = [{ id: '', corto: 'Ninguna' }].concat(VERSIONES.filter(x => x.id !== version));
+    $('hver-cmp').innerHTML = op.map(x => `<button class="chip-cmp" type="button" role="radio" data-cmp="${x.id}" aria-checked="${(comparar || '') === x.id && (x.id === '' || comparar !== version)}">${x.corto}</button>`).join('');
+  }
+  $('hver-cmp').addEventListener('click', e => {
+    const b = e.target.closest('[data-cmp]'); if (!b) return;
+    comparar = b.dataset.cmp; guardar('lecturaComparar', comparar);
+    pintarChipsComparar();
+    cerrarTodo();
+    if (comparar) avisar('Comparando con ' + verInfo(comparar).nombre);
+    mostrar(libro, capitulo, 0, { mantenerScroll: true });
   });
   $('hver-lista').addEventListener('click', async e => {
     const b = e.target.closest('[data-ver]'); if (!b) return;
