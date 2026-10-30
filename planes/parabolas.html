@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/pymicon.png">
+<link rel="apple-touch-icon" href="../icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../tema.js"></script>
+<link rel="stylesheet" href="../app.css">
+<title>Las parábolas de Jesús · Biblia de Poder y Milagros</title>
+<style>
+.p30-top { display: flex; align-items: center; gap: 8px; }
+.p30-top a { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: var(--text); background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; }
+.p30-top h1 { margin: 0; font-size: 18px; font-weight: 700; }
+.hero { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; }
+.hero .titulo { font-family: 'Great Vibes', cursive; font-size: 44px; line-height: 1; color: var(--text); margin: 0; }
+.hero .sub { margin: 0; color: var(--text-2); font-size: 15px; line-height: 1.5; }
+.barra { height: 10px; border-radius: 5px; background: var(--border); overflow: hidden; }
+.barra i { display: block; height: 100%; width: 0; border-radius: 5px; background: var(--accent-fill); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+.cuenta { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--text-2); }
+.cuenta b { font-size: 22px; color: var(--text); }
+.siguiente { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 18px; background: var(--accent-soft); }
+.siguiente small { font-size: 13px; font-weight: 700; color: var(--accent); }
+.siguiente b { font-size: 18px; line-height: 1.3; }
+.siguiente .ref { font-size: 14px; color: var(--text-2); }
+.fila-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.fila-btns .btn { flex: 1; min-width: 140px; }
+.btn.sec { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.dias { display: flex; flex-direction: column; gap: 10px; }
+.dia { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 12px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); transition: opacity .3s; }
+.dia.actual { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.check { width: 44px; height: 44px; border-radius: 22px; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface); color: transparent; display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .2s, border-color .2s, color .2s; }
+.check[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); animation: pop .35s ease; }
+@keyframes pop { 50% { transform: scale(1.18); } }
+.dia a { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: var(--text); }
+.dia .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dia .n { font-size: 12px; font-weight: 700; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+.dia .chip { background: var(--accent-fill); color: var(--on-accent); font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+.dia .t { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.dia .r { font-size: 14px; color: var(--accent); font-weight: 600; }
+.dia.hecho .t { color: var(--text-2); }
+.dia.brillo { animation: brillo 2.2s ease-out; }
+@keyframes brillo {
+  0% { box-shadow: 0 0 0 1px var(--accent), 0 0 0 0 rgba(46,125,50,.55); }
+  30% { box-shadow: 0 0 0 1px var(--accent), 0 0 22px 8px rgba(46,125,50,.35); transform: scale(1.02); }
+  100% { box-shadow: 0 0 0 1px var(--accent), 0 0 0 0 rgba(46,125,50,0); transform: none; }
+}
+.fiesta { text-align: center; font-size: 15px; font-weight: 600; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .dia.brillo { animation: none; } .check[aria-pressed="true"] { animation: none; } .barra i { transition: none; } }
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="p30-top">
+    <a href="../planes-estudio.html" aria-label="Volver a los planes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
+    <h1>Plan de lectura</h1>
+  </header>
+
+  <section class="hero" aria-labelledby="t30">
+    <h2 class="titulo" id="t30">Las parábolas de Jesús</h2>
+    <p class="sub">Jesús enseñaba con historias sencillas que revelan el Reino de Dios. Lee una parábola cada día durante 33 días; marca cada una al terminar y tu avance se guarda solo.</p>
+    <div>
+      <div class="cuenta"><span><b id="hechos">0</b> de 33 días</span><span id="porc">0%</span></div>
+      <div class="barra" role="progressbar" aria-label="Avance del plan" aria-valuemin="0" aria-valuemax="33" aria-valuenow="0" id="barra"><i id="barra-i"></i></div>
+    </div>
+    <div class="siguiente" id="siguiente"></div>
+  </section>
+
+  <section aria-labelledby="tdias" style="display:flex;flex-direction:column;gap:12px">
+    <h2 class="sec" id="tdias">Las 33 parábolas</h2>
+    <div class="dias" id="dias"></div>
+  </section>
+</main>
+
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="../index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="../lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="../planes-estudio.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="../predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="../mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
+
+<script src="../audio-biblia.js"></script>
+<script>
+(function () {
+  const plan30Dias = [
+            { day: 1, title: "El sembrador", reference: "Mateo 13:1-23", capitulo: "13", versiculo: "1" },
+            { day: 2, title: "El trigo y la cizaña", reference: "Mateo 13:24-30, 36-43", capitulo: "13", versiculo: "24" },
+            { day: 3, title: "La semilla de mostaza y la levadura", reference: "Mateo 13:31-35", capitulo: "13", versiculo: "31" },
+            { day: 4, title: "La semilla que crece sola", reference: "Marcos 4:26-29", capitulo: "4", versiculo: "26" },
+            { day: 5, title: "El tesoro escondido y la perla de gran precio", reference: "Mateo 13:44-46", capitulo: "13", versiculo: "44" },
+            { day: 6, title: "La red", reference: "Mateo 13:47-52", capitulo: "13", versiculo: "47" },
+            { day: 7, title: "La casa sobre la roca", reference: "Mateo 7:24-29", capitulo: "7", versiculo: "24" },
+            { day: 8, title: "Los dos deudores", reference: "Lucas 7:36-50", capitulo: "7", versiculo: "36" },
+            { day: 9, title: "El buen samaritano", reference: "Lucas 10:25-37", capitulo: "10", versiculo: "25" },
+            { day: 10, title: "El amigo a medianoche", reference: "Lucas 11:5-13", capitulo: "11", versiculo: "5" },
+            { day: 11, title: "El rico insensato", reference: "Lucas 12:13-21", capitulo: "12", versiculo: "13" },
+            { day: 12, title: "Los siervos que esperan a su señor", reference: "Lucas 12:35-48", capitulo: "12", versiculo: "35" },
+            { day: 13, title: "La higuera estéril", reference: "Lucas 13:6-9", capitulo: "13", versiculo: "6" },
+            { day: 14, title: "La gran cena", reference: "Lucas 14:15-24", capitulo: "14", versiculo: "15" },
+            { day: 15, title: "Calcular el costo", reference: "Lucas 14:25-33", capitulo: "14", versiculo: "25" },
+            { day: 16, title: "La oveja perdida", reference: "Lucas 15:1-7", capitulo: "15", versiculo: "1" },
+            { day: 17, title: "La moneda perdida", reference: "Lucas 15:8-10", capitulo: "15", versiculo: "8" },
+            { day: 18, title: "El hijo pródigo", reference: "Lucas 15:11-32", capitulo: "15", versiculo: "11" },
+            { day: 19, title: "El mayordomo infiel", reference: "Lucas 16:1-13", capitulo: "16", versiculo: "1" },
+            { day: 20, title: "El rico y Lázaro", reference: "Lucas 16:19-31", capitulo: "16", versiculo: "19" },
+            { day: 21, title: "Los siervos inútiles", reference: "Lucas 17:7-10", capitulo: "17", versiculo: "7" },
+            { day: 22, title: "La viuda y el juez injusto", reference: "Lucas 18:1-8", capitulo: "18", versiculo: "1" },
+            { day: 23, title: "El fariseo y el publicano", reference: "Lucas 18:9-14", capitulo: "18", versiculo: "9" },
+            { day: 24, title: "El siervo que no quiso perdonar", reference: "Mateo 18:21-35", capitulo: "18", versiculo: "21" },
+            { day: 25, title: "Los obreros de la viña", reference: "Mateo 20:1-16", capitulo: "20", versiculo: "1" },
+            { day: 26, title: "Las minas", reference: "Lucas 19:11-27", capitulo: "19", versiculo: "11" },
+            { day: 27, title: "Los dos hijos", reference: "Mateo 21:28-32", capitulo: "21", versiculo: "28" },
+            { day: 28, title: "Los labradores malvados", reference: "Mateo 21:33-46", capitulo: "21", versiculo: "33" },
+            { day: 29, title: "La fiesta de bodas", reference: "Mateo 22:1-14", capitulo: "22", versiculo: "1" },
+            { day: 30, title: "Las diez vírgenes", reference: "Mateo 25:1-13", capitulo: "25", versiculo: "1" },
+            { day: 31, title: "Los talentos", reference: "Mateo 25:14-30", capitulo: "25", versiculo: "14" },
+            { day: 32, title: "Las ovejas y los cabritos", reference: "Mateo 25:31-46", capitulo: "25", versiculo: "31" },
+            { day: 33, title: "El buen pastor", reference: "Juan 10:1-18", capitulo: "10", versiculo: "1" }
+        ];
+  const CLAVE = 'parabolasPlan';
+  const ok = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  const flecha = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>'.replace('<svg', '<svg class="chev"');
+  // Versión 2 de la lista de lecturas: el avance de la lista anterior no se conserva
+  const VERSION = 2;
+  function leer() {
+    try { const p = JSON.parse(localStorage.getItem(CLAVE)); if (p && Array.isArray(p.diasCompletados) && p.version === VERSION) return p; } catch (e) {}
+    return { diasCompletados: [], ultimoDiaAccedido: 1, fechaInicio: new Date().toISOString(), version: VERSION };
+  }
+  function guardar(p) { try { localStorage.setItem(CLAVE, JSON.stringify(p)); } catch (e) {} }
+  const libroDe = d => d.reference.replace(/\s+\d.*$/, '');
+  const enlace = d => `../lectura.html?book=${encodeURIComponent(libroDe(d))}&chapter=${d.capitulo}&verse=${d.versiculo || 1}`;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function pintar() {
+    const p = leer(), hechos = new Set(p.diasCompletados.map(Number));
+    const n = hechos.size, pct = Math.round(n / 33 * 100);
+    document.getElementById('hechos').textContent = n;
+    document.getElementById('porc').textContent = pct + '%';
+    document.getElementById('barra-i').style.width = pct + '%';
+    document.getElementById('barra').setAttribute('aria-valuenow', n);
+    const sig = plan30Dias.find(d => !hechos.has(d.day));
+    const caja = document.getElementById('siguiente');
+    if (sig) {
+      caja.innerHTML = `<small>${n === 0 ? 'Empieza aquí' : 'Tu siguiente lectura'}</small>
+        <b>Día ${sig.day}: ${esc(sig.title)}</b><span class="ref">${esc(sig.reference)}</span>
+        <div class="fila-btns"><a class="btn" href="${enlace(sig)}" data-leer="${sig.day}">Leer ahora</a><a class="btn sec" href="${window.AudioBiblia ? window.AudioBiblia.enlace(libroDe(sig), sig.capitulo, '../') : '../audio.html'}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Escuchar</a><button class="btn sec" type="button" data-marcar="${sig.day}">Ya lo leí</button></div>`;
+    } else {
+      caja.innerHTML = '<p class="fiesta">🎉 ¡Completaste las parábolas de Jesús! «El que tiene oídos para oír, oiga.»</p>';
+    }
+    document.getElementById('dias').innerHTML = plan30Dias.map(d => {
+      const hecho = hechos.has(d.day), actual = sig && d.day === sig.day;
+      return `<div class="dia${hecho ? ' hecho' : ''}${actual ? ' actual' : ''}">
+        <button class="check" type="button" data-marcar="${d.day}" aria-pressed="${hecho}" aria-label="Día ${d.day} ${hecho ? 'completado' : 'sin completar'}">${ok}</button>
+        <a href="${enlace(d)}" data-leer="${d.day}"><span class="txt"><span class="n">Día ${d.day}${actual ? '<span class="chip">Siguiente</span>' : ''}</span><span class="t">${esc(d.title)}</span><span class="r">${esc(d.reference)}</span></span>${flecha}</a>
+      </div>`;
+    }).join('');
+  }
+
+  document.addEventListener('click', e => {
+    const m = e.target.closest('[data-marcar]');
+    if (m) {
+      const dia = parseInt(m.dataset.marcar, 10), p = leer();
+      const set = new Set(p.diasCompletados.map(Number));
+      set.has(dia) ? set.delete(dia) : set.add(dia);
+      p.diasCompletados = [...set].sort((a, b) => a - b);
+      guardar(p); pintar();
+      return;
+    }
+    const l = e.target.closest('[data-leer]');
+    if (l) { const p = leer(); p.ultimoDiaAccedido = parseInt(l.dataset.leer, 10); guardar(p); }
+  });
+
+  pintar();
+  // Al entrar, el día que sigue brilla un momento (como el día de hoy en la Biblia en un año)
+  setTimeout(() => {
+    const act = document.querySelector('.dia.actual');
+    if (!act) return;
+    const r = act.getBoundingClientRect();
+    if (r.top > innerHeight - 100) act.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+    setTimeout(() => { act.classList.add('brillo'); setTimeout(() => act.classList.remove('brillo'), 2300); }, r.top > innerHeight - 100 ? 600 : 0);
+  }, 500);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('../service-worker.js').catch(() => {});
+})();
+</script>
+<script type="module" src="../cuenta.js"></script>
+</body>
+</html>
