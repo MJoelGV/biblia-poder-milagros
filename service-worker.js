@@ -1,12 +1,12 @@
 // Service Worker for offline support
-const SW_VERSION = 'v16';
+const SW_VERSION = 'v17';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v16';
+const CACHE_NAME = 'biblia-app-cache-v17';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v16';
+const STATIC_CACHE = 'biblia-static-v17';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v16';
+const DYNAMIC_CACHE = 'biblia-dynamic-v17';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
 
@@ -227,7 +227,23 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   
   // Estrategia: Cache First para recursos estáticos
-  if (isStaticResource(event.request)) {
+  // Código de la app (.js y .css): red primero para que las mejoras lleguen de inmediato;
+  // si no hay internet o tarda más de 4 segundos, se usa la copia guardada
+  if (/\.(js|css)$/.test(url.pathname) && !url.pathname.includes('pericopas-datos')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      try {
+        const red = fetch(event.request, { cache: 'no-cache' });
+        const resp = await Promise.race([red, new Promise((_, rej) => setTimeout(() => rej(new Error('lento')), 4000))]);
+        if (resp && resp.ok) cache.put(event.request, resp.clone());
+        return resp;
+      } catch (e) {
+        const guardado = await cache.match(event.request) || await caches.match(event.request);
+        return guardado || fetch(event.request);
+      }
+    })());
+  }
+  else if (isStaticResource(event.request)) {
     event.respondWith(
       caches.open(STATIC_CACHE)
         .then(cache => cache.match(event.request))
