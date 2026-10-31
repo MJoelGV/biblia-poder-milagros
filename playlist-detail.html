@@ -1,991 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle de Playlist</title>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            min-height: 100vh;
-            color: white;
-            padding: 20px;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            animation: fadeInDown 1s ease;
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .back-button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            font-weight: 700;
-            margin: 15px 0;
-            background: linear-gradient(45deg, #fff, #f0f0f0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        #playlistInfo {
-            font-size: 1.1em;
-            opacity: 0.9;
-            font-weight: 300;
-            margin: 5px 0 0 0;
-        }
-        
-        main {
-            animation: fadeIn 1s ease 0.3s both;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        #videosContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
-        
-        .video-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .video-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .video-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        .video-item:hover::before {
-            opacity: 1;
-        }
-        
-        .video-thumbnail {
-            width: 120px;
-            height: 90px;
-            border-radius: 12px;
-            object-fit: cover;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .video-item:hover .video-thumbnail {
-            transform: scale(1.05);
-        }
-        
-        .video-info {
-            flex: 1;
-            z-index: 1;
-        }
-        
-        .video-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: white;
-            line-height: 1.3;
-        }
-        
-        .video-meta {
-            font-size: 0.9em;
-            margin: 0;
-            opacity: 0.8;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        .play-button {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .video-item:hover .play-button {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
-        }
-        
-        /* Reproductor flotante */
-        .audio-player {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 15px;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            color: white;
-        }
-        
-        .audio-player.active {
-            transform: translateY(0);
-        }
-        
-        .player-content {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .player-info {
-            flex: 1;
-        }
-        
-        .player-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 5px 0;
-        }
-        
-        .player-artist {
-            font-size: 14px;
-            opacity: 0.8;
-            margin: 0;
-        }
-        
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .player-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .player-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-        
-        .progress-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .progress-bar {
-            flex: 1;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.1s ease;
-        }
-        
-        .time {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        /* Reproductor de YouTube visible (necesario para ver el botón "Omitir anuncio").
-           Compacto por defecto, del tamaño mínimo que permite YouTube (200x200) */
-        .player-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .player-row .player-content {
-            flex: 1;
-            min-width: 0;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
-        .player-row .player-title {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .video-wrap {
-            flex: 0 0 200px;
-            width: 200px;
-            height: 200px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #000;
-        }
-        .video-wrap iframe, #youtubePlayer {
-            width: 100%;
-            height: 100%;
-            display: block;
-            border: 0;
-        }
-        .audio-player.expanded .player-row { flex-direction: column; align-items: stretch; }
-        .audio-player.expanded .video-wrap {
-            flex: none;
-            width: 100%;
-            max-width: 640px;
-            height: auto;
-            min-height: 200px;
-            aspect-ratio: 16 / 9;
-            margin: 0 auto;
-        }
-        .player-btn.small { width: 34px; height: 34px; font-size: 15px; }
-        @media (max-width: 440px) {
-            .audio-player { padding: 12px; }
-            .player-row { gap: 10px; }
-            .player-row .player-controls { gap: 6px; flex-wrap: wrap; }
-            .player-row .player-btn { width: 34px; height: 34px; font-size: 15px; }
-            .player-row .player-btn.play-pause { width: 40px; height: 40px; }
-            .player-row .progress-container { flex-wrap: wrap; gap: 4px 8px; }
-            .player-row .progress-bar { flex: 1 1 100%; }
-            .player-row .player-title { font-size: 0.95em; }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .error-message {
-            text-align: center;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            margin: 20px 0;
-        }
-        
-        .error-message h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-        
-        .error-message p {
-            opacity: 0.8;
-            margin-bottom: 20px;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
-            
-            header {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            #videosContainer {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .video-item {
-                padding: 15px;
-            }
-            
-            .video-thumbnail {
-                width: 100px;
-                height: 75px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            header {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-            }
-            
-            .video-item {
-                padding: 12px;
-                gap: 12px;
-            }
-            
-            .video-thumbnail {
-                width: 80px;
-                height: 60px;
-            }
-            
-            .video-title {
-                font-size: 1em;
-            }
-            
-            .video-meta {
-                font-size: 0.8em;
-            }
-            
-            .play-button {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-        }
-    </style>
-
-    <script>
-        // Imagen de respaldo cuando una miniatura no carga
-        window.imgRespaldo = function (img) {
-            img.onerror = null;
-            var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180" viewBox="0 0 300 180">' +
-                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs>' +
-                '<rect width="300" height="180" fill="url(#g)"/>' +
-                '<polygon points="130,65 130,115 172,90" fill="white" opacity="0.9"/></svg>';
-            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-        };
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="predicas.css">
+<title>Predicaciones · Biblia de Poder y Milagros</title>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <button class="back-button" onclick="history.back()">
-                <span>←</span>
-                <span>Volver</span>
-            </button>
-            <h1 id="playlistTitle">Cargando...</h1>
-            <p id="playlistInfo">Videos de la playlist</p>
-        </header>
-        
-        <main>
-            <div id="videosContainer">
-                <div class="loading">
-                    <p>Cargando videos...</p>
-                </div>
-            </div>
-        </main>
+<main class="page">
+  <section class="reproductor" id="reproductor" hidden aria-label="Reproductor de video">
+    <div class="marco"><div id="yt"></div></div>
+    <div class="rep-barra">
+      <button class="rb" type="button" id="r-ant" aria-label="Video anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 20 9 12l10-8z" fill="currentColor"/><path d="M5 19V5"/></svg></button>
+      <b id="r-tit"></b>
+      <button class="rb" type="button" id="r-sig" aria-label="Video siguiente"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 4 10 8-10 8z" fill="currentColor"/><path d="M19 5v14"/></svg></button>
+      <button class="rb" type="button" id="r-cerrar" aria-label="Cerrar el video"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
-    
-    <!-- Reproductor flotante -->
-    <div class="audio-player" id="audioPlayer">
-        <div class="player-row">
-        <div class="video-wrap"><div id="youtubePlayer"></div></div>
-        <div class="player-content">
-            <div class="player-info">
-                <h3 class="player-title" id="playerTitle">Selecciona un video</h3>
-                <p class="player-artist" id="playerArtist">Predicaciones</p>
-            </div>
-            <div class="player-controls">
-                <button class="player-btn" id="prevBtn">⏮</button>
-                <button class="player-btn play-pause" id="playPauseBtn">▶</button>
-                <button class="player-btn" id="nextBtn">⏭</button>
-                <button class="player-btn small" id="sizeBtn" title="Agrandar video" aria-label="Agrandar video">⤢</button>
-            </div>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress" id="progress"></div>
-                </div>
-                <span class="time" id="currentTime">0:00</span>
-                <span class="time" id="duration">0:00</span>
-            </div>
-        </div>
-        </div>
-    </div>
-    
-    
-    <script>
-        // Variables globales
-        let playlistData = null;
-        let videosData = [];
-        let currentVideoIndex = 0;
-        let youtubePlayer = null;
-        let isPlaying = false;
-        
-        // Elementos del DOM
-        const audioPlayer = document.getElementById('audioPlayer');
-        const playerTitle = document.getElementById('playerTitle');
-        const playerArtist = document.getElementById('playerArtist');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const progress = document.getElementById('progress');
-        const currentTime = document.getElementById('currentTime');
-        const duration = document.getElementById('duration');
-        
-        // Obtener parámetros de la URL
-        function getUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                id: params.get('id'),
-                name: params.get('name')
-            };
-        }
-        
-        // Cargar videos de la playlist
-        async function loadPlaylistVideos() {
-            try {
-                const params = getUrlParams();
-                console.log('Parámetros URL:', params);
-                
-                if (!params.id) {
-                    throw new Error('No se proporcionó ID de playlist');
-                }
-                
-                // Actualizar título
-                document.getElementById('playlistTitle').textContent = params.name || 'Playlist';
-                
-                // Usar la API key real
-                const API_KEY = 'AIzaSyA5B2vj3m6lMWRrMrF7LP7xD3PsPVTjBzM';
-                
-                console.log(`Cargando videos de playlist: ${params.id}`);
-                
-                // Obtener todos los videos de la playlist con paginación
-                let allVideos = [];
-                let nextPageToken = null;
-                let totalVideos = 0;
-                
-                do {
-                    const url = nextPageToken 
-                        ? `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${params.id}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`
-                        : `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${params.id}&maxResults=50&key=${API_KEY}`;
-                    
-                    console.log(`Cargando página de videos... (Total actual: ${allVideos.length})`);
-                    
-                    const response = await fetch(url, { cache: 'no-store' });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log(`Videos encontrados en esta página: ${data.items?.length || 0}`);
-                    
-                    if (data.items && data.items.length > 0) {
-                        allVideos = allVideos.concat(data.items);
-                        nextPageToken = data.nextPageToken;
-                        totalVideos = data.pageInfo?.totalItems || allVideos.length;
-                        
-                        // Mostrar progreso
-                        document.getElementById('playlistInfo').textContent = `Cargando videos... ${allVideos.length} de ${totalVideos || '??'} encontrados`;
-                    } else {
-                        nextPageToken = null;
-                    }
-                    
-                    // Pequeña pausa para no sobrecargar la API
-                    if (nextPageToken) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    
-                } while (nextPageToken && allVideos.length < 2000); // Trae todas las páginas (límite de seguridad muy alto)
-                
-                console.log(`Total de videos cargados: ${allVideos.length}`);
-                
-                if (allVideos.length > 0) {
-                    // La fecha real de publicación ya viene en contentDetails.videoPublishedAt,
-                    // así que no hace falta pedir cada video por separado (ahorra cuota de YouTube).
-                    // Se omiten los videos privados o eliminados.
-                    const videosWithRealDates = allVideos
-                        .filter(item => {
-                            const t = (item.snippet?.title || '').toLowerCase();
-                            return t !== 'private video' && t !== 'deleted video';
-                        })
-                        .map(item => ({
-                            ...item,
-                            realPublishedAt: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt,
-                            realTitle: item.snippet?.title
-                        }));
-                    
-                    // Ordenar videos por fecha de publicación real (más reciente primero)
-                    const sortedVideos = videosWithRealDates.sort((a, b) => {
-                        const dateA = new Date(a.realPublishedAt);
-                        const dateB = new Date(b.realPublishedAt);
-                        return dateB - dateA; // Más reciente primero
-                    });
-                    
-                    console.log('Videos ordenados por fecha de publicación real (más reciente primero):');
-                    sortedVideos.forEach((video, index) => {
-                        const date = new Date(video.realPublishedAt);
-                        console.log(`  ${index + 1}. ${video.realTitle} - ${date.toLocaleDateString()}`);
-                    });
-                    
-                    videosData = sortedVideos;
-                    renderVideos(sortedVideos);
+  </section>
 
-                    // Si viene de la portada con un video elegido (&v=ID), abrirlo en el reproductor
-                    const vElegido = new URLSearchParams(location.search).get('v');
-                    if (vElegido) {
-                        const idx = sortedVideos.findIndex(x => (x.snippet?.resourceId?.videoId || x.contentDetails?.videoId) === vElegido);
-                        if (idx >= 0) {
-                            let intentos = 0;
-                            const espera = setInterval(() => {
-                                intentos++;
-                                if (typeof youtubePlayer !== 'undefined' && youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
-                                    clearInterval(espera);
-                                    playVideo(idx, vElegido, sortedVideos[idx].realTitle || sortedVideos[idx].snippet?.title || '');
-                                }
-                                if (intentos > 60) clearInterval(espera);
-                            }, 250);
-                        }
-                    }
-                    
-                    // Actualizar información con el total real
-                    document.getElementById('playlistInfo').textContent = `${sortedVideos.length} videos encontrados (ordenados por fecha de publicación)`;
-                } else {
-                    throw new Error('No se encontraron videos en esta playlist');
-                }
-                
-            } catch (error) {
-                console.error('Error al cargar videos:', error);
-                document.getElementById('videosContainer').innerHTML = `
-                    <div class="error-message">
-                        <h3>Error al cargar videos</h3>
-                        <p>${error.message}</p>
-                        <button class="back-button" onclick="history.back()">Volver</button>
-                    </div>
-                `;
-            }
-        }
-        
-        // Renderizar videos
-        function renderVideos(videos) {
-            const container = document.getElementById('videosContainer');
-            container.innerHTML = '';
-            
-            videos.forEach((video, index) => {
-                const videoDiv = document.createElement('div');
-                videoDiv.className = 'video-item';
-                
-                // Obtener thumbnail con múltiples opciones de respaldo
-                let thumbnail = null;
-                const videoId = video.snippet?.resourceId?.videoId || video.snippet?.videoId || '';
-                
-                // Intentar obtener thumbnail de YouTube en diferentes calidades (HTTPS absoluto)
-                if (videoId) {
-                    // Opciones de thumbnails de YouTube (de mayor a menor calidad) con HTTPS absoluto
-                    const youtubeThumbnails = [
-                        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-                        `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-                        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                        `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-                        `https://img.youtube.com/vi/${videoId}/default.jpg`
-                    ];
-                    
-                    // Usar la primera opción (maxresdefault)
-                    thumbnail = youtubeThumbnails[0];
-                }
-                
-                // Fallback: usar thumbnail del snippet si no hay videoId
-                if (!thumbnail) {
-                    const snippetThumb = video.snippet?.thumbnails?.medium?.url || 
-                                      video.snippet?.thumbnails?.high?.url || 
-                                      video.snippet?.thumbnails?.default?.url;
-                    // Asegurar que sea HTTPS absoluto
-                    thumbnail = snippetThumb ? snippetThumb.replace(/^http:\/\//, 'https://') : null;
-                }
-                
-                // Fallback final: usar imagen de placeholder basada en el título
-                if (!thumbnail) {
-                    const title = video.realTitle || video.snippet?.title || 'Video sin título';
-                    const seed = title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
-                    thumbnail = `https://picsum.photos/seed/${seed}${videoId || index}/300/180.jpg`;
-                }
-                
-                // Usar el título real del video si está disponible
-                const title = video.realTitle || video.snippet?.title || 'Video sin título';
-                
-                // Usar la fecha de publicación real si está disponible
-                const publishedDate = new Date(video.realPublishedAt || video.snippet.publishedAt);
-                const formattedDate = publishedDate.toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                
-                // Calcular tiempo relativo (hace cuánto tiempo)
-                const now = new Date();
-                const diffTime = Math.abs(now - publishedDate);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                let timeAgo;
-                if (diffDays === 0) {
-                    timeAgo = 'Hoy';
-                } else if (diffDays === 1) {
-                    timeAgo = 'Ayer';
-                } else if (diffDays < 7) {
-                    timeAgo = `Hace ${diffDays} días`;
-                } else if (diffDays < 30) {
-                    timeAgo = `Hace ${Math.floor(diffDays / 7)} semanas`;
-                } else if (diffDays < 365) {
-                    timeAgo = `Hace ${Math.floor(diffDays / 30)} meses`;
-                } else {
-                    timeAgo = `Hace ${Math.floor(diffDays / 365)} años`;
-                }
-                
-                videoDiv.innerHTML = `
-                    <img src="${thumbnail}" alt="${title}" class="video-thumbnail" 
-                         onerror="imgRespaldo(this)">
-                    <div class="video-info">
-                        <h3 class="video-title">${title}</h3>
-                        <p class="video-meta">
-                            ${timeAgo} • ${formattedDate}
-                            ${index === 0 ? '<span style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: 600;">MÁS RECIENTE</span>' : ''}
-                        </p>
-                    </div>
-                    <div class="play-button">▶</div>
-                `;
-                
-                // Evento click
-                videoDiv.onclick = () => {
-                    playVideo(index, videoId, title);
-                };
-                
-                container.appendChild(videoDiv);
-            });
-        }
-        
-        // Reproducir video
-        function playVideo(index, videoId, title) {
-            console.log(`Reproduciendo video: ${videoId} - ${title}`);
-            
-            currentVideoIndex = index;
-            
-            // Actualizar UI del reproductor
-            playerTitle.textContent = title;
-            const params = getUrlParams();
-            playerArtist.textContent = params.name || 'Predicaciones';
-            
-            // Mostrar reproductor
-            audioPlayer.classList.add('active');
-            // Dejar espacio abajo para que el reproductor no tape la lista
-            setTimeout(ajustarEspacio, 350);
-            
-            // Cargar y reproducir video en YouTube player (solo audio)
-            if (youtubePlayer) {
-                youtubePlayer.loadVideoById(videoId);
-                youtubePlayer.playVideo();
-                isPlaying = true;
-                updatePlayPauseButton();
-            }
-            
-            // Configurar Media Session API para reproducción en background
-            setupMediaSession(title, params.name || 'Predicaciones');
-        }
-        
-        // Agrandar o achicar el video
-        function ajustarEspacio() {
-            if (audioPlayer.classList.contains('active')) document.body.style.paddingBottom = audioPlayer.offsetHeight + 'px';
-        }
-        document.getElementById('sizeBtn').addEventListener('click', () => {
-            const grande = audioPlayer.classList.toggle('expanded');
-            const b = document.getElementById('sizeBtn');
-            b.textContent = grande ? '⤡' : '⤢';
-            b.title = b.ariaLabel = grande ? 'Achicar video' : 'Agrandar video';
-            setTimeout(ajustarEspacio, 50);
-        });
-        window.addEventListener('resize', ajustarEspacio);
+  <header class="pt"><a class="atras" href="predicaciones.html" aria-label="Volver a Predicaciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a><div><h1 id="titulo" style="font-size:22px">Predicaciones</h1><small id="cuenta">Cargando…</small></div></header>
+  <label class="buscador"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr">Buscar en esta lista</span><input id="buscar" type="search" placeholder="Buscar en esta lista" autocomplete="off"></label>
+  <div class="vids" id="vids"></div>
+  <button class="btn sec mas" type="button" id="mas" hidden style="background:transparent;color:var(--text);border:1px solid var(--border);padding:0 20px">Mostrar más</button>
+</main>
 
-        // Configurar YouTube Player
-        function onYouTubeIframeAPIReady() {
-            console.log('YouTube API ready, creando player...');
-            
-            youtubePlayer = new YT.Player('youtubePlayer', {
-                height: '100%',
-                width: '100%',
-                videoId: '',
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
-                },
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 1,
-                    'playsinline': 1,
-                    'fs': 1,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'showinfo': 0
-                }
-            });
-        }
-        
-        // Player ready
-        function onPlayerReady(event) {
-            console.log('YouTube player ready');
-            updateProgress();
-        }
-        
-        // Player state change
-        function onPlayerStateChange(event) {
-            console.log('Player state:', event.data);
-            
-            if (event.data === YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                updatePlayPauseButton();
-            } else if (event.data === YT.PlayerState.PAUSED) {
-                isPlaying = false;
-                updatePlayPauseButton();
-            } else if (event.data === YT.PlayerState.ENDED) {
-                // Reproducir siguiente video automáticamente
-                playNext();
-            }
-        }
-        
-        // Player error
-        function onPlayerError(event) {
-            console.error('YouTube player error:', event.data);
-        }
-        
-        // Actualizar botón play/pause
-        function updatePlayPauseButton() {
-            playPauseBtn.innerHTML = isPlaying ? '⏸' : '▶';
-        }
-        
-        // Toggle play/pause
-        function togglePlayPause() {
-            if (!youtubePlayer) return;
-            
-            if (isPlaying) {
-                youtubePlayer.pauseVideo();
-            } else {
-                youtubePlayer.playVideo();
-            }
-        }
-        
-        // Reproducir anterior
-        function playPrevious() {
-            if (currentVideoIndex > 0) {
-                currentVideoIndex--;
-                const video = videosData[currentVideoIndex];
-                const videoId = video.snippet?.resourceId?.videoId || video.snippet?.videoId || '';
-                const title = video.snippet?.title || 'Video sin título';
-                playVideo(currentVideoIndex, videoId, title);
-            }
-        }
-        
-        // Reproducir siguiente
-        function playNext() {
-            if (currentVideoIndex < videosData.length - 1) {
-                currentVideoIndex++;
-                const video = videosData[currentVideoIndex];
-                const videoId = video.snippet?.resourceId?.videoId || video.snippet?.videoId || '';
-                const title = video.snippet?.title || 'Video sin título';
-                playVideo(currentVideoIndex, videoId, title);
-            }
-        }
-        
-        // Actualizar progreso
-        function updateProgress() {
-            if (!youtubePlayer || !isPlaying) return;
-            
-            const currentTimeSeconds = youtubePlayer.getCurrentTime();
-            const durationSeconds = youtubePlayer.getDuration();
-            
-            if (durationSeconds > 0) {
-                const progressPercent = (currentTimeSeconds / durationSeconds) * 100;
-                progress.style.width = progressPercent + '%';
-                currentTime.textContent = formatTime(currentTimeSeconds);
-                duration.textContent = formatTime(durationSeconds);
-            }
-            
-            requestAnimationFrame(updateProgress);
-        }
-        
-        // Formatear tiempo
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-        
-        // Configurar Media Session API
-        function setupMediaSession(title, artist) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: title,
-                    artist: artist,
-                    album: 'Predicaciones',
-                    artwork: [
-                        { src: 'https://picsum.photos/seed/predicaciones/96x96.jpg', sizes: '96x96', type: 'image/jpeg' },
-                        { src: 'https://picsum.photos/seed/predicaciones/128x128.jpg', sizes: '128x128', type: 'image/jpeg' },
-                        { src: 'https://picsum.photos/seed/predicaciones/192x192.jpg', sizes: '192x192', type: 'image/jpeg' },
-                        { src: 'https://picsum.photos/seed/predicaciones/256x256.jpg', sizes: '256x256', type: 'image/jpeg' },
-                        { src: 'https://picsum.photos/seed/predicaciones/384x384.jpg', sizes: '384x384', type: 'image/jpeg' },
-                        { src: 'https://picsum.photos/seed/predicaciones/512x512.jpg', sizes: '512x512', type: 'image/jpeg' }
-                    ]
-                });
-                
-                navigator.mediaSession.setActionHandler('play', () => {
-                    if (youtubePlayer) youtubePlayer.playVideo();
-                });
-                
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    if (youtubePlayer) youtubePlayer.pauseVideo();
-                });
-                
-                navigator.mediaSession.setActionHandler('previoustrack', () => {
-                    playPrevious();
-                });
-                
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    playNext();
-                });
-                
-                navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-                    if (youtubePlayer) {
-                        const currentTime = youtubePlayer.getCurrentTime();
-                        youtubePlayer.seekTo(Math.max(0, currentTime - 10));
-                    }
-                });
-                
-                navigator.mediaSession.setActionHandler('seekforward', (details) => {
-                    if (youtubePlayer) {
-                        const currentTime = youtubePlayer.getCurrentTime();
-                        youtubePlayer.seekTo(currentTime + 10);
-                    }
-                });
-            }
-        }
-        
-        // Event listeners
-        playPauseBtn.addEventListener('click', togglePlayPause);
-        prevBtn.addEventListener('click', playPrevious);
-        nextBtn.addEventListener('click', playNext);
-        
-        // Cargar cuando la página esté lista
-        document.addEventListener('DOMContentLoaded', () => {
-            loadPlaylistVideos();
-            
-            // Si YouTube API ya está lista
-            if (typeof YT !== 'undefined' && YT.Player) {
-                onYouTubeIframeAPIReady();
-            }
-        });
-    </script>
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
+
+<script>
+(function () {
+  'use strict';
+
+  const KEY = 'AIzaSyA5B2vj3m6lMWRrMrF7LP7xD3PsPVTjBzM', CANAL = 'UCh2_5mMqBEFlYdxg81Rys_Q', SUBIDAS = 'UUh2_5mMqBEFlYdxg81Rys_Q';
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const normal = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const PLAYMINI = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>';
+  function hace(f) {
+    const d = Math.floor((Date.now() - new Date(f).getTime()) / 86400000);
+    if (d <= 0) return 'Hoy'; if (d === 1) return 'Ayer'; if (d < 7) return `Hace ${d} días`;
+    if (d < 30) { const s = Math.floor(d / 7); return s === 1 ? 'Hace 1 semana' : `Hace ${s} semanas`; }
+    return new Date(f).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  // Guarda respuestas un tiempo para no gastar la cuota diaria de YouTube
+  function deCache(k, horas) { try { const c = JSON.parse(localStorage.getItem(k)); if (c && Date.now() - c.t < horas * 3600000) return c.d; } catch (e) {} return null; }
+  function aCache(k, d) { try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), d })); } catch (e) {} }
+  async function yt(ruta) {
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/${ruta}&key=${KEY}`, { cache: 'no-store' });
+    if (!r.ok) throw new Error('YouTube ' + r.status);
+    return r.json();
+  }
+  async function videosDe(lista, max) {
+    let todos = [], token = '';
+    do {
+      const d = await yt(`playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${lista}${token ? '&pageToken=' + token : ''}`);
+      todos = todos.concat(d.items || []);
+      token = d.nextPageToken || '';
+    } while (token && todos.length < (max || 2000));
+    return todos.filter(x => !/^(private|deleted) video$/i.test(x.snippet?.title || ''))
+      .map(x => ({ id: x.contentDetails?.videoId || x.snippet?.resourceId?.videoId, titulo: x.snippet?.title || '', fecha: x.contentDetails?.videoPublishedAt || x.snippet?.publishedAt }))
+      .filter(x => x.id).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  }
+  const miniatura = id => `<span class="mini"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="play">${PLAYMINI}</span></span>`;
+
+  const params = new URLSearchParams(location.search);
+  const LISTA = params.get('id') || SUBIDAS;
+  const NOMBRE = params.get('name') || 'Predicaciones';
+  $('titulo').textContent = NOMBRE; document.title = `${NOMBRE} · Biblia de Poder y Milagros`;
+  let videos = [], visibles = 40, actual = -1, player = null, listo = false, pendiente = null;
+
+  function filtrados() { const q = normal($('buscar').value.trim()); return videos.map((v, i) => ({ ...v, i })).filter(v => !q || normal(v.titulo).includes(q)); }
+  function pintar() {
+    const f = filtrados();
+    $('vids').innerHTML = f.slice(0, visibles).map(v => `<button class="vid${v.i === actual ? ' sonando' : ''}" type="button" data-i="${v.i}"${v.i === actual ? ' aria-current="true"' : ''}>${miniatura(v.id)}<span class="tx"><b>${esc(v.titulo)}</b><span class="meta">${hace(v.fecha)}</span></span></button>`).join('')
+      || '<p class="error">No hay videos con esa búsqueda.</p>';
+    $('mas').hidden = f.length <= visibles;
+  }
+  $('buscar').addEventListener('input', () => { visibles = 40; pintar(); });
+  $('mas').addEventListener('click', () => { visibles += 40; pintar(); });
+  $('vids').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) reproducir(parseInt(b.dataset.i, 10)); });
+
+  // ---------- Reproductor de YouTube (visible, con sus controles y el botón de omitir anuncios) ----------
+  function cargarAPI() {
+    if (window.YT && window.YT.Player) return crear();
+    window.onYouTubeIframeAPIReady = crear;
+    const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+  }
+  function crear() {
+    player = new YT.Player('yt', {
+      playerVars: { playsinline: 1, rel: 0 },
+      events: {
+        onReady: () => { listo = true; if (pendiente !== null) { const p = pendiente; pendiente = null; reproducir(p); } },
+        onStateChange: ev => { if (ev.data === YT.PlayerState.ENDED && actual < videos.length - 1) reproducir(actual + 1); }
+      }
+    });
+  }
+  function reproducir(i) {
+    if (i < 0 || i >= videos.length) return;
+    actual = i;
+    if (!$('buscar').value.trim()) visibles = Math.max(visibles, Math.ceil((i + 1) / 40) * 40);
+    $('reproductor').hidden = false;
+    $('r-tit').textContent = videos[i].titulo;
+    $('r-ant').disabled = i === 0; $('r-sig').disabled = i === videos.length - 1;
+    pintar();
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    if (!player) { pendiente = i; cargarAPI(); return; }
+    if (!listo) { pendiente = i; return; }
+    player.loadVideoById(videos[i].id);
+  }
+  $('r-ant').addEventListener('click', () => reproducir(actual - 1));
+  $('r-sig').addEventListener('click', () => reproducir(actual + 1));
+  $('r-cerrar').addEventListener('click', () => { if (player && listo) player.stopVideo(); $('reproductor').hidden = true; actual = -1; pintar(); });
+
+  // ---------- Cargar la lista ----------
+  (async function () {
+    let v = deCache('pl:' + LISTA, 1);
+    try { if (!v) { v = await videosDe(LISTA); aCache('pl:' + LISTA, v); } }
+    catch (e) { $('cuenta').textContent = ''; $('vids').innerHTML = '<p class="error">No se pudo cargar esta lista. Revisa tu conexión e inténtalo de nuevo.</p>'; return; }
+    videos = v;
+    $('cuenta').textContent = v.length === 1 ? '1 video' : `${v.length} videos · del más nuevo al más antiguo`;
+    pintar();
+    const elegido = params.get('v');
+    if (elegido) { const i = videos.findIndex(x => x.id === elegido); if (i >= 0) reproducir(i); }
+  })();
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+})();
+</script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>
