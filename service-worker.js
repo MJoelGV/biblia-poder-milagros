@@ -1,12 +1,12 @@
 // Service Worker for offline support
-const SW_VERSION = 'v17';
+const SW_VERSION = 'v18';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v17';
+const CACHE_NAME = 'biblia-app-cache-v18';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v17';
+const STATIC_CACHE = 'biblia-static-v18';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v17';
+const DYNAMIC_CACHE = 'biblia-dynamic-v18';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
 
@@ -502,14 +502,17 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const destino = new URL((event.notification.data && event.notification.data.link) || 'lectura.html', self.registration.scope).href;
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(lista => {
-      for (const c of lista) {
-        if (c.url.startsWith(self.registration.scope) && 'navigate' in c) {
-          return c.focus().then(() => c.navigate(destino));
-        }
-      }
-      return self.clients.openWindow(destino);
-    })
-  );
+  event.waitUntil((async () => {
+    // Se deja anotado a dónde ir, por si la app se abre en la portada (pasa en la app instalada)
+    try { const c = await caches.open('abrir-pendiente'); await c.put('abrir', new Response(JSON.stringify({ url: destino, t: Date.now() }))); } catch (e) {}
+    const lista = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of lista) {
+      if (!c.url.startsWith(self.registration.scope)) continue;
+      try { await c.focus(); } catch (e) {}
+      c.postMessage({ tipo: 'abrir', url: destino });
+      try { if ('navigate' in c) await c.navigate(destino); } catch (e) {}
+      return;
+    }
+    await self.clients.openWindow(destino);
+  })());
 });

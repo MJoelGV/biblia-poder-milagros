@@ -24,3 +24,21 @@
   if (media && media.addEventListener) media.addEventListener('change', aplicar);
   aplicar();
 })();
+
+// Al tocar la notificación del Capítulo del día: abrir el capítulo aunque la app arranque en la portada
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  function ir(url) { if (url && location.href !== url) location.replace(url); }
+  navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.tipo === 'abrir') ir(e.data.url); });
+  if (!window.caches) return;
+  caches.open('abrir-pendiente').then(function (c) {
+    return c.match('abrir').then(function (r) {
+      if (!r) return;
+      return r.json().then(function (d) {
+        c.delete('abrir');
+        if (d && Date.now() - d.t < 120000) ir(d.url);
+      });
+    });
+  }).catch(function () {});
+})();
+

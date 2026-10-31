@@ -27,6 +27,17 @@ function textoHora(h) { const ampm = h < 12 ? 'a.m.' : 'p.m.'; const h12 = h % 1
 function datosToken(token) {
   return { token, plataforma: plataforma(), hora: leerHora(), tz: zona(), updatedAt: serverTimestamp() };
 }
+// El mismo capítulo que manda la notificación: el Nuevo Testamento en orden, empezando el 1 de noviembre de 2026
+const NT = [['Mateo',28],['Marcos',16],['Lucas',24],['Juan',21],['Hechos',28],['Romanos',16],['1 Corintios',16],['2 Corintios',13],['Gálatas',6],['Efesios',6],['Filipenses',4],['Colosenses',4],['1 Tesalonicenses',5],['2 Tesalonicenses',3],['1 Timoteo',6],['2 Timoteo',4],['Tito',3],['Filemón',1],['Hebreos',13],['Santiago',5],['1 Pedro',5],['2 Pedro',3],['1 Juan',5],['2 Juan',1],['3 Juan',1],['Judas',1],['Apocalipsis',22]];
+const LISTA_NT = NT.flatMap(([libro, n]) => Array.from({ length: n }, (_, i) => ({ libro, cap: i + 1 })));
+function capituloDeHoy() {
+  const h = new Date();
+  const dias = Math.round((Date.UTC(h.getFullYear(), h.getMonth(), h.getDate()) - Date.UTC(2026, 10, 1)) / 86400000);
+  return LISTA_NT[((dias % LISTA_NT.length) + LISTA_NT.length) % LISTA_NT.length];
+}
+const hoy = capituloDeHoy();
+const textoHoy = `${hoy.libro} ${hoy.cap}`;
+const enlaceHoy = `lectura.html?book=${encodeURIComponent(hoy.libro)}&chapter=${hoy.cap}`;
 function leerToken() { try { return localStorage.getItem(CLAVE_LOCAL); } catch (e) { return null; } }
 function guardarToken(t) { try { t ? localStorage.setItem(CLAVE_LOCAL, t) : localStorage.removeItem(CLAVE_LOCAL); } catch (e) {} }
 
@@ -38,9 +49,9 @@ function pintar(nuevo, mensaje) {
   estado = nuevo;
   if (!m) return;
   m.tile.disabled = nuevo === 'cargando';
-  if (nuevo === 'activo') m.set(`Activado · ${textoHora(leerHora())}`, true);
+  if (nuevo === 'activo') m.set(`Hoy: ${textoHoy} · ${textoHora(leerHora())}`, true);
   else if (nuevo === 'cargando') m.set(mensaje || 'Un momento…', false);
-  else m.set('Toca para activar', false);
+  else m.set(`Hoy: ${textoHoy}`, false);
   if (nuevo === 'bloqueado' && mensaje) m.mostrar(mensaje, [{ texto: 'Entendido', tipo: 'sec', accion: () => m.ocultar() }]);
   else if (nuevo !== 'cargando') m.ocultar();
 }
@@ -95,28 +106,37 @@ async function desactivar() {
 function mostrarAjustes(intro) {
   const opciones = [];
   for (let h = 4; h <= 22; h++) opciones.push(`<option value="${h}"${h === leerHora() ? ' selected' : ''}>${textoHora(h)}</option>`);
-  m.mostrar(`${intro || 'Cada día te llega una notificación con un capítulo del Nuevo Testamento. Al tocarla se abre la lectura.'}
+  m.mostrar(`${intro ? intro + '<br>' : ''}Hoy toca <b>${textoHoy}</b>. Cada día te llega una notificación con un capítulo del Nuevo Testamento; al tocarla se abre la lectura.
     <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-weight:600">¿A qué hora?
       <select id="cdd-hora" style="min-height:44px;border-radius:12px;padding:0 12px;font:inherit;font-size:16px;background:var(--bg,#F6F8F5);color:var(--text,#15201A);border:1px solid var(--border,#E3E9E4)">${opciones.join('')}</select>
     </label>`, [
-    { texto: 'Listo', accion: () => m.ocultar() },
+    { texto: `Leer ${textoHoy}`, accion: () => { location.href = enlaceHoy; } },
+    { texto: 'Cerrar', tipo: 'sec', accion: () => m.ocultar() },
     { texto: 'Desactivar', tipo: 'sec', accion: desactivar }
   ]);
   const sel = m.panel.querySelector('#cdd-hora');
   sel.addEventListener('change', async () => {
     const h = parseInt(sel.value, 10);
     guardarHora(h);
-    pintar('activo'); mostrarAjustes('Hora guardada ✓ Te llegará cada día a esta hora.');
+    pintar('activo');
     const token = leerToken();
-    if (token) { try { await setDoc(doc(db, 'tokens', token), datosToken(token), { merge: true }); } catch (e) { console.warn('Hora:', e); } }
+    try {
+      if (token) await setDoc(doc(db, 'tokens', token), datosToken(token), { merge: true });
+      mostrarAjustes('Hora guardada ✓ Te llegará cada día a esta hora.');
+    } catch (e) {
+      console.warn('Hora:', e);
+      mostrarAjustes('⚠️ No se pudo guardar la hora en el servidor. Revisa tu conexión e inténtalo otra vez.');
+    }
   });
 }
 
 if (m) m.tile.addEventListener('click', () => {
-  if (estado === 'activo') {
-    if (!m.panel.hidden) return m.ocultar();
-    mostrarAjustes();
-  } else if (estado !== 'cargando') activar();
+  if (!m.panel.hidden) return m.ocultar();
+  if (estado === 'activo') mostrarAjustes();
+  else if (estado !== 'cargando') m.mostrar(`Hoy toca <b>${textoHoy}</b>. ¿Quieres que cada día te llegue una notificación con el capítulo para leer?`, [
+    { texto: `Leer ${textoHoy}`, accion: () => { location.href = enlaceHoy; } },
+    { texto: 'Recibirlo cada día', tipo: 'sec', accion: () => { m.ocultar(); activar(); } }
+  ]);
 });
 
 // Estado inicial y renovación silenciosa del token
