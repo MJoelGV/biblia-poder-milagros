@@ -108,7 +108,15 @@
     let html = '', abierto = false;
     const abrir = () => { if (!abierto) { html += '<p>'; abierto = true; } };
     const cerrar = () => { if (abierto) { html += '</p>'; abierto = false; } };
+    // Algunas versiones (como TLA) juntan varios versículos en uno: se muestran como «1-3»
+    const etiqueta = {};
+    for (let i = 0; i < lista.length; i++) {
+      if (!lista[i].t) continue;
+      let j = i; while (j + 1 < lista.length && !lista[j + 1].t) j++;
+      etiqueta[lista[i].n] = j > i ? `${lista[i].n}-${lista[j].n}` : String(lista[i].n);
+    }
     for (const x of lista) {
+      if (!x.t) continue;
       const p = peris.find(pp => pp.desde === x.n);
       if (p) { cerrar(); html += `<h2 class="peri"><button type="button" data-peri="${x.n}" aria-label="${esc(p.titulo)}. Ver todas las perícopas de ${esc(b)}">${esc(p.titulo)}</button></h2>`; }
       if (comparando) cerrar();
@@ -117,7 +125,7 @@
       const color = marcados.has(k) ? (COLORES.includes(colores[k]) ? colores[k] : 'verde') : '';
       const iconos = (comentarios[k] ? `<button class="vi" type="button" data-com="${x.n}" aria-label="Ver comentario">${svg(ICO_COM, 16)}</button>` : '')
         + (memorizados.has(k) ? `<span class="vi" title="Memorizado" aria-label="Memorizado">${svg(ICO_MEM, 16)}</span>` : '');
-      html += `<span class="v${color ? ' hl-' + color : ''}" data-v="${x.n}" tabindex="0" role="button" aria-label="Versículo ${x.n}"><sup class="vn">${x.n}</sup>${iconos}${esc(x.t)}</span> `;
+      html += `<span class="v${color ? ' hl-' + color : ''}" data-v="${x.n}" tabindex="0" role="button" aria-label="Versículo ${x.n}"><sup class="vn">${etiqueta[x.n] || x.n}</sup>${iconos}${esc(x.t)}</span> `;
       if (comparando) {
         cerrar();
         const t2 = mapaOtra.get(x.n);
@@ -146,7 +154,8 @@
   }
 
   function irAVersiculo(v) {
-    const el = document.querySelector(`.v[data-v="${v}"]`);
+    let el = null;
+    for (let n = v; n >= 1 && !el; n--) el = document.querySelector(`.v[data-v="${n}"]`); // versículos combinados
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.scrollY - 96;
     window.scrollTo({ top: Math.max(0, y), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
