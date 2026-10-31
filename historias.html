@@ -1,335 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historias Bíblicas - Biblia de Poder y Milagros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4CAF50;
-            --text-color: #333;
-            --bg-color: #fff;
-            --nav-bg: rgba(248, 248, 248, 0.95);
-            --nav-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            --card-bg: rgba(255, 255, 255, 0.95);
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #45a049;
-            --text-color: #fff;
-            --bg-color: #1a1a1a;
-            --nav-bg: rgba(42, 42, 42, 0.95);
-            --nav-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            --card-bg: rgba(42, 42, 42, 0.95);
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            min-height: 100vh;
-            transition: background-color 0.3s;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.3));
-            z-index: 0;
-        }
-
-        .header {
-            background: var(--nav-bg);
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            box-shadow: var(--nav-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .page-title {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2.5em;
-            color: var(--primary-color);
-            margin: 0;
-            text-align: center;
-            padding: 20px 0;
-            position: relative;
-            z-index: 1;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .side-menu-toggle {
-            text-decoration: none;
-            font-size: 24px;
-            color: var(--primary-color);
-            transition: transform 0.3s;
-        }
-
-        .side-menu-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        .filters {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            flex-grow: 1;
-            justify-content: center;
-        }
-
-        select {
-            padding: 8px 15px;
-            border: 2px solid var(--primary-color);
-            border-radius: 20px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            outline: none;
-            min-width: 200px;
-        }
-
-        select:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .content {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .book-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
-        }
-
-        .book-title {
-            color: var(--primary-color);
-            font-size: 24px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
-        }
-
-        .book-category {
-            color: var(--primary-color);
-            font-size: 14px;
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-
-        .book-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .info-item {
-            background: rgba(76, 175, 80, 0.1);
-            padding: 12px;
-            border-radius: 10px;
-            transition: transform 0.3s;
-        }
-
-        .info-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .info-label {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            color: var(--text-color);
-        }
-
-        .book-description {
-            margin-bottom: 15px;
-            line-height: 1.8;
-            font-size: 15px;
-        }
-
-        .book-topics {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(76, 175, 80, 0.05);
-            border-radius: 10px;
-        }
-
-        .read-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.3s, background-color 0.3s;
-            font-size: 16px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .read-button:hover {
-            transform: translateY(-2px);
-            background: #45a049;
-        }
-
-        .theme-toggle {
-            background: var(--primary-color);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.3s;
-        }
-
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-        }
-
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 250px;
-            background-color: var(--nav-bg);
-            padding: 20px;
-            display: none;
-            z-index: 1000;
-        }
-
-        .side-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .side-menu li {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-            cursor: pointer;
-        }
-
-        .side-menu li:hover {
-            background-color: #f0f0f0;
-        }
-
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-            }
-
-            select {
-                width: 100%;
-            }
-
-            .content {
-                grid-template-columns: 1fr;
-                padding: 10px;
-            }
-
-            .book-info {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="explorar.css">
+<title>Libros de la Biblia · Biblia de Poder y Milagros</title>
 </head>
 <body>
-    <!-- Menú lateral -->
-    <div id="side-menu" class="side-menu">
-        <ul>
-            <li onclick="window.location.href='index.html'">Página principal</li>
-            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
-            <li onclick="window.location.href='audio.html'">Escuchar</li>
-            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
-            <li onclick="window.location.href='historias.html'">Historias</li>
-            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
-            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
-            <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='topics.html'">Temas</li>
-        </ul>
-    </div>
+<main class="page">
+  <header class="pt"><a class="atras" href="mas.html" aria-label="Volver a Más"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a><div><h1>Libros de la Biblia</h1><small id="sub">Introducción a los 66 libros de la Biblia</small></div></header>
+  <label class="buscador"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr">Buscar un libro</span><input id="q" type="search" placeholder="Buscar libro, autor o tema" autocomplete="off"></label>
+  <div class="chips" id="cats" role="group" aria-label="Filtrar"></div>
+  <div class="lista" id="lista"></div>
+</main>
 
-    <div class="header">
-        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
-        <div class="filters">
-            <select id="testament-selector">
-                <option value="all">Todos los Testamentos</option>
-                <option value="old">Antiguo Testamento</option>
-                <option value="new">Nuevo Testamento</option>
-            </select>
-            <select id="category-selector">
-                <option value="all">Todas las Categorías</option>
-                <option value="pentateuch">Pentateuco</option>
-                <option value="historical">Libros Históricos</option>
-                <option value="poetic">Libros Poéticos</option>
-                <option value="prophetic-major">Profetas Mayores</option>
-                <option value="prophetic-minor">Profetas Menores</option>
-                <option value="gospel">Evangelios</option>
-                <option value="historical-nt">Historia (NT)</option>
-                <option value="pauline">Epístolas Paulinas</option>
-                <option value="general">Epístolas Generales</option>
-                <option value="apocalyptic">Apocalíptico</option>
-            </select>
-            <select id="author-selector">
-                <option value="all">Todos los Autores</option>
-            </select>
-        </div>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
-    </div>
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
 
-    <h1 class="page-title">Historias Bíblicas</h1>
+<script>
+(function () {
+  'use strict';
 
-    <div class="content" id="books-container"></div>
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const normal = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const CHEV = '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>', HP = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>', LEER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>', SHARE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  const leer = (b, c, v) => `lectura.html?book=${encodeURIComponent(b)}&chapter=${c}${v ? '&verse=' + v : ''}`;
+  const oir = (b, c) => `audio.html?book=${encodeURIComponent(b)}&chapter=${c}&play=1`;
+  const compartir = (b, c, v) => `share.html?book=${encodeURIComponent(b)}&chapter=${c}&verse=${v}`;
+  function alternar(e) { const cab = e.target.closest('.cab'); if (!cab) return false; const t = cab.parentElement, ab = !t.classList.contains('abierta'); t.classList.toggle('abierta', ab); cab.setAttribute('aria-expanded', String(ab)); return true; }
 
-    <script>
-        const booksData = {
+
+  const DATOS = {
             // Pentateuco
             "Génesis": {
                 testament: "old",
@@ -933,127 +653,38 @@
                 keyTopics: ["Siete Iglesias", "Juicio", "Segunda Venida", "Nueva Jerusalén"]
             }
         };
+  if (DATOS['Nahúm'] && !DATOS['Nahum']) { DATOS['Nahum'] = DATOS['Nahúm']; delete DATOS['Nahúm']; }
+  const CATS = { todos: 'Todos', old: 'Antiguo Testamento', new: 'Nuevo Testamento', pentateuch: 'Pentateuco', historical: 'Históricos', poetic: 'Poéticos', 'prophetic-major': 'Profetas mayores', 'prophetic-minor': 'Profetas menores', gospel: 'Evangelios', 'historical-nt': 'Hechos', pauline: 'Cartas de Pablo', general: 'Cartas generales', apocalyptic: 'Apocalipsis' };
+  const NOMBRE_CAT = { pentateuch: 'Pentateuco', historical: 'Libro histórico', poetic: 'Libro poético', 'prophetic-major': 'Profeta mayor', 'prophetic-minor': 'Profeta menor', gospel: 'Evangelio', 'historical-nt': 'Historia (NT)', pauline: 'Carta de Pablo', general: 'Carta general', apocalyptic: 'Apocalíptico' };
+  const COLOR = { pentateuch: '#8D6E63', historical: '#6D4C41', poetic: '#AD1457', 'prophetic-major': '#5E35B1', 'prophetic-minor': '#3949AB', gospel: '#2E7D32', 'historical-nt': '#00897B', pauline: '#1565C0', general: '#00838F', apocalyptic: '#C62828' };
+  const ORDEN = ["Génesis", "Éxodo", "Levítico", "Números", "Deuteronomio", "Josué", "Jueces", "Rut", "1 Samuel", "2 Samuel", "1 Reyes", "2 Reyes", "1 Crónicas", "2 Crónicas", "Esdras", "Nehemías", "Ester", "Job", "Salmos", "Proverbios", "Eclesiastés", "Cantares", "Isaías", "Jeremías", "Lamentaciones", "Ezequiel", "Daniel", "Oseas", "Joel", "Amós", "Abdías", "Jonás", "Miqueas", "Nahum", "Habacuc", "Sofonías", "Hageo", "Zacarías", "Malaquías", "Mateo", "Marcos", "Lucas", "Juan", "Hechos", "Romanos", "1 Corintios", "2 Corintios", "Gálatas", "Efesios", "Filipenses", "Colosenses", "1 Tesalonicenses", "2 Tesalonicenses", "1 Timoteo", "2 Timoteo", "Tito", "Filemón", "Hebreos", "Santiago", "1 Pedro", "2 Pedro", "1 Juan", "2 Juan", "3 Juan", "Judas", "Apocalipsis"];
+  let cat = 'todos';
+  $('cats').innerHTML = Object.entries(CATS).map(([k, v]) => `<button class="chip" type="button" data-cat="${k}" aria-pressed="${k === cat}">${v}</button>`).join('');
+  const sigla = n => n.replace(/^(\d)\s*/, '$1').slice(0, n.match(/^\d/) ? 3 : 2);
+  function pintar() {
+    const q = normal($('q').value.trim());
+    const lista = Object.entries(DATOS).filter(([n, d]) => (cat === 'todos' || d.testament === cat || d.category === cat)
+      && (!q || normal(`${n} ${d.author} ${d.theme} ${(d.keyTopics || []).join(' ')}`).includes(q))).sort((a, b) => ORDEN.indexOf(a[0]) - ORDEN.indexOf(b[0]));
+    $('sub').textContent = lista.length === 66 ? 'Introducción a los 66 libros de la Biblia' : `${lista.length} de 66 libros`;
+    $('lista').innerHTML = lista.map(([n, d]) => `<article class="tarjeta"><button class="cab" type="button" aria-expanded="false">
+        <span class="ico-libro" style="background:${COLOR[d.category] || '#2E7D32'}" aria-hidden="true">${esc(sigla(n))}</span>
+        <span class="tx"><b>${esc(n)}</b><span>${esc(d.theme || '')}</span></span>${CHEV}</button>
+      <div class="cuerpo">
+        <p><span class="etq">${esc(NOMBRE_CAT[d.category] || '')}</span></p>
+        <dl class="datos"><dt>Autor</dt><dd>${esc(d.author || '—')}</dd><dt>Fecha</dt><dd>${esc(d.date || '—')}</dd></dl>
+        <p>${esc(d.description || '')}</p>
+        ${(d.keyTopics || []).length ? `<div class="temas-clave">${d.keyTopics.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="acciones"><a class="btn" href="${leer(n, 1)}">${LEER}Leer ${esc(n)}</a><a class="btn sec" href="${oir(n, 1)}">${HP}Escuchar</a></div>
+      </div></article>`).join('') || '<p class="vacio">No hay libros con esa búsqueda.</p>';
+  }
+  $('q').addEventListener('input', pintar);
+  $('cats').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (!b) return; cat = b.dataset.cat; document.querySelectorAll('[data-cat]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); pintar(); });
+  $('lista').addEventListener('click', alternar);
+  pintar();
 
-        // Generar lista de autores únicos
-        function updateAuthorsList() {
-            const authors = new Set();
-            Object.values(booksData).forEach(book => authors.add(book.author));
-            
-            const authorSelector = document.getElementById('author-selector');
-            authorSelector.innerHTML = '<option value="all">Todos los Autores</option>' +
-                Array.from(authors).sort().map(author => 
-                    `<option value="${author}">${author}</option>`
-                ).join('');
-        }
-
-        function filterBooks() {
-            const testament = document.getElementById('testament-selector').value;
-            const category = document.getElementById('category-selector').value;
-            const author = document.getElementById('author-selector').value;
-            const container = document.getElementById('books-container');
-            
-            container.innerHTML = Object.entries(booksData)
-                .filter(([_, data]) => 
-                    (testament === 'all' || data.testament === testament) &&
-                    (category === 'all' || data.category === category) &&
-                    (author === 'all' || data.author === author)
-                )
-                .map(([book, data]) => `
-                    <div class="book-card">
-                        <h2 class="book-title">${book}</h2>
-                        <div class="book-category">
-                            ${getCategoryName(data.category)} · ${getTestamentName(data.testament)}
-                        </div>
-                        <div class="book-info">
-                            <div class="info-item">
-                                <div class="info-label">Autor</div>
-                                <div class="info-value">${data.author}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Fecha de Escritura</div>
-                                <div class="info-value">${data.date}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Tema Principal</div>
-                                <div class="info-value">${data.theme}</div>
-                            </div>
-                        </div>
-                        <p class="book-description">${data.description}</p>
-                        <div class="book-topics">
-                            <div class="info-label">Temas Clave</div>
-                            <div class="info-value">${data.keyTopics.join(' · ')}</div>
-                        </div>
-                        <a href="lectura.html?version=Reina-Valera-1960&book=${book}&chapter=1" 
-                           class="read-button">Leer ${book}</a>
-                    </div>
-                `).join('');
-        }
-
-        function getCategoryName(category) {
-            const categories = {
-                pentateuch: 'Pentateuco',
-                historical: 'Libro Histórico',
-                poetic: 'Libro Poético',
-                'prophetic-major': 'Profeta Mayor',
-                'prophetic-minor': 'Profeta Menor',
-                gospel: 'Evangelio',
-                'historical-nt': 'Historia (NT)',
-                pauline: 'Epístola Paulina',
-                general: 'Epístola General',
-                apocalyptic: 'Apocalíptico'
-            };
-            return categories[category] || category;
-        }
-
-        function getTestamentName(testament) {
-            return testament === 'old' ? 'Antiguo Testamento' : 'Nuevo Testamento';
-        }
-
-        function toggleTheme() {
-            const body = document.body;
-            const button = document.querySelector('.theme-toggle');
-            const isDark = body.getAttribute('data-theme') === 'dark';
-            
-            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            button.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
-            
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        }
-
-        function toggleSideMenu() {
-            const sideMenu = document.getElementById('side-menu');
-            sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            const sideMenu = document.getElementById('side-menu');
-            const toggleBtn = document.getElementById('side-menu-toggle');
-            if (sideMenu.style.display === 'block' && !sideMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
-                sideMenu.style.display = 'none';
-            }
-        });
-
-        // Cargar tema guardado
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.body.setAttribute('data-theme', savedTheme);
-            document.querySelector('.theme-toggle').textContent = 
-                savedTheme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro';
-        }
-
-        // Inicialización
-        updateAuthorsList();
-        
-        // Event listeners
-        document.getElementById('testament-selector').addEventListener('change', filterBooks);
-        document.getElementById('category-selector').addEventListener('change', filterBooks);
-        document.getElementById('author-selector').addEventListener('change', filterBooks);
-        document.getElementById('side-menu-toggle').addEventListener('click', toggleSideMenu);
-
-        // Mostrar libros inicialmente
-        filterBooks();
-    </script>
-    <script type="module" src="cuenta.js"></script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+})();
+</script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>
