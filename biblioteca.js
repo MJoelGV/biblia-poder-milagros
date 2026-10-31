@@ -3,7 +3,7 @@
   'use strict';
   const MODO = document.body.dataset.modo; // 'marcados' | 'comentarios' | 'memorizados'
   const $ = id => document.getElementById(id);
-  const VERSIONES = { 'Reina-Valera-1960': ['RVR1960', 'rv1960'], 'TLA': ['TLA', 'tla'], 'Dios-Habla-Hoy': ['DHH', 'dhh'], 'La-Biblia-de-Las-Americas': ['LBLA', 'lla'], 'Nueva-Traduccion-Viviente': ['NTV', 'ntv'] };
+  const VERSIONES = { 'Reina-Valera-1960': ['RVR1960', 'rv1960'], 'TLA': ['TLA', 'tla'], 'Dios-Habla-Hoy': ['DHH', 'dhh'], 'La-Biblia-de-Las-Americas': ['LBLA', 'lla'], 'Nueva-Traduccion-Viviente': ['NTV', 'ntv'], 'KJV': ['KJV', 'kjv'], 'WEB': ['WEB', 'web'] };
   const COLORES = { amarillo: 'Amarillo', verde: 'Verde', azul: 'Azul', rosa: 'Rosa', morado: 'Morado' };
   const leerJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };

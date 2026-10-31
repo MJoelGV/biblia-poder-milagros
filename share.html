@@ -231,8 +231,8 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm' };
-        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA' };
+        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm' };
+        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)' };
         let versionParam = (params.get('version') || 'rv1960').toLowerCase();
         const versionSelect = document.getElementById('version-select');
         function populateVersionSelect() { versionSelect.innerHTML=''; for (let k in versionNames) { const o=document.createElement('option'); o.value=k; o.text=versionNames[k]; if (k===versionParam) o.selected=true; versionSelect.append(o);} }
@@ -471,7 +471,9 @@
                 'dhh': 'DHH',
                 'lla': 'LBLA',
                 'ntv': 'NTV',
-                'tla': 'TLA'
+                'tla': 'TLA',
+                'kjv': 'KJV',
+                'web': 'WEB'
             };
             return abbreviations[versionCode] || versionCode.toUpperCase();
         }

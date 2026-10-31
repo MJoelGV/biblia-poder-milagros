@@ -144,7 +144,7 @@
 
 <script>
 (function () {
-  const VERSIONES = { 'Reina-Valera-1960': 'Reina-Valera 1960', 'TLA': 'Lenguaje Actual', 'Dios-Habla-Hoy': 'Dios Habla Hoy', 'La-Biblia-de-Las-Americas': 'La Biblia de las Américas', 'Nueva-Traduccion-Viviente': 'Nueva Traducción Viviente' };
+  const VERSIONES = { 'Reina-Valera-1960': 'Reina-Valera 1960', 'TLA': 'Lenguaje Actual', 'Dios-Habla-Hoy': 'Dios Habla Hoy', 'La-Biblia-de-Las-Americas': 'La Biblia de las Américas', 'Nueva-Traduccion-Viviente': 'Nueva Traducción Viviente', 'KJV': 'King James Version', 'WEB': 'World English Bible' };
   const leer = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const enlace = (pag, b, c, v) => `${pag}?book=${encodeURIComponent(b)}&chapter=${c}` + (v ? `&verse=${v}` : '');
 

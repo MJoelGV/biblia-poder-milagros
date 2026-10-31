@@ -8,7 +8,9 @@
     { id: 'TLA', corto: 'TLA', nombre: 'Traducción en Lenguaje Actual' },
     { id: 'Dios-Habla-Hoy', corto: 'DHH', nombre: 'Dios Habla Hoy' },
     { id: 'La-Biblia-de-Las-Americas', corto: 'LBLA', nombre: 'La Biblia de las Américas' },
-    { id: 'Nueva-Traduccion-Viviente', corto: 'NTV', nombre: 'Nueva Traducción Viviente' }
+    { id: 'Nueva-Traduccion-Viviente', corto: 'NTV', nombre: 'Nueva Traducción Viviente' },
+    { id: 'KJV', corto: 'KJV', nombre: 'King James Version (inglés)' },
+    { id: 'WEB', corto: 'WEB', nombre: 'World English Bible (inglés)' }
   ];
   const CODIGOS = ['GEN','EXO','LEV','NUM','DEU','JOS','JDG','RUT','1SA','2SA','1KI','2KI','1CH','2CH','EZR','NEH','EST','JOB','PSA','PRO','ECC','SNG','ISA','JER','LAM','EZK','DAN','HOS','JOL','AMO','OBA','JON','MIC','NAM','HAB','ZEP','HAG','ZEC','MAL',
     'MAT','MRK','LUK','JHN','ACT','ROM','1CO','2CO','GAL','EPH','PHP','COL','1TH','2TH','1TI','2TI','TIT','PHM','HEB','JAS','1PE','2PE','1JN','2JN','3JN','JUD','REV'];
@@ -300,7 +302,7 @@
       }
       case 'compartir':
         // La página de compartir usa claves cortas para las versiones
-        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv' })[version] || 'rv1960'}`;
+        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv', 'KJV': 'kjv', 'WEB': 'web' })[version] || 'rv1960'}`;
         break;
       case 'nota':
         cerrarUltimo();
