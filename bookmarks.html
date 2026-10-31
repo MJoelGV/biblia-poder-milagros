@@ -1,146 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Versículos marcados - Biblia de Poder y Milagros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    <style>
-        body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-color, #f9f9f9); color: #333; }
-        .header { padding: 20px; text-align: center; background: #4CAF50; color: white; }
-        .list { max-width: 800px; margin: 20px auto; padding: 0; list-style: none; }
-        .list-item { display: block; padding: 16px; background: white; margin-bottom: 16px; border-radius: 8px; text-decoration: none; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s ease; cursor: pointer; }
-        .list-item:hover { background: #f8fff8; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .verse-reference { font-weight: bold; color: var(--primary-color, #4CAF50); margin-bottom: 8px; font-size: 1.1em; }
-        .verse-text { line-height: 1.5; color: #333; }
-        .loading { text-align: center; padding: 20px; color: #777; }
-        .empty-message { text-align: center; padding: 20px; color: #777; font-style: italic; }
-        .nav { text-align: center; margin-top: 10px; }
-        .nav a { margin: 0 8px; color: #4CAF50; text-decoration: none; }
-        /* Menú lateral */
-        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: var(--bg-color, #fff); box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
-        .side-menu.active { left: 0; }
-        .side-menu ul { list-style: none; padding: 20px; margin: 0; }
-        .side-menu ul li { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
-        .side-menu ul li:last-child { border-bottom: none; }
-        .side-menu-toggle { background: none; border: none; font-size: 24px; color: white; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
-        .side-menu-toggle:hover { background-color: rgba(0,0,0,0.05); border-radius: 50%; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="biblioteca.css">
+<title>Marcados · Biblia de Poder y Milagros</title>
 </head>
-<body>
-    <!-- Menú lateral -->
-    <div id="side-menu" class="side-menu">
-        <ul>
-            <li onclick="window.location.href='index.html'">Página principal</li>
-            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
-            <li onclick="window.location.href='audio.html'">Escuchar</li>
-            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
-            <li onclick="window.location.href='historias.html'">Historias</li>
-            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
-            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
-            <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='temas.html'">Temas</li>
-        </ul>
-    </div>
-    <div class="header">
-        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
-        <h1>Versículos marcados</h1>
-    </div>
-    <div class="nav">
-        <a href="index.html">Inicio</a>
-        <a href="lectura.html">Lectura</a>
-    </div>
-    <ul id="bookmarks-list" class="list"></ul>
-    <script>
-        // Cargar la Biblia y mostrar los versículos marcados con su contenido
-        let xmlDoc = null;
-        const container = document.getElementById('bookmarks-list');
-        const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-        
-        // Mostrar mensaje de carga
-        if (!bookmarks.length) {
-            container.innerHTML = '<div class="empty-message">No tienes versículos marcados.</div>';
-        } else {
-            container.innerHTML = '<div class="loading">Cargando versículos...</div>';
-            loadBible();
-        }
-        
-        // Cargar la Biblia (usamos Reina-Valera 1960 por defecto)
-        async function loadBible() {
-            try {
-                // Primero intentar desde caché (offline)
-                if ('caches' in window) {
-                    const cache = await caches.open('biblia-data-v7');
-                    const cachedResponse = await cache.match('biblia-files/Reina-Valera-1960.xmm');
-                    if (cachedResponse) {
-                        const xmlText = await cachedResponse.text();
-                        xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                        displayBookmarks();
-                        return;
-                    }
-                }
-                
-                // Si no está en caché, intentar desde red
-                const response = await fetch('biblia-files/Reina-Valera-1960.xmm');
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el archivo de la Biblia');
-                }
-                const xmlText = await response.text();
-                xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                displayBookmarks();
-            } catch (error) {
-                console.error('Error al cargar la Biblia:', error);
-                container.innerHTML = `<div class="empty-message">Error al cargar los versículos: ${error.message}</div>`;
-            }
-        }
-        
-        // Mostrar los versículos marcados con su contenido
-        function displayBookmarks() {
-            container.innerHTML = ''; // Limpiar el contenedor
-            
-            if (!bookmarks.length) {
-                container.innerHTML = '<div class="empty-message">No tienes versículos marcados.</div>';
-                return;
-            }
-            
-            bookmarks.forEach(key => {
-                const [book, chapter, verse] = key.split('-');
-                
-                // Buscar el versículo en la Biblia
-                const verseElement = xmlDoc.querySelector(`b[n="${book}"] c[n="${chapter}"] v[n="${verse}"]`);
-                let verseText = 'Versículo no encontrado';
-                
-                if (verseElement) {
-                    verseText = verseElement.textContent;
-                }
-                
-                // Crear el elemento del versículo
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <div class="verse-reference">${book} ${chapter}:${verse}</div>
-                    <div class="verse-text">${verseText}</div>
-                `;
-                
-                // Agregar evento de clic para ir a la página de lectura
-                div.addEventListener('click', function() {
-                    window.location.href = `lectura.html?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`;
-                });
-                
-                container.appendChild(div);
-            });
-        }
-    </script>
-    <script>
-        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
-        const sideMenu = document.getElementById('side-menu');
-        if (sideMenuToggleBtn) sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
-        document.addEventListener('click', e => {
-            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
-                sideMenu.classList.remove('active');
-            }
-        });
-    </script>
-    <script type="module" src="cuenta.js"></script>
+<body data-modo="marcados">
+<main class="page">
+  <header class="bt"><a href="mas.html" aria-label="Volver a Más"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a><div><h1>Marcados</h1><small id="total"></small></div></header>
+  <p style="margin:-8px 0 0;color:var(--text-2)">Tus versículos marcados con color.</p>
+  <div class="herr">
+    <label class="buscador"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="sr">Buscar</span><input id="buscar" type="search" placeholder="Buscar por libro o palabra" autocomplete="off"></label>
+    <div class="colores" id="colores" role="group" aria-label="Filtrar por color"></div>
+  </div>
+  <div class="lista" id="lista" aria-live="polite"></div>
+  <template id="vacio-tpl"><span style="color:var(--accent)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></span><b>Todavía no tienes versículos marcados</b><p>En la Biblia, toca un versículo y elige un color para marcarlo. Aparecerá aquí.</p><a class="btn" href="lectura.html" style="display:inline-flex;padding:0 20px">Ir a la Biblia</a></template>
+</main>
+
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+<script src="biblioteca.js"></script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>
