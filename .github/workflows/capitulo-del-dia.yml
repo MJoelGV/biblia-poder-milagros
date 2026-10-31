@@ -2,11 +2,15 @@ name: Capítulo del día
 
 on:
   schedule:
-    # Cada hora (al minuto 13, para evitar la congestión de la hora en punto).
-    # En cada ejecución se envía solo a quienes ya les llegó la hora que eligieron
-    # y todavía no recibieron el capítulo de hoy.
+    # Respaldo por si falla el despertador externo (cron-job.org, que llama a la tarea cada hora en punto).
+    # Nunca se envía dos veces el mismo día a la misma persona.
     - cron: '13 * * * *'
-  workflow_dispatch:       # envío manual: le llega a todos los suscritos
+  workflow_dispatch:       # manual (le llega a todos) o desde el despertador externo (respeta la hora de cada quien)
+    inputs:
+      programado:
+        description: 'Marcar solo si lo llama el despertador externo (cron-job.org)'
+        type: boolean
+        default: false
 
 jobs:
   enviar:
@@ -20,6 +24,7 @@ jobs:
       - name: Enviar capítulo del día
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PROGRAMADO: ${{ inputs.programado }}
         run: |
           cat > enviar.cjs <<'FIN'
           // Envía el "Capítulo del día" a cada persona a la hora que eligió (se ejecuta cada hora)
@@ -75,7 +80,8 @@ jobs:
           }
 
           async function main() {
-            const manual = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+            // Manual: le llega a todos. Si lo llama el despertador externo, se comporta como el horario normal.
+            const manual = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' && process.env.PROGRAMADO !== 'true';
             let xml = '';
             try { xml = await (await fetch(BIBLIA_URL)).text(); } catch (e) { console.warn('Sin Biblia:', e.message); }
             const mensajes = {}; // por fecha
