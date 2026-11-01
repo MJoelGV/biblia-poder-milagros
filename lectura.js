@@ -33,6 +33,13 @@
   let libro = null, capitulo = 1, versiculoInicial = parseInt(params.get('verse') || '0', 10) || 0;
   let comparar = leer('lecturaComparar', '');
   let mostrarPericopas = leer('mostrarPericopas', '1') !== '0';
+  let mostrarRefs = leer('mostrarReferencias', '1') !== '0';
+  let refsTodas = null; // se descarga una sola vez (≈1 MB) y luego queda guardado para usar sin internet
+  async function refsDe(i) {
+    if (i < 0) return {};
+    if (!refsTodas) refsTodas = fetch('referencias.json').then(r => r.ok ? r.json() : {}).catch(() => { refsTodas = null; return {}; });
+    return ((await refsTodas) || {})[i] || {};
+  }
   let tamLetra = parseFloat(leer('verseFontSize', '20')) || 20;
   const docs = {};       // versiones ya cargadas
   let doc = null;        // versión actual
@@ -100,6 +107,7 @@
     }
     const mapaOtra = new Map(otra.map(x => [x.n, x.t]));
     const peris = mostrarPericopas ? pericopasDe(b, c) : [];
+    const refs = mostrarRefs ? await refsDe(libros.indexOf(b)) : {};
     const marcados = new Set(leerJSON('bookmarks', []));
     const colores = leerJSON('bookmarkColors', {});
     const comentarios = leerJSON('comments', {});
@@ -127,7 +135,7 @@
       const color = marcados.has(k) ? (COLORES.includes(colores[k]) ? colores[k] : 'verde') : '';
       const iconos = (comentarios[k] ? `<button class="vi" type="button" data-com="${x.n}" aria-label="Ver comentario">${svg(ICO_COM, 16)}</button>` : '')
         + (memorizados.has(k) ? `<span class="vi" title="Memorizado" aria-label="Memorizado">${svg(ICO_MEM, 16)}</span>` : '');
-      html += `<span class="v${color ? ' hl-' + color : ''}" data-v="${x.n}" tabindex="0" role="button" aria-label="Versículo ${x.n}"><sup class="vn">${etiqueta[x.n] || x.n}</sup>${iconos}${esc(x.t)}</span> `;
+      html += `<span class="v${color ? ' hl-' + color : ''}" data-v="${x.n}" tabindex="0" role="button" aria-label="Versículo ${x.n}"><sup class="vn">${etiqueta[x.n] || x.n}</sup>${iconos}${esc(x.t)}${refs[`${c}:${x.n}`] ? `<button class="xr" type="button" data-xr="${x.n}" aria-expanded="false" aria-label="Ver ${refs[`${c}:${x.n}`].length} referencias relacionadas con el versículo ${x.n}">*</button>` : ''}</span> `;
       if (comparando) {
         cerrar();
         const t2 = mapaOtra.get(x.n);
@@ -245,7 +253,37 @@
     document.querySelector('[data-accion="memorizar"]').classList.toggle('on', mem);
     abrir('hoja-v');
   }
+  // ---------- Referencias cruzadas: al tocar el * se muestran debajo del versículo ----------
+  async function alternarRefs(btn) {
+    const v = parseInt(btn.dataset.xr, 10), span = btn.closest('.v');
+    const abierta = span.nextElementSibling && span.nextElementSibling.classList.contains('xr-box') ? span.nextElementSibling : null;
+    if (abierta) { abierta.remove(); btn.setAttribute('aria-expanded', 'false'); return; }
+    const lista = (await refsDe(libros.indexOf(libro)))[`${capitulo}:${v}`] || [];
+    const caja = document.createElement('span');
+    caja.className = 'xr-box'; caja.setAttribute('role', 'region'); caja.setAttribute('aria-label', `Referencias de ${referencia(v)}`);
+    caja.innerHTML = lista.map(([bi, ch, vi, ch2, vi2]) => {
+      const b2 = libros[bi]; if (!b2) return '';
+      const vs = versiculosDe(doc, b2, ch);
+      let texto = '', etq = `${b2} ${ch}:${vi}`;
+      if (ch2 && ch2 === ch && vi2 > vi) {
+        const tramo = vs.filter(x => x.n >= vi && x.n <= vi2);
+        etq += `-${vi2}`;
+        texto = tramo.slice(0, 3).map(x => x.t).join(' ') + (tramo.length > 3 ? ' …' : '');
+      } else {
+        if (ch2 && ch2 !== ch) etq += `–${ch2}:${vi2}`;
+        texto = (vs.find(x => x.n === vi) || {}).t || '';
+      }
+      return `<span class="xr-item"><b>${esc(etq)}</b>${esc(texto)}<button type="button" class="xr-ir" data-ir-b="${esc(b2)}" data-ir-c="${ch}" data-ir-v="${vi}">Ir al pasaje</button></span>`;
+    }).join('') + '<span class="xr-pie">Referencias: OpenBible.info (CC BY)</span>';
+    span.after(caja);
+    btn.setAttribute('aria-expanded', 'true');
+  }
   $('texto').addEventListener('click', e => {
+    const xr = e.target.closest('[data-xr]');
+    if (xr) { e.stopPropagation(); alternarRefs(xr); return; }
+    const ir2 = e.target.closest('.xr-ir');
+    if (ir2) { e.stopPropagation(); mostrar(ir2.dataset.irB, parseInt(ir2.dataset.irC, 10), parseInt(ir2.dataset.irV, 10)); return; }
+    if (e.target.closest('.xr-box')) return;
     const com = e.target.closest('[data-com]');
     if (com) { e.stopPropagation(); seleccionado = { v: parseInt(com.dataset.com, 10) }; abrirComentario(); return; }
     const el = e.target.closest('.v');
@@ -389,6 +427,7 @@
   $('btn-aa').addEventListener('click', () => {
     $('aa-cmp').innerHTML = '<option value="">Ninguna</option>' + VERSIONES.filter(x => x.id !== version).map(x => `<option value="${x.id}"${x.id === comparar ? ' selected' : ''}>${x.corto}</option>`).join('');
     $('aa-peri').setAttribute('aria-checked', String(mostrarPericopas));
+    $('aa-refs').setAttribute('aria-checked', String(mostrarRefs));
     const t = window.temaApp ? window.temaApp.actual() : 'auto';
     document.querySelectorAll('#hoja-aa [data-tema]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tema === t)));
     abrir('hoja-aa');
@@ -432,6 +471,11 @@
     }, 60);
   }
   $('aa-ver-peri').addEventListener('click', () => abrirPericopas(capitulo, 0));
+  $('aa-refs').addEventListener('click', () => {
+    mostrarRefs = !mostrarRefs; guardar('mostrarReferencias', mostrarRefs ? '1' : '0');
+    $('aa-refs').setAttribute('aria-checked', String(mostrarRefs));
+    const y = window.scrollY; mostrar(libro, capitulo, 0, { mantenerScroll: true }).then(() => { window.scrollTo(0, y); abrir('hoja-aa'); });
+  });
   $('texto').addEventListener('click', e => {
     const b = e.target.closest('[data-peri]');
     if (b) { e.stopPropagation(); abrirPericopas(capitulo, parseInt(b.dataset.peri, 10)); }
