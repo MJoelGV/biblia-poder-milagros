@@ -190,3 +190,11 @@ body.lectura { background: var(--surface); }
   color: var(--text); font: inherit; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
 .xr-pie { display: block; padding: 6px 0 2px; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 11px; color: var(--text-2); }
 @media (prefers-reduced-motion: reduce) { .xr-box { animation: none; } }
+
+/* Un versículo por línea: el número va en una columna a la izquierda */
+.texto.separado p { position: relative; margin: 0 0 12px; padding-left: 2em; }
+.texto.separado .vn { position: absolute; left: 0; top: .5em; width: 1.6em; text-align: right; vertical-align: baseline; line-height: 1; font-size: .62em; margin: 0; }
+.texto.separado .xr-box { margin-left: 0; }
+/* El * más discreto hasta que se toca */
+.xr { color: var(--text-2); opacity: .75; font-weight: 700; }
+.xr:hover, .xr:focus-visible { opacity: 1; color: var(--accent); }

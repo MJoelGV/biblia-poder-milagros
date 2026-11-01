@@ -34,6 +34,7 @@
   let comparar = leer('lecturaComparar', '');
   let mostrarPericopas = leer('mostrarPericopas', '1') !== '0';
   let mostrarRefs = leer('mostrarReferencias', '1') !== '0';
+  let separados = leer('versiculosSeparados', '1') !== '0'; // un versículo por línea (por defecto)
   let refsTodas = null; // se descarga una sola vez (≈1 MB) y luego queda guardado para usar sin internet
   async function refsDe(i) {
     if (i < 0) return {};
@@ -129,7 +130,7 @@
       if (!x.t) continue;
       const p = peris.find(pp => pp.desde === x.n);
       if (p) { cerrar(); html += `<h2 class="peri"><button type="button" data-peri="${x.n}" aria-label="${esc(p.titulo)}. Ver todas las perícopas de ${esc(b)}">${esc(p.titulo)}</button></h2>`; }
-      if (comparando) cerrar();
+      if (comparando || separados) cerrar();
       abrir();
       const k = `${b}-${c}-${x.n}`;
       const color = marcados.has(k) ? (COLORES.includes(colores[k]) ? colores[k] : 'verde') : '';
@@ -145,6 +146,7 @@
     cerrar();
     const texto = $('texto');
     texto.classList.toggle('comparando', comparando);
+    texto.classList.toggle('separado', separados || comparando);
     texto.innerHTML = html || '<div class="cargando-txt">No se encontró este capítulo en esta versión.</div>';
     pintarFin();
 
@@ -428,6 +430,7 @@
     $('aa-cmp').innerHTML = '<option value="">Ninguna</option>' + VERSIONES.filter(x => x.id !== version).map(x => `<option value="${x.id}"${x.id === comparar ? ' selected' : ''}>${x.corto}</option>`).join('');
     $('aa-peri').setAttribute('aria-checked', String(mostrarPericopas));
     $('aa-refs').setAttribute('aria-checked', String(mostrarRefs));
+    $('aa-sep').setAttribute('aria-checked', String(separados));
     const t = window.temaApp ? window.temaApp.actual() : 'auto';
     document.querySelectorAll('#hoja-aa [data-tema]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tema === t)));
     abrir('hoja-aa');
@@ -471,6 +474,11 @@
     }, 60);
   }
   $('aa-ver-peri').addEventListener('click', () => abrirPericopas(capitulo, 0));
+  $('aa-sep').addEventListener('click', () => {
+    separados = !separados; guardar('versiculosSeparados', separados ? '1' : '0');
+    $('aa-sep').setAttribute('aria-checked', String(separados));
+    const y = window.scrollY; mostrar(libro, capitulo, 0, { mantenerScroll: true }).then(() => { window.scrollTo(0, y); abrir('hoja-aa'); });
+  });
   $('aa-refs').addEventListener('click', () => {
     mostrarRefs = !mostrarRefs; guardar('mostrarReferencias', mostrarRefs ? '1' : '0');
     $('aa-refs').setAttribute('aria-checked', String(mostrarRefs));
