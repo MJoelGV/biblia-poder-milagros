@@ -7,9 +7,20 @@
     var p = preferencia();
     var oscuro = p === 'dark' || (p !== 'light' && media && media.matches);
     document.documentElement.setAttribute('data-theme', oscuro ? 'dark' : 'light');
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', oscuro ? '#0F1412' : '#F6F8F5');
+    pintarBarra(oscuro);
   }
+  // La barra del teléfono (hora, batería) toma el mismo color que el fondo de la página
+  function pintarBarra(oscuro) {
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.appendChild(meta); }
+    var color = oscuro ? '#0F1412' : '#F6F8F5';
+    if (document.body) {
+      var bg = getComputedStyle(document.body).backgroundColor;
+      if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') color = bg;
+    }
+    meta.setAttribute('content', color);
+  }
+  document.addEventListener('DOMContentLoaded', function () { pintarBarra(document.documentElement.getAttribute('data-theme') === 'dark'); });
   window.temaApp = {
     actual: function () { var p = preferencia(); return p === 'dark' ? 'oscuro' : p === 'light' ? 'claro' : 'auto'; },
     elegir: function (op) {

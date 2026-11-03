@@ -126,3 +126,9 @@ h2.sec { margin: 0; font-size: 18px; font-weight: 700; }
 .pr-item.cargando .pr-linea.corta { width: 50%; }
 .pr-item.cargando .pr-mini, .pr-item.cargando .pr-linea { animation: parpadeo 1.2s ease-in-out infinite; }
 @keyframes parpadeo { 50% { opacity: .5; } }
+
+/* Barras de vidrio: el contenido se ve suavemente detrás, desenfocado */
+.tabbar { background: color-mix(in srgb, var(--surface) 68%, transparent) !important; -webkit-backdrop-filter: saturate(180%) blur(22px); backdrop-filter: saturate(180%) blur(22px);
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important; transition: transform .6s cubic-bezier(.22,.61,.36,1), opacity .6s ease; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .tabbar { background: var(--surface) !important; } }
+@media (prefers-reduced-motion: reduce) { .tabbar { transition: none; } }
