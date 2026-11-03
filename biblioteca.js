@@ -27,7 +27,9 @@
   }
 
   // ---------- Biblia ----------
-  const version = VERSIONES[localStorage.getItem('lecturaVersion')] ? localStorage.getItem('lecturaVersion') : 'RVG';
+  const EN_LINEA = ['La-Biblia-de-Las-Americas', 'NBLA', 'Nueva-Traduccion-Viviente'];
+  const pref = localStorage.getItem('lecturaVersion');
+  const version = VERSIONES[pref] && !EN_LINEA.includes(pref) ? pref : 'RVG';
   let doc = null, orden = [];
   const partir = k => { const a = k.lastIndexOf('-'), b = k.lastIndexOf('-', a - 1); return { libro: k.slice(0, b), cap: parseInt(k.slice(b + 1, a), 10), v: parseInt(k.slice(a + 1), 10) }; };
   function texto(p) {

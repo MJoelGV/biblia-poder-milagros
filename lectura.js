@@ -9,8 +9,10 @@
     { id: 'RV1909', corto: 'RV1909', nombre: 'Reina-Valera 1909', nota: 'Reina-Valera 1909: dominio público.' },
     { id: 'TLA', corto: 'TLA', nombre: 'Traducción en Lenguaje Actual' },
     { id: 'Dios-Habla-Hoy', corto: 'DHH', nombre: 'Dios Habla Hoy' },
-    { id: 'La-Biblia-de-Las-Americas', corto: 'LBLA', nombre: 'La Biblia de las Américas' },
-    { id: 'Nueva-Traduccion-Viviente', corto: 'NTV', nombre: 'Nueva Traducción Viviente' },
+    // Estas tres se leen en línea con su licencia: LBLA y NBLA por YouVersion (Lockman), NTV por API.Bible
+    { id: 'La-Biblia-de-Las-Americas', corto: 'LBLA', nombre: 'La Biblia de las Américas', fuente: 'yv', yvId: 89, enlace: 'https://www.nuevabiblia.com', enlaceTxt: 'NuevaBiblia.com' },
+    { id: 'NBLA', corto: 'NBLA', nombre: 'Nueva Biblia de las Américas', fuente: 'yv', yvId: 103, enlace: 'https://www.nuevabiblia.com', enlaceTxt: 'NuevaBiblia.com' },
+    { id: 'Nueva-Traduccion-Viviente', corto: 'NTV', nombre: 'Nueva Traducción Viviente', fuente: 'ab', abbr: 'NTV' },
     { id: 'KJV', corto: 'KJV', nombre: 'King James Version (inglés)' },
     { id: 'WEB', corto: 'WEB', nombre: 'World English Bible (inglés)' }
   ];
@@ -71,6 +73,75 @@
     docs[id] = d;
     return d;
   }
+  // ---------- Versiones en línea (con licencia) ----------
+  const remota = id => !!(VERSIONES.find(v => v.id === id) || {}).fuente;
+  const cacheRem = {};
+  let yvCliente = null, fumsListo = null;
+  async function capituloRemoto(id, b, c) {
+    const k = `${id}|${b}|${c}`;
+    if (cacheRem[k]) return cacheRem[k];
+    const vi = verInfo(id), i = libros.indexOf(b), cod = CODIGOS[i];
+    if (!cod) throw new Error('libro');
+    const claves = window.CLAVES || {};
+    let lista = [], nota = '';
+    if (vi.fuente === 'yv') {
+      if (!yvCliente) {
+        const m = await import('https://cdn.jsdelivr.net/npm/@youversion/platform-core@2.15.0/+esm');
+        yvCliente = new m.BibleClient(new m.ApiClient({ appKey: claves.youversion }));
+      }
+      const d = await yvCliente.getPassageDisplay({ versionId: vi.yvId, passageId: `${cod}.${c}`, includeHeadings: false, includeNotes: false });
+      const dom = new DOMParser().parseFromString(`<div>${d.html}</div>`, 'text/html');
+      dom.querySelectorAll('.yv-vlbl, .va, [data-verse-footnote], .yv-h, .yv-n').forEach(x => x.remove());
+      const mapa = new Map();
+      dom.querySelectorAll('.yv-v[v]').forEach(s => {
+        if (s.parentElement && s.parentElement.closest('.yv-v')) return;
+        const n = parseInt(s.getAttribute('v'), 10);
+        if (n) mapa.set(n, (mapa.get(n) || '') + ' ' + s.textContent);
+      });
+      lista = [...mapa].sort((a, z) => a[0] - z[0]).map(([n, t]) => ({ n, t: t.replace(/\s+/g, ' ').trim() })).filter(x => x.t);
+      nota = (d.attribution && d.attribution.text) || '';
+    } else if (vi.fuente === 'ab') {
+      const AB = 'https://rest.api.bible/v1', h = { 'api-key': claves.apiBible };
+      let bid = leer('abible-' + vi.abbr, '');
+      if (!bid) {
+        const r = await fetch(`${AB}/bibles?language=spa`, { headers: h });
+        if (!r.ok) throw new Error('api.bible ' + r.status);
+        const lista2 = (await r.json()).data || [];
+        const x = lista2.find(z => [z.abbreviationLocal, z.abbreviation].some(a => (a || '').toUpperCase() === vi.abbr)) || lista2.find(z => /traducci[oó]n viviente/i.test((z.nameLocal || '') + ' ' + (z.name || '')));
+        if (!x) throw new Error('no disponible');
+        bid = x.id; guardar('abible-' + vi.abbr, bid);
+      }
+      const r = await fetch(`${AB}/bibles/${bid}/chapters/${cod}.${c}?content-type=json&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=false&include-verse-spans=false`, { headers: h });
+      if (!r.ok) throw new Error('api.bible ' + r.status);
+      const j = await r.json(), data = j.data || {};
+      const mapa = new Map();
+      (function recorrer(items) {
+        (items || []).forEach(it => {
+          if (it.type === 'text' && it.attrs && it.attrs.verseId) {
+            const n = parseInt(String(it.attrs.verseId).split('.').pop(), 10);
+            if (n) mapa.set(n, (mapa.get(n) || '') + it.text);
+          }
+          if (it.items) recorrer(it.items);
+        });
+      })(Array.isArray(data.content) ? data.content : []);
+      lista = [...mapa].sort((a, z) => a[0] - z[0]).map(([n, t]) => ({ n, t: t.replace(/\s+/g, ' ').trim() })).filter(x => x.t);
+      nota = data.copyright || '';
+      // API.Bible pide registrar cada lectura con su sistema FUMS (es parte de la licencia)
+      const fid = j.meta && j.meta.fumsId;
+      if (fid) {
+        if (!fumsListo) fumsListo = new Promise(ok => { const s = document.createElement('script'); s.src = 'https://cdn.scripture.api.bible/fums/fumsv2.min.js'; s.onload = ok; s.onerror = ok; document.head.appendChild(s); });
+        fumsListo.then(() => { try { window._BAPI && window._BAPI.t(fid); } catch (e) {} });
+      }
+    }
+    if (!lista.length) throw new Error('vacío');
+    return (cacheRem[k] = { lista, nota });
+  }
+  async function versiculosVersion(id, b, c) {
+    if (remota(id)) return (await capituloRemoto(id, b, c)).lista;
+    return versiculosDe(await cargarVersion(id), b, c);
+  }
+  let listaActual = [];
+
   const nodoLibro = (d, b) => d.querySelector(`b[n="${CSS.escape(b)}"]`);
   const nodoCap = (d, b, c) => { const nb = nodoLibro(d, b); return nb ? nb.querySelector(`c[n="${c}"]`) : null; };
   const numCaps = b => { const nb = nodoLibro(doc, b); return nb ? nb.getElementsByTagName('c').length : 0; };
@@ -103,10 +174,15 @@
     $('cap-nombre').textContent = `${b} ${c}`;
     document.title = `${b} ${c} · Biblia de Poder y Milagros`;
 
-    const lista = versiculosDe(doc, b, c);
+    let lista = [], notaRem = '', errorRem = false;
+    if (remota(version)) {
+      try { const r = await capituloRemoto(version, b, c); lista = r.lista; notaRem = r.nota; }
+      catch (e) { console.warn(e); errorRem = true; }
+    } else lista = versiculosDe(doc, b, c);
+    listaActual = lista;
     let otra = [];
     if (comparar && comparar !== version) {
-      try { otra = versiculosDe(await cargarVersion(comparar), b, c); } catch (e) { avisar('No se pudo cargar la versión para comparar'); }
+      try { otra = await versiculosVersion(comparar, b, c); } catch (e) { avisar('No se pudo cargar la versión para comparar'); }
     }
     const mapaOtra = new Map(otra.map(x => [x.n, x.t]));
     const peris = mostrarPericopas ? pericopasDe(b, c) : [];
@@ -147,7 +223,8 @@
       }
     }
     cerrar();
-    if (vi.nota) html += `<p class="nota-derechos">${esc(vi.nota)}</p>`;
+    if (errorRem) html = `<div class="cargando-txt">No se pudo cargar ${esc(vi.nombre)}. Esta versión se lee en línea: revisa tu conexión, o cambia a otra versión para leer sin internet.</div>`;
+    else if (notaRem || vi.nota) html += `<p class="nota-derechos">${esc(notaRem || vi.nota)}${vi.enlace ? ` · <a href="${vi.enlace}" target="_blank" rel="noopener">${esc(vi.enlaceTxt)}</a>` : ''}</p>`;
     const texto = $('texto');
     texto.classList.toggle('comparando', comparando);
     texto.classList.toggle('separado', separados || comparando);
@@ -280,7 +357,7 @@
         texto = (vs.find(x => x.n === vi) || {}).t || '';
       }
       return `<span class="xr-item"><b>${esc(etq)}</b>${esc(texto)}<button type="button" class="xr-ir" data-ir-b="${esc(b2)}" data-ir-c="${ch}" data-ir-v="${vi}">Ir al pasaje</button></span>`;
-    }).join('') + '<span class="xr-pie">Referencias: OpenBible.info (CC BY)</span>';
+    }).join('') + `<span class="xr-pie">Referencias: OpenBible.info (CC BY)${remota(version) ? ' · Texto de las referencias: RVG' : ''}</span>`;
     span.after(caja);
     btn.setAttribute('aria-expanded', 'true');
   }
@@ -324,7 +401,7 @@
   document.querySelectorAll('#hoja-v .accion').forEach(b => b.addEventListener('click', () => {
     if (!seleccionado) return;
     const v = seleccionado.v, k = clave(v);
-    const texto = (versiculosDe(doc, libro, capitulo).find(x => x.n === v) || {}).t || '';
+    const texto = (listaActual.find(x => x.n === v) || {}).t || '';
     switch (b.dataset.accion) {
       case 'comparar': abrirComparar(v, texto); break;
       case 'comentar': cerrarUltimo(); seleccionado = { v }; abrirComentario(); break;
@@ -346,7 +423,7 @@
       }
       case 'compartir':
         // La página de compartir usa claves cortas para las versiones
-        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv', 'KJV': 'kjv', 'WEB': 'web', 'RV1909': 'rv1909', 'RVG': 'rvg' })[version] || 'rvg'}`;
+        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv', 'KJV': 'kjv', 'WEB': 'web', 'RV1909': 'rv1909', 'RVG': 'rvg', 'NBLA': 'nbla' })[version] || 'rvg'}${remota(version) ? '&texto=' + encodeURIComponent(texto) : ''}`;
         break;
       case 'nota':
         cerrarUltimo();
@@ -385,8 +462,7 @@
       const res = $('hcmp-res');
       res.hidden = false; res.textContent = 'Cargando…';
       try {
-        const d = await cargarVersion(btn.dataset.ver);
-        const t = (versiculosDe(d, libro, capitulo).find(x => x.n === v) || {}).t;
+        const t = ((await versiculosVersion(btn.dataset.ver, libro, capitulo)).find(x => x.n === v) || {}).t;
         res.innerHTML = `<b style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--accent)">${esc(verInfo(btn.dataset.ver).nombre)}</b><br>${esc(t || 'Este versículo no está en esa versión.')}`;
       } catch (err) { res.textContent = 'No se pudo cargar esa versión. Revisa tu conexión.'; }
     };
@@ -414,7 +490,7 @@
   async function guardarActual() {
     if (!window.caches) return;
     const g = await guardadas();
-    if (!g.has(urlBiblia(version))) guardarBiblia(version).catch(() => {});
+    if (!remota(version) && !g.has(urlBiblia(version))) guardarBiblia(version).catch(() => {});
   }
 
   // ---------- Versión ----------
@@ -423,6 +499,7 @@
     const g = await guardadas();
     $('hver-lista').innerHTML = VERSIONES.map(x => {
       const ok = g.has(urlBiblia(x.id));
+      if (x.fuente) return `<div class="ver-fila"><button type="button" data-ver="${x.id}"><span>${esc(x.nombre)} <small style="color:var(--text-2)">${x.corto}</small></span>${x.id === version ? `<span style="color:var(--accent)">${svg(ICO_OK, 20)}</span>` : ''}</button><span class="ver-dl en-linea">En línea</span></div>`;
       return `<div class="ver-fila"><button type="button" data-ver="${x.id}"><span>${esc(x.nombre)} <small style="color:var(--text-2)">${x.corto}</small></span>${x.id === version ? `<span style="color:var(--accent)">${svg(ICO_OK, 20)}</span>` : ''}</button>` +
         `<button type="button" class="ver-dl${ok ? ' ok' : ''}" data-dl="${x.id}" aria-label="${ok ? 'Guardada para leer sin internet. Toca para quitarla' : 'Descargar ' + esc(x.nombre) + ' para leer sin internet'}">${ok ? svg(ICO_OK, 18) + '<span>Sin internet</span>' : svg(ICO_BAJAR, 18) + '<span>Descargar</span>'}</button></div>`;
     }).join('') + '<p class="ver-ayuda">Las Biblias descargadas se pueden leer sin internet. Cada una ocupa unos 5 MB. La que estás leyendo se guarda sola.</p>';
@@ -464,7 +541,7 @@
     if (b.dataset.ver === version) return;
     avisar('Cargando ' + verInfo(b.dataset.ver).nombre + '…');
     try {
-      doc = await cargarVersion(b.dataset.ver);
+      if (!remota(b.dataset.ver)) doc = await cargarVersion(b.dataset.ver);
       version = b.dataset.ver; guardar('lecturaVersion', version);
       mostrar(libro, capitulo, 0, { mantenerScroll: true });
       guardarActual();
@@ -626,7 +703,7 @@
       const [i, n] = pos;
       return esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + n)) + '</mark>' + esc(t.slice(i + n));
     };
-    res.innerHTML = `<p class="res-n">${total === 0 ? 'No se encontraron versículos.' : total === 1 ? '1 versículo encontrado' : `${total} versículos encontrados` + (total > 300 ? ' (se muestran los primeros 300)' : '')}</p>`
+    res.innerHTML = `<p class="res-n">${total === 0 ? 'No se encontraron versículos.' : total === 1 ? '1 versículo encontrado' : `${total} versículos encontrados` + (total > 300 ? ' (se muestran los primeros 300)' : '')}${remota(version) ? ' · búsqueda en la RVG' : ''}</p>`
       + hallados.map(h => `<button class="res" type="button" data-b="${esc(h.b)}" data-c="${h.c}" data-v="${h.v}"><b>${esc(h.b)} ${h.c}:${h.v}</b><span>${marcar(h.t)}</span></button>`).join('');
   }
   $('btn-buscar').addEventListener('click', () => { abrir('p-buscar'); });
@@ -826,7 +903,7 @@
   aplicarLetra();
   (async function iniciar() {
     try {
-      doc = await cargarVersion(version);
+      doc = await cargarVersion(remota(version) ? 'RVG' : version);
       guardarActual();
     } catch (e) {
       try { version = 'RVG'; doc = await cargarVersion(version); }

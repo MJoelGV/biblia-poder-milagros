@@ -231,8 +231,8 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm', rv1909: 'RV1909.xmm', rvg: 'RVG.xmm' };
-        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)', rv1909: 'Reina-Valera 1909', rvg: 'Reina Valera Gómez' };
+        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'RVG.xmm', ntv: 'RVG.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm', rv1909: 'RV1909.xmm', rvg: 'RVG.xmm', nbla: 'RVG.xmm' };
+        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)', rv1909: 'Reina-Valera 1909', rvg: 'Reina Valera Gómez', nbla: 'Nueva Biblia de las Américas' };
         let versionParam = (params.get('version') || 'rvg').toLowerCase();
         const versionSelect = document.getElementById('version-select');
         function populateVersionSelect() { versionSelect.innerHTML=''; for (let k in versionNames) { const o=document.createElement('option'); o.value=k; o.text=versionNames[k]; if (k===versionParam) o.selected=true; versionSelect.append(o);} }
@@ -433,7 +433,6 @@
         function updateVerse() {
             const topSig = '<div class="top-signature">Biblia de Poder y Milagros</div>';
             const logo = '<img class="logo-watermark" src="icons/pymicon.png" alt="Logo">';
-            const versionAbbr = getVersionAbbreviation(versionParam);
             const name = getBookName(bookParam);
             const bNode = findBookNode(xmlData, name);
             if (!bNode) { console.error('Book not found:', name); verseCard.textContent = 'Libro no encontrado'; return; }
@@ -441,8 +440,17 @@
             if (!cNode) { console.error('Chapter not found:', chapter); verseCard.textContent = 'Capítulo no encontrado'; return; }
             const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
             if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
+            // LBLA, NBLA y NTV se leen en línea: su texto llega desde la lectura; si se cambia de versículo aquí, se usa la RVG
+            const enLinea = ['lla', 'ntv', 'nbla'].includes(versionParam);
+            let textoMostrar = vNode.textContent;
+            if (enLinea) {
+                if (textoFijo && String(name).toLowerCase() === textoFijo.b && chapter === textoFijo.c && verse === textoFijo.v) textoMostrar = textoFijo.t;
+                else { versionParam = 'rvg'; try { versionSelect.value = 'rvg'; } catch (e) {} }
+            }
+            const versionAbbr = getVersionAbbreviation(versionParam);
+            const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             if (vNode) {
-                verseCard.innerHTML = `${topSig}<div id="text-box"><div id="verse-ref">${name} ${chapter}:${verse}</div><div id="verse-text">${vNode.textContent}</div><div style="font-size: 0.8em; color: #fff !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; text-align: right; margin-top: 5px; font-weight: 600;">-${versionAbbr}</div></div>${logo}`;
+                verseCard.innerHTML = `${topSig}<div id="text-box"><div id="verse-ref">${name} ${chapter}:${verse}</div><div id="verse-text">${escHtml(textoMostrar)}</div><div style="font-size: 0.8em; color: #fff !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; text-align: right; margin-top: 5px; font-weight: 600;">-${versionAbbr}</div></div>${logo}`;
                 
                 // Ajustar automáticamente el tamaño de fuente
                 setTimeout(() => {
@@ -475,7 +483,8 @@
                 'kjv': 'KJV',
                 'web': 'WEB',
                 'rv1909': 'RV1909',
-                'rvg': 'RVG'
+                'rvg': 'RVG',
+                'nbla': 'NBLA'
             };
             return abbreviations[versionCode] || versionCode.toUpperCase();
         }
@@ -555,6 +564,8 @@
             return verses[hash % verses.length];
         }
 
+        const pTxt = new URLSearchParams(location.search);
+        const textoFijo = pTxt.get('texto') ? { t: pTxt.get('texto'), b: (pTxt.get('book') || '').toLowerCase(), c: pTxt.get('chapter'), v: pTxt.get('verse') } : null;
         (async function init() {
             try {
                 await loadXml();
