@@ -198,3 +198,16 @@ body.lectura { background: var(--surface); }
 /* El * más discreto hasta que se toca */
 .xr { color: var(--text-2); opacity: .75; font-weight: 700; }
 .xr:hover, .xr:focus-visible { opacity: 1; color: var(--accent); }
+
+/* Títulos de los salmos y nota de derechos de la versión */
+.sobrescrito { font-style:italic; font-size:.86em; color:var(--text-2); margin:0 0 10px; }
+.texto.separado .sobrescrito { padding-left:2em; }
+.nota-derechos { font-family:'Plus Jakarta Sans', system-ui, sans-serif; font-size:12px; line-height:1.5; color:var(--text-2); margin:26px 0 0; }
+
+/* Descargar Biblias para leer sin internet */
+.ver-fila { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
+.ver-fila > button[data-ver] { flex:1; min-width:0; border-bottom:0 !important; }
+.ver-dl { flex-shrink:0; min-height:36px; padding:0 12px; border-radius:18px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+.ver-dl.ok { border-color:transparent; background:var(--accent-soft); color:var(--accent); }
+.ver-dl:disabled { opacity:.7; }
+.ver-ayuda { margin:12px 2px 0; font-size:13px; line-height:1.5; color:var(--text-2); }

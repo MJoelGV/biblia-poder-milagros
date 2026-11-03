@@ -1,14 +1,15 @@
 // Service Worker for offline support
-const SW_VERSION = 'v18';
+const SW_VERSION = 'v19';
 console.log('Service Worker version:', SW_VERSION);
-const CACHE_NAME = 'biblia-app-cache-v18';
+const CACHE_NAME = 'biblia-app-cache-v19';
 
 // Cache estático para recursos principales
-const STATIC_CACHE = 'biblia-static-v18';
+const STATIC_CACHE = 'biblia-static-v19';
 // Cache dinámico para contenido generado
-const DYNAMIC_CACHE = 'biblia-dynamic-v18';
+const DYNAMIC_CACHE = 'biblia-dynamic-v19';
 // Cache para datos bíblicos
 const DATA_CACHE = 'biblia-data-v12';
+const OFFLINE_BIBLIAS = 'biblias-offline'; // Biblias que cada persona descargó para leer sin internet
 
 // Recursos esenciales para funcionamiento básico (descarga inmediata)
 const ESSENTIAL_URLS = [
@@ -82,8 +83,7 @@ self.addEventListener('install', event => {
       .then(cache => Promise.all(ESSENTIAL_URLS.map(u => cache.add(u).catch(err => console.warn('No se pudo guardar:', u, err)))))
       .then(() => {
         console.log('Essential resources cached');
-        // Las Biblias se descargan en segundo plano, sin frenar la actualización
-        progressiveCacheBibleData().catch(err => console.warn('Descarga de Biblias incompleta:', err));
+        // Ya no se descargan todas las Biblias solas: cada persona elige cuáles guardar (lectura → versión)
       })
   );
 });
@@ -203,7 +203,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         keys.map(key => {
           // Eliminar cachés antiguos
-          if (key !== STATIC_CACHE && key !== DYNAMIC_CACHE && key !== DATA_CACHE) {
+          if (key !== STATIC_CACHE && key !== DYNAMIC_CACHE && key !== DATA_CACHE && key !== OFFLINE_BIBLIAS && key !== 'abrir-pendiente') {
             console.log('Deleting old cache:', key);
             return caches.delete(key);
           }
@@ -266,6 +266,31 @@ self.addEventListener('fetch', event => {
         .then(cache => cache.match(event.request, { ignoreSearch: true }))
         .then(r => r || caches.match('./index.html')))
     );
+  }
+  // Biblias completas (.xmm): primero la copia descargada; se renueva sola cada semana para recibir correcciones
+  else if (url.pathname.includes('/biblia-files/') && url.pathname.endsWith('.xmm')) {
+    event.respondWith((async () => {
+      const off = await caches.open(OFFLINE_BIBLIAS);
+      const guardada = await off.match(event.request, { ignoreSearch: true });
+      if (guardada) {
+        const edad = Date.now() - Number(guardada.headers.get('x-guardado') || 0);
+        if (edad > 7 * 86400000) {
+          event.waitUntil(fetch(event.request.url, { cache: 'reload' }).then(async r => {
+            if (!r.ok) return;
+            const h = new Headers(r.headers); h.set('x-guardado', String(Date.now()));
+            await off.put(event.request.url, new Response(await r.blob(), { status: 200, headers: h }));
+          }).catch(() => {}));
+        }
+        return guardada;
+      }
+      try {
+        const r = await fetch(event.request);
+        if (r.ok) { const copia = r.clone(); caches.open(DYNAMIC_CACHE).then(c => c.put(event.request, copia)); }
+        return r;
+      } catch (e) {
+        return (await caches.match(event.request, { ignoreSearch: true })) || new Response('', { status: 504 });
+      }
+    })());
   }
   // Estrategia: Cache First con fallback para datos bíblicos
   else if (isDataResource(event.request)) {

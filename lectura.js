@@ -4,7 +4,9 @@
 
   // ---------- Datos básicos ----------
   const VERSIONES = [
+    { id: 'RVG', corto: 'RVG', nombre: 'Reina Valera Gómez', nota: 'Santa Biblia Reina Valera Gómez. Copyright © 2004, 2010, 2023 Dr. Humberto Gómez Caballero. Derechos reservados; distribución gratuita autorizada por el autor. Fuente: eBible.org' },
     { id: 'Reina-Valera-1960', corto: 'RVR1960', nombre: 'Reina-Valera 1960' },
+    { id: 'RV1909', corto: 'RV1909', nombre: 'Reina-Valera 1909', nota: 'Reina-Valera 1909: dominio público.' },
     { id: 'TLA', corto: 'TLA', nombre: 'Traducción en Lenguaje Actual' },
     { id: 'Dios-Habla-Hoy', corto: 'DHH', nombre: 'Dios Habla Hoy' },
     { id: 'La-Biblia-de-Las-Americas', corto: 'LBLA', nombre: 'La Biblia de las Américas' },
@@ -29,7 +31,7 @@
   const params = new URLSearchParams(location.search);
   const ultima = leerJSON('ultimaLectura', null);
   let version = VERSIONES.some(v => v.id === params.get('version')) ? params.get('version')
-    : (VERSIONES.some(v => v.id === leer('lecturaVersion')) ? leer('lecturaVersion') : (ultima && VERSIONES.some(v => v.id === ultima.version) ? ultima.version : 'Reina-Valera-1960'));
+    : (VERSIONES.some(v => v.id === leer('lecturaVersion')) ? leer('lecturaVersion') : (ultima && VERSIONES.some(v => v.id === ultima.version) ? ultima.version : 'RVG'));
   let libro = null, capitulo = 1, versiculoInicial = parseInt(params.get('verse') || '0', 10) || 0;
   let comparar = leer('lecturaComparar', '');
   let mostrarPericopas = leer('mostrarPericopas', '1') !== '0';
@@ -128,6 +130,7 @@
     }
     for (const x of lista) {
       if (!x.t) continue;
+      if (x.n === 0) { cerrar(); html += `<p class="sobrescrito">${esc(x.t)}</p>`; continue; } // título del salmo
       const p = peris.find(pp => pp.desde === x.n);
       if (p) { cerrar(); html += `<h2 class="peri"><button type="button" data-peri="${x.n}" aria-label="${esc(p.titulo)}. Ver todas las perícopas de ${esc(b)}">${esc(p.titulo)}</button></h2>`; }
       if (comparando || separados) cerrar();
@@ -144,6 +147,7 @@
       }
     }
     cerrar();
+    if (vi.nota) html += `<p class="nota-derechos">${esc(vi.nota)}</p>`;
     const texto = $('texto');
     texto.classList.toggle('comparando', comparando);
     texto.classList.toggle('separado', separados || comparando);
@@ -342,7 +346,7 @@
       }
       case 'compartir':
         // La página de compartir usa claves cortas para las versiones
-        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv', 'KJV': 'kjv', 'WEB': 'web' })[version] || 'rv1960'}`;
+        location.href = `share.html?book=${encodeURIComponent(libro)}&chapter=${capitulo}&verse=${v}&version=${({ 'Reina-Valera-1960': 'rv1960', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'La-Biblia-de-Las-Americas': 'lla', 'Nueva-Traduccion-Viviente': 'ntv', 'KJV': 'kjv', 'WEB': 'web', 'RV1909': 'rv1909', 'RVG': 'rvg' })[version] || 'rvg'}`;
         break;
       case 'nota':
         cerrarUltimo();
@@ -391,9 +395,40 @@
     abrir('hoja-cmp');
   }
 
+  // ---------- Biblias guardadas para leer sin internet ----------
+  const OFF = 'biblias-offline';
+  const urlBiblia = id => new URL(`biblia-files/${id}.xmm`, location.href).href;
+  async function guardadas() {
+    try { const c = await caches.open(OFF); const ks = await c.keys(); return new Set(ks.map(r => r.url)); } catch (e) { return new Set(); }
+  }
+  async function guardarBiblia(id) {
+    const c = await caches.open(OFF);
+    const r = await fetch(urlBiblia(id), { cache: 'reload' });
+    if (!r.ok) throw new Error('descarga');
+    const h = new Headers(r.headers); h.set('x-guardado', String(Date.now()));
+    await c.put(urlBiblia(id), new Response(await r.blob(), { status: 200, headers: h }));
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  }
+  async function quitarBiblia(id) { try { const c = await caches.open(OFF); await c.delete(urlBiblia(id)); } catch (e) {} }
+  // La versión que estás leyendo se guarda sola
+  async function guardarActual() {
+    if (!window.caches) return;
+    const g = await guardadas();
+    if (!g.has(urlBiblia(version))) guardarBiblia(version).catch(() => {});
+  }
+
   // ---------- Versión ----------
-  $('btn-version').addEventListener('click', () => {
-    $('hver-lista').innerHTML = VERSIONES.map(x => `<button type="button" data-ver="${x.id}"><span>${esc(x.nombre)} <small style="color:var(--text-2)">${x.corto}</small></span>${x.id === version ? `<span style="color:var(--accent)">${svg(ICO_OK, 20)}</span>` : ''}</button>`).join('');
+  const ICO_BAJAR = '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>';
+  async function pintarVersiones() {
+    const g = await guardadas();
+    $('hver-lista').innerHTML = VERSIONES.map(x => {
+      const ok = g.has(urlBiblia(x.id));
+      return `<div class="ver-fila"><button type="button" data-ver="${x.id}"><span>${esc(x.nombre)} <small style="color:var(--text-2)">${x.corto}</small></span>${x.id === version ? `<span style="color:var(--accent)">${svg(ICO_OK, 20)}</span>` : ''}</button>` +
+        `<button type="button" class="ver-dl${ok ? ' ok' : ''}" data-dl="${x.id}" aria-label="${ok ? 'Guardada para leer sin internet. Toca para quitarla' : 'Descargar ' + esc(x.nombre) + ' para leer sin internet'}">${ok ? svg(ICO_OK, 18) + '<span>Sin internet</span>' : svg(ICO_BAJAR, 18) + '<span>Descargar</span>'}</button></div>`;
+    }).join('') + '<p class="ver-ayuda">Las Biblias descargadas se pueden leer sin internet. Cada una ocupa unos 5 MB. La que estás leyendo se guarda sola.</p>';
+  }
+  $('btn-version').addEventListener('click', async () => {
+    await pintarVersiones();
     pintarChipsComparar();
     abrir('hoja-ver');
   });
@@ -410,6 +445,20 @@
     mostrar(libro, capitulo, 0, { mantenerScroll: true });
   });
   $('hver-lista').addEventListener('click', async e => {
+    const dl = e.target.closest('[data-dl]');
+    if (dl) {
+      const id = dl.dataset.dl, nombre = verInfo(id).nombre;
+      if (dl.classList.contains('ok')) {
+        if (id === version) { avisar('La versión que estás leyendo se mantiene guardada'); return; }
+        if (!confirm(`¿Quitar ${nombre} de este celular? La podrás descargar otra vez cuando quieras.`)) return;
+        await quitarBiblia(id); avisar(nombre + ' quitada'); pintarVersiones(); return;
+      }
+      dl.disabled = true; dl.querySelector('span').textContent = 'Descargando…';
+      try { await guardarBiblia(id); avisar(nombre + ' lista para leer sin internet'); }
+      catch (err) { avisar('No se pudo descargar. Revisa tu conexión.'); }
+      pintarVersiones();
+      return;
+    }
     const b = e.target.closest('[data-ver]'); if (!b) return;
     cerrarTodo();
     if (b.dataset.ver === version) return;
@@ -418,6 +467,7 @@
       doc = await cargarVersion(b.dataset.ver);
       version = b.dataset.ver; guardar('lecturaVersion', version);
       mostrar(libro, capitulo, 0, { mantenerScroll: true });
+      guardarActual();
     } catch (err) { avisar('No se pudo cargar esa versión'); }
   });
 
@@ -561,6 +611,7 @@
       const b = nb.getAttribute('n');
       for (const nc of nb.getElementsByTagName('c')) {
         for (const nv of nc.getElementsByTagName('v')) {
+          if (nv.getAttribute('n') === '0') continue;
           const t = textoV(nv);
           if (posicion(normal(t))) {
             total++;
@@ -776,8 +827,9 @@
   (async function iniciar() {
     try {
       doc = await cargarVersion(version);
+      guardarActual();
     } catch (e) {
-      try { version = 'Reina-Valera-1960'; doc = await cargarVersion(version); }
+      try { version = 'RVG'; doc = await cargarVersion(version); }
       catch (e2) { $('texto').innerHTML = '<div class="cargando-txt">No se pudo cargar la Biblia. Revisa tu conexión e inténtalo de nuevo.</div>'; return; }
     }
     libros = Array.from(doc.getElementsByTagName('b')).map(b => b.getAttribute('n'));
