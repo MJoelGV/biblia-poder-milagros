@@ -231,9 +231,9 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm' };
-        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)' };
-        let versionParam = (params.get('version') || 'rv1960').toLowerCase();
+        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'La-Biblia-de-Las-Americas.xmm', ntv: 'Nueva-Traduccion-Viviente.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm', rv1909: 'RV1909.xmm', rvg: 'RVG.xmm' };
+        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)', rv1909: 'Reina-Valera 1909', rvg: 'Reina Valera Gómez' };
+        let versionParam = (params.get('version') || 'rvg').toLowerCase();
         const versionSelect = document.getElementById('version-select');
         function populateVersionSelect() { versionSelect.innerHTML=''; for (let k in versionNames) { const o=document.createElement('option'); o.value=k; o.text=versionNames[k]; if (k===versionParam) o.selected=true; versionSelect.append(o);} }
         function loadXml() { return fetch(`biblia-files/${versionMap[versionParam]}`).then(r=>r.text()).then(t=>{ xmlData=new DOMParser().parseFromString(t,'text/xml'); }); }
@@ -473,7 +473,9 @@
                 'ntv': 'NTV',
                 'tla': 'TLA',
                 'kjv': 'KJV',
-                'web': 'WEB'
+                'web': 'WEB',
+                'rv1909': 'RV1909',
+                'rvg': 'RVG'
             };
             return abbreviations[versionCode] || versionCode.toUpperCase();
         }

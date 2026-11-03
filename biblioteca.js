@@ -3,7 +3,7 @@
   'use strict';
   const MODO = document.body.dataset.modo; // 'marcados' | 'comentarios' | 'memorizados'
   const $ = id => document.getElementById(id);
-  const VERSIONES = { 'Reina-Valera-1960': ['RVR1960', 'rv1960'], 'TLA': ['TLA', 'tla'], 'Dios-Habla-Hoy': ['DHH', 'dhh'], 'La-Biblia-de-Las-Americas': ['LBLA', 'lla'], 'Nueva-Traduccion-Viviente': ['NTV', 'ntv'], 'KJV': ['KJV', 'kjv'], 'WEB': ['WEB', 'web'] };
+  const VERSIONES = { 'Reina-Valera-1960': ['RVR1960', 'rv1960'], 'TLA': ['TLA', 'tla'], 'Dios-Habla-Hoy': ['DHH', 'dhh'], 'La-Biblia-de-Las-Americas': ['LBLA', 'lla'], 'Nueva-Traduccion-Viviente': ['NTV', 'ntv'], 'KJV': ['KJV', 'kjv'], 'WEB': ['WEB', 'web'], 'RV1909': ['RV1909', 'rv1909'], 'RVG': ['RVG', 'rvg'] };
   const COLORES = { amarillo: 'Amarillo', verde: 'Verde', azul: 'Azul', rosa: 'Rosa', morado: 'Morado' };
   const leerJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -27,7 +27,7 @@
   }
 
   // ---------- Biblia ----------
-  const version = VERSIONES[localStorage.getItem('lecturaVersion')] ? localStorage.getItem('lecturaVersion') : 'Reina-Valera-1960';
+  const version = VERSIONES[localStorage.getItem('lecturaVersion')] ? localStorage.getItem('lecturaVersion') : 'RVG';
   let doc = null, orden = [];
   const partir = k => { const a = k.lastIndexOf('-'), b = k.lastIndexOf('-', a - 1); return { libro: k.slice(0, b), cap: parseInt(k.slice(b + 1, a), 10), v: parseInt(k.slice(a + 1), 10) }; };
   function texto(p) {
