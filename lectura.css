@@ -214,3 +214,14 @@ body.lectura { background: var(--surface); }
 
 .ver-dl.en-linea { cursor:default; border-style:dashed; color:var(--text-2); }
 .nota-derechos a { color:var(--accent); }
+
+/* Lectura: barras más transparentes, como vidrio claro (el texto se ve pasar detrás) */
+.lectura .lbar { background: color-mix(in srgb, var(--surface) 38%, transparent); -webkit-backdrop-filter: saturate(190%) blur(16px); backdrop-filter: saturate(190%) blur(16px);
+  border-bottom-color: color-mix(in srgb, var(--border) 45%, transparent); }
+.lectura .tabbar { background: color-mix(in srgb, var(--surface) 40%, transparent) !important; -webkit-backdrop-filter: saturate(190%) blur(16px); backdrop-filter: saturate(190%) blur(16px);
+  border-top-color: color-mix(in srgb, var(--border) 45%, transparent) !important; }
+.lectura .lbar .lpill { background: color-mix(in srgb, var(--bg) 45%, transparent); border-color: color-mix(in srgb, var(--border) 60%, transparent); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lectura .lbar { background: color-mix(in srgb, var(--surface) 92%, transparent); }
+  .lectura .tabbar { background: color-mix(in srgb, var(--surface) 92%, transparent) !important; }
+}
