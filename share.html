@@ -1,722 +1,248 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compartir Versículo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-    <style>
-        :root { --primary-color: #4CAF50; --bg-color: #fff; --text-color: #333; }
-        body { margin:0; font-family: Arial, sans-serif, 'Great Vibes'; background:#f0f0f0; color:var(--text-color); }
-        .header { display:flex; align-items:center; padding:10px; background:var(--primary-color); color:#fff; }
-        .header a { color:#fff; text-decoration:none; margin-right:10px; font-size:24px; }
-        .header .side-menu-toggle { background:none; border:none; color:#fff; font-size:24px; margin-right:10px; cursor:pointer; }
-        #share-container { display:flex; justify-content:center; padding:20px; }
-        #verse-card {
-            width: 360px;
-            height: 640px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            padding: 0;
-            border-radius: 0px;
-            box-sizing: border-box;
-        }
-        #text-box {
-            position: absolute;
-            top: 20%;
-            left: 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-            max-height: 70%; /* Limitar altura al 70% de la tarjeta */
-            overflow: hidden; /* Evitar que se desborde */
-        }
-        .logo-watermark {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 80px;
-            height: 80px;
-            opacity: 0.9;
-            z-index: 10;
-            pointer-events: none;
-            image-rendering: auto;
-            -webkit-font-smoothing: antialiased;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-        .top-signature {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Great Vibes', cursive;
-            font-weight: 600;
-            font-size: 1.6em;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
-        }
-        #verse-text { 
-            font-size: 1.5em; 
-            margin-bottom: 15px; 
-            line-height: 1.6; 
-            text-align: center; 
-            color: #fff !important; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
-            max-height: 250px; /* Aumentar altura máxima */
-            overflow: hidden; /* Ocultar texto que se desborde */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            word-wrap: break-word; /* Permitir que las palabras largas se dividan */
-            hyphens: auto; /* Permitir guiones automáticos */
-        }
-        #verse-ref {
-            font-style: italic;
-            margin-top: 10px;
-            position: relative;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 16px;
-            border-radius: 4px;
-            color: #fff !important;
-            font-weight: 600;
-            text-shadow: none !important;
-            display: inline-block;
-        }
-        #verse-ref::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -8px;
-            width: 0;
-            height: 0;
-            border-top: 14px solid rgba(0, 0, 0, 0.7);
-            border-bottom: 14px solid rgba(0, 0, 0, 0.7);
-            border-right: 8px solid transparent;
-        }
-        #verse-ref::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: -8px;
-            width: 0;
-            height: 0;
-            border-top: 14px solid rgba(0, 0, 0, 0.7);
-            border-bottom: 14px solid rgba(0, 0, 0, 0.7);
-            border-left: 8px solid transparent;
-        }
-        /* Swiper Carousel styles */
-        .swiper-container {
-            width: 260px;
-            margin: 0 auto;
-            overflow: hidden;
-            padding-bottom: 20px;
-        }
-        .swiper-slide {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .bg-thumb {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border: 2px solid transparent;
-            border-radius: 4px;
-            transition: transform 0.3s, border-color 0.3s;
-            transform: scale(0.8);
-        }
-        .swiper-slide-active .bg-thumb {
-            transform: scale(1.2);
-            border-color: var(--primary-color);
-        }
-        .swiper-slide-next .bg-thumb,
-        .swiper-slide-prev .bg-thumb {
-            transform: scale(0.8);
-        }
-        #acciones-img { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:20px auto 6px; padding:0 16px; }
-        #acciones-img button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px;
-            border-radius:24px; font-size:16px; font-weight:700; cursor:pointer; border:none; }
-        #share-btn { background:var(--primary-color); color:#fff; }
-        #download-btn { background:transparent; color:var(--primary-color); border:2px solid var(--primary-color) !important; }
-        #acciones-img button:disabled { opacity:.6; cursor:default; }
-        #share-aviso { text-align:center; min-height:1.3em; margin:0 16px 16px; font-size:14px; opacity:.85; }
-        /* Verse search selectors */
-        #search-panel { text-align: center; margin: 20px 0; }
-        #search-panel select { margin: 0 5px; padding: 5px; font-size: 16px; }
-        .signature { text-align: center; font-family: 'Great Vibes', cursive; font-weight: 600; font-size: 1.4em; margin: 10px 0; color: var(--text-color); letter-spacing: 0.5px; }
-        #verse-card .signature { position: absolute; bottom: 10px; left: 0; width: 100%; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); font-family: 'Great Vibes', cursive; font-weight: 600; font-size: 1.4em; }
-        .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #f9f9f9; box-shadow: 2px 0 8px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1001; }
-        .side-menu.active { left: 0; }
-        .side-menu ul { list-style:none; padding:20px; margin:0; }
-        .side-menu ul li { padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.1); cursor:pointer; }
-        .side-menu ul li:last-child { border-bottom:none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8F5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/pymicon.png">
+<link rel="apple-touch-icon" href="icons/pymicon.png">
+<meta name="application-name" content="BibliaPYM">
+<meta name="apple-mobile-web-app-title" content="BibliaPYM">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Literata:opsz,wght@7..72,500;7..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="app.css">
+<title>Compartir versículo · Biblia de Poder y Milagros</title>
+<style>
+.pt { display:flex; align-items:center; gap:8px; }
+.pt a { width:44px; height:44px; border-radius:22px; display:grid; place-items:center; color:var(--text); background:var(--surface); border:1px solid var(--border); flex-shrink:0; }
+.pt h1 { margin:0; font-size:22px; }
+.vista { position:relative; border-radius:20px; overflow:hidden; background:var(--border); box-shadow:0 10px 30px rgba(0,0,0,.14); margin:0 auto; width:100%; max-width:420px; }
+.vista canvas { display:block; width:100%; height:auto; }
+.cargando { position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-weight:700; background:rgba(0,0,0,.25); }
+.campo { display:flex; flex-direction:column; gap:8px; }
+.campo > span { font-size:14px; font-weight:700; color:var(--text-2); }
+.selects { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; }
+.selects select, .sel-ver { min-height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-size:15px; padding:0 10px; width:100%; }
+.chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip { flex-shrink:0; min-height:40px; padding:0 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.chip[aria-pressed="true"] { background:var(--accent-fill); border-color:var(--accent-fill); color:var(--on-accent); }
+.fondos { display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:none; }
+.fondos::-webkit-scrollbar { display:none; }
+.fondo { flex-shrink:0; width:76px; height:76px; border-radius:14px; border:3px solid transparent; padding:0; overflow:hidden; cursor:pointer; background:var(--border); }
+.fondo img { width:100%; height:100%; object-fit:cover; display:block; }
+.fondo[aria-pressed="true"] { border-color:var(--accent-fill); }
+.acciones { display:grid; grid-template-columns:2fr 1fr; gap:10px; position:sticky; bottom:calc(84px + env(safe-area-inset-bottom,0px)); z-index:5; }
+.acciones .btn { height:52px; font-size:16px; }
+.btn.sec { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+.aviso { text-align:center; color:var(--text-2); font-size:14px; min-height:20px; margin:0; }
+</style>
 </head>
 <body>
-    <!-- Menú lateral -->
-    <div id="side-menu" class="side-menu">
-        <ul>
-            <li onclick="window.location.href='index.html'">Página principal</li>
-            <li onclick="window.location.href='lectura.html'">Leer Biblia</li>
-            <li onclick="window.location.href='audio.html'">Escuchar</li>
-            <li onclick="window.location.href='memorizados.html'">Memorizados</li>
-            <li onclick="window.location.href='historias.html'">Historias</li>
-            <li onclick="window.location.href='diccionario.html'">Diccionario</li>
-            <li onclick="window.location.href='bookmarks.html'">Marcados</li>
-            <li onclick="window.location.href='comments.html'">Comentarios</li>
-            <li onclick="window.location.href='topics.html'">Temas</li>
-        </ul>
+<main class="page">
+  <header class="pt"><a href="lectura.html" id="volver" aria-label="Volver a la lectura"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a><h1>Compartir versículo</h1></header>
+
+  <div class="vista"><canvas id="lienzo" width="1080" height="1350" role="img" aria-label="Vista previa de la imagen del versículo"></canvas><div class="cargando" id="cargando">Preparando…</div></div>
+
+  <div class="acciones"><button class="btn" type="button" id="compartir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir imagen</button><button class="btn sec" type="button" id="descargar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Guardar</button></div>
+  <p class="aviso" id="aviso" role="status" aria-live="polite"></p>
+
+  <section class="campo"><span>Versículo</span>
+    <select class="sel-ver" id="sel-version" aria-label="Versión"></select>
+    <div class="selects"><select id="sel-libro" aria-label="Libro"></select><select id="sel-cap" aria-label="Capítulo"></select><select id="sel-vers" aria-label="Versículo"></select></div>
+  </section>
+
+  <section class="campo"><span>Tamaño</span>
+    <div class="chips" role="group" aria-label="Tamaño de la imagen">
+      <button class="chip" type="button" data-fmt="1080x1350">Publicación</button>
+      <button class="chip" type="button" data-fmt="1080x1080">Cuadrada</button>
+      <button class="chip" type="button" data-fmt="1080x1920">Estado / Historia</button>
     </div>
-    <div class="header">
-        <button id="side-menu-toggle" class="side-menu-toggle">☰</button>
-        <h1>Compartir Versículo</h1>
+  </section>
+
+  <section class="campo"><span>Letra</span>
+    <div class="chips" role="group" aria-label="Estilo de letra">
+      <button class="chip" type="button" data-letra="serif">Clásica</button>
+      <button class="chip" type="button" data-letra="sans">Moderna</button>
     </div>
-    <div id="search-panel">
-        <select id="version-select"></select>
-        <select id="book-select"></select>
-        <select id="chapter-select"></select>
-        <select id="verse-select"></select>
-    </div>
-    <div id="share-container">
-        <div id="verse-card"></div>
-    </div>
-    <div id="bg-options">
-        <h2>Elegir fondo</h2>
-        <div class="swiper-container" id="carousel">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1450558415837-1f5e21a17709?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1450558415837-1f5e21a17709?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1626494988966-4c3a81b3e056?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1626494988966-4c3a81b3e056?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1709837420088-76dd8f588f53?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1709837420088-76dd8f588f53?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1562276400-da9c38382068?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1562276400-da9c38382068?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1434077471918-4ea96e6e45d5?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1434077471918-4ea96e6e45d5?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1768326943626-a80f242a7970?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1768326943626-a80f242a7970?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1465496980292-e83064a74e4f?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1465496980292-e83064a74e4f?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1757167426688-cac9332e6304?auto=format&fit=crop&crop=entropy&q=80&w=240&h=240" data-bg="https://images.unsplash.com/photo-1757167426688-cac9332e6304?auto=format&fit=crop&crop=entropy&q=80&w=1080&h=1920"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1200&q=80"></div>
-                <div class="swiper-slide"><img class="bg-thumb" src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80" data-bg="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80"></div>
-            </div>
-        </div>
-    </div>
-    <div id="acciones-img">
-      <button id="share-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir imagen</button>
-      <button id="download-btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar</button>
-    </div>
-    <p id="share-aviso" role="status" aria-live="polite"></p>
+  </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const versionMap = { rv1960: 'Reina-Valera-1960.xmm', dhh: 'Dios-Habla-Hoy.xmm', lla: 'RVG.xmm', ntv: 'RVG.xmm', tla: 'TLA.xmm', kjv: 'KJV.xmm', web: 'WEB.xmm', rv1909: 'RV1909.xmm', rvg: 'RVG.xmm', nbla: 'RVG.xmm' };
-        const versionNames = { rv1960: 'Reina Valera 1960', dhh: 'Dios Habla Hoy', lla: 'Biblia de las Américas', ntv: 'Nueva Traducción Viviente', tla: 'TLA', kjv: 'King James Version (inglés)', web: 'World English Bible (inglés)', rv1909: 'Reina-Valera 1909', rvg: 'Reina Valera Gómez', nbla: 'Nueva Biblia de las Américas' };
-        let versionParam = (params.get('version') || 'rvg').toLowerCase();
-        const versionSelect = document.getElementById('version-select');
-        function populateVersionSelect() { versionSelect.innerHTML=''; for (let k in versionNames) { const o=document.createElement('option'); o.value=k; o.text=versionNames[k]; if (k===versionParam) o.selected=true; versionSelect.append(o);} }
-        function loadXml() { return fetch(`biblia-files/${versionMap[versionParam]}`).then(r=>r.text()).then(t=>{ xmlData=new DOMParser().parseFromString(t,'text/xml'); }); }
-        let bookParam = (params.get('book') || '').toLowerCase();
-        let chapter = params.get('chapter'), verse = params.get('verse');
-        const bookNames = {
-            // Antiguo Testamento - Pentateuco
-            genesis: 'Génesis', exodus: 'Éxodo', leviticus: 'Levítico', numbers: 'Números', deuteronomy: 'Deuteronomio',
-            // Antiguo Testamento - Libros Históricos
-            joshua: 'Josué', judges: 'Jueces', ruth: 'Rut', samuel1: '1 Samuel', samuel2: '2 Samuel', 
-            kings1: '1 Reyes', kings2: '2 Reyes', chronicles1: '1 Crónicas', chronicles2: '2 Crónicas',
-            ezra: 'Esdras', nehemiah: 'Nehemías', esther: 'Ester',
-            // Antiguo Testamento - Libros Poéticos y Sapienciales
-            job: 'Job', psalms: 'Salmos', proverbs: 'Proverbios', ecclesiastes: 'Eclesiastés', songofsongs: 'Cantares',
-            // Antiguo Testamento - Profetas Mayores
-            isaiah: 'Isaías', jeremiah: 'Jeremías', lamentations: 'Lamentaciones', ezekiel: 'Ezequiel', daniel: 'Daniel',
-            // Antiguo Testamento - Profetas Menores
-            hosea: 'Oseas', joel: 'Joel', amos: 'Amós', obadiah: 'Abdías', jonah: 'Jonás', micah: 'Miqueas', 
-            nahum: 'Nahúm', habakkuk: 'Habacuc', zephaniah: 'Sofonías', haggai: 'Hageo', zechariah: 'Zacarías', malachi: 'Malaquías',
-            // Nuevo Testamento - Evangelios
-            matthew: 'Mateo', mark: 'Marcos', luke: 'Lucas', john: 'Juan',
-            // Nuevo Testamento - Historia
-            acts: 'Hechos',
-            // Nuevo Testamento - Epístolas Paulinas
-            romans: 'Romanos', corinthians1: '1 Corintios', corinthians2: '2 Corintios', galatians: 'Gálatas', 
-            ephesians: 'Efesios', philippians: 'Filipenses', colossians: 'Colosenses', thessalonians1: '1 Tesalonicenses', 
-            thessalonians2: '2 Tesalonicenses', timothy1: '1 Timoteo', timothy2: '2 Timoteo', titus: 'Tito', 
-            philemon: 'Filemón',
-            // Nuevo Testamento - Epístolas Generales
-            hebrews: 'Hebreos', james: 'Santiago', peter1: '1 Pedro', peter2: '2 Pedro', john1: '1 Juan', 
-            john2: '2 Juan', john3: '3 Juan', jude: 'Judas',
-            // Nuevo Testamento - Profecía
-            revelation: 'Apocalipsis'
-        };
-        // Map display name param to slug if needed
-        if (bookParam && !(bookParam in bookNames)) {
-            const lookup = Object.entries(bookNames).find(([, name]) => name.toLowerCase() === bookParam);
-            if (lookup) bookParam = lookup[0];
-        }
-        const displayBook = bookNames[bookParam] || bookParam;
-        const verseCard = document.getElementById('verse-card');
-        const downloadBtn = document.getElementById('download-btn');
-        let xmlData;
-        const bookSelect = document.getElementById('book-select');
-        const chapterSelect = document.getElementById('chapter-select');
-        const verseSelect = document.getElementById('verse-select');
+  <section class="campo"><span>Fondo</span><div class="fondos" id="fondos" role="group" aria-label="Fondo"></div></section>
+</main>
 
-        let ultimoFondo = '';
-        async function loadBg(url) {
-            if (!url) return;
-            ultimoFondo = url;
-            // Mostrar la imagen de inmediato y luego convertirla para que se pueda descargar
-            verseCard.style.backgroundImage = `url('${url}')`;
-            try {
-                const res = await fetch(url);
-                const blob = await res.blob();
-                const dataUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-                if (ultimoFondo === url) verseCard.style.backgroundImage = `url('${dataUrl}')`;
-            } catch (e) {
-                console.warn('Fondo:', e);
-            }
-        }
+<nav class="tabbar" aria-label="Navegación principal"><div class="in">
+  <a href="index.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="lectura.html" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20"/><path d="M12 6v8M9 9h6"/></svg>Biblia</a>
+  <a href="planes-estudio.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Planes</a>
+  <a href="predicaciones.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>Prédicas</a>
+  <a href="mas.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Más</a>
+</div></nav>
 
-        const swiper = new Swiper('#carousel', {
-            slidesPerView: 3,
-            spaceBetween: 10,
-            centeredSlides: true,
-            loop: true,
-            loopedSlides: 6,
-            simulateTouch: true,
-            allowTouchMove: true,
-            init: false, // se inicia abajo, después de preparar los eventos (en iPhone no cargaba el fondo inicial)
-        });
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const FOTOS = ["https://images.unsplash.com/photo-1450558415837-1f5e21a17709", "https://images.unsplash.com/photo-1626494988966-4c3a81b3e056", "https://images.unsplash.com/photo-1709837420088-76dd8f588f53", "https://images.unsplash.com/photo-1562276400-da9c38382068", "https://images.unsplash.com/photo-1434077471918-4ea96e6e45d5", "https://images.unsplash.com/photo-1768326943626-a80f242a7970", "https://images.unsplash.com/photo-1465496980292-e83064a74e4f", "https://images.unsplash.com/photo-1757167426688-cac9332e6304", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4", "https://images.unsplash.com/photo-1507525428034-b723cf961d3e", "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05", "https://images.unsplash.com/photo-1506744038136-46273834b3fb", "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa", "https://images.unsplash.com/photo-1501785888041-af3ef285b470", "https://images.unsplash.com/photo-1521295121783-8a321d551ad2", "https://images.unsplash.com/photo-1519904981063-b0cf448d479e", "https://images.unsplash.com/photo-1511884642898-4c92249e20b6", "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429"];
+  const COLORES = [['#1B5E20', '#0F2E14'], ['#15201A', '#000000'], ['#3B1F4A', '#12285A'], ['#7A4A12', '#2B1A08']];
+  const VERS = {
+    rvg: ['RVG.xmm', 'Reina Valera Gómez', 'RVG'], rv1960: ['Reina-Valera-1960.xmm', 'Reina-Valera 1960', 'RVR1960'], rv1909: ['RV1909.xmm', 'Reina-Valera 1909', 'RV1909'],
+    tla: ['TLA.xmm', 'Traducción en Lenguaje Actual', 'TLA'], dhh: ['Dios-Habla-Hoy.xmm', 'Dios Habla Hoy', 'DHH'],
+    kjv: ['KJV.xmm', 'King James Version', 'KJV'], web: ['WEB.xmm', 'World English Bible', 'WEB'],
+    lla: [null, 'La Biblia de las Américas', 'LBLA'], nbla: [null, 'Nueva Biblia de las Américas', 'NBLA'], ntv: [null, 'Nueva Traducción Viviente', 'NTV']
+  };
+  const p = new URLSearchParams(location.search);
+  const normal = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let version = VERS[(p.get('version') || '').toLowerCase()] ? p.get('version').toLowerCase() : (leerPref() || 'rvg');
+  const textoFijo = p.get('texto') ? { t: p.get('texto'), b: normal(p.get('book')), c: p.get('chapter'), v: p.get('verse') } : null;
+  let doc = null, libro = p.get('book') || 'Juan', cap = parseInt(p.get('chapter') || '3', 10), vers = parseInt(p.get('verse') || '16', 10);
+  let fmt = localStorage.getItem('shareFmt') || '1080x1350', letra = localStorage.getItem('shareLetra') || 'serif', fondo = parseInt(localStorage.getItem('shareFondo') || '0', 10);
+  const imgCache = {};
+  function leerPref() {
+    const m = { 'RVG': 'rvg', 'Reina-Valera-1960': 'rv1960', 'RV1909': 'rv1909', 'TLA': 'tla', 'Dios-Habla-Hoy': 'dhh', 'KJV': 'kjv', 'WEB': 'web' };
+    try { return m[localStorage.getItem('lecturaVersion')]; } catch (e) { return null; }
+  }
+  function avisar(t) { $('aviso').textContent = t; }
+  if (document.referrer && new URL(document.referrer).origin === location.origin) $('volver').addEventListener('click', e => { e.preventDefault(); history.back(); });
 
-        swiper.on('init', () => {
-            const primera = swiper.slides[swiper.activeIndex] && swiper.slides[swiper.activeIndex].querySelector('.bg-thumb');
-            loadBg(primera ? primera.dataset.bg : document.querySelector('.bg-thumb').dataset.bg);
-            
-            // Agregar evento click a todas las imágenes
-            document.querySelectorAll('.bg-thumb').forEach(img => {
-                img.addEventListener('click', () => {
-                    console.log('URL de imagen clickeada:', img.dataset.bg);
-                    loadBg(img.dataset.bg);
-                });
-            });
-        });
-        
-        swiper.on('slideChange', () => {
-            const slide = swiper.slides[swiper.activeIndex];
-            const img = slide.querySelector('.bg-thumb');
-            loadBg(img.dataset.bg);
-        });
-        swiper.init();
+  // ---------- Texto ----------
+  async function cargar(v) {
+    const f = VERS[v][0] || 'RVG.xmm';
+    const t = await (await fetch('biblia-files/' + f)).text();
+    return new DOMParser().parseFromString(t.replace(/^\uFEFF/, ''), 'text/xml');
+  }
+  const libros = () => Array.from(doc.getElementsByTagName('b')).map(b => b.getAttribute('n'));
+  const nodoB = n => Array.from(doc.getElementsByTagName('b')).find(b => b.getAttribute('n') === n);
+  const caps = n => { const b = nodoB(n); return b ? b.getElementsByTagName('c').length : 0; };
+  const versos = (n, c) => { const b = nodoB(n), cc = b && Array.from(b.getElementsByTagName('c')).find(x => x.getAttribute('n') === String(c)); return cc ? Array.from(cc.getElementsByTagName('v')).filter(v => v.getAttribute('n') !== '0') : []; };
+  const textoDe = v => Array.from(v.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').replace(/\s+/g, ' ').trim();
+  function textoActual() {
+    if (!VERS[version][0]) {
+      if (textoFijo && normal(libro) === textoFijo.b && String(cap) === textoFijo.c && String(vers) === textoFijo.v) return textoFijo.t;
+      version = 'rvg'; $('sel-version').value = 'rvg';
+    }
+    const v = versos(libro, cap).find(x => x.getAttribute('n') === String(vers));
+    return v ? textoDe(v) : '';
+  }
+  function llenar(sel, items, val) { sel.innerHTML = items.map(([v, t]) => `<option value="${v}"${String(v) === String(val) ? ' selected' : ''}>${t}</option>`).join(''); }
+  function llenarSelects() {
+    llenar($('sel-libro'), libros().map(b => [b, b]), libro);
+    const nc = caps(libro); llenar($('sel-cap'), Array.from({ length: nc }, (_, i) => [i + 1, i + 1]), cap);
+    llenar($('sel-vers'), versos(libro, cap).map(v => [v.getAttribute('n'), v.getAttribute('n')]), vers);
+  }
 
-        function populateBookSelect() {
-            bookSelect.innerHTML = '';
-            for (let slug in bookNames) {
-                const opt = document.createElement('option'); opt.value = slug; opt.text = bookNames[slug];
-                if (slug === bookParam) opt.selected = true;
-                bookSelect.append(opt);
-            }
-        }
+  // ---------- Dibujo en lienzo: nítido y sin cortar palabras ----------
+  function cargarImg(url) {
+    if (!imgCache[url]) imgCache[url] = new Promise((ok, mal) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = mal; i.src = url; });
+    return imgCache[url];
+  }
+  function partir(ctx, texto, ancho) {
+    const palabras = texto.split(' '), lineas = []; let linea = '';
+    for (const w of palabras) {
+      const prueba = linea ? linea + ' ' + w : w;
+      if (ctx.measureText(prueba).width <= ancho || !linea) linea = prueba; else { lineas.push(linea); linea = w; }
+    }
+    if (linea) lineas.push(linea);
+    return lineas;
+  }
+  let turno = 0;
+  async function dibujar(cv) {
+    const yo = ++turno;
+    const [W, Hh] = fmt.split('x').map(Number);
+    cv.width = W; cv.height = Hh;
+    const ctx = cv.getContext('2d');
+    // Fondo
+    if (fondo < FOTOS.length) {
+      try {
+        const img = await cargarImg(`${FOTOS[fondo]}?auto=format&fit=crop&w=${W}&h=${Hh}&q=85`);
+        if (yo !== turno) return;
+        const k = Math.max(W / img.width, Hh / img.height), iw = img.width * k, ih = img.height * k;
+        ctx.drawImage(img, (W - iw) / 2, (Hh - ih) / 2, iw, ih);
+      } catch (e) { fondo = FOTOS.length; }
+    }
+    if (fondo >= FOTOS.length) {
+      const [a, b] = COLORES[(fondo - FOTOS.length) % COLORES.length];
+      const g = ctx.createLinearGradient(0, 0, W, Hh); g.addColorStop(0, a); g.addColorStop(1, b); ctx.fillStyle = g; ctx.fillRect(0, 0, W, Hh);
+    }
+    // Velo para que el texto se lea bien
+    const v = ctx.createLinearGradient(0, 0, 0, Hh); v.addColorStop(0, 'rgba(0,0,0,.35)'); v.addColorStop(.5, 'rgba(0,0,0,.45)'); v.addColorStop(1, 'rgba(0,0,0,.6)');
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, Hh);
+    // Texto: busca el tamaño más grande que quepa sin partir palabras
+    const texto = textoActual();
+    const familia = letra === 'serif' ? '"Literata", Georgia, serif' : '"Plus Jakarta Sans", system-ui, sans-serif';
+    await Promise.all([document.fonts.load(`500 60px ${familia}`), document.fonts.load('400 60px "Great Vibes"'), document.fonts.load('700 30px "Plus Jakarta Sans"')]).catch(() => {});
+    if (yo !== turno) return;
+    const margen = W * 0.1, ancho = W - margen * 2, altoMax = Hh * (fmt === '1080x1920' ? 0.5 : 0.56);
+    let tam = 84, lineas = [];
+    for (; tam >= 28; tam -= 2) {
+      ctx.font = `500 ${tam}px ${familia}`;
+      lineas = partir(ctx, `“${texto}”`, ancho);
+      const ancha = Math.max(...lineas.map(l => ctx.measureText(l).width));
+      if (lineas.length * tam * 1.38 <= altoMax && ancha <= ancho) break;
+    }
+    const alto = lineas.length * tam * 1.38;
+    let y = Hh / 2 - alto / 2 - tam * 0.2;
+    ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 2;
+    lineas.forEach(l => { ctx.fillText(l, W / 2, y); y += tam * 1.38; });
+    // Cita
+    ctx.font = `700 ${Math.round(tam * 0.62 + 6)}px "Plus Jakarta Sans", system-ui, sans-serif`;
+    ctx.fillStyle = '#F2D48A';
+    ctx.fillText(`${libro} ${cap}:${vers} · ${VERS[version][2]}`, W / 2, y + tam * 0.55);
+    // Firma de la app
+    ctx.shadowBlur = 10;
+    ctx.font = '400 54px "Great Vibes", cursive'; ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.fillText('Biblia de Poder y Milagros', W / 2, Hh - Hh * 0.075 - 54);
+    ctx.shadowBlur = 0;
+    if (cv.id === 'lienzo') $('cargando').hidden = true;
+  }
+  const repintar = () => dibujar($('lienzo')).catch(e => console.warn(e));
 
-        function getBookName(key) {
-            if (bookNames[key]) return bookNames[key];
-            return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-        }
+  // ---------- Compartir y guardar ----------
+  async function imagen() {
+    const cv = document.createElement('canvas');
+    await dibujar(cv);
+    return new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.95));
+  }
+  const nombreArchivo = () => `${libro}-${cap}-${vers}.jpg`.replace(/\s+/g, '-');
+  $('compartir').addEventListener('click', async () => {
+    avisar('Preparando la imagen…');
+    try {
+      const blob = await imagen(), file = new File([blob], nombreArchivo(), { type: 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: `${libro} ${cap}:${vers}` }); avisar(''); }
+      else { descargarBlob(blob); avisar('Tu celular no permite compartir directo; la imagen se guardó.'); }
+    } catch (e) { if (e.name !== 'AbortError') avisar('No se pudo crear la imagen. Prueba con otro fondo.'); else avisar(''); }
+  });
+  function descargarBlob(blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombreArchivo(); document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); }
+  $('descargar').addEventListener('click', async () => { avisar('Preparando la imagen…'); try { descargarBlob(await imagen()); avisar('Imagen guardada'); } catch (e) { avisar('No se pudo crear la imagen. Prueba con otro fondo.'); } });
 
-        function findBookNode(xmlData, bookName) {
-            // Primero intentar búsqueda exacta
-            let bookNode = Array.from(xmlData.getElementsByTagName('b')).find(b=>b.getAttribute('n')===bookName);
-            
-            if (!bookNode) {
-                // Intentar búsqueda case-insensitive
-                bookNode = Array.from(xmlData.getElementsByTagName('b')).find(b=> {
-                    const xmlBookName = b.getAttribute('n');
-                    return xmlBookName && xmlBookName.toLowerCase() === bookName.toLowerCase();
-                });
-            }
-            
-            if (!bookNode) {
-                // Intentar búsqueda sin acentos
-                const normalizeString = (str) => str.toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '');
-                
-                const normalizedBookName = normalizeString(bookName);
-                bookNode = Array.from(xmlData.getElementsByTagName('b')).find(b=> {
-                    const xmlBookName = b.getAttribute('n');
-                    return xmlBookName && normalizeString(xmlBookName) === normalizedBookName;
-                });
-            }
-            
-            if (!bookNode) {
-                // Intentar búsqueda por similitud (para "Nahum" vs "Nahúm")
-                bookNode = Array.from(xmlData.getElementsByTagName('b')).find(b=> {
-                    const xmlBookName = b.getAttribute('n');
-                    if (!xmlBookName) return false;
-                    
-                    const normalizeString = (str) => str.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '');
-                    
-                    const normalizedXml = normalizeString(xmlBookName);
-                    const normalizedTarget = normalizeString(bookName);
-                    
-                    return normalizedXml === normalizedTarget || 
-                           normalizedXml.includes(normalizedTarget) || 
-                           normalizedTarget.includes(normalizedXml);
-                });
-            }
-            
-            return bookNode;
-        }
+  // ---------- Controles ----------
+  function marcar(sel, attr, val) { document.querySelectorAll(`[${attr}]`).forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute(attr) === String(val)))); }
+  document.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => { fmt = b.dataset.fmt; localStorage.setItem('shareFmt', fmt); marcar(null, 'data-fmt', fmt); repintar(); }));
+  document.querySelectorAll('[data-letra]').forEach(b => b.addEventListener('click', () => { letra = b.dataset.letra; localStorage.setItem('shareLetra', letra); marcar(null, 'data-letra', letra); repintar(); }));
+  $('fondos').innerHTML = FOTOS.map((f, i) => `<button class="fondo" type="button" data-fondo="${i}" aria-label="Foto ${i + 1}"><img src="${f}?auto=format&fit=crop&w=160&h=160&q=70" alt="" loading="lazy"></button>`).join('')
+    + COLORES.map(([a, b], i) => `<button class="fondo" type="button" data-fondo="${FOTOS.length + i}" aria-label="Color ${i + 1}" style="background:linear-gradient(135deg,${a},${b})"></button>`).join('');
+  $('fondos').addEventListener('click', e => { const b = e.target.closest('[data-fondo]'); if (!b) return; fondo = parseInt(b.dataset.fondo, 10); localStorage.setItem('shareFondo', fondo); marcar(null, 'data-fondo', fondo); repintar(); });
+  llenar($('sel-version'), Object.entries(VERS).filter(([k, v]) => v[0] || (textoFijo && k === version)).map(([k, v]) => [k, v[1]]), version);
+  $('sel-version').addEventListener('change', async () => { version = $('sel-version').value; doc = await cargar(version); llenarSelects(); repintar(); });
+  $('sel-libro').addEventListener('change', () => { libro = $('sel-libro').value; cap = 1; vers = 1; llenarSelects(); repintar(); });
+  $('sel-cap').addEventListener('change', () => { cap = parseInt($('sel-cap').value, 10); vers = 1; llenarSelects(); repintar(); });
+  $('sel-vers').addEventListener('change', () => { vers = parseInt($('sel-vers').value, 10); repintar(); });
+  marcar(null, 'data-fmt', fmt); marcar(null, 'data-letra', letra); marcar(null, 'data-fondo', fondo);
 
-        function loadChapters(bSlug) {
-            chapterSelect.innerHTML = '';
-            const name = getBookName(bSlug);
-            const bNode = findBookNode(xmlData, name);
-            if (!bNode) {
-                console.error('Book not found:', name);
-                chapterSelect.textContent = 'No chapters';
-                return;
-            }
-            Array.from(bNode.getElementsByTagName('c')).forEach(c=>{
-                const n = c.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
-                if (n===chapter) o.selected=true; chapterSelect.append(o);
-            });
-        }
-
-        function loadVerses(bSlug, chNum) {
-            verseSelect.innerHTML = '';
-            const name = getBookName(bSlug);
-            const bNode = findBookNode(xmlData, name);
-            if (!bNode) {
-                console.error('Book not found:', name);
-                verseSelect.textContent = 'No verses';
-                return;
-            }
-            const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chNum);
-            if (!cNode) {
-                console.error('Chapter not found:', chNum);
-                verseSelect.textContent = 'No verses';
-                return;
-            }
-            Array.from(cNode.getElementsByTagName('v')).forEach(vn=>{
-                const n=vn.getAttribute('n'); const o=document.createElement('option'); o.value=o.text=n;
-                if (n===verse) o.selected=true; verseSelect.append(o);
-            });
-        }
-
-        function updateVerse() {
-            const topSig = '<div class="top-signature">Biblia de Poder y Milagros</div>';
-            const logo = '<img class="logo-watermark" src="icons/pymicon.png" alt="Logo">';
-            const name = getBookName(bookParam);
-            const bNode = findBookNode(xmlData, name);
-            if (!bNode) { console.error('Book not found:', name); verseCard.textContent = 'Libro no encontrado'; return; }
-            const cNode = Array.from(bNode.getElementsByTagName('c')).find(c=>c.getAttribute('n')===chapter);
-            if (!cNode) { console.error('Chapter not found:', chapter); verseCard.textContent = 'Capítulo no encontrado'; return; }
-            const vNode = Array.from(cNode.getElementsByTagName('v')).find(v=>v.getAttribute('n')===verse);
-            if (!vNode) { console.error('Verse not found:', verse); verseCard.textContent = 'Versículo no encontrado'; return; }
-            // LBLA, NBLA y NTV se leen en línea: su texto llega desde la lectura; si se cambia de versículo aquí, se usa la RVG
-            const enLinea = ['lla', 'ntv', 'nbla'].includes(versionParam);
-            let textoMostrar = vNode.textContent;
-            if (enLinea) {
-                if (textoFijo && String(name).toLowerCase() === textoFijo.b && chapter === textoFijo.c && verse === textoFijo.v) textoMostrar = textoFijo.t;
-                else { versionParam = 'rvg'; try { versionSelect.value = 'rvg'; } catch (e) {} }
-            }
-            const versionAbbr = getVersionAbbreviation(versionParam);
-            const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            if (vNode) {
-                verseCard.innerHTML = `${topSig}<div id="text-box"><div id="verse-ref">${name} ${chapter}:${verse}</div><div id="verse-text">${escHtml(textoMostrar)}</div><div style="font-size: 0.8em; color: #fff !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; text-align: right; margin-top: 5px; font-weight: 600;">-${versionAbbr}</div></div>${logo}`;
-                
-                // Ajustar automáticamente el tamaño de fuente
-                setTimeout(() => {
-                    adjustFontSize();
-                }, 100);
-                syncUrl();
-            }
-        }
-
-        // Mantiene la dirección (URL) al día con el versículo que se está viendo
-        function currentParams() {
-            const p = new URLSearchParams(window.location.search);
-            p.set('book', getBookName(bookParam));
-            p.set('chapter', chapter);
-            p.set('verse', verse);
-            p.set('version', versionParam);
-            return p;
-        }
-        function syncUrl() {
-            try { history.replaceState(null, '', window.location.pathname + '?' + currentParams().toString()); } catch (e) {}
-        }
-
-        function getVersionAbbreviation(versionCode) {
-            const abbreviations = {
-                'rv1960': 'RVR1960',
-                'dhh': 'DHH',
-                'lla': 'LBLA',
-                'ntv': 'NTV',
-                'tla': 'TLA',
-                'kjv': 'KJV',
-                'web': 'WEB',
-                'rv1909': 'RV1909',
-                'rvg': 'RVG',
-                'nbla': 'NBLA'
-            };
-            return abbreviations[versionCode] || versionCode.toUpperCase();
-        }
-
-        // Función para ajustar el tamaño de fuente automáticamente
-        function adjustFontSize() {
-            const verseText = document.getElementById('verse-text');
-            const textBox = document.getElementById('text-box');
-            
-            if (!verseText || !textBox) return;
-            
-            let fontSize = 1.5; // Tamaño inicial en em
-            const minFontSize = 0.8; // Tamaño mínimo
-            const maxFontSize = 1.8; // Tamaño máximo
-            const maxHeight = 250; // Altura máxima en px
-            
-            // Resetear al tamaño inicial
-            verseText.style.fontSize = fontSize + 'em';
-            
-            // Reducir tamaño si el texto se desborda
-            while (verseText.scrollHeight > maxHeight && fontSize > minFontSize) {
-                fontSize -= 0.05;
-                verseText.style.fontSize = fontSize + 'em';
-            }
-            
-            // Aumentar si hay espacio y no está en el máximo
-            while (verseText.scrollHeight < maxHeight * 0.9 && fontSize < maxFontSize) {
-                fontSize += 0.05;
-                verseText.style.fontSize = fontSize + 'em';
-                if (verseText.scrollHeight > maxHeight) {
-                    fontSize -= 0.05;
-                    verseText.style.fontSize = fontSize + 'em';
-                    break;
-                }
-            }
-        }
-
-        // Handlers for dynamic selection
-        function handleBookChange() {
-            bookParam = bookSelect.value;
-            loadChapters(bookParam);
-            chapter = chapterSelect.value;
-            loadVerses(bookParam, chapter);
-            verse = verseSelect.value;
-            updateVerse();
-        }
-        function handleChapterChange() {
-            loadVerses(bookSelect.value, chapterSelect.value);
-            chapter = chapterSelect.value;
-            verse = verseSelect.value;
-            updateVerse();
-        }
-        function handleVerseChange() {
-            verse = verseSelect.value;
-            updateVerse();
-        }
-
-        // Verse del día helper
-        function getDailyVerse() {
-            const verses = [];
-            const dateStr = new Date().toISOString().slice(0,10);
-            let hash = 0;
-            for (let i = 0; i < dateStr.length; i++) {
-                hash = (hash * 31 + dateStr.charCodeAt(i)) >>> 0;
-            }
-            for (let slug in bookNames) {
-                const name = bookNames[slug];
-                const bNode = Array.from(xmlData.getElementsByTagName('b')).find(b => b.getAttribute('n') === name);
-                if (!bNode) return;
-                Array.from(bNode.getElementsByTagName('c')).forEach(c => {
-                    const ch = c.getAttribute('n');
-                    Array.from(c.getElementsByTagName('v')).forEach(v => {
-                        verses.push({slug, chapter: ch, verse: v.getAttribute('n')});
-                    });
-                });
-            }
-            return verses[hash % verses.length];
-        }
-
-        const pTxt = new URLSearchParams(location.search);
-        const textoFijo = pTxt.get('texto') ? { t: pTxt.get('texto'), b: (pTxt.get('book') || '').toLowerCase(), c: pTxt.get('chapter'), v: pTxt.get('verse') } : null;
-        (async function init() {
-            try {
-                await loadXml();
-                // Populate version dropdown and handle changes
-                populateVersionSelect();
-                versionSelect.addEventListener('change', () => { const p=currentParams(); p.set('version', versionSelect.value); window.location.search=p.toString(); });
-                // Verse del día si no hay parámetros URL
-                if (!bookParam || !chapter || !verse) {
-                    // Verso por defecto si no hay parámetros
-                    verseCard.innerHTML = `<div class="top-signature">Biblia de Poder y Milagros</div><div id="text-box"><div id="verse-ref">Juan 3:16</div><div id="verse-text">Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</div></div><div class="logo-watermark"></div>`;
-                }
-                // Populate book selector
-                populateBookSelect();
-                // Initial book selection
-                if (bookParam in bookNames) {
-                    bookSelect.value = bookParam;
-                } else {
-                    bookSelect.selectedIndex = 0;
-                    bookParam = bookSelect.value;
-                }
-                // Populate chapters
-                loadChapters(bookParam);
-                // Initial chapter selection
-                if (chapter && Array.from(chapterSelect.options).some(o=>o.value===chapter)) {
-                    chapterSelect.value = chapter;
-                } else {
-                    chapterSelect.selectedIndex = 0;
-                }
-                chapter = chapterSelect.value;
-                // Populate verses
-                loadVerses(bookParam, chapter);
-                // Initial verse selection
-                if (verse && Array.from(verseSelect.options).some(o=>o.value===verse)) {
-                    verseSelect.value = verse;
-                } else {
-                    verseSelect.selectedIndex = 0;
-                }
-                verse = verseSelect.value;
-                // Display verse
-                updateVerse();
-                // Bind change events
-                bookSelect.addEventListener('change', handleBookChange);
-                chapterSelect.addEventListener('change', handleChapterChange);
-                verseSelect.addEventListener('change', handleVerseChange);
-            } catch (e) {
-                console.error(e);
-                verseCard.textContent = 'Error cargando versículo';
-            }
-        })();
-
-        // ---------- Crear la imagen de la tarjeta ----------
-        function crearImagen() {
-            const options = {
-                scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false,
-                onclone: function (clonedDoc) {
-                    const logo = clonedDoc.querySelector('.logo-watermark');
-                    if (logo) { logo.style.imageRendering = 'auto'; logo.style.width = '80px'; logo.style.height = '80px'; logo.style.opacity = '0.9'; }
-                }
-            };
-            return html2canvas(verseCard, options).catch(() => html2canvas(verseCard, { scale: 2, backgroundColor: '#ffffff' }));
-        }
-        const nombreArchivo = () => `versiculo-${bookParam}-${chapter}-${verse}.png`;
-        const aviso = document.getElementById('share-aviso');
-        const shareBtn = document.getElementById('share-btn');
-
-        downloadBtn.addEventListener('click', async () => {
-            downloadBtn.disabled = true;
-            try {
-                const canvas = await crearImagen();
-                const link = document.createElement('a');
-                link.download = nombreArchivo();
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
-            } catch (e) { console.error(e); aviso.textContent = 'No se pudo crear la imagen. Inténtalo de nuevo.'; }
-            downloadBtn.disabled = false;
-        });
-
-        // ---------- Compartir ----------
-        // La imagen se prepara por adelantado cada vez que cambia la tarjeta, porque el iPhone
-        // solo permite abrir el menú de compartir justo después de tocar el botón.
-        let imagenLista = null, preparando = null, version = 0, temporizador = null;
-        function prepararImagen() {
-            const mia = ++version;
-            imagenLista = null;
-            preparando = crearImagen()
-                .then(canvas => new Promise(res => canvas.toBlob(res, 'image/png', 1.0)))
-                .then(blob => {
-                    if (!blob || mia !== version) return null;
-                    imagenLista = new File([blob], nombreArchivo(), { type: 'image/png' });
-                    return imagenLista;
-                })
-                .catch(e => { console.warn('Preparar imagen:', e); return null; });
-            return preparando;
-        }
-        new MutationObserver(() => {
-            clearTimeout(temporizador);
-            imagenLista = null;
-            temporizador = setTimeout(prepararImagen, 900);
-        }).observe(verseCard, { attributes: true, attributeFilter: ['style'], childList: true, subtree: true, characterData: true });
-        setTimeout(prepararImagen, 1500);
-
-        function referencia() {
-            const r = verseCard.querySelector('#verse-ref');
-            return r ? r.textContent.trim() : '';
-        }
-        async function compartirArchivo(archivo) {
-            const datos = { files: [archivo], title: referencia(), text: `${referencia()} · Biblia de Poder y Milagros` };
-            if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-                await navigator.share(datos);
-                return true;
-            }
-            return false;
-        }
-        shareBtn.addEventListener('click', async () => {
-            aviso.textContent = '';
-            try {
-                if (imagenLista) {
-                    if (await compartirArchivo(imagenLista)) return;
-                } else {
-                    shareBtn.disabled = true;
-                    aviso.textContent = 'Preparando la imagen…';
-                    const archivo = await (preparando && version ? preparando : prepararImagen()) || await prepararImagen();
-                    shareBtn.disabled = false;
-                    if (!archivo) throw new Error('Sin imagen');
-                    try {
-                        if (await compartirArchivo(archivo)) { aviso.textContent = ''; return; }
-                    } catch (e) {
-                        if (e && e.name === 'NotAllowedError') { aviso.textContent = 'La imagen ya está lista. Toca "Compartir imagen" otra vez.'; return; }
-                        throw e;
-                    }
-                }
-                // Este navegador no permite compartir imágenes: se descarga
-                aviso.textContent = 'Tu navegador no permite compartir imágenes directamente; se descargará para que la compartas.';
-                downloadBtn.click();
-            } catch (e) {
-                shareBtn.disabled = false;
-                if (e && e.name === 'AbortError') { aviso.textContent = ''; return; }
-                console.error('Compartir:', e);
-                aviso.textContent = 'No se pudo compartir. Prueba con "Descargar".';
-            }
-        });
-    </script>
-    <script>
-        const sideMenuToggleBtn = document.getElementById('side-menu-toggle');
-        const sideMenu = document.getElementById('side-menu');
-        if (sideMenuToggleBtn) sideMenuToggleBtn.addEventListener('click', () => sideMenu.classList.toggle('active'));
-        document.addEventListener('click', e => {
-            if (sideMenu.classList.contains('active') && !sideMenu.contains(e.target) && !sideMenuToggleBtn.contains(e.target)) {
-                sideMenu.classList.remove('active');
-            }
-        });
-    </script>
+  (async function () {
+    try { doc = await cargar(version); } catch (e) { version = 'rvg'; doc = await cargar('rvg'); }
+    const L = libros(); libro = L.find(b => normal(b) === normal(libro)) || 'Juan';
+    if (!caps(libro) || cap > caps(libro)) cap = 1;
+    llenarSelects(); repintar();
+  })();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+})();
+</script>
+<script type="module" src="cuenta.js"></script>
 </body>
 </html>
