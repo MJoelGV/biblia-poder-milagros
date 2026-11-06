@@ -198,6 +198,14 @@
     ctx.font = '400 54px "Great Vibes", cursive'; ctx.fillStyle = 'rgba(255,255,255,.92)';
     ctx.fillText('Biblia de Poder y Milagros', W / 2, Hh - Hh * 0.075 - 54);
     ctx.shadowBlur = 0;
+    // El logo de la iglesia en la esquina, como antes
+    try {
+      const logo = await cargarImg('icons/pymicon.png');
+      if (yo !== turno) return;
+      const L = Math.round(W * 0.13), x = W - L - W * 0.045, yl = Hh - L - W * 0.045;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 16; ctx.globalAlpha = .95;
+      ctx.drawImage(logo, x, yl, L, L); ctx.restore();
+    } catch (e) {}
     if (cv.id === 'lienzo') $('cargando').hidden = true;
   }
   const repintar = () => dibujar($('lienzo')).catch(e => console.warn(e));
