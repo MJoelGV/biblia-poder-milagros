@@ -193,10 +193,10 @@
     ctx.font = `700 ${Math.round(tam * 0.62 + 6)}px "Plus Jakarta Sans", system-ui, sans-serif`;
     ctx.fillStyle = '#F2D48A';
     ctx.fillText(`${libro} ${cap}:${vers} · ${VERS[version][2]}`, W / 2, y + tam * 0.55);
-    // Firma de la app
+    // Firma de la app arriba, como antes
     ctx.shadowBlur = 10;
-    ctx.font = '400 54px "Great Vibes", cursive'; ctx.fillStyle = 'rgba(255,255,255,.92)';
-    ctx.fillText('Biblia de Poder y Milagros', W / 2, Hh - Hh * 0.075 - 54);
+    ctx.font = '400 62px "Great Vibes", cursive'; ctx.fillStyle = 'rgba(255,255,255,.95)';
+    ctx.fillText('Biblia de Poder y Milagros', W / 2, Math.max(56, Hh * 0.055));
     ctx.shadowBlur = 0;
     // El logo de la iglesia en la esquina, como antes
     try {
